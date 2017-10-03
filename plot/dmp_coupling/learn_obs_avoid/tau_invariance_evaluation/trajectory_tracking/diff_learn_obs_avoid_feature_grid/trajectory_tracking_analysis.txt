@@ -1,0 +1,26 @@
+In trajectory_tracking_failure folder:
+While the idealistic (but non-realistic) DMP unrolling (light-green curve) successfully reproduced the correct behavior (dark-blue curve), the realistic DMP unrolling (cyan curve) fails to track the correct behavior. This is because there is no guarantee at all that the robot will exactly track/follow the same trajectory as the learning trajectory during unrolling/reproduction.
+This was produced using the following parameters:
+N_beta_grid		= 3
+N_k_phi1_phi2_grid	= 5
+N_k_phi3_grid		= 5
+beta_low		= 3.0/M_PI
+beta_high		= 5.0/M_PI
+k_phi1_phi2_low		= 1.0
+k_phi1_phi2_high	= 2.0
+k_phi3_low		= 1.0
+k_phi3_high		= 2.0
+
+Turns out that this problem can be solved by simply widening the range of beta and k values.
+See trajectory_tracking_success folder:
+This time the tracking is successful in the realistic DMP unrolling, PROBABLY because of wider range of beta and k values.
+This was produced using the following parameters:
+N_beta_grid		= 3
+N_k_phi1_phi2_grid	= 5
+N_k_phi3_grid		= 5
+beta_low		= 0.5/M_PI
+beta_high		= 10.0/M_PI
+k_phi1_phi2_low		= 0.1
+k_phi1_phi2_high	= 10.0
+k_phi3_low		= 0.1
+k_phi3_high		= 10.0

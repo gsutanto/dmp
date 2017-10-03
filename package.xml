@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <name>amd_clmc_dmp</name>
+  <version>1.0.0</version>
+  <description>sl</description>
+  <license>BSD</license>
+  <author email="gsutanto@usc.edu">Giovanni Sutanto</author>
+  <maintainer email="gsutanto@usc.edu">Giovanni Sutanto</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>Eigen</build_depend>
+
+  <run_depend>Eigen</run_depend>
+
+  <export>
+  </export>
+</package>
+

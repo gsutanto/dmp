@@ -1,0 +1,10 @@
+These were produced using the following parameters:
+N_beta_grid		= 5
+N_k_phi1_phi2_grid	= 5
+N_k_phi3_grid		= 5
+beta_low		= 0.5/M_PI
+beta_high		= 20.0/M_PI
+k_phi1_phi2_low		= 0.1
+k_phi1_phi2_high	= 10.0
+k_phi3_low		= 0.1
+k_phi3_high		= 10.0

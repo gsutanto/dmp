@@ -1,0 +1,1 @@
+../../../../utilities/getNullClippingIndex.m
