@@ -14,7 +14,7 @@ task_type           = 'peg_in_hole_big_cone';
 % Change in_data_dir_path to the path of the input data directory, as
 % necessary:
 in_data_dir_path    = ['~/Desktop/dmp_demos/peg_in_hole/',task_type,'/'];
-out_data_dir_path   = [pwd, '/',task_type,'/'];
+out_data_dir_path   = [pwd, '/../../../../amd_clmc_dmp_data/dmp_coupling/learn_tactile_feedback/',task_type,'/'];
 
 is_performing_transformation_to_object_peg_board_coord_sys  = 1;
 
