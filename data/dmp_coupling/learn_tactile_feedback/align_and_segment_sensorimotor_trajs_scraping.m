@@ -14,7 +14,7 @@ task_type           = 'scraping';
 % Change in_data_dir_path to the path of the input data directory, as
 % necessary:
 in_data_dir_path    = ['~/Desktop/dmp_demos/',task_type,'/'];
-out_data_dir_path   = [pwd, '/',task_type,'/'];
+out_data_dir_path   = [pwd, '/../../../../amd_clmc_dmp_data/dmp_coupling/learn_tactile_feedback/',task_type,'/'];
 
 % tool_adaptor is the tip of the transformation chain   (is_tool_adaptor_tip_of_transform_chain == 1)
 % end-effector is the tip of the transformation chain   (is_tool_adaptor_tip_of_transform_chain == 0)
