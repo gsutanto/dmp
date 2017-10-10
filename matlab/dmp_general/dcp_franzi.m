@@ -943,6 +943,9 @@ switch lower(action),
         
         varargout(1) = {Ct};
         varargout(2) = {f};
+        varargout(3) = {PSI};
+        varargout(4) = {V};
+        varargout(5) = {X};
         
         % .........................................................................
     case 'structure'

@@ -17,12 +17,10 @@ function [ varargout ] = computeSubFeatMatAndSubTargetCt( varargin )
     loa_feat_methods                        = varargin{5};
     loa_feat_param                          = varargin{6};
     
-    if (nargout > 2)
-        if (nargout == 3)
-            debugging_X_and_Ct_mode       	= 1;
-        elseif (nargout == 4)
-            debugging_X_and_Ct_mode         = 2;
-        end
+    if (nargout == 3)
+        debugging_X_and_Ct_mode             = 1;
+    elseif (nargout == 4)
+        debugging_X_and_Ct_mode             = 2;
     else
         debugging_X_and_Ct_mode             = 0;
     end
@@ -68,7 +66,9 @@ function [ varargout ] = computeSubFeatMatAndSubTargetCt( varargin )
     Y_obs_local     = demo_obs_avoid_traj_local{1,1};
     Yd_obs_local    = demo_obs_avoid_traj_local{2,1};
     Ydd_obs_local   = demo_obs_avoid_traj_local{3,1};
-    [sub_target_ct] = computeDMPCtTarget(   Y_obs_local, ...
+    [sub_target_ct, ~,...
+     sub_PSI, sub_PV, ...
+     sub_PX]        = computeDMPCtTarget(   Y_obs_local, ...
                                             Yd_obs_local, ...
                                             Ydd_obs_local, ...
                                             cart_coord_dmp_baseline_params.w, ...
@@ -91,6 +91,12 @@ function [ varargout ] = computeSubFeatMatAndSubTargetCt( varargin )
         varargout(3)    = {sub_target_ct_3D};
         if (debugging_X_and_Ct_mode == 2)
             varargout(4)= {sub_X_per_obs_point_cell};
+        end
+    else
+        if (nargout > 4)
+            varargout(5)= {sub_PSI};
+            varargout(6)= {sub_PV};
+            varargout(7)= {sub_PX};
         end
     end
 end
