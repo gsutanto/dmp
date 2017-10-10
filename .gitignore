@@ -12,6 +12,7 @@ matlab/dmp_coupling/learn_obs_avoid/learn_obs_avoid_noisy_synthetic_data/Ct.mat
 matlab/dmp_coupling/learn_obs_avoid/learn_obs_avoid_noisy_synthetic_data/wi.mat
 matlab/dmp_coupling/learn_obs_avoid/loa_generalization_test_no_unrolling/Ct.mat
 matlab/dmp_coupling/learn_obs_avoid/loa_generalization_test_no_unrolling/wi.mat
+matlab/dmp_coupling/learn_obs_avoid/learn_obs_avoid_pmnn_vicon_data/*.mat
 matlab/dmp_coupling/learn_obs_avoid/learn_obs_avoid_vicon_data/*.mat
 matlab/dmp_coupling/learn_obs_avoid/learn_obs_avoid_vicon_data/*/*.mat
 matlab/dmp_coupling/learn_obs_avoid/learn_obs_avoid_vicon_data/trained_NN_history/*
