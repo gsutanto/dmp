@@ -1,0 +1,5 @@
+Execution Order for Reproducing Experimental Results:
+**---------------- Learning Feedback/Coupling Term Model for Unrolling on Robot ----------------**
+ [1] Prepare the Training and Generalization Testing Dataset, by running the following scripts in amd_clmc_dmp/matlab/dmp_coupling/learn_obs_avoid/learn_obs_avoid_pmnn_vicon_data/:
+     >> on MATLAB: convert_demo_to_supervised_obs_avoid_fb_dataset.m 
+                   => tf_obs_avoid_data_preparation_robot_unroll.m

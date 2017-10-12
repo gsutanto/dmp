@@ -39,6 +39,9 @@ function [ varargout ] = computeSubFeatMatAndSubTargetCt( varargin )
     if ((norm(start_position_global_obs_avoid_demo-cart_coord_dmp_baseline_params.mean_start_global) > max_critical_point_distance_baseline_vs_oa_demo) || ...
         (norm(goal_position_global_obs_avoid_demo-cart_coord_dmp_baseline_params.mean_goal_global) > max_critical_point_distance_baseline_vs_oa_demo))
         disp('ERROR: Critical position distance between baseline and obstacle avoidance demonstration is beyond tolerable threshold!!!');
+        is_good_demo    = 0;
+    else
+        is_good_demo    = 1;
     end
     
     [ demo_obs_avoid_traj_local ] = convertCTrajAtOldToNewCoordSys( demo_obs_avoid_traj_global, ...
@@ -97,6 +100,7 @@ function [ varargout ] = computeSubFeatMatAndSubTargetCt( varargin )
             varargout(5)= {sub_PSI};
             varargout(6)= {sub_PV};
             varargout(7)= {sub_PX};
+            varargout(8)= {is_good_demo};
         end
     end
 end

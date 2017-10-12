@@ -19,6 +19,7 @@ matlab/dmp_coupling/learn_obs_avoid/learn_obs_avoid_vicon_data/trained_NN_histor
 matlab/dmp_coupling/learn_tactile_feedback/unroll/*/*/*/*
 matlab/dmp_coupling/learn_tactile_feedback/neural_nets/unroll/*.mat
 matlab/dmp_coupling/learn_tactile_feedback/*.mat
+python/dmp_coupling/learn_obs_avoid/**/*.mat
 python/dmp_coupling/learn_tactile_feedback/**/*.mat
 pictures/*
 plot/dmp_1D/*.txt
