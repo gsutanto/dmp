@@ -67,6 +67,9 @@ for prim_no in range(1, 4):
     # Define Neural Network Topology
     encoder_NN_hidden_layer_topology = [100]
     
+    # Define Neural Network Activation Function
+    encoder_NN_hidden_layer_activation_func_list = ['tanh']
+    
     D_latent = X_dim_reduced_pca.shape[1] # match the latent dimensionality with that of PCA's result
     
     # Permutation with Chunks (for Stochastic Gradient Descent (SGD))
@@ -109,7 +112,9 @@ for prim_no in range(1, 4):
         tf_valid_X = tf.constant(X_valid, name="tf_valid_X_constant")
         tf_test_X = tf.constant(X_test, name="tf_test_X_constant")
         
-        AE = AutoEncoder(NN_name, D_input, encoder_NN_hidden_layer_topology, D_latent, "")
+        AE = AutoEncoder(NN_name, D_input, 
+                         encoder_NN_hidden_layer_topology, encoder_NN_hidden_layer_activation_func_list, 
+                         D_latent, "")
     
         # Build the Prediction Graph (that computes predictions from the inference model).
         train_batch_prediction = AE.performNeuralNetworkPrediction(tf_train_X_batch, tf_train_dropout_keep_prob)

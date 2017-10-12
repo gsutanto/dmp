@@ -53,6 +53,8 @@ for prim_no in range(1, 4):
     regular_NN_hidden_layer_topology = [100]
     N_phaseLWR_kernels = normalized_phase_kernels.shape[1]
     NN_topology = [D_input] + regular_NN_hidden_layer_topology + [N_phaseLWR_kernels, D_output]
+            
+    regular_NN_hidden_layer_activation_func_list = ['tanh'] * len(regular_NN_hidden_layer_topology)
     
     NN_name = 'my_ffNNphaseLWR'
     
@@ -75,7 +77,9 @@ for prim_no in range(1, 4):
         tf_test_X = tf.constant(X_test, name="tf_test_X_constant")
         tf_test_nPSI = tf.constant(nPSI_test, name="tf_test_nPSI_constant")
         
-        ffNNphaseLWR = FFNNFinalPhaseLWRLayerPerDims(NN_name, D_input, regular_NN_hidden_layer_topology, N_phaseLWR_kernels, D_output, filepath, True)
+        ffNNphaseLWR = FFNNFinalPhaseLWRLayerPerDims(NN_name, D_input, 
+                                                     regular_NN_hidden_layer_topology, regular_NN_hidden_layer_activation_func_list, 
+                                                     N_phaseLWR_kernels, D_output, filepath, True)
         
         test_prediction  = ffNNphaseLWR.performNeuralNetworkPrediction(tf_test_X, tf_test_nPSI, 1.0)
     

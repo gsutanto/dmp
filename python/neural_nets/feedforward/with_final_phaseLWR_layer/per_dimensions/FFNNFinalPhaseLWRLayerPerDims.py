@@ -21,17 +21,34 @@ class FFNNFinalPhaseLWRLayerPerDims(FeedForwardNeuralNetwork):
     All neural networks (i.e. for all output dimensions) are optimized together.
     """
     
-    def __init__(self, name, D_input, regular_hidden_layer_topology, N_phaseLWR_kernels, D_output, filepath="", is_using_phase_kernel_modulation=True):
+    def __init__(self, name, D_input, 
+                 regular_hidden_layer_topology, regular_hidden_layer_activation_func_list, 
+                 N_phaseLWR_kernels, D_output, 
+                 filepath="", is_using_phase_kernel_modulation=True):
         self.name = name
+        
         self.neural_net_topology = [D_input] + regular_hidden_layer_topology + [N_phaseLWR_kernels, D_output]
         print "FFNNFinalPhaseLWRLayerPerDims Topology:"
         print self.neural_net_topology
+        
         self.D_output = D_output
         self.N_layers = len(self.neural_net_topology)
+        
+        if (regular_hidden_layer_activation_func_list == []):
+            self.neural_net_activation_func_list = ['identity'] * self.N_layers
+        else:
+            assert (len(regular_hidden_layer_activation_func_list) == len(regular_hidden_layer_topology)), "len(regular_hidden_layer_activation_func_list) must be == len(regular_hidden_layer_topology)"
+            self.neural_net_activation_func_list = ['identity'] + regular_hidden_layer_activation_func_list + ['identity', 'identity']
+        # First Layer (Input Layer) always uses 'identity' activation function (and it does NOT matter actually; this is mainly for the sake of layer-indexing consistency...).
+        assert (len(self.neural_net_activation_func_list) == self.N_layers), "len(self.neural_net_activation_func_list) must be == self.N_layers"
+        print "Neural Network Activation Function List:"
+        print self.neural_net_activation_func_list
+        
         if (filepath == ""):
             self.num_params = self.defineNeuralNetworkModel()
         else:
             self.num_params = self.loadNeuralNetworkFromMATLABMatFile(filepath)
+        
         self.is_using_phase_kernel_modulation = is_using_phase_kernel_modulation
     
     def getLayerName(self, layer_index):
@@ -91,22 +108,33 @@ class FFNNFinalPhaseLWRLayerPerDims(FeedForwardNeuralNetwork):
     
             for dim_out in range(self.D_output):
                 layer_dim_ID = layer_name + '_' + str(dim_out)
+                
                 if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation)
                     current_layer_dim_size = self.neural_net_topology[i]
                 else: # Output Layer
                     current_layer_dim_size = 1
+                
                 with tf.variable_scope(self.name+'_'+layer_dim_ID, reuse=True):
                     weights = tf.get_variable('weights', [self.neural_net_topology[i-1], current_layer_dim_size])
                     if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
                         biases = tf.get_variable('biases', [current_layer_dim_size])
+                    
                     if (i < self.N_layers - 2):  # Regular Hidden Layer
-                        #hidden_dim[dim_out] = (tf.matmul(hidden_drop_dim[dim_out], weights) + biases)
-                        hidden_dim[dim_out] = tf.nn.tanh(tf.matmul(hidden_drop_dim[dim_out], weights) + biases)
+                        affine_intermediate_result = tf.matmul(hidden_drop_dim[dim_out], weights) + biases
+                        if (self.neural_net_activation_func_list[i] == 'identity'):
+                            activation_func_output = affine_intermediate_result
+                        elif (self.neural_net_activation_func_list[i] == 'tanh'):
+                            activation_func_output = tf.nn.tanh(affine_intermediate_result)
+                        elif (self.neural_net_activation_func_list[i] == 'relu'):
+                            activation_func_output = tf.nn.relu(affine_intermediate_result)
+                        else:
+                            sys.exit('Unrecognized activation function: ' + self.neural_net_activation_func_list[i])
+                        
+                        hidden_dim[dim_out] = activation_func_output
                         hidden_drop_dim[dim_out] = tf.nn.dropout(hidden_dim[dim_out], dropout_keep_prob)
                     elif (i == self.N_layers - 2): # Final Hidden Layer with Phase LWR Gating/Modulation
                         if (self.is_using_phase_kernel_modulation == True):
                             hidden_dim[dim_out] = normalized_phase_kernels * (tf.matmul(hidden_drop_dim[dim_out], weights) + biases)
-                            #hidden_dim[dim_out] = normalized_phase_kernels * tf.nn.tanh(tf.matmul(hidden_drop_dim[dim_out], weights) + biases)
                             hidden_drop_dim[dim_out] = hidden_dim[dim_out] # no dropout
                         else:   # if NOT using phase kernel modulation:
                             hidden_dim[dim_out] = tf.nn.tanh(tf.matmul(hidden_drop_dim[dim_out], weights) + biases)

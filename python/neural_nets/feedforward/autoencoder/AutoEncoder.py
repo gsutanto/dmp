@@ -19,13 +19,28 @@ class AutoEncoder(FeedForwardNeuralNetwork):
     Also, the last two layers (final hidden layer and output layer) are dimension-specific.
     """
     
-    def __init__(self, name, D_input, encoder_hidden_layer_topology, D_latent, filepath=""):
+    def __init__(self, name, D_input, 
+                 encoder_hidden_layer_topology, encoder_hidden_layer_activation_func_list, 
+                 D_latent, filepath=""):
         self.name = name
+        
         self.neural_net_topology = [D_input] + encoder_hidden_layer_topology + [D_latent] + list(reversed(encoder_hidden_layer_topology)) + [D_input]
         print "AutoEncoder Topology:"
         print self.neural_net_topology
+        
         self.D_output = D_input
         self.N_layers = len(self.neural_net_topology)
+        
+        if (encoder_hidden_layer_activation_func_list == []):
+            self.neural_net_activation_func_list = ['identity'] * self.N_layers
+        else:
+            assert (len(encoder_hidden_layer_activation_func_list) == len(encoder_hidden_layer_topology)), "len(encoder_hidden_layer_activation_func_list) must be == len(encoder_hidden_layer_topology)"
+            self.neural_net_activation_func_list = ['identity'] + encoder_hidden_layer_activation_func_list + ['identity'] + list(reversed(encoder_hidden_layer_activation_func_list)) + ['identity']
+        # First Layer (Input Layer) always uses 'identity' activation function (and it does NOT matter actually; this is mainly for the sake of layer-indexing consistency...).
+        assert (len(self.neural_net_activation_func_list) == self.N_layers), "len(self.neural_net_activation_func_list) must be == self.N_layers"
+        print "Neural Network Activation Function List:"
+        print self.neural_net_activation_func_list
+        
         if (filepath == ""):
             self.num_params = self.defineNeuralNetworkModel()
         else:
@@ -58,12 +73,22 @@ class AutoEncoder(FeedForwardNeuralNetwork):
             with tf.variable_scope(self.name+'_'+layer_name, reuse=True):
                 weights = tf.get_variable('weights', [self.neural_net_topology[i - 1], self.neural_net_topology[i]])
                 biases = tf.get_variable('biases', [self.neural_net_topology[i]])
+                
+                affine_intermediate_result = tf.matmul(hidden_drop, weights) + biases
+                if (self.neural_net_activation_func_list[i] == 'identity'):
+                    activation_func_output = affine_intermediate_result
+                elif (self.neural_net_activation_func_list[i] == 'tanh'):
+                    activation_func_output = tf.nn.tanh(affine_intermediate_result)
+                elif (self.neural_net_activation_func_list[i] == 'relu'):
+                    activation_func_output = tf.nn.relu(affine_intermediate_result)
+                else:
+                    sys.exit('Unrecognized activation function: ' + self.neural_net_activation_func_list[i])
+                
                 if (i < ((self.N_layers - 1) / 2)): # Encoder's Hidden Layer
-                    # hidden = tf.nn.relu(tf.matmul(hidden_drop, weights) + biases)
-                    hidden = tf.nn.tanh(tf.matmul(hidden_drop, weights) + biases)
+                    hidden = activation_func_output
                     hidden_drop = tf.nn.dropout(hidden, dropout_keep_prob)
-                elif (i == (self.N_layers - 1) / 2): # Latent Layer
-                    latent = tf.matmul(hidden_drop, weights) + biases
+                elif (i == (self.N_layers - 1) / 2): # Latent Layer (no Dropout here!)
+                    latent = activation_func_output
         return latent
     
     def decode(self, latent_dataset, dropout_keep_prob=1.0):
@@ -80,12 +105,22 @@ class AutoEncoder(FeedForwardNeuralNetwork):
             with tf.variable_scope(self.name+'_'+layer_name, reuse=True):
                 weights = tf.get_variable('weights', [self.neural_net_topology[i - 1], self.neural_net_topology[i]])
                 biases = tf.get_variable('biases', [self.neural_net_topology[i]])
+                
+                affine_intermediate_result = tf.matmul(hidden_drop, weights) + biases
+                if (self.neural_net_activation_func_list[i] == 'identity'):
+                    activation_func_output = affine_intermediate_result
+                elif (self.neural_net_activation_func_list[i] == 'tanh'):
+                    activation_func_output = tf.nn.tanh(affine_intermediate_result)
+                elif (self.neural_net_activation_func_list[i] == 'relu'):
+                    activation_func_output = tf.nn.relu(affine_intermediate_result)
+                else:
+                    sys.exit('Unrecognized activation function: ' + self.neural_net_activation_func_list[i])
+                
                 if (i < (self.N_layers - 1)): # Decoder's Hidden Layer
-                    # hidden = tf.nn.relu(tf.matmul(hidden_drop, weights) + biases)
-                    hidden = tf.nn.tanh(tf.matmul(hidden_drop, weights) + biases)
+                    hidden = activation_func_output
                     hidden_drop = tf.nn.dropout(hidden, dropout_keep_prob)
-                elif (i == self.N_layers - 1): # Output Layer
-                    output = tf.matmul(hidden_drop, weights) + biases
+                elif (i == self.N_layers - 1): # Output Layer (no Dropout here!)
+                    output = activation_func_output
         return output
     
     def performNeuralNetworkPrediction(self, dataset, dropout_keep_prob=1.0):

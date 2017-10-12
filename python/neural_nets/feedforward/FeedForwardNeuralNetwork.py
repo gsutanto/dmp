@@ -15,12 +15,25 @@ from NeuralNetwork import *
 class FeedForwardNeuralNetwork(NeuralNetwork):
     'Class for feed-forward neural network.'
     
-    def __init__(self, name, neural_net_topology, filepath=""):
+    def __init__(self, name, neural_net_topology, nn_hidden_layer_activation_func_list=[], filepath=""):
         self.name = name
+        
         self.neural_net_topology = neural_net_topology
         print "Neural Network Topology:"
         print self.neural_net_topology
+        
         self.N_layers = len(self.neural_net_topology)
+        
+        if (nn_hidden_layer_activation_func_list == []):
+            self.neural_net_activation_func_list = ['identity'] * self.N_layers
+        else:
+            assert (len(nn_hidden_layer_activation_func_list) == (self.N_layers - 2)), "len(nn_hidden_layer_activation_func_list) must be == (self.N_layers-2)! Only activation functions of the hidden layers that need to be specified!"
+            self.neural_net_activation_func_list = ['identity'] + nn_hidden_layer_activation_func_list + ['identity']
+        # First Layer (Input Layer) always uses 'identity' activation function (and it does NOT matter actually; this is mainly for the sake of layer-indexing consistency...).
+        assert (len(self.neural_net_activation_func_list) == self.N_layers), "len(self.neural_net_activation_func_list) must be == self.N_layers"
+        print "Neural Network Activation Function List:"
+        print self.neural_net_activation_func_list
+        
         if (filepath == ""):
             self.num_params = self.defineNeuralNetworkModel()
         else:
@@ -67,12 +80,22 @@ class FeedForwardNeuralNetwork(NeuralNetwork):
             with tf.variable_scope(self.name+'_'+layer_name, reuse=True):
                 weights = tf.get_variable('weights', [self.neural_net_topology[i - 1], self.neural_net_topology[i]])
                 biases = tf.get_variable('biases', [self.neural_net_topology[i]])
-                if (i < self.N_layers - 1):  # Hidden Layer
-                    # hidden = tf.nn.relu(tf.matmul(hidden_drop, weights) + biases)
-                    hidden = tf.nn.tanh(tf.matmul(hidden_drop, weights) + biases)
+                
+                affine_intermediate_result = tf.matmul(hidden_drop, weights) + biases
+                if (self.neural_net_activation_func_list[i] == 'identity'):
+                    activation_func_output = affine_intermediate_result
+                elif (self.neural_net_activation_func_list[i] == 'tanh'):
+                    activation_func_output = tf.nn.tanh(affine_intermediate_result)
+                elif (self.neural_net_activation_func_list[i] == 'relu'):
+                    activation_func_output = tf.nn.relu(affine_intermediate_result)
+                else:
+                    sys.exit('Unrecognized activation function: ' + self.neural_net_activation_func_list[i])
+                
+                if (i < self.N_layers - 1):     # Hidden Layer
+                    hidden = activation_func_output
                     hidden_drop = tf.nn.dropout(hidden, dropout_keep_prob)
-                else:                   # Output Layer
-                    output = tf.matmul(hidden_drop, weights) + biases
+                else:                           # Output Layer (no Dropout here!)
+                    output = activation_func_output
         return output
     
     # def performNeuralNetworkTraining(self, prediction, ground_truth, initial_learning_rate, beta, N_steps):
