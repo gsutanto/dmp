@@ -202,22 +202,22 @@ for input_selector in input_selector_list:
                 tf_generalization_test_nPSI = tf.constant(nPSI_generalization_test, name="tf_generalization_test_nPSI_constant")
                 tf_generalization_test_W = tf.constant(W_generalization_test, name="tf_generalization_test_W_constant")
                 
-                PMNN = PMNN(NN_name, D_input, 
+                pmnn = PMNN(NN_name, D_input, 
                             regular_NN_hidden_layer_topology, regular_NN_hidden_layer_activation_func_list, 
                             N_phaseLWR_kernels, D_output, "", is_using_phase_kernel_modulation)
             
                 # Build the Prediction Graph (that computes predictions from the inference model).
-                train_batch_prediction = PMNN.performNeuralNetworkPrediction(tf_train_X_batch, tf_train_nPSI_batch, tf_train_dropout_keep_prob)
+                train_batch_prediction = pmnn.performNeuralNetworkPrediction(tf_train_X_batch, tf_train_nPSI_batch, tf_train_dropout_keep_prob)
                 
                 # Build the Training Graph (that calculate and apply gradients), per output dimension.
                 if (is_performing_weighted_training):
-                    train_op_dim0, loss_dim0 = PMNN.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 0, tf_train_W_batch)
-                    train_op_dim1, loss_dim1 = PMNN.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 1, tf_train_W_batch)
-                    train_op_dim2, loss_dim2 = PMNN.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2, tf_train_W_batch)
+                    train_op_dim0, loss_dim0 = pmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 0, tf_train_W_batch)
+                    train_op_dim1, loss_dim1 = pmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 1, tf_train_W_batch)
+                    train_op_dim2, loss_dim2 = pmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2, tf_train_W_batch)
                 else:
-                    train_op_dim0, loss_dim0 = PMNN.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 0)
-                    train_op_dim1, loss_dim1 = PMNN.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 1)
-                    train_op_dim2, loss_dim2 = PMNN.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2)
+                    train_op_dim0, loss_dim0 = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 0)
+                    train_op_dim1, loss_dim1 = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 1)
+                    train_op_dim2, loss_dim2 = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2)
                 
                 # Create a summary:
                 #tf.summary.scalar("loss_dim_"+str(dim_out), loss_dim[dim_out])
@@ -226,10 +226,10 @@ for input_selector in input_selector_list:
                 summary_op = tf.summary.merge_all()
             
                 # Predictions for the training, validation, and test data.
-                train_prediction = PMNN.performNeuralNetworkPrediction(tf_train_X, tf_train_nPSI, 1.0)
-                valid_prediction = PMNN.performNeuralNetworkPrediction(tf_valid_X, tf_valid_nPSI, 1.0)
-                test_prediction  = PMNN.performNeuralNetworkPrediction(tf_test_X, tf_test_nPSI, 1.0)
-                generalization_test_prediction  = PMNN.performNeuralNetworkPrediction(tf_generalization_test_X, tf_generalization_test_nPSI, 1.0)
+                train_prediction = pmnn.performNeuralNetworkPrediction(tf_train_X, tf_train_nPSI, 1.0)
+                valid_prediction = pmnn.performNeuralNetworkPrediction(tf_valid_X, tf_valid_nPSI, 1.0)
+                test_prediction  = pmnn.performNeuralNetworkPrediction(tf_test_X, tf_test_nPSI, 1.0)
+                generalization_test_prediction  = pmnn.performNeuralNetworkPrediction(tf_generalization_test_X, tf_generalization_test_nPSI, 1.0)
             
             # Test Random Vector Generation at Output Layer's Biases:
             #expected_rv_output_biases  = np.array([ -1.65803023e-14, -3.75096513e-15, 5.12945704e-15, -1.96647209e-16, -8.87342059e-15, 2.00303844e-14 ])
@@ -243,12 +243,12 @@ for input_selector in input_selector_list:
                     tf.global_variables_initializer().run()
                     print("Initialized")
                     
-                    if (PMNN.num_params < N_train_dataset):
-                        print("OK: PMNN.num_params=%d < %d=N_train_dataset" % (PMNN.num_params, N_train_dataset))
+                    if (pmnn.num_params < N_train_dataset):
+                        print("OK: pmnn.num_params=%d < %d=N_train_dataset" % (pmnn.num_params, N_train_dataset))
                     else:
-                        print(Fore.RED + "WARNING: PMNN.num_params=%d >= %d=N_train_dataset" % (PMNN.num_params, N_train_dataset))
+                        print(Fore.RED + "WARNING: pmnn.num_params=%d >= %d=N_train_dataset" % (pmnn.num_params, N_train_dataset))
                         print(Style.RESET_ALL)
-        #                sys.exit("ERROR: PMNN.num_params=%d >= %d=N_train_dataset" % (PMNN.num_params, N_train_dataset))
+        #                sys.exit("ERROR: pmnn.num_params=%d >= %d=N_train_dataset" % (pmnn.num_params, N_train_dataset))
                     
                     # create log writer object
                     writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
@@ -312,7 +312,7 @@ for input_selector in input_selector_list:
                                 print("Training         Variance: ", var_ground_truth_Ctt_train)
                                 print("")
             #                    if ((step > 0) and ((step == np.power(10,(np.floor(np.log10(step)))).astype(np.int32)) or (step == 5 * np.power(10,(np.floor(np.log10(step/5)))).astype(np.int32)))):
-                                NN_model_params = PMNN.saveNeuralNetworkToMATLABMatFile()
+                                NN_model_params = pmnn.saveNeuralNetworkToMATLABMatFile()
                                 sio.savemat((model_output_dir_path+'prim_'+str(prim_no)+'_params_reinit_'+str(n_NN_reinit_trial)+'_step_%07d'%step+'.mat'), NN_model_params)
                                 nmse["nmse_train"] = nmse_train
                                 nmse["nmse_valid"] = nmse_valid

@@ -7,8 +7,8 @@ import tensorflow as tf
 from six.moves import cPickle as pickle
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../utilities/'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../neural_nets/feedforward/pmnn/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../neural_nets/feedforward/pmnn/'))
 
 # Seed the random variables generator:
 random.seed(38)
@@ -18,19 +18,19 @@ from utilities import *
 from PMNN import *
 
 parent_path = 'models/'
-reinit_selection_idx = np.genfromtxt(parent_path+'reinit_selection_idx.txt', delimiter=' ', dtype='int')
+reinit_selection_idx = [np.genfromtxt(parent_path+'reinit_selection_idx.txt', delimiter=' ', dtype='int').tolist()]
 TF_max_train_iters = np.genfromtxt(parent_path+'TF_max_train_iters.txt', delimiter=' ', dtype='int')
-savepath = '../../../data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/python_models/'
+savepath = '../../../../data/dmp_coupling/learn_obs_avoid/static_obs/neural_nets/pmnn/python_models/'
 if not os.path.isdir(savepath):
     os.makedirs(savepath)
 
-for prim_no in range(1, 4):
+for prim_no in range(1, 2):
     print ("prim_no = ", prim_no)
 
     # dummy data for neural networks learning simulation/verification:
-    X = sio.loadmat('scraping/test_unroll_prim_'+str(prim_no)+'_X_raw_scraping.mat', struct_as_record=True)['X']
-    Ct_target = sio.loadmat('scraping/test_unroll_prim_'+str(prim_no)+'_Ct_target_scraping.mat', struct_as_record=True)['Ct_target']
-    normalized_phase_kernels = sio.loadmat('scraping/test_unroll_prim_'+str(prim_no)+'_normalized_phase_PSI_mult_phase_V_scraping.mat', struct_as_record=True)['normalized_phase_PSI_mult_phase_V']
+    X = sio.loadmat('input_data/test_unroll_prim_'+str(prim_no)+'_X_raw_obs_avoid.mat', struct_as_record=True)['X']
+    Ct_target = sio.loadmat('input_data/test_unroll_prim_'+str(prim_no)+'_Ct_target_obs_avoid.mat', struct_as_record=True)['Ct_target']
+    normalized_phase_kernels = sio.loadmat('input_data/test_unroll_prim_'+str(prim_no)+'_normalized_phase_PSI_mult_phase_V_obs_avoid.mat', struct_as_record=True)['normalized_phase_PSI_mult_phase_V']
     
     filepath = parent_path + 'prim_' + str(prim_no) + '_params_reinit_' + str(reinit_selection_idx[prim_no-1]) + ('_step_%07d.mat' % TF_max_train_iters)
     
@@ -46,17 +46,13 @@ for prim_no in range(1, 4):
     print('D_output =', D_output)
     
     # Define Neural Network Topology
-    #regular_NN_hidden_layer_topology = [30, 22, 16, 10]
-    #regular_NN_hidden_layer_topology = [21, 3]
-    #regular_NN_hidden_layer_topology = [25, 10]
-    #regular_NN_hidden_layer_topology = [30, 20, 10, 7]
-    regular_NN_hidden_layer_topology = [100]
+    regular_NN_hidden_layer_topology = [100, 75]
     N_phaseLWR_kernels = normalized_phase_kernels.shape[1]
     NN_topology = [D_input] + regular_NN_hidden_layer_topology + [N_phaseLWR_kernels, D_output]
             
-    regular_NN_hidden_layer_activation_func_list = ['tanh'] * len(regular_NN_hidden_layer_topology)
+    regular_NN_hidden_layer_activation_func_list = ['relu', 'tanh']
     
-    NN_name = 'my_ffNNphaseLWR'
+    NN_name = 'my_PMNN_obs_avoid_fb'
     
     X = X.astype(np.float32)
     normalized_phase_kernels = normalized_phase_kernels.astype(np.float32)
