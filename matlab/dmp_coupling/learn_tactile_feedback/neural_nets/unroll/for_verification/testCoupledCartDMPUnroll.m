@@ -20,7 +20,7 @@ function [] = testCoupledCartDMPUnroll(output_dir_path)
     addpath([rel_dir_path, '../../cart_dmp/cart_coord_dmp/']);
     addpath([rel_dir_path, '../../cart_dmp/quat_dmp/']);
     addpath([rel_dir_path, '../../dmp_multi_dim/']);
-    addpath([rel_dir_path, '../../neural_nets/feedforward/with_final_phaseLWR_layer/per_dimensions/FFNNFinalPhaseLWRLayerPerDims/']);
+    addpath([rel_dir_path, '../../neural_nets/feedforward/pmnn/']);
 
     scraping_data_root_dir_path = [rel_dir_path, '../../../data/dmp_coupling/learn_tactile_feedback/scraping/'];
 
@@ -119,7 +119,7 @@ function [] = testCoupledCartDMPUnroll(output_dir_path)
 
     %% NN-LWR Coupling Term Prediction
 
-    model_path  = [rel_dir_path, '../../../data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/FFNNFinalPhaseLWRLayerPerDims/python_models/'];
+    model_path  = [rel_dir_path, '../../../data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/python_models/'];
 
     Ctt_test_prediction_MATLAB_cell     = cell(N_prims, 1);
     NN_LWR_layer_cell_cell              = cell(N_prims, 1);

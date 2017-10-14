@@ -1,6 +1,6 @@
 #!/bin/bash
 
-matlab_funcs_src_folder=$'../../../../../utilities/'
+matlab_funcs_src_folder=$'../../../utilities/'
 
 matlab_funcs=$'recreateDir'
 

@@ -8,21 +8,19 @@ from six.moves import cPickle as pickle
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../utilities/'))
-#sys.path.append(os.path.join(os.path.dirname(__file__), '../../neural_nets/feedforward/with_final_phaseLWR_layer/shared_hidden_layers/'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../neural_nets/feedforward/with_final_phaseLWR_layer/per_dimensions/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../neural_nets/feedforward/pmnn/'))
 
 # Seed the random variables generator:
 random.seed(38)
 np.random.seed(38)
 
 from utilities import *
-#from FFNNFinalPhaseLWRLayerSharedHiddenLayers import *
-from FFNNFinalPhaseLWRLayerPerDims import *
+from PMNN import *
 
 parent_path = 'models/'
 reinit_selection_idx = np.genfromtxt(parent_path+'reinit_selection_idx.txt', delimiter=' ', dtype='int')
 TF_max_train_iters = np.genfromtxt(parent_path+'TF_max_train_iters.txt', delimiter=' ', dtype='int')
-savepath = '../../../data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/FFNNFinalPhaseLWRLayerPerDims/python_models/'
+savepath = '../../../data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/python_models/'
 
 for prim_no in range(1, 4):
     print ("prim_no = ", prim_no)
@@ -77,11 +75,11 @@ for prim_no in range(1, 4):
         tf_test_X = tf.constant(X_test, name="tf_test_X_constant")
         tf_test_nPSI = tf.constant(nPSI_test, name="tf_test_nPSI_constant")
         
-        ffNNphaseLWR = FFNNFinalPhaseLWRLayerPerDims(NN_name, D_input, 
-                                                     regular_NN_hidden_layer_topology, regular_NN_hidden_layer_activation_func_list, 
-                                                     N_phaseLWR_kernels, D_output, filepath, True)
+        PMNN = PMNN(NN_name, D_input, 
+                    regular_NN_hidden_layer_topology, regular_NN_hidden_layer_activation_func_list, 
+                    N_phaseLWR_kernels, D_output, filepath, True)
         
-        test_prediction  = ffNNphaseLWR.performNeuralNetworkPrediction(tf_test_X, tf_test_nPSI, 1.0)
+        test_prediction  = PMNN.performNeuralNetworkPrediction(tf_test_X, tf_test_nPSI, 1.0)
     
     # Run training for N_steps and save checkpoint at the end.
     with tf.Session(graph=ff_nn_graph) as session:

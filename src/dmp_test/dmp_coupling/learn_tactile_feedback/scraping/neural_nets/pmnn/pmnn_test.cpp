@@ -4,14 +4,14 @@
 #include <unistd.h>
 #include <getopt.h>
 
-#include "amd_clmc_dmp/neural_nets/FFNNFinalPhaseLWRLayerPerDims.h"
+#include "amd_clmc_dmp/neural_nets/PMNN.h"
 #include "amd_clmc_dmp/paths.h"
 
 using namespace dmp;
 
 void print_usage()
 {
-    printf("Usage: amd_clmc_dmp_ffnn_final_phase_lwr_per_dims_demo [-e rt_err_file_path]\n");
+    printf("Usage: amd_clmc_dmp_pmnn_demo [-e rt_err_file_path]\n");
 }
 
 int main(int argc, char** argv)
@@ -58,22 +58,22 @@ int main(int argc, char** argv)
 
     DataIO                          data_io(&rt_assertor);
 
-    FFNNFinalPhaseLWRLayerPerDims   ffnn_phaselwr(6, topology, &rt_assertor);
+    PMNN                            pmnn(6, topology, &rt_assertor);
 
-    if (rt_assert_main(ffnn_phaselwr.loadParams(get_data_path("/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/FFNNFinalPhaseLWRLayerPerDims/cpp_models/prim1/").c_str(),
-                                                0)) == false)
+    if (rt_assert_main(pmnn.loadParams(get_data_path("/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/cpp_models/prim1/").c_str(),
+                                       0)) == false)
     {
         return (-1);
     }
 
     MatrixXxXPtr                    X;
-    if (rt_assert_main(data_io.readMatrixFromFile(get_data_path("/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/FFNNFinalPhaseLWRLayerPerDims/unroll_test_dataset/test_unroll_prim_1_X_raw_scraping.txt").c_str(), X)) == false)
+    if (rt_assert_main(data_io.readMatrixFromFile(get_data_path("/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/unroll_test_dataset/test_unroll_prim_1_X_raw_scraping.txt").c_str(), X)) == false)
     {
         return (-1);
     }
 
     MatrixXxXPtr                    normalized_phase_PSI_mult_phase_V;
-    if (rt_assert_main(data_io.readMatrixFromFile(get_data_path("/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/FFNNFinalPhaseLWRLayerPerDims/unroll_test_dataset/test_unroll_prim_1_normalized_phase_PSI_mult_phase_V_scraping.txt").c_str(), normalized_phase_PSI_mult_phase_V)) == false)
+    if (rt_assert_main(data_io.readMatrixFromFile(get_data_path("/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/unroll_test_dataset/test_unroll_prim_1_normalized_phase_PSI_mult_phase_V_scraping.txt").c_str(), normalized_phase_PSI_mult_phase_V)) == false)
     {
         return (-1);
     }
@@ -95,9 +95,7 @@ int main(int argc, char** argv)
     {
         input                   = X->block(t, 0, 1, Nci).transpose();
         phase_kernel_modulation = normalized_phase_PSI_mult_phase_V->block(t, 0, 1, Ncp).transpose();
-        if (rt_assert_main(ffnn_phaselwr.computePrediction(input,
-                                                           phase_kernel_modulation,
-                                                           output)) == false)
+        if (rt_assert_main(pmnn.computePrediction(input, phase_kernel_modulation, output)) == false)
         {
             printf("Failed making prediction!");
             return (-1);

@@ -36,9 +36,9 @@
 
 ../software_test/execute_cpp_test.sh "./amd_clmc_dmp_quat_dmp_unroll_demo" test_cpp_quat_dmp_unroll_test.txt
 
-../software_test/execute_cpp_test.sh "./amd_clmc_dmp_ffnn_final_phase_lwr_per_dims_demo" test_cpp_ffnn_final_phase_lwr_per_dims_test.txt
+../software_test/execute_cpp_test.sh "./amd_clmc_dmp_pmnn_demo" test_cpp_pmnn_test.txt
 
-../software_test/execute_cpp_test.sh "./amd_clmc_dmp_cart_dmp_nnlwr_fitted_ct_unroll_demo -o ../software_test/" test_cpp_cart_dmp_nnlwr_fitted_ct_unroll_test.txt
+../software_test/execute_cpp_test.sh "./amd_clmc_dmp_cart_dmp_pmnn_fitted_ct_unroll_demo -o ../software_test/" test_cpp_cart_dmp_pmnn_fitted_ct_unroll_test.txt
 
 ../software_test/execute_matlab_tests_and_compare_w_cpp_tests.sh
 

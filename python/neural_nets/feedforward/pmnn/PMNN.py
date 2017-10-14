@@ -9,11 +9,11 @@ Created on Wed Apr 10 15:00:00 2017
 import scipy.io as sio
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 from FeedForwardNeuralNetwork import *
 from copy import deepcopy
 
-class FFNNFinalPhaseLWRLayerPerDims(FeedForwardNeuralNetwork):
+class PMNN(FeedForwardNeuralNetwork):
     """
     Class for special feed-forward neural network,
     the final hidden layer is gated/modulated by phase-LWR.
@@ -28,7 +28,7 @@ class FFNNFinalPhaseLWRLayerPerDims(FeedForwardNeuralNetwork):
         self.name = name
         
         self.neural_net_topology = [D_input] + regular_hidden_layer_topology + [N_phaseLWR_kernels, D_output]
-        print "FFNNFinalPhaseLWRLayerPerDims Topology:"
+        print "PMNN Topology:"
         print self.neural_net_topology
         
         self.D_output = D_output

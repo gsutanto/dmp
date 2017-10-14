@@ -13,7 +13,7 @@ addpath('../../../dmp_general/');
 
 task_type                   = 'scraping';
 load(['../dataset_Ct_tactile_asm_',task_type,'_augmented.mat']);
-data_path   = ['../../../../data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/FFNNFinalPhaseLWRLayerPerDims/cpp_models/prim', ...
+data_path   = ['../../../../data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/cpp_models/prim', ...
                num2str(prim_no), '/', num2str(ct_dim_no-1), '/'];
 
 global      dcps;

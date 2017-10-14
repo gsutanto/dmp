@@ -1,9 +1,9 @@
-#include "amd_clmc_dmp/neural_nets/FFNNFinalPhaseLWRLayerPerDims.h"
+#include "amd_clmc_dmp/neural_nets/PMNN.h"
 
 namespace dmp
 {
 
-    FFNNFinalPhaseLWRLayerPerDims::FFNNFinalPhaseLWRLayerPerDims():
+    PMNN::PMNN():
         num_dimensions(0), data_io(DataIO()), rt_assertor(NULL)
     {
         weights.resize(0);
@@ -15,9 +15,7 @@ namespace dmp
      * @param topology_init Initialization of the neural network topology that will be used
      * @param real_time_assertor Real-Time Assertor for troubleshooting and debugging
      */
-    FFNNFinalPhaseLWRLayerPerDims::FFNNFinalPhaseLWRLayerPerDims(uint num_dimensions_init,
-                                                                 std::vector< uint > topology_init,
-                                                                 RealTimeAssertor* real_time_assertor):
+    PMNN::PMNN(uint num_dimensions_init, std::vector< uint > topology_init, RealTimeAssertor* real_time_assertor):
         num_dimensions(num_dimensions_init),
         data_io(DataIO(real_time_assertor)), rt_assertor(real_time_assertor)
     {
@@ -49,7 +47,7 @@ namespace dmp
      *
      * @return Valid (true) or invalid (false)
      */
-    bool FFNNFinalPhaseLWRLayerPerDims::isValid()
+    bool PMNN::isValid()
     {
         if (rt_assertor == NULL)
         {
@@ -114,7 +112,7 @@ namespace dmp
      * @param start_idx Start sub-directory index to read from
      * @return Success or failure
      */
-    bool FFNNFinalPhaseLWRLayerPerDims::loadParams(const char* dir_path, uint start_idx)
+    bool PMNN::loadParams(const char* dir_path, uint start_idx)
     {
         // pre-condition(s) checking
         if (rt_assert(this->isValid()) == false)
@@ -191,11 +189,10 @@ namespace dmp
      * @param end_index (Optional) selected end index of the dimensionality of the prediction
      * @return Success or failure
      */
-    bool FFNNFinalPhaseLWRLayerPerDims::computePrediction(const VectorNN_N& input,
-                                                          const VectorNN_N& phase_kernel_modulation,
-                                                          VectorNN_N& output,
-                                                          int start_index,
-                                                          int end_index)
+    bool PMNN::computePrediction(const VectorNN_N& input,
+                                 const VectorNN_N& phase_kernel_modulation,
+                                 VectorNN_N& output,
+                                 int start_index, int end_index)
     {
         // pre-condition(s) checking
         if (rt_assert(this->isValid()) == false)
@@ -254,7 +251,7 @@ namespace dmp
         return (this->isValid());
     }
 
-    FFNNFinalPhaseLWRLayerPerDims::~FFNNFinalPhaseLWRLayerPerDims()
+    PMNN::~PMNN()
     {}
 
 }

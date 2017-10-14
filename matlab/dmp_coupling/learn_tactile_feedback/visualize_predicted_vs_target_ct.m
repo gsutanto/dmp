@@ -16,7 +16,7 @@ addpath([rel_dir_path, '../../utilities/']);
 addpath([rel_dir_path, '../../cart_dmp/cart_coord_dmp/']);
 addpath([rel_dir_path, '../../cart_dmp/quat_dmp/']);
 addpath([rel_dir_path, '../../dmp_multi_dim/']);
-addpath([rel_dir_path, '../../neural_nets/feedforward/with_final_phaseLWR_layer/per_dimensions/FFNNFinalPhaseLWRLayerPerDims/']);
+addpath([rel_dir_path, '../../neural_nets/feedforward/pmnn/']);
 
 task_type           = 'scraping';
 load(['dataset_Ct_tactile_asm_',task_type,'_augmented.mat']);
@@ -35,7 +35,7 @@ subset_settings_indices = 1:size(dataset_Ct_tactile_asm.sub_Ct_target, 2);	% new
 
 generalization_test_demo_trial_rank_no  = 3;
 
-model_path  = [rel_dir_path, '../../../data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/FFNNFinalPhaseLWRLayerPerDims/python_models/'];
+model_path  = [rel_dir_path, '../../../data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/python_models/'];
 
 % for np=1:N_prims
 for np=2

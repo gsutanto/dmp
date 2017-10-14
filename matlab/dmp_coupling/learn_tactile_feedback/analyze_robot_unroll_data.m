@@ -42,14 +42,14 @@ else
 	reinit_selection_idx= dlmread([rel_dir_path, '../../../python/dmp_coupling/learn_tactile_feedback/models/reinit_selection_idx.txt']);
 	TF_max_train_iters 	= dlmread([rel_dir_path, '../../../python/dmp_coupling/learn_tactile_feedback/models/TF_max_train_iters.txt']);
 
-	model_path  		= [rel_dir_path, '../../../data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/FFNNFinalPhaseLWRLayerPerDims/python_models/'];
+	model_path  		= [rel_dir_path, '../../../data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/python_models/'];
 end
 
 addpath([rel_dir_path, '../../utilities/']);
 addpath([rel_dir_path, '../../cart_dmp/cart_coord_dmp/']);
 addpath([rel_dir_path, '../../cart_dmp/quat_dmp/']);
 addpath([rel_dir_path, '../../dmp_multi_dim/']);
-addpath([rel_dir_path, '../../neural_nets/feedforward/with_final_phaseLWR_layer/per_dimensions/FFNNFinalPhaseLWRLayerPerDims/']);
+addpath([rel_dir_path, '../../neural_nets/feedforward/pmnn/']);
 
 is_plotting_other_sensings         	= 0;
 other_sense_strings                 = {'global force'};

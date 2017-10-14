@@ -9,7 +9,7 @@
 #include "amd_clmc_dmp/dmp_param/TauSystem.h"
 #include "amd_clmc_dmp/dmp_discrete/CanonicalSystemDiscrete.h"
 #include "amd_clmc_dmp/dmp_multi_dim/DMPDiscreteMultiDim.h"
-#include "amd_clmc_dmp/neural_nets/FFNNFinalPhaseLWRLayerPerDims.h"
+#include "amd_clmc_dmp/neural_nets/PMNN.h"
 #include "amd_clmc_dmp/cart_dmp/cart_coord_dmp/CartesianCoordDMP.h"
 #include "amd_clmc_dmp/cart_dmp/quat_dmp/QuaternionDMP.h"
 #include "amd_clmc_dmp/dmp_coupling/learn_tactile_feedback/TransformCouplingLearnTactileFeedback.h"
@@ -19,7 +19,7 @@ using namespace dmp;
 
 void print_usage()
 {
-    printf("Usage: amd_clmc_dmp_cart_dmp_nnlwr_fitted_ct_unroll_demo [-o output_plot_dir_path] [-e rt_err_file_path]\n");
+    printf("Usage: amd_clmc_dmp_cart_dmp_pmnn_fitted_ct_unroll_demo [-o output_plot_dir_path] [-e rt_err_file_path]\n");
 }
 
 int main(int argc, char** argv)
@@ -178,7 +178,7 @@ int main(int argc, char** argv)
 
     double                                      canonical_multiplier;
 
-    std::vector< boost::shared_ptr<FFNNFinalPhaseLWRLayerPerDims> > ffnn_phaselwr(N_prims);
+    std::vector< boost::shared_ptr<PMNN> >      pmnn(N_prims);
 
     std::vector< boost::shared_ptr<TransformCouplingLearnTactileFeedback> > tc_lft(N_act);
 
@@ -323,18 +323,16 @@ int main(int argc, char** argv)
 
     VectorNN_N  X_vector(N_total_sense_dimensionality);
 
-    char nn_lwr_model_path[1000]    = "";
+    char pmnn_model_path[1000]    = "";
     for (uint np=0; np<N_prims; ++np)
     {
         // Initialize Neural Network-LWR (NN-LWR):
-        ffnn_phaselwr[np]   = boost::make_shared<FFNNFinalPhaseLWRLayerPerDims>(N_total_act_dimensionality,
-                                                                                topology,
-                                                                                &rt_assertor);
+        pmnn[np]    = boost::make_shared<PMNN>(N_total_act_dimensionality, topology, &rt_assertor);
 
-        sprintf(nn_lwr_model_path, "%sprim%u/",
-                get_data_path("/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/FFNNFinalPhaseLWRLayerPerDims/cpp_models/").c_str(),
+        sprintf(pmnn_model_path, "%sprim%u/",
+                get_data_path("/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/cpp_models/").c_str(),
                 np+1);
-        if (rt_assert_main(ffnn_phaselwr[np]->loadParams(nn_lwr_model_path, 0)) == false)
+        if (rt_assert_main(pmnn[np]->loadParams(pmnn_model_path, 0)) == false)
         {
             printf("Failed loading NN-LWR params for primitive #%u\n", np+1);
             return (-1);
@@ -497,7 +495,7 @@ int main(int argc, char** argv)
             }
 
             // Select the activated coupling term's neural network:
-            (*(tc_lft[a])).ffnn_lwr_per_dims    = ffnn_phaselwr[np].get();
+            (*(tc_lft[a])).pmnn     = pmnn[np].get();
         }
 
         // Run sensory primitives:
@@ -569,9 +567,8 @@ int main(int argc, char** argv)
             // actually the following computePrediction() is unnecessary,
             // since inside the coupling term getValue(), this is called automatically;
             // the following is called only for logging purpose:
-            if (rt_assert_main(ffnn_phaselwr[np]->computePrediction(X_vector,
-                                                                    normalized_phase_PSI_mult_phase_V,
-                                                                    Ct_vector)) == false)
+            if (rt_assert_main(pmnn[np]->computePrediction(X_vector, normalized_phase_PSI_mult_phase_V,
+                                                           Ct_vector)) == false)
             {
                 printf("Failed prediction at time t=%u for primitive #%u\n", t, np+1);
                 return (-1);

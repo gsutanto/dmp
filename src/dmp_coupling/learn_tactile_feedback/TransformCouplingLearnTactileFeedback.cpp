@@ -9,8 +9,8 @@ namespace dmp
 TransformCouplingLearnTactileFeedback::TransformCouplingLearnTactileFeedback():
     TransformCoupling(),
     start_index(0),
-    ffnn_lwr_input_num_dimensions(0), ffnn_lwr_phase_kernel_model_size(0), ffnn_lwr_output_num_dimensions(0),
-    ffnn_lwr_per_dims(NULL), ffnn_lwr_input_vector(NULL), ffnn_lwr_phase_kernel_modulation(NULL), ffnn_lwr_output_vector(NULL)
+    pmnn_input_num_dimensions(0), pmnn_phase_kernel_model_size(0), pmnn_output_num_dimensions(0),
+    pmnn(NULL), pmnn_input_vector(NULL), pmnn_phase_kernel_modulation(NULL), pmnn_output_vector(NULL)
 {}
 
 /**
@@ -21,21 +21,21 @@ TransformCouplingLearnTactileFeedback::TransformCouplingLearnTactileFeedback():
  */
 TransformCouplingLearnTactileFeedback::TransformCouplingLearnTactileFeedback(uint dmp_num_dimensions_init,
                                                                              uint start_index_init,
-                                                                             uint ffnn_lwr_input_num_dimensions_init,
-                                                                             uint ffnn_lwr_phase_kernel_model_size_init,
-                                                                             uint ffnn_lwr_output_num_dimensions_init,
-                                                                             VectorNN_N* ffnn_lwr_input_vector_ptr,
-                                                                             VectorNN_N* ffnn_lwr_phase_kernel_modulation_ptr,
-                                                                             VectorNN_N* ffnn_lwr_output_vector_ptr,
+                                                                             uint pmnn_input_num_dimensions_init,
+                                                                             uint pmnn_phase_kernel_model_size_init,
+                                                                             uint pmnn_output_num_dimensions_init,
+                                                                             VectorNN_N* pmnn_input_vector_ptr,
+                                                                             VectorNN_N* pmnn_phase_kernel_modulation_ptr,
+                                                                             VectorNN_N* pmnn_output_vector_ptr,
                                                                              RealTimeAssertor* real_time_assertor):
     TransformCoupling(dmp_num_dimensions_init, real_time_assertor),
     start_index(start_index_init),
-    ffnn_lwr_input_num_dimensions(ffnn_lwr_input_num_dimensions_init),
-    ffnn_lwr_phase_kernel_model_size(ffnn_lwr_phase_kernel_model_size_init),
-    ffnn_lwr_output_num_dimensions(ffnn_lwr_output_num_dimensions_init),
-    ffnn_lwr_per_dims(NULL),    // this should be set manually later
-    ffnn_lwr_input_vector(ffnn_lwr_input_vector_ptr), ffnn_lwr_phase_kernel_modulation(ffnn_lwr_phase_kernel_modulation_ptr),
-    ffnn_lwr_output_vector(ffnn_lwr_output_vector_ptr)
+    pmnn_input_num_dimensions(pmnn_input_num_dimensions_init),
+    pmnn_phase_kernel_model_size(pmnn_phase_kernel_model_size_init),
+    pmnn_output_num_dimensions(pmnn_output_num_dimensions_init),
+    pmnn(NULL),    // this should be set manually later
+    pmnn_input_vector(pmnn_input_vector_ptr), pmnn_phase_kernel_modulation(pmnn_phase_kernel_modulation_ptr),
+    pmnn_output_vector(pmnn_output_vector_ptr)
 {}
 
 /**
@@ -54,39 +54,39 @@ bool TransformCouplingLearnTactileFeedback::isValid()
         return false;
     }
     if (rt_assert((rt_assert(start_index >= 0)) &&
-                  (rt_assert(start_index < ffnn_lwr_output_num_dimensions))) == false)
+                  (rt_assert(start_index < pmnn_output_num_dimensions))) == false)
     {
         return false;
     }
-    if (rt_assert((rt_assert(ffnn_lwr_input_num_dimensions >= 0)) &&
-                  (rt_assert(ffnn_lwr_input_num_dimensions <= MAX_NN_NUM_NODES_PER_LAYER))) == false)
+    if (rt_assert((rt_assert(pmnn_input_num_dimensions >= 0)) &&
+                  (rt_assert(pmnn_input_num_dimensions <= MAX_NN_NUM_NODES_PER_LAYER))) == false)
     {
         return false;
     }
-    if (rt_assert((rt_assert(ffnn_lwr_phase_kernel_model_size >= 0)) &&
-                  (rt_assert(ffnn_lwr_phase_kernel_model_size <= MAX_MODEL_SIZE))) == false)
+    if (rt_assert((rt_assert(pmnn_phase_kernel_model_size >= 0)) &&
+                  (rt_assert(pmnn_phase_kernel_model_size <= MAX_MODEL_SIZE))) == false)
     {
         return false;
     }
-    if (rt_assert((rt_assert(ffnn_lwr_output_num_dimensions >= 0)) &&
-                  (rt_assert(ffnn_lwr_output_num_dimensions > start_index + dmp_num_dimensions - 1))) == false)
+    if (rt_assert((rt_assert(pmnn_output_num_dimensions >= 0)) &&
+                  (rt_assert(pmnn_output_num_dimensions > start_index + dmp_num_dimensions - 1))) == false)
     {
         return false;
     }
-    if (rt_assert((rt_assert(ffnn_lwr_per_dims != NULL)) &&
-                  (rt_assert(ffnn_lwr_input_vector != NULL)) &&
-                  (rt_assert(ffnn_lwr_phase_kernel_modulation != NULL)) &&
-                  (rt_assert(ffnn_lwr_output_vector != NULL))) == false)
+    if (rt_assert((rt_assert(pmnn != NULL)) &&
+                  (rt_assert(pmnn_input_vector != NULL)) &&
+                  (rt_assert(pmnn_phase_kernel_modulation != NULL)) &&
+                  (rt_assert(pmnn_output_vector != NULL))) == false)
     {
         return false;
     }
-    if (rt_assert(ffnn_lwr_per_dims->isValid()) == false)
+    if (rt_assert(pmnn->isValid()) == false)
     {
         return false;
     }
-    if (rt_assert((rt_assert(ffnn_lwr_input_vector->rows() == ffnn_lwr_input_num_dimensions)) &&
-                  (rt_assert(ffnn_lwr_phase_kernel_modulation->rows() == ffnn_lwr_phase_kernel_model_size)) &&
-                  (rt_assert(ffnn_lwr_output_vector->rows() == ffnn_lwr_output_num_dimensions))) == false)
+    if (rt_assert((rt_assert(pmnn_input_vector->rows() == pmnn_input_num_dimensions)) &&
+                  (rt_assert(pmnn_phase_kernel_modulation->rows() == pmnn_phase_kernel_model_size)) &&
+                  (rt_assert(pmnn_output_vector->rows() == pmnn_output_num_dimensions))) == false)
     {
         return false;
     }
@@ -116,10 +116,10 @@ bool TransformCouplingLearnTactileFeedback::getValue(VectorN& ct_acc, VectorN& c
         return false;
     }
 
-    ffnn_lwr_per_dims->computePrediction(*ffnn_lwr_input_vector, *ffnn_lwr_phase_kernel_modulation, *ffnn_lwr_output_vector,
-                                         start_index, start_index+dmp_num_dimensions-1);
+    pmnn->computePrediction(*pmnn_input_vector, *pmnn_phase_kernel_modulation, *pmnn_output_vector,
+                            start_index, start_index+dmp_num_dimensions-1);
 
-    ct_acc.block(0,0,dmp_num_dimensions,1)  = ffnn_lwr_output_vector->block(start_index,0,dmp_num_dimensions,1);
+    ct_acc.block(0,0,dmp_num_dimensions,1)  = pmnn_output_vector->block(start_index,0,dmp_num_dimensions,1);
 
     ct_vel                                  = ZeroVectorN(dmp_num_dimensions);
 

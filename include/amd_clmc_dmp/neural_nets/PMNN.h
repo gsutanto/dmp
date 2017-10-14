@@ -1,15 +1,16 @@
 /*
- * FFNNFinalPhaseLWRLayerPerDims.h
+ * PMNN.h
  *
- *  Class for feedforward neural network with phase LWR modulation on the final hidden layer.
+ *  Class for Phase-Modulated Neural Network (PMNN:
+ *  feedforward neural network with phase modulation on the final hidden layer).
  *  Each dimension has its own network.
  *
  *  Created on: June 24, 2017
  *  Author: Giovanni Sutanto
  */
 
-#ifndef FFNN_FINALPHASELWRLAYER_PERDIMS_H
-#define FFNN_FINALPHASELWRLAYER_PERDIMS_H
+#ifndef PMNN_H
+#define PMNN_H
 
 #include "amd_clmc_dmp/utility/DefinitionsDerived.h"
 #include "amd_clmc_dmp/utility/utility.h"
@@ -32,7 +33,7 @@ typedef boost::shared_ptr< MatrixNN_2xN >   MatrixNN_2xNPtr;
 
 #define ZeroVectorNN_N(N)   Eigen::Matrix<double, Eigen::Dynamic, 1, Eigen::AutoAlign, MAX_NN_NUM_NODES_PER_LAYER>::Zero(N)
 
-    class FFNNFinalPhaseLWRLayerPerDims
+    class PMNN
     {
 
     protected:
@@ -50,16 +51,14 @@ typedef boost::shared_ptr< MatrixNN_2xN >   MatrixNN_2xNPtr;
 
     public:
 
-        FFNNFinalPhaseLWRLayerPerDims();
+        PMNN();
 
         /**
          * @param num_dimensions_init Initialization of the number of dimensions that will be used
          * @param topology_init Initialization of the neural network topology that will be used
          * @param real_time_assertor Real-Time Assertor for troubleshooting and debugging
          */
-        FFNNFinalPhaseLWRLayerPerDims(uint num_dimensions_init,
-                                      std::vector< uint > topology_init,
-                                      RealTimeAssertor* real_time_assertor);
+        PMNN(uint num_dimensions_init, std::vector< uint > topology_init, RealTimeAssertor* real_time_assertor);
 
         /**
          * Checks whether this special neural network is valid or not.
@@ -93,7 +92,7 @@ typedef boost::shared_ptr< MatrixNN_2xN >   MatrixNN_2xNPtr;
                                VectorNN_N& output,
                                int start_index=0, int end_index=-1);
 
-        ~FFNNFinalPhaseLWRLayerPerDims();
+        ~PMNN();
 
     };
 }

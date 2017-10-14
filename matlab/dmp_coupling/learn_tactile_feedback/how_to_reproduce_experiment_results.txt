@@ -52,7 +52,7 @@ Execution Order for Reproducing Experimental Results:
                    => augment_outlier_metric_and_visualize_2D_data_projection.m 
                    => tf_tactile_data_preparation_robot_unroll.m
  [9] Perform Feedback Model Training in TensorFlow in Python:
-     >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_tactile_feedback/learn_tactile_feedback_w_ffNNphaseLWR.py
+     >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_tactile_feedback/learn_tactile_feedback_w_PMNN.py
      (ensuring (is_performing_generalization_test == 0) on line 49 is selected...)
 [10] Using helper script amd_clmc_dmp/python/dmp_coupling/learn_tactile_feedback/models/compare_nmse_generalization_among_reinits.m ,
      for EACH x in [1,2,3], inspect and compare among the prim_x_nmse_reinit_y_step_0100000.mat files for y in [1,2,3], 
@@ -64,7 +64,7 @@ Execution Order for Reproducing Experimental Results:
      "2 0 1" (without the double quotes when writing in the file of course...).
 [11] Execute the script amd_clmc_dmp/data/dmp_coupling/learn_tactile_feedback/scraping/update_data_after_TF_training.m .
 [12] Test the trained Feedback Model performing prediction on unseen demonstration/trial in TensorFlow in Python:
-     >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_tactile_feedback/test_learned_tactile_feedback_w_ffNNphaseLWR.py
+     >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_tactile_feedback/test_learned_tactile_feedback_w_PMNN.py
 [13] Execute TensorFlow Python versus MATLAB prediction based on trained parameters, by running the following scripts in amd_clmc_dmp/matlab/dmp_coupling/learn_tactile_feedback/:
      >> on MATLAB: test_TensorFlow_trained_NN_model.m
 [14] For safety during real robot unrolling with trained Feedback Model, we compute the safety bounds,
@@ -92,7 +92,7 @@ Execution Order for Reproducing Experimental Results:
      prepare the Training and Generalization Testing Datasets, by running the following scripts in amd_clmc_dmp/matlab/dmp_coupling/learn_tactile_feedback/:
      >> on MATLAB: tf_tactile_data_preparation_generalization_evaluation.m
 [10] Perform Feedback Model Training in TensorFlow in Python:
-     >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_tactile_feedback/learn_tactile_feedback_w_ffNNphaseLWR.py
+     >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_tactile_feedback/learn_tactile_feedback_w_PMNN.py
      (ensuring (is_performing_generalization_test == 1) on line 49 is selected, and
       ensuring appropriate input_selector_list on line 61 is selected...)
 [11] Compute average best-generalization NMSE, 

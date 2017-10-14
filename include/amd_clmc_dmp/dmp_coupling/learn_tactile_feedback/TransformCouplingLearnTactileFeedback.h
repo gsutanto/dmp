@@ -11,7 +11,7 @@
 #define TRANSFORM_COUPLING_LEARN_TACTILE_FEEDBACK_H
 
 #include "amd_clmc_dmp/dmp_coupling/base/TransformCoupling.h"
-#include "amd_clmc_dmp/neural_nets/FFNNFinalPhaseLWRLayerPerDims.h"
+#include "amd_clmc_dmp/neural_nets/PMNN.h"
 
 namespace dmp
 {
@@ -21,21 +21,21 @@ class TransformCouplingLearnTactileFeedback : public TransformCoupling
 
 protected:
 
-    uint                            start_index;                        // >=0, i.e. the queried coupling term will be
-                                                                        // the values from ffnn_lwr_output_vector[start_index]
-                                                                        // to ffnn_lwr_output_vector[start_index+dmp_num_dimensions-1], inclusive
+    uint                            start_index;                    // >=0, i.e. the queried coupling term will be
+                                                                    // the values from pmnn_output_vector[start_index]
+                                                                    // to pmnn_output_vector[start_index+dmp_num_dimensions-1], inclusive
 
-    uint                            ffnn_lwr_input_num_dimensions;      // size of input vector
-    uint                            ffnn_lwr_phase_kernel_model_size;   // model size of the phase kernel modulator
-    uint                            ffnn_lwr_output_num_dimensions;     // total size of the usable output vector this MUST be bigger than (start_index + dmp_num_dimensions - 1)
+    uint                            pmnn_input_num_dimensions;      // size of input vector
+    uint                            pmnn_phase_kernel_model_size;   // model size of the phase kernel modulator
+    uint                            pmnn_output_num_dimensions;     // total size of the usable output vector this MUST be bigger than (start_index + dmp_num_dimensions - 1)
 
 public:
 
-    FFNNFinalPhaseLWRLayerPerDims*  ffnn_lwr_per_dims;                  // (pointer to) the prediction model; this pointer might be shared by other TransformCouplingLearnTactileFeedback object
+    PMNN*                           pmnn;                           // (pointer to) the prediction model; this pointer might be shared by other TransformCouplingLearnTactileFeedback object
 
-    VectorNN_N*                     ffnn_lwr_input_vector;              // (pointer to) the input vector; this pointer might be shared by other TransformCouplingLearnTactileFeedback object
-    VectorNN_N*                     ffnn_lwr_phase_kernel_modulation;   // (pointer to) the phase kernel modulator, modulating the final hidden layer of the ffnn_lwr_per_dims model; this pointer might be shared by other TransformCouplingLearnTactileFeedback object
-    VectorNN_N*                     ffnn_lwr_output_vector;             // (pointer to) the output vector
+    VectorNN_N*                     pmnn_input_vector;              // (pointer to) the input vector; this pointer might be shared by other TransformCouplingLearnTactileFeedback object
+    VectorNN_N*                     pmnn_phase_kernel_modulation;   // (pointer to) the phase kernel modulator, modulating the final hidden layer of the pmnn model; this pointer might be shared by other TransformCouplingLearnTactileFeedback object
+    VectorNN_N*                     pmnn_output_vector;             // (pointer to) the output vector
 
     TransformCouplingLearnTactileFeedback();
 
@@ -47,12 +47,12 @@ public:
      */
     TransformCouplingLearnTactileFeedback(uint dmp_num_dimensions_init,
                                           uint start_index_init,
-                                          uint ffnn_lwr_input_num_dimensions_init,
-                                          uint ffnn_lwr_phase_kernel_model_size_init,
-                                          uint ffnn_lwr_output_num_dimensions_init,
-                                          VectorNN_N* ffnn_lwr_input_vector_ptr,
-                                          VectorNN_N* ffnn_lwr_phase_kernel_modulation_ptr,
-                                          VectorNN_N* ffnn_lwr_output_vector_ptr,
+                                          uint pmnn_input_num_dimensions_init,
+                                          uint pmnn_phase_kernel_model_size_init,
+                                          uint pmnn_output_num_dimensions_init,
+                                          VectorNN_N* pmnn_input_vector_ptr,
+                                          VectorNN_N* pmnn_phase_kernel_modulation_ptr,
+                                          VectorNN_N* pmnn_output_vector_ptr,
                                           RealTimeAssertor* real_time_assertor);
 
     bool isValid();

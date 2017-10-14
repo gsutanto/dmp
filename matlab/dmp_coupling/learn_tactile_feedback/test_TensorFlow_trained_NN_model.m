@@ -9,14 +9,14 @@ matlab_root_dir_path        = [amd_clmc_dmp_root_dir_path, 'matlab/'];
 python_root_dir_path        = [amd_clmc_dmp_root_dir_path, 'python/'];
 
 data_learn_tactile_fb_scraping_dir_path             = [data_root_dir_path, 'dmp_coupling/learn_tactile_feedback/scraping/'];
-data_LTacFB_scraping_PRBFN_dir_path                 = [data_learn_tactile_fb_scraping_dir_path, 'neural_nets/FFNNFinalPhaseLWRLayerPerDims/'];
+data_LTacFB_scraping_PRBFN_dir_path                 = [data_learn_tactile_fb_scraping_dir_path, 'neural_nets/pmnn/'];
 data_LTacFB_scraping_PRBFN_unroll_test_dir_path     = [data_LTacFB_scraping_PRBFN_dir_path, 'unroll_test_dataset/'];
 data_LTacFB_scraping_PRBFN_python_models_dir_path   = [data_LTacFB_scraping_PRBFN_dir_path, 'python_models/'];
 
 python_learn_tactile_fb_dir_path     	= [python_root_dir_path, 'dmp_coupling/learn_tactile_feedback/'];
 python_learn_tactile_fb_models_dir_path = [python_learn_tactile_fb_dir_path, 'models/'];
 
-addpath([matlab_root_dir_path, 'neural_nets/feedforward/with_final_phaseLWR_layer/per_dimensions/FFNNFinalPhaseLWRLayerPerDims/']);
+addpath([matlab_root_dir_path, 'neural_nets/feedforward/pmnn/']);
 
 reinit_selection_idx= dlmread([python_learn_tactile_fb_models_dir_path, 'reinit_selection_idx.txt']);
 TF_max_train_iters  = dlmread([python_learn_tactile_fb_models_dir_path, 'TF_max_train_iters.txt']);
