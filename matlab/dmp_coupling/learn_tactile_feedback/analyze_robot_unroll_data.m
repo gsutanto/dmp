@@ -175,7 +175,7 @@ for n_unrolled_settings=1:N_unrolled_settings
         NN_info.topology    = [D_input, regular_NN_hidden_layer_topology, N_phaseLWR_kernels, D_output];
         NN_info.filepath    = [model_path, 'prim_', num2str(np), '_params_reinit_', num2str(reinit_selection_idx(1, np)), '_step_',num2str(TF_max_train_iters,'%07d'),'.mat'];
 
-        % Perform PRBFN Coupling Term Prediction
+        % Perform PMNN Coupling Term Prediction
         [ Ct_prediction, ~ ]= performNeuralNetworkPrediction( NN_info, ...
                                                               dataset_Ct_tactile_asm.sub_X{np,setting_no}{generalization_test_demo_trial_no,1}, ...
                                                               dataset_Ct_tactile_asm.sub_normalized_phase_PSI_mult_phase_V{np,setting_no}{generalization_test_demo_trial_no,1} );

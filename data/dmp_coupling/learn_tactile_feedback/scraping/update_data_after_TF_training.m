@@ -11,10 +11,10 @@ matlab_root_dir_path        = [amd_clmc_dmp_root_dir_path, 'matlab/'];
 python_root_dir_path        = [amd_clmc_dmp_root_dir_path, 'python/'];
 
 data_learn_tactile_fb_task_type_dir_path             = [data_root_dir_path, 'dmp_coupling/learn_tactile_feedback/',task_type,'/'];
-data_LTacFB_task_type_PRBFN_dir_path                 = [data_learn_tactile_fb_task_type_dir_path, 'neural_nets/pmnn/'];
-data_LTacFB_task_type_PRBFN_unroll_test_dir_path     = [data_LTacFB_task_type_PRBFN_dir_path, 'unroll_test_dataset/'];
-data_LTacFB_task_type_PRBFN_python_models_dir_path   = [data_LTacFB_task_type_PRBFN_dir_path, 'python_models/'];
-data_LTacFB_task_type_PRBFN_cpp_models_dir_path      = [data_LTacFB_task_type_PRBFN_dir_path, 'cpp_models/'];
+data_LTacFB_task_type_PMNN_dir_path                  = [data_learn_tactile_fb_task_type_dir_path, 'neural_nets/pmnn/'];
+data_LTacFB_task_type_PMNN_unroll_test_dir_path      = [data_LTacFB_task_type_PMNN_dir_path, 'unroll_test_dataset/'];
+data_LTacFB_task_type_PMNN_python_models_dir_path    = [data_LTacFB_task_type_PMNN_dir_path, 'python_models/'];
+data_LTacFB_task_type_PMNN_cpp_models_dir_path       = [data_LTacFB_task_type_PMNN_dir_path, 'cpp_models/'];
 
 matlab_learn_tactile_fb_dir_path	= [matlab_root_dir_path, 'dmp_coupling/learn_tactile_feedback/'];
 
@@ -25,9 +25,9 @@ python_learn_tactile_fb_models_dir_path     = [python_learn_tactile_fb_dir_path,
 addpath([matlab_root_dir_path, 'utilities/']);
 addpath([matlab_root_dir_path, 'neural_nets/feedforward/pmnn/']);
 
-recreateDir(data_LTacFB_task_type_PRBFN_unroll_test_dir_path);
-recreateDir(data_LTacFB_task_type_PRBFN_python_models_dir_path);
-recreateDir(data_LTacFB_task_type_PRBFN_cpp_models_dir_path);
+recreateDir(data_LTacFB_task_type_PMNN_unroll_test_dir_path);
+recreateDir(data_LTacFB_task_type_PMNN_python_models_dir_path);
+recreateDir(data_LTacFB_task_type_PMNN_cpp_models_dir_path);
 
 reinit_selection_idx    = dlmread([python_learn_tactile_fb_models_dir_path, 'reinit_selection_idx.txt']);
 TF_max_train_iters      = dlmread([python_learn_tactile_fb_models_dir_path, 'TF_max_train_iters.txt']);
@@ -129,11 +129,11 @@ load([python_learn_tactile_fb_task_type_dir_path, 'test_unroll_prim_1_X_raw_',ta
 load([python_learn_tactile_fb_task_type_dir_path, 'test_unroll_prim_1_normalized_phase_PSI_mult_phase_V_',task_type,'.mat']);
 load([python_learn_tactile_fb_task_type_dir_path, 'test_unroll_prim_1_Ct_target_',task_type,'.mat']);
 
-dlmwrite([data_LTacFB_task_type_PRBFN_unroll_test_dir_path, 'test_unroll_prim_1_X_raw_',task_type,'.txt'], X, 'delimiter', ' ', 'precision', precision_string);
-dlmwrite([data_LTacFB_task_type_PRBFN_unroll_test_dir_path, 'test_unroll_prim_1_normalized_phase_PSI_mult_phase_V_',task_type,'.txt'], normalized_phase_PSI_mult_phase_V, 'delimiter', ' ', 'precision', precision_string);
-dlmwrite([data_LTacFB_task_type_PRBFN_unroll_test_dir_path, 'test_unroll_prim_1_Ct_target_',task_type,'.txt'], Ct_target, 'delimiter', ' ', 'precision', precision_string);
+dlmwrite([data_LTacFB_task_type_PMNN_unroll_test_dir_path, 'test_unroll_prim_1_X_raw_',task_type,'.txt'], X, 'delimiter', ' ', 'precision', precision_string);
+dlmwrite([data_LTacFB_task_type_PMNN_unroll_test_dir_path, 'test_unroll_prim_1_normalized_phase_PSI_mult_phase_V_',task_type,'.txt'], normalized_phase_PSI_mult_phase_V, 'delimiter', ' ', 'precision', precision_string);
+dlmwrite([data_LTacFB_task_type_PMNN_unroll_test_dir_path, 'test_unroll_prim_1_Ct_target_',task_type,'.txt'], Ct_target, 'delimiter', ' ', 'precision', precision_string);
 
-%% Copy and Convert FFNNFinalPhaseLWRPerDims (or PRBFN) Learned Parameters from *.mat (Python TensorFlow Result) to *.txt (for Loading by C++ Programs) Files
+%% Copy and Convert Phase-Modulated Neural Network (PMNN) Learned Parameters from *.mat (Python TensorFlow Result) to *.txt (for Loading by C++ Programs) Files
 
 NN_name             = 'my_ffNNphaseLWR';
 
@@ -142,22 +142,22 @@ for np=1:N_prims
     nmse_filename   = ['prim_',num2str(np),'_nmse_reinit_',num2str(reinit_selection_idx(1,np)),'_step_',num2str(TF_max_train_iters,'%07d'),'.mat'];
     var_gt_filename = ['prim_',num2str(np),'_var_ground_truth.mat'];
 
-    % Copy FFNNFinalPhaseLWRPerDims (or PRBFN) Learned Parameters:
+    % Copy Phase-Modulated Neural Network (PMNN) Learned Parameters:
     copyfile([python_learn_tactile_fb_models_dir_path, param_filename], ...
-             data_LTacFB_task_type_PRBFN_python_models_dir_path);
+             data_LTacFB_task_type_PMNN_python_models_dir_path);
 
-    % Copy FFNNFinalPhaseLWRPerDims (or PRBFN) Learning NMSEs:
+    % Copy Phase-Modulated Neural Network (PMNN) Learning NMSEs:
     copyfile([python_learn_tactile_fb_models_dir_path, nmse_filename], ...
-             data_LTacFB_task_type_PRBFN_python_models_dir_path);
+             data_LTacFB_task_type_PMNN_python_models_dir_path);
 
-    % Copy FFNNFinalPhaseLWRPerDims (or PRBFN) Ground-Truth Variance:
+    % Copy Phase-Modulated Neural Network (PMNN) Ground-Truth Variance:
     copyfile([python_learn_tactile_fb_models_dir_path, var_gt_filename], ...
-             data_LTacFB_task_type_PRBFN_python_models_dir_path);
+             data_LTacFB_task_type_PMNN_python_models_dir_path);
     
-    % Convert FFNNFinalPhaseLWRPerDims (or PRBFN) Learned Parameters:
-    mat_filepath= [data_LTacFB_task_type_PRBFN_python_models_dir_path, param_filename];
-    out_dirpath = [data_LTacFB_task_type_PRBFN_cpp_models_dir_path, 'prim', num2str(np)];
-    convertFFNNFinalPhaseLWRPerDimsParamsFromMatFile2TxtFiles( NN_name, 6, mat_filepath, out_dirpath );
+    % Convert Phase-Modulated Neural Network (PMNN) Learned Parameters:
+    mat_filepath= [data_LTacFB_task_type_PMNN_python_models_dir_path, param_filename];
+    out_dirpath = [data_LTacFB_task_type_PMNN_cpp_models_dir_path, 'prim', num2str(np)];
+    convertPMNNParamsFromMatFile2TxtFiles( NN_name, 6, mat_filepath, out_dirpath );
 end
 
 %% Test Dataset (with Particular Selection of Setting and Trial Number) Logging into *.txt Files (for Comparison between MATLAB and C++ Execution)

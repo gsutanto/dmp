@@ -48,7 +48,7 @@ is_performing_generalization_test = 0
 
 generalization_test_comparison_dimension = 4
 
-#input_selector = 1 # X_raw input, Phase Radial Basis Function Network (PRBFN) with  2 regular hidden layers of 100 (relu), and 75 (tanh) nodes, and 25 nodes in the phase-modulated final hidden layer (regular execution)
+#input_selector = 1 # X_raw input, Phase-Modulated Neural Network (PMNN) with  2 regular hidden layers of 100 (relu), and 75 (tanh) nodes, and 25 nodes in the phase-modulated final hidden layer (regular execution)
 
 if (is_performing_generalization_test == 1):
     input_selector_list = [1]

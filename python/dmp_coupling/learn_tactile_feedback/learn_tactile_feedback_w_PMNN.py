@@ -50,12 +50,12 @@ is_performing_generalization_test = 1
 
 generalization_test_comparison_dimension = 4
 
-#input_selector = 1 # X_raw input, Phase Radial Basis Function Network (PRBFN) with  1 regular hidden layer only of 100 nodes and 25 nodes in the phase-modulated final hidden layer (regular execution)
-#input_selector = 2 # X_dim_reduced_pca input,                          PRBFN  with NO regular hidden layer                   and 25 nodes in the phase-modulated final hidden layer (comparison: with [Chebotar & Kroemer]'s model)
-#input_selector = 3 # X_raw input,                                      PRBFN  with  1 regular hidden layer only of 100 nodes and  8 nodes in the phase-modulated final hidden layer (comparison: between different number of nodes in the regular hidden layer)
-#input_selector = 4 # X_dim_reduced_autoencoder input,                  PRBFN  with NO regular hidden layer                   and 25 nodes in the phase-modulated final hidden layer (comparison: with [Chebotar & Kroemer]'s model)
-#input_selector = 5 # X_raw input, regular Feed-Forward Neural Network (FFNN)  with 100 and 25 nodes in the (regular) hidden layers,           NO phase modulation                   (comparison between different neural network structures)
-#input_selector = 6 # X_raw input,                                      PRBFN  with NO regular hidden layer                   and 25 nodes in the phase-modulated final hidden layer (comparison between different neural network structures)
+#input_selector = 1 # X_raw input, Phase-Modulated Neural Network      (PMNN) with  1 regular hidden layer only of 100 nodes and 25 nodes in the phase-modulated final hidden layer (regular execution)
+#input_selector = 2 # X_dim_reduced_pca input,                          PMNN  with NO regular hidden layer                   and 25 nodes in the phase-modulated final hidden layer (comparison: with [Chebotar & Kroemer]'s model)
+#input_selector = 3 # X_raw input,                                      PMNN  with  1 regular hidden layer only of 100 nodes and  8 nodes in the phase-modulated final hidden layer (comparison: between different number of nodes in the regular hidden layer)
+#input_selector = 4 # X_dim_reduced_autoencoder input,                  PMNN  with NO regular hidden layer                   and 25 nodes in the phase-modulated final hidden layer (comparison: with [Chebotar & Kroemer]'s model)
+#input_selector = 5 # X_raw input, regular Feed-Forward Neural Network (FFNN) with 100 and 25 nodes in the (regular) hidden layers,           NO phase modulation                   (comparison between different neural network structures)
+#input_selector = 6 # X_raw input,                                      PMNN  with NO regular hidden layer                   and 25 nodes in the phase-modulated final hidden layer (comparison between different neural network structures)
 
 if (is_performing_generalization_test == 1):
 #    input_selector_list = [1,2,3,4,5,6]

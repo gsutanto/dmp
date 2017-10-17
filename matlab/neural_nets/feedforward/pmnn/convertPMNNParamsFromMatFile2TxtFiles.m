@@ -1,6 +1,7 @@
-function [  ] = convertFFNNFinalPhaseLWRPerDimsParamsFromMatFile2TxtFiles( NN_name, D_output, mat_filepath, out_dirpath )
-    % Converts FFNNFinalPhaseLWRPerDims parameters  
-    % logged in *.mat file to txt files
+function [  ] = convertPMNNParamsFromMatFile2TxtFiles( NN_name, D_output, mat_filepath, out_dirpath )
+    % Converts Phase-Modulated Neural Network (PMNN) parameters  
+    % logged in *.mat file to *.txt files 
+    % (for future loadings by C++ programs).
     
     close all;
     clc;

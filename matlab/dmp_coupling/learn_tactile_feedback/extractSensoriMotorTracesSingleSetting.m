@@ -56,13 +56,13 @@ function [ data_demo ] = extractSensoriMotorTracesSingleSetting( in_data_dir_pat
                     data_demo{prim_count,1}{traj_count,22}= sm_traj(:,147:153); % Joint Positions/Coordinates
                 end
                 if (size(sm_traj,2) > 153)
-                    data_demo{prim_count,1}{traj_count,23}= sm_traj(:,154:159); % Coupling Terms (6-D: 3-D position x-y-z and 3-D orientation alpha-beta-gamma, output of PRBFN)
+                    data_demo{prim_count,1}{traj_count,23}= sm_traj(:,154:159); % Coupling Terms (6-D: 3-D position x-y-z and 3-D orientation alpha-beta-gamma, output of PMNN)
                 end
                 if (size(sm_traj,2) > 159)
-                    data_demo{prim_count,1}{traj_count,24}= sm_traj(:,160:165); % Supposed (Computed but might be NOT Applied) Coupling Terms (6-D: 3-D position x-y-z and 3-D orientation alpha-beta-gamma, output of PRBFN)
+                    data_demo{prim_count,1}{traj_count,24}= sm_traj(:,160:165); % Supposed (Computed but might be NOT Applied) Coupling Terms (6-D: 3-D position x-y-z and 3-D orientation alpha-beta-gamma, output of PMNN)
                 end
                 if (size(sm_traj,2) > 165)
-                    data_demo{prim_count,1}{traj_count,25}= sm_traj(:,166:210); % X_vector (Delta X, the feature vector input for PRBFN)
+                    data_demo{prim_count,1}{traj_count,25}= sm_traj(:,166:210); % X_vector (Delta X, the feature vector input for PMNN)
                 end
 
                 traj_count  = traj_count + 1;
