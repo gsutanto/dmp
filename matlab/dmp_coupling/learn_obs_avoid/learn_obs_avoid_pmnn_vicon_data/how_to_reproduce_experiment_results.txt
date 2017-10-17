@@ -12,6 +12,6 @@ Execution Order for Reproducing Experimental Results:
      Suppose for x==1, y=2;
      then write/update the file amd_clmc_dmp/python/dmp_coupling/learn_obs_avoid/tf/models/reinit_selection_idx.txt with content:
      "2" (without the double quotes when writing in the file of course...).
- [4] Execute the script amd_clmc_dmp/data/dmp_coupling/learn_obs_avoid/static_obs/update_data_after_TF_training.m .
+ [4] Execute the script amd_clmc_dmp/data/dmp_coupling/learn_obs_avoid/static_obs/update_obs_avoid_data_after_TF_training.m .
  [5] Test the trained Feedback Model performing prediction on unseen demonstration/trial in TensorFlow in Python:
-     >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_obs_avoid/tf/test_learned_tactile_feedback_w_PMNN.py
+     >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_obs_avoid/tf/test_learned_obs_avoid_feedback_w_PMNN.py

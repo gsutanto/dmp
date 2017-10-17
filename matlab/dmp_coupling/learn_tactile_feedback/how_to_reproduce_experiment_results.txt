@@ -62,7 +62,7 @@ Execution Order for Reproducing Experimental Results:
              for x==3, y=1;
      then write/update the file amd_clmc_dmp/python/dmp_coupling/learn_tactile_feedback/models/reinit_selection_idx.txt with content:
      "2 0 1" (without the double quotes when writing in the file of course...).
-[11] Execute the script amd_clmc_dmp/data/dmp_coupling/learn_tactile_feedback/scraping/update_data_after_TF_training.m .
+[11] Execute the script amd_clmc_dmp/data/dmp_coupling/learn_tactile_feedback/scraping/update_scraping_data_after_TF_training.m .
 [12] Test the trained Feedback Model performing prediction on unseen demonstration/trial in TensorFlow in Python:
      >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_tactile_feedback/test_learned_tactile_feedback_w_PMNN.py
 [13] Execute TensorFlow Python versus MATLAB prediction based on trained parameters, by running the following scripts in amd_clmc_dmp/matlab/dmp_coupling/learn_tactile_feedback/:

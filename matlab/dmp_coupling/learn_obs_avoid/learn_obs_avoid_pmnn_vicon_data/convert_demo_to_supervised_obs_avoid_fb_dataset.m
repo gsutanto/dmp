@@ -50,6 +50,9 @@ disp('Processing Local Coordinate System for Demonstrated Baseline Trajectories 
 [ cart_coord_dmp_baseline_params, ...
   unrolling_param.cart_coord_dmp_baseline_unroll_global_traj ] = learnCartPrimitiveMultiOnLocalCoord(data_global_coord.baseline, data_global_coord.dt, n_rfs, c_order);
 
+dmp_baseline_params.cart_coord{1,1} = cart_coord_dmp_baseline_params;
+save(['dmp_baseline_params_obs_avoid.mat'],'dmp_baseline_params');
+
 % end of Baseline Primitive Learning
 
 %% Obstacle Avoidance Features Grid Setting
