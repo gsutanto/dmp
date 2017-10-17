@@ -20,13 +20,13 @@ from utilities import *
 from PMNN import *
 
 # Create directories if not currently exist:
-model_output_dir_path = './models/'
-if not os.path.isdir(model_output_dir_path):
-    os.makedirs(model_output_dir_path)
+model_parent_dir_path = './models/'
+if not os.path.isdir(model_parent_dir_path):
+    os.makedirs(model_parent_dir_path)
 
 N_NN_reinit_trials = 3
 batch_size = 64
-TF_max_train_iters = np.genfromtxt(model_output_dir_path+'TF_max_train_iters.txt', delimiter=' ', dtype='int') + 1
+TF_max_train_iters = np.loadtxt(model_parent_dir_path+'TF_max_train_iters.txt', dtype=np.int, ndmin=0) + 1
 
 # Dropouts:
 tf_train_dropout_keep_prob = 0.5
@@ -133,8 +133,8 @@ for input_selector in input_selector_list:
             
             # Define Neural Network Topology
             if (input_selector == 1):
-                regular_NN_hidden_layer_topology = np.genfromtxt(parent_path+'regular_NN_hidden_layer_topology.txt', delimiter=' ', dtype='int').tolist()
-                regular_NN_hidden_layer_activation_func_list = np.genfromtxt(parent_path+'regular_NN_hidden_layer_activation_func_list.txt', delimiter=' ', dtype='S25').tolist()
+                regular_NN_hidden_layer_topology = list(np.loadtxt(model_parent_dir_path+'regular_NN_hidden_layer_topology.txt', dtype=np.int, ndmin=1))
+                regular_NN_hidden_layer_activation_func_list = list(np.loadtxt(model_parent_dir_path+'regular_NN_hidden_layer_activation_func_list.txt', dtype=np.str, ndmin=1))
             N_phaseLWR_kernels = normalized_phase_kernels.shape[1]
             NN_topology = [D_input] + regular_NN_hidden_layer_topology + [N_phaseLWR_kernels, D_output]
             

@@ -17,11 +17,11 @@ np.random.seed(38)
 from utilities import *
 from PMNN import *
 
-parent_path = 'models/'
-reinit_selection_idx = [np.genfromtxt(parent_path+'reinit_selection_idx.txt', delimiter=' ', dtype='int').tolist()]
-TF_max_train_iters = np.genfromtxt(parent_path+'TF_max_train_iters.txt', delimiter=' ', dtype='int')
-regular_NN_hidden_layer_topology = np.genfromtxt(parent_path+'regular_NN_hidden_layer_topology.txt', delimiter=' ', dtype='int').tolist()
-regular_NN_hidden_layer_activation_func_list = np.genfromtxt(parent_path+'regular_NN_hidden_layer_activation_func_list.txt', delimiter=' ', dtype='S25').tolist()
+model_parent_dir_path = 'models/'
+reinit_selection_idx = list(np.loadtxt(model_parent_dir_path+'reinit_selection_idx.txt', dtype=np.int, ndmin=1))
+TF_max_train_iters = np.loadtxt(model_parent_dir_path+'TF_max_train_iters.txt', dtype=np.int, ndmin=0)
+regular_NN_hidden_layer_topology = list(np.loadtxt(model_parent_dir_path+'regular_NN_hidden_layer_topology.txt', dtype=np.int, ndmin=1))
+regular_NN_hidden_layer_activation_func_list = list(np.loadtxt(model_parent_dir_path+'regular_NN_hidden_layer_activation_func_list.txt', dtype=np.str, ndmin=1))
 savepath = '../../../../data/dmp_coupling/learn_obs_avoid/static_obs/neural_nets/pmnn/python_models/'
 if not os.path.isdir(savepath):
     os.makedirs(savepath)
@@ -34,7 +34,7 @@ for prim_no in range(1, 2):
     Ct_target = sio.loadmat('input_data/test_unroll_prim_'+str(prim_no)+'_Ct_target_obs_avoid.mat', struct_as_record=True)['Ct_target']
     normalized_phase_kernels = sio.loadmat('input_data/test_unroll_prim_'+str(prim_no)+'_normalized_phase_PSI_mult_phase_V_obs_avoid.mat', struct_as_record=True)['normalized_phase_PSI_mult_phase_V']
     
-    filepath = parent_path + 'prim_' + str(prim_no) + '_params_reinit_' + str(reinit_selection_idx[prim_no-1]) + ('_step_%07d.mat' % TF_max_train_iters)
+    filepath = model_parent_dir_path + 'prim_' + str(prim_no) + '_params_reinit_' + str(reinit_selection_idx[prim_no-1]) + ('_step_%07d.mat' % TF_max_train_iters)
     
     print('X.shape                        =', X.shape)
     print('Ct_target.shape                =', Ct_target.shape)

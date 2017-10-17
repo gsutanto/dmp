@@ -17,9 +17,11 @@ np.random.seed(38)
 from utilities import *
 from PMNN import *
 
-parent_path = 'models/'
-reinit_selection_idx = np.genfromtxt(parent_path+'reinit_selection_idx.txt', delimiter=' ', dtype='int')
-TF_max_train_iters = np.genfromtxt(parent_path+'TF_max_train_iters.txt', delimiter=' ', dtype='int')
+model_parent_dir_path = 'models/'
+reinit_selection_idx = list(np.loadtxt(model_parent_dir_path+'reinit_selection_idx.txt', dtype=np.int, ndmin=1))
+TF_max_train_iters = np.loadtxt(model_parent_dir_path+'TF_max_train_iters.txt', dtype=np.int, ndmin=0)
+regular_NN_hidden_layer_topology = list(np.loadtxt(model_parent_dir_path+'regular_NN_hidden_layer_topology.txt', dtype=np.int, ndmin=1))
+regular_NN_hidden_layer_activation_func_list = list(np.loadtxt(model_parent_dir_path+'regular_NN_hidden_layer_activation_func_list.txt', dtype=np.str, ndmin=1))
 savepath = '../../../data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/python_models/'
 if not os.path.isdir(savepath):
     os.makedirs(savepath)
@@ -32,7 +34,7 @@ for prim_no in range(1, 4):
     Ct_target = sio.loadmat('scraping/test_unroll_prim_'+str(prim_no)+'_Ct_target_scraping.mat', struct_as_record=True)['Ct_target']
     normalized_phase_kernels = sio.loadmat('scraping/test_unroll_prim_'+str(prim_no)+'_normalized_phase_PSI_mult_phase_V_scraping.mat', struct_as_record=True)['normalized_phase_PSI_mult_phase_V']
     
-    filepath = parent_path + 'prim_' + str(prim_no) + '_params_reinit_' + str(reinit_selection_idx[prim_no-1]) + ('_step_%07d.mat' % TF_max_train_iters)
+    filepath = model_parent_dir_path + 'prim_' + str(prim_no) + '_params_reinit_' + str(reinit_selection_idx[prim_no-1]) + ('_step_%07d.mat' % TF_max_train_iters)
     
     print('X.shape                        =', X.shape)
     print('Ct_target.shape                =', Ct_target.shape)
@@ -46,15 +48,8 @@ for prim_no in range(1, 4):
     print('D_output =', D_output)
     
     # Define Neural Network Topology
-    #regular_NN_hidden_layer_topology = [30, 22, 16, 10]
-    #regular_NN_hidden_layer_topology = [21, 3]
-    #regular_NN_hidden_layer_topology = [25, 10]
-    #regular_NN_hidden_layer_topology = [30, 20, 10, 7]
-    regular_NN_hidden_layer_topology = [100]
     N_phaseLWR_kernels = normalized_phase_kernels.shape[1]
     NN_topology = [D_input] + regular_NN_hidden_layer_topology + [N_phaseLWR_kernels, D_output]
-            
-    regular_NN_hidden_layer_activation_func_list = ['tanh'] * len(regular_NN_hidden_layer_topology)
     
     NN_name = 'my_ffNNphaseLWR'
     
