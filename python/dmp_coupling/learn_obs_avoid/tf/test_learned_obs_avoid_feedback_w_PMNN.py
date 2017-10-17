@@ -20,6 +20,8 @@ from PMNN import *
 parent_path = 'models/'
 reinit_selection_idx = [np.genfromtxt(parent_path+'reinit_selection_idx.txt', delimiter=' ', dtype='int').tolist()]
 TF_max_train_iters = np.genfromtxt(parent_path+'TF_max_train_iters.txt', delimiter=' ', dtype='int')
+regular_NN_hidden_layer_topology = np.genfromtxt(parent_path+'regular_NN_hidden_layer_topology.txt', delimiter=' ', dtype='int').tolist()
+regular_NN_hidden_layer_activation_func_list = np.genfromtxt(parent_path+'regular_NN_hidden_layer_activation_func_list.txt', delimiter=' ', dtype='S25').tolist()
 savepath = '../../../../data/dmp_coupling/learn_obs_avoid/static_obs/neural_nets/pmnn/python_models/'
 if not os.path.isdir(savepath):
     os.makedirs(savepath)
@@ -46,11 +48,8 @@ for prim_no in range(1, 2):
     print('D_output =', D_output)
     
     # Define Neural Network Topology
-    regular_NN_hidden_layer_topology = [100, 75]
     N_phaseLWR_kernels = normalized_phase_kernels.shape[1]
     NN_topology = [D_input] + regular_NN_hidden_layer_topology + [N_phaseLWR_kernels, D_output]
-            
-    regular_NN_hidden_layer_activation_func_list = ['relu', 'tanh']
     
     NN_name = 'my_PMNN_obs_avoid_fb'
     

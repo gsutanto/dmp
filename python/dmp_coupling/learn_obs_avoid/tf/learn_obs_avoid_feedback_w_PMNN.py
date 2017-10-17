@@ -133,11 +133,10 @@ for input_selector in input_selector_list:
             
             # Define Neural Network Topology
             if (input_selector == 1):
-                regular_NN_hidden_layer_topology = [100, 75]
+                regular_NN_hidden_layer_topology = np.genfromtxt(parent_path+'regular_NN_hidden_layer_topology.txt', delimiter=' ', dtype='int').tolist()
+                regular_NN_hidden_layer_activation_func_list = np.genfromtxt(parent_path+'regular_NN_hidden_layer_activation_func_list.txt', delimiter=' ', dtype='S25').tolist()
             N_phaseLWR_kernels = normalized_phase_kernels.shape[1]
             NN_topology = [D_input] + regular_NN_hidden_layer_topology + [N_phaseLWR_kernels, D_output]
-            
-            regular_NN_hidden_layer_activation_func_list = ['relu', 'tanh']
             
             # Permutation with Chunks (for Stochastic Gradient Descent (SGD))
             data_idx_chunks = list(chunks(range(N_data), chunk_size))

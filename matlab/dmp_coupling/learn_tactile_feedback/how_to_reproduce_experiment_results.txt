@@ -55,7 +55,7 @@ Execution Order for Reproducing Experimental Results:
      >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_tactile_feedback/learn_tactile_feedback_w_PMNN.py
      (ensuring (is_performing_generalization_test == 0) on line 49 is selected...)
 [10] Using helper script amd_clmc_dmp/python/dmp_coupling/learn_tactile_feedback/models/compare_nmse_generalization_among_reinits.m ,
-     for EACH x in [1,2,3], inspect and compare among the prim_x_nmse_reinit_y_step_0100000.mat files for y in [1,2,3], 
+     for EACH x in [1,2,3], inspect and compare among the prim_<x>_nmse_reinit_<y>_step_<TF_max_train_iters>.mat files for y in [0,1,2], 
      and manually select y which has the best (lowest) nmse_generalization_test.
      Suppose for x==1, y=2;
              for x==2, y=0;

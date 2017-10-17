@@ -3,3 +3,15 @@ Execution Order for Reproducing Experimental Results:
  [1] Prepare the Training and Generalization Testing Dataset, by running the following scripts in amd_clmc_dmp/matlab/dmp_coupling/learn_obs_avoid/learn_obs_avoid_pmnn_vicon_data/:
      >> on MATLAB: convert_demo_to_supervised_obs_avoid_fb_dataset.m 
                    => tf_obs_avoid_data_preparation_robot_unroll.m
+ [2] Perform Feedback Model Training in TensorFlow in Python:
+     >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_obs_avoid/tf/learn_obs_avoid_feedback_w_PMNN.py
+     (ensuring (is_performing_generalization_test == 0) on line 47 is selected...)
+ [3] Using helper script amd_clmc_dmp/python/dmp_coupling/learn_obs_avoid/tf/models/compare_nmse_generalization_among_reinits.m ,
+     inspect and compare among the prim_1_nmse_reinit_<y>_step_<TF_max_train_iters>.mat files for y in [0,1,2], 
+     and manually select y which has the best (lowest) nmse_generalization_test.
+     Suppose for x==1, y=2;
+     then write/update the file amd_clmc_dmp/python/dmp_coupling/learn_obs_avoid/tf/models/reinit_selection_idx.txt with content:
+     "2" (without the double quotes when writing in the file of course...).
+ [4] Execute the script amd_clmc_dmp/data/dmp_coupling/learn_obs_avoid/static_obs/update_data_after_TF_training.m .
+ [5] Test the trained Feedback Model performing prediction on unseen demonstration/trial in TensorFlow in Python:
+     >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_obs_avoid/tf/test_learned_tactile_feedback_w_PMNN.py
