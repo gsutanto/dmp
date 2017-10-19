@@ -2,7 +2,7 @@
 
 matlab_funcs_src_folder=$'../../utilities/'
 
-matlab_funcs=$'prepareData\nstackDataset'
+matlab_funcs=$'prepareData\nstackDataset\ntestTensorFlowTrainedPMNNFeedbackModel'
 
 for matlab_func in $matlab_funcs
 do

@@ -139,7 +139,7 @@ function [] = testCoupledCartDMPUnroll(output_dir_path)
         NN_info.activation_func_list= {'identity', regular_NN_hidden_layer_activation_func_list{:}, 'identity', 'identity'};
         NN_info.filepath    = [model_path, 'prim_', num2str(np), '_params_reinit_', num2str(reinit_selection_idx(1, np)), '_step_',num2str(TF_max_train_iters,'%07d'),'.mat'];
 
-        [ Ctt_test_prediction_MATLAB_cell{np,1}, NN_LWR_layer_cell_cell{np,1} ] = performNeuralNetworkPrediction( NN_info, X_cell{np,1}, normalized_phase_PSI_mult_phase_V_cell{np,1} );
+        [ Ctt_test_prediction_MATLAB_cell{np,1}, NN_LWR_layer_cell_cell{np,1} ] = performPMNNPrediction( NN_info, X_cell{np,1}, normalized_phase_PSI_mult_phase_V_cell{np,1} );
     end
 
     % end of NN-LWR Coupling Term Prediction

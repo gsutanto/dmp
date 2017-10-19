@@ -2,58 +2,17 @@ clear all;
 close all;
 clc;
 
-task_type                   = 'obs_avoid';
+task_type                       = 'obs_avoid';
+learn_fb_task                   = 'learn_obs_avoid';
+amd_clmc_dmp_root_dir_path      = '../../../../';
+data_learn_fb_task_subdir_path  = [learn_fb_task, '/static_obs/'];
+python_learn_fb_task_TF_models_prefix_subdir_path   = 'tf/';
+start_prim_num                  = 1;
+end_prim_num                    = 1;
+PMNN_name                       = 'my_PMNN_obs_avoid_fb';
 
-amd_clmc_dmp_root_dir_path  = '../../../../';
-
-data_root_dir_path          = [amd_clmc_dmp_root_dir_path, 'data/'];
-matlab_root_dir_path        = [amd_clmc_dmp_root_dir_path, 'matlab/'];
-python_root_dir_path        = [amd_clmc_dmp_root_dir_path, 'python/'];
-
-data_learn_obs_avoid_fb_task_type_dir_path              = [data_root_dir_path, 'dmp_coupling/learn_obs_avoid/static_obs/'];
-data_LObsAvoidFB_task_type_PMNN_dir_path                = [data_learn_obs_avoid_fb_task_type_dir_path, 'neural_nets/pmnn/'];
-data_LObsAvoidFB_task_type_PMNN_unroll_test_dir_path    = [data_LObsAvoidFB_task_type_PMNN_dir_path, 'unroll_test_dataset/'];
-data_LObsAvoidFB_task_type_PMNN_python_models_dir_path  = [data_LObsAvoidFB_task_type_PMNN_dir_path, 'python_models/'];
-
-python_learn_obs_avoid_fb_dir_path          = [python_root_dir_path, 'dmp_coupling/learn_obs_avoid/'];
-python_learn_obs_avoid_fb_tf_dir_path       = [python_learn_obs_avoid_fb_dir_path, 'tf/'];
-python_learn_obs_avoid_fb_tf_models_dir_path= [python_learn_obs_avoid_fb_tf_dir_path, 'models/'];
-
-addpath([matlab_root_dir_path, 'utilities/']);
-addpath([matlab_root_dir_path, 'neural_nets/feedforward/pmnn/']);
-
-reinit_selection_idx= dlmread([python_learn_obs_avoid_fb_tf_models_dir_path, 'reinit_selection_idx.txt']);
-TF_max_train_iters  = dlmread([python_learn_obs_avoid_fb_tf_models_dir_path, 'TF_max_train_iters.txt']);
-N_prims             = size(reinit_selection_idx, 2);
-
-for np = 1:N_prims
-    X               = dlmread([data_LObsAvoidFB_task_type_PMNN_unroll_test_dir_path, 'test_unroll_prim_',num2str(np),'_X_raw_',task_type,'.txt']);
-    normalized_phase_PSI_mult_phase_V   = dlmread([data_LObsAvoidFB_task_type_PMNN_unroll_test_dir_path, 'test_unroll_prim_',num2str(np),'_normalized_phase_PSI_mult_phase_V_',task_type,'.txt']);
-    Ct_target       = dlmread([data_LObsAvoidFB_task_type_PMNN_unroll_test_dir_path, 'test_unroll_prim_',num2str(np),'_Ct_target_',task_type,'.txt']);
-
-    T               = load([data_LObsAvoidFB_task_type_PMNN_python_models_dir_path, 'prim_', num2str(np), '_Ctt_test_prediction.mat']);
-    Ctt_test_prediction_TF  = T.('Ctt_test_prediction');
-
-    D_input             = size(X, 2);
-    regular_NN_hidden_layer_topology = dlmread([python_learn_obs_avoid_fb_tf_models_dir_path, 'regular_NN_hidden_layer_topology.txt']);
-    N_phaseLWR_kernels  = size(normalized_phase_PSI_mult_phase_V, 2);
-    D_output            = size(Ct_target, 2);
-    
-    regular_NN_hidden_layer_activation_func_list = readStringsToCell([python_learn_obs_avoid_fb_tf_models_dir_path, 'regular_NN_hidden_layer_activation_func_list.txt']);
-    
-    NN_info.name                = 'my_PMNN_obs_avoid_fb';
-    NN_info.topology            = [D_input, regular_NN_hidden_layer_topology, N_phaseLWR_kernels, D_output];
-    NN_info.activation_func_list= {'identity', regular_NN_hidden_layer_activation_func_list{:}, 'identity', 'identity'};
-    NN_info.filepath            = [data_LObsAvoidFB_task_type_PMNN_python_models_dir_path, 'prim_', num2str(np), '_params_reinit_',num2str(reinit_selection_idx(1,np)),'_step_',num2str(TF_max_train_iters,'%07d'),'.mat'];
-    
-    [ Ctt_test_prediction_MATLAB, layer_cell ] = performNeuralNetworkPrediction( NN_info, X, normalized_phase_PSI_mult_phase_V );
-
-    diff_Ctt_test_prediction            = Ctt_test_prediction_MATLAB - Ctt_test_prediction_TF;
-    L2_norm_diff_Ctt_test_prediction    = norm(diff_Ctt_test_prediction);
-    max_abs_diff_Ctt_test_prediction    = max(max(abs(diff_Ctt_test_prediction)));
-    rel_abs_diff_Ctt_test_prediction    = abs(diff_Ctt_test_prediction ./ Ctt_test_prediction_TF);
-    max_rel_abs_diff_Ctt_test_prediction= max(max(rel_abs_diff_Ctt_test_prediction));
-    disp(['L2_norm_diff_Ctt_test_prediction     = ', num2str(L2_norm_diff_Ctt_test_prediction)]);
-    disp(['max_abs_diff_Ctt_test_prediction     = ', num2str(max_abs_diff_Ctt_test_prediction)]);
-    disp(['max_rel_abs_diff_Ctt_test_prediction = ', num2str(max_rel_abs_diff_Ctt_test_prediction)]);
-end
+testTensorFlowTrainedPMNNFeedbackModel( task_type, learn_fb_task, ...
+                                        amd_clmc_dmp_root_dir_path, ...
+                                        data_learn_fb_task_subdir_path, ...
+                                        python_learn_fb_task_TF_models_prefix_subdir_path, ...
+                                        start_prim_num, end_prim_num, PMNN_name );

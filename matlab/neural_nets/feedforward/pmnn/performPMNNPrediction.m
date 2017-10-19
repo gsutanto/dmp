@@ -1,4 +1,4 @@
-function [ output, layer_cell ] = performNeuralNetworkPrediction( neural_net_info, dataset, normalized_phase_kernels )
+function [ output, layer_cell ] = performPMNNPrediction( neural_net_info, dataset, normalized_phase_kernels )
     % Author        : Giovanni Sutanto
     % Date          : April 2017
     % Description   :

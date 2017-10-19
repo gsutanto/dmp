@@ -60,7 +60,7 @@ for np=2
         Ct_target           = dataset_Ct_tactile_asm.sub_Ct_target{np,ns}{nd,1};
         
         % Perform PMNN Coupling Term Prediction
-        [ Ct_prediction, ~ ]= performNeuralNetworkPrediction( NN_info, dataset_Ct_tactile_asm.sub_X{np,ns}{nd,1}, dataset_Ct_tactile_asm.sub_normalized_phase_PSI_mult_phase_V{np,ns}{nd,1} );
+        [ Ct_prediction, ~ ]= performPMNNPrediction( NN_info, dataset_Ct_tactile_asm.sub_X{np,ns}{nd,1}, dataset_Ct_tactile_asm.sub_normalized_phase_PSI_mult_phase_V{np,ns}{nd,1} );
         
         %% Plotting
         
