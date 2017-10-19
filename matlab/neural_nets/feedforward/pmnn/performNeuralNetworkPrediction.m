@@ -4,10 +4,13 @@ function [ output, layer_cell ] = performNeuralNetworkPrediction( neural_net_inf
     % Description   :
     %   Perform prediction using the trained Neural Network model,
     %   in the same way as what Google's TensorFlow engine does.
-    NN_name     = neural_net_info.name;
-    NN_topology = neural_net_info.topology;
-    assert(size(NN_topology, 1) == 1, 'NN_topology must be a row vector!');
-    NN_model_params_filepath    = neural_net_info.filepath;
+    NN_name                 = neural_net_info.name;
+    NN_topology             = neural_net_info.topology;
+    NN_activation_func_list = neural_net_info.activation_func_list;
+    assert(size(NN_topology, 1) == 1,             'NN_topology must be a row vector!');
+    assert(size(NN_activation_func_list, 1) == 1, 'NN_activation_func_list must be a row vector!');
+    assert(size(NN_topology, 2) == size(NN_activation_func_list, 2), 'NN_topology must have the same size as NN_activation_func_list!');
+    NN_model_params_filepath= neural_net_info.filepath;
     load(NN_model_params_filepath);
     N_layers    = size(NN_topology, 2);
     D_output    = NN_topology(1, N_layers);
@@ -34,7 +37,15 @@ function [ output, layer_cell ] = performNeuralNetworkPrediction( neural_net_inf
                     layer_cell{dim_out, layer_idx}  = (layer_cell{dim_out, layer_idx-1} * weights);
                 end
                 if (layer_idx < N_layers - 1) % Regular Hidden Layer
-                    layer_cell{dim_out, layer_idx}  = tanh(layer_cell{dim_out, layer_idx});
+                    if (strcmp(NN_activation_func_list(1,layer_idx), 'identity') == 1)
+                        layer_cell{dim_out, layer_idx}  = layer_cell{dim_out, layer_idx};
+                    elseif (strcmp(NN_activation_func_list(1,layer_idx), 'tanh') == 1)
+                        layer_cell{dim_out, layer_idx}  = tanh(layer_cell{dim_out, layer_idx});
+                    elseif (strcmp(NN_activation_func_list(1,layer_idx), 'relu') == 1)
+                        layer_cell{dim_out, layer_idx}  = max(layer_cell{dim_out, layer_idx}, 0);
+                    else
+                        error(['ERROR: Unrecognized activation function: ', NN_activation_func_list(1,layer_idx)]);
+                    end
                 elseif (layer_idx == N_layers - 1) % Final Hidden Layer with Phase LWR Gating/Modulation
                     layer_cell{dim_out, layer_idx}  = normalized_phase_kernels .* layer_cell{dim_out, layer_idx};
                 else % Output Layer

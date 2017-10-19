@@ -24,8 +24,10 @@ addpath([rel_dir_path, '../../neural_nets/feedforward/pmnn/']);
 
 scraping_data_root_dir_path = [rel_dir_path, '../../../data/dmp_coupling/learn_tactile_feedback/scraping/'];
 
-reinit_selection_idx        = dlmread([rel_dir_path, '../../../python/dmp_coupling/learn_tactile_feedback/models/reinit_selection_idx.txt']);
-TF_max_train_iters          = dlmread([rel_dir_path, '../../../python/dmp_coupling/learn_tactile_feedback/models/TF_max_train_iters.txt']);
+python_learn_tactile_fb_models_dir_path = [rel_dir_path, '../../../python/dmp_coupling/learn_tactile_feedback/models/'];
+
+reinit_selection_idx        = dlmread([python_learn_tactile_fb_models_dir_path, 'reinit_selection_idx.txt']);
+TF_max_train_iters          = dlmread([python_learn_tactile_fb_models_dir_path, 'TF_max_train_iters.txt']);
 
 freq        = 300.0;    % ARM robot servo rate is 300 Hz
 dt          = 1.0/freq;
@@ -124,12 +126,15 @@ NN_LWR_layer_cell_cell          = cell(N_prims, 1);
 
 for np=1:N_prims
     D_input             = size(X_cell{np,1}, 2);
-    regular_NN_hidden_layer_topology = [100];
+    regular_NN_hidden_layer_topology = dlmread([python_learn_tactile_fb_models_dir_path, 'regular_NN_hidden_layer_topology.txt']);
     N_phaseLWR_kernels  = size(normalized_phase_PSI_mult_phase_V_cell{np,1}, 2);
     D_output            = 6;
-
+    
+    regular_NN_hidden_layer_activation_func_list = readStringsToCell([python_learn_tactile_fb_models_dir_path, 'regular_NN_hidden_layer_activation_func_list.txt']);
+    
     NN_info.name        = 'my_ffNNphaseLWR';
     NN_info.topology    = [D_input, regular_NN_hidden_layer_topology, N_phaseLWR_kernels, D_output];
+    NN_info.activation_func_list= {'identity', regular_NN_hidden_layer_activation_func_list{:}, 'identity', 'identity'};
     NN_info.filepath    = [model_path, 'prim_', num2str(np), '_params_reinit_', num2str(reinit_selection_idx(1, np)), '_step_',num2str(TF_max_train_iters,'%07d'),'.mat'];
 
     [ Ctt_test_prediction_MATLAB_cell{np,1}, NN_LWR_layer_cell_cell{np,1} ] = performNeuralNetworkPrediction( NN_info, X_cell{np,1}, normalized_phase_PSI_mult_phase_V_cell{np,1} );

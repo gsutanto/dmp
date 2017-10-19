@@ -27,23 +27,24 @@ if (is_standalone)
     if (~exist(in_data_dir_path, 'dir'))
         error([in_data_dir_path, ' does NOT exist!']);
     end
-
-	reinit_selection_idx= dlmread([in_data_dir_path, 'NN_phaseRBF_params/reinit_selection_idx.txt']);
-	TF_max_train_iters 	= dlmread([in_data_dir_path, 'NN_phaseRBF_params/TF_max_train_iters.txt']);
-
-	model_path  		= [in_data_dir_path, 'NN_phaseRBF_params/'];
+    
+    python_learn_tactile_fb_models_dir_path = [in_data_dir_path, 'NN_phaseRBF_params/'];
+        
+	model_path  		= python_learn_tactile_fb_models_dir_path;
 else
 	rel_dir_path   		= './';
 
 	in_data_dir_path    = ['../../../data/dmp_coupling/learn_tactile_feedback/'...
 		                   ,generic_task_type,'/robot_unroll_data/'];
 	mat_files_dir_path 	= rel_dir_path;
-
-	reinit_selection_idx= dlmread([rel_dir_path, '../../../python/dmp_coupling/learn_tactile_feedback/models/reinit_selection_idx.txt']);
-	TF_max_train_iters 	= dlmread([rel_dir_path, '../../../python/dmp_coupling/learn_tactile_feedback/models/TF_max_train_iters.txt']);
-
+    
+    python_learn_tactile_fb_models_dir_path = [rel_dir_path, '../../../python/dmp_coupling/learn_tactile_feedback/models/'];
+    
 	model_path  		= [rel_dir_path, '../../../data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/python_models/'];
 end
+
+reinit_selection_idx= dlmread([python_learn_tactile_fb_models_dir_path, 'reinit_selection_idx.txt']);
+TF_max_train_iters 	= dlmread([python_learn_tactile_fb_models_dir_path, 'TF_max_train_iters.txt']);
 
 addpath([rel_dir_path, '../../utilities/']);
 addpath([rel_dir_path, '../../cart_dmp/cart_coord_dmp/']);
@@ -167,12 +168,15 @@ for n_unrolled_settings=1:N_unrolled_settings
         generalization_test_demo_trial_no   = dataset_Ct_tactile_asm.trial_idx_ranked_by_outlier_metric_w_exclusion{np,setting_no}(generalization_test_demo_trial_rank_no,1);
         
         D_input             = size(dataset_Ct_tactile_asm.sub_X{np,1}{1,1}, 2);
-        regular_NN_hidden_layer_topology = [100];
+        regular_NN_hidden_layer_topology = dlmread([python_learn_tactile_fb_models_dir_path, 'regular_NN_hidden_layer_topology.txt']);
         N_phaseLWR_kernels  = size(dataset_Ct_tactile_asm.sub_normalized_phase_PSI_mult_phase_V{np,1}{1,1}, 2);
         D_output            = 6;
+        
+        regular_NN_hidden_layer_activation_func_list = readStringsToCell([python_learn_tactile_fb_models_dir_path, 'regular_NN_hidden_layer_activation_func_list.txt']);
 
         NN_info.name        = 'my_ffNNphaseLWR';
         NN_info.topology    = [D_input, regular_NN_hidden_layer_topology, N_phaseLWR_kernels, D_output];
+        NN_info.activation_func_list= {'identity', regular_NN_hidden_layer_activation_func_list{:}, 'identity', 'identity'};
         NN_info.filepath    = [model_path, 'prim_', num2str(np), '_params_reinit_', num2str(reinit_selection_idx(1, np)), '_step_',num2str(TF_max_train_iters,'%07d'),'.mat'];
 
         % Perform PMNN Coupling Term Prediction

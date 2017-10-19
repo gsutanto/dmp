@@ -2,6 +2,8 @@ clear all;
 close all;
 clc;
 
+task_type                   = 'scraping';
+
 amd_clmc_dmp_root_dir_path  = '../../../';
 
 data_root_dir_path          = [amd_clmc_dmp_root_dir_path, 'data/'];
@@ -16,6 +18,7 @@ data_LTacFB_scraping_PMNN_python_models_dir_path    = [data_LTacFB_scraping_PMNN
 python_learn_tactile_fb_dir_path     	= [python_root_dir_path, 'dmp_coupling/learn_tactile_feedback/'];
 python_learn_tactile_fb_models_dir_path = [python_learn_tactile_fb_dir_path, 'models/'];
 
+addpath([matlab_root_dir_path, 'utilities/']);
 addpath([matlab_root_dir_path, 'neural_nets/feedforward/pmnn/']);
 
 reinit_selection_idx= dlmread([python_learn_tactile_fb_models_dir_path, 'reinit_selection_idx.txt']);
@@ -24,29 +27,25 @@ N_prims             = size(reinit_selection_idx, 2);
 
 % for np = 1:N_prims
 for np = 1:1
-    % load([data_LTacFB_scraping_PMNN_unroll_test_dir_path, 'test_unroll_prim_',num2str(np),'_X_raw_scraping.mat']);
-    % load([data_LTacFB_scraping_PMNN_unroll_test_dir_path, 'test_unroll_prim_',num2str(np),'_normalized_phase_PSI_mult_phase_V_scraping.mat']);
-    % load([data_LTacFB_scraping_PMNN_unroll_test_dir_path, 'test_unroll_prim_',num2str(np),'_Ct_target_scraping.mat']);
-    X               = dlmread([data_LTacFB_scraping_PMNN_unroll_test_dir_path, 'test_unroll_prim_',num2str(np),'_X_raw_scraping.txt']);
-    normalized_phase_PSI_mult_phase_V   = dlmread([data_LTacFB_scraping_PMNN_unroll_test_dir_path, 'test_unroll_prim_',num2str(np),'_normalized_phase_PSI_mult_phase_V_scraping.txt']);
-    Ct_target       = dlmread([data_LTacFB_scraping_PMNN_unroll_test_dir_path, 'test_unroll_prim_',num2str(np),'_Ct_target_scraping.txt']);
+    X               = dlmread([data_LTacFB_scraping_PMNN_unroll_test_dir_path, 'test_unroll_prim_',num2str(np),'_X_raw_',task_type,'.txt']);
+    normalized_phase_PSI_mult_phase_V   = dlmread([data_LTacFB_scraping_PMNN_unroll_test_dir_path, 'test_unroll_prim_',num2str(np),'_normalized_phase_PSI_mult_phase_V_',task_type,'.txt']);
+    Ct_target       = dlmread([data_LTacFB_scraping_PMNN_unroll_test_dir_path, 'test_unroll_prim_',num2str(np),'_Ct_target_',task_type,'.txt']);
 
     T               = load([data_LTacFB_scraping_PMNN_python_models_dir_path, 'prim_', num2str(np), '_Ctt_test_prediction.mat']);
     Ctt_test_prediction_TF  = T.('Ctt_test_prediction');
 
     D_input             = size(X, 2);
-    % regular_NN_hidden_layer_topology = [30, 22, 16, 10];
-    % regular_NN_hidden_layer_topology = [26, 14, 3];
-    % regular_NN_hidden_layer_topology = [30, 20, 10, 7];
-    regular_NN_hidden_layer_topology = [100];
+    regular_NN_hidden_layer_topology = dlmread([python_learn_tactile_fb_models_dir_path, 'regular_NN_hidden_layer_topology.txt']);
     N_phaseLWR_kernels  = size(normalized_phase_PSI_mult_phase_V, 2);
     D_output            = size(Ct_target, 2);
-
-    NN_info.name        = 'my_ffNNphaseLWR';
-    NN_info.topology    = [D_input, regular_NN_hidden_layer_topology, N_phaseLWR_kernels, D_output];
-    % NN_info.filepath    = [data_LTacFB_scraping_PMNN_python_models_dir_path, 'params_reinit_0.mat'];
-    NN_info.filepath    = [data_LTacFB_scraping_PMNN_python_models_dir_path, 'prim_', num2str(np), '_params_reinit_',num2str(reinit_selection_idx(1,np)),'_step_',num2str(TF_max_train_iters,'%07d'),'.mat'];
-
+    
+    regular_NN_hidden_layer_activation_func_list = readStringsToCell([python_learn_tactile_fb_models_dir_path, 'regular_NN_hidden_layer_activation_func_list.txt']);
+    
+    NN_info.name                = 'my_ffNNphaseLWR';
+    NN_info.topology            = [D_input, regular_NN_hidden_layer_topology, N_phaseLWR_kernels, D_output];
+    NN_info.activation_func_list= {'identity', regular_NN_hidden_layer_activation_func_list{:}, 'identity', 'identity'};
+    NN_info.filepath            = [data_LTacFB_scraping_PMNN_python_models_dir_path, 'prim_', num2str(np), '_params_reinit_',num2str(reinit_selection_idx(1,np)),'_step_',num2str(TF_max_train_iters,'%07d'),'.mat'];
+    
     [ Ctt_test_prediction_MATLAB, layer_cell ] = performNeuralNetworkPrediction( NN_info, X, normalized_phase_PSI_mult_phase_V );
 
     diff_Ctt_test_prediction            = Ctt_test_prediction_MATLAB - Ctt_test_prediction_TF;

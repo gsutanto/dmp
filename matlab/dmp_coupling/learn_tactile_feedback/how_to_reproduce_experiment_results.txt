@@ -66,7 +66,7 @@ Execution Order for Reproducing Experimental Results:
 [12] Test the trained Feedback Model performing prediction on unseen demonstration/trial in TensorFlow in Python:
      >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_tactile_feedback/test_learned_tactile_feedback_w_PMNN.py
 [13] Execute TensorFlow Python versus MATLAB prediction based on trained parameters, by running the following scripts in amd_clmc_dmp/matlab/dmp_coupling/learn_tactile_feedback/:
-     >> on MATLAB: test_TensorFlow_trained_NN_model.m
+     >> on MATLAB: test_TensorFlow_trained_tactile_fb_NN_model.m
 [14] For safety during real robot unrolling with trained Feedback Model, we compute the safety bounds,
      by executing the script amd_clmc_dmp/matlab/dmp_coupling/learn_tactile_feedback/analyze_trajectory_statistics.m .
 **------------------- Unrolling both Learned Primitive ------------------*

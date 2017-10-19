@@ -15,3 +15,5 @@ Execution Order for Reproducing Experimental Results:
  [4] Execute the script amd_clmc_dmp/data/dmp_coupling/learn_obs_avoid/static_obs/update_obs_avoid_data_after_TF_training.m .
  [5] Test the trained Feedback Model performing prediction on unseen demonstration/trial in TensorFlow in Python:
      >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_obs_avoid/tf/test_learned_obs_avoid_feedback_w_PMNN.py
+ [6] Execute TensorFlow Python versus MATLAB prediction based on trained parameters, by running the following scripts in amd_clmc_dmp/matlab/dmp_coupling/learn_obs_avoid/learn_obs_avoid_pmnn_vicon_data/:
+     >> on MATLAB: test_TensorFlow_trained_obs_avoid_fb_NN_model.m

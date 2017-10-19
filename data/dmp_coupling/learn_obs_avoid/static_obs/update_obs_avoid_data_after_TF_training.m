@@ -80,30 +80,30 @@ dlmwrite([data_LObsAvoidFB_task_type_PMNN_unroll_test_dir_path, 'test_unroll_pri
 
 %% Copy and Convert Phase-Modulated Neural Network (PMNN) Learned Parameters from *.mat (Python TensorFlow Result) to *.txt (for Loading by C++ Programs) Files
 
-% NN_name             = 'my_PMNN_obs_avoid_fb';
-% 
-% for np=1:N_prims
-%     param_filename  = ['prim_',num2str(np),'_params_reinit_',num2str(reinit_selection_idx(1,np)),'_step_',num2str(TF_max_train_iters,'%07d'),'.mat'];
-%     nmse_filename   = ['prim_',num2str(np),'_nmse_reinit_',num2str(reinit_selection_idx(1,np)),'_step_',num2str(TF_max_train_iters,'%07d'),'.mat'];
-%     var_gt_filename = ['prim_',num2str(np),'_var_ground_truth.mat'];
-% 
-%     % Copy Phase-Modulated Neural Network (PMNN) Learned Parameters:
-%     copyfile([python_learn_obs_avoid_fb_tf_models_dir_path, param_filename], ...
-%              data_LObsAvoidFB_task_type_PMNN_python_models_dir_path);
-% 
-%     % Copy Phase-Modulated Neural Network (PMNN) Learning NMSEs:
-%     copyfile([python_learn_obs_avoid_fb_tf_models_dir_path, nmse_filename], ...
-%              data_LObsAvoidFB_task_type_PMNN_python_models_dir_path);
-% 
-%     % Copy Phase-Modulated Neural Network (PMNN) Ground-Truth Variance:
-%     copyfile([python_learn_obs_avoid_fb_tf_models_dir_path, var_gt_filename], ...
-%              data_LObsAvoidFB_task_type_PMNN_python_models_dir_path);
-%     
-%     % Convert Phase-Modulated Neural Network (PMNN) Learned Parameters:
-%     mat_filepath= [data_LObsAvoidFB_task_type_PMNN_python_models_dir_path, param_filename];
-%     out_dirpath = [data_LObsAvoidFB_task_type_PMNN_cpp_models_dir_path, 'prim', num2str(np)];
+NN_name             = 'my_PMNN_obs_avoid_fb';
+
+for np=1:N_prims
+    param_filename  = ['prim_',num2str(np),'_params_reinit_',num2str(reinit_selection_idx(1,np)),'_step_',num2str(TF_max_train_iters,'%07d'),'.mat'];
+    nmse_filename   = ['prim_',num2str(np),'_nmse_reinit_',num2str(reinit_selection_idx(1,np)),'_step_',num2str(TF_max_train_iters,'%07d'),'.mat'];
+    var_gt_filename = ['prim_',num2str(np),'_var_ground_truth.mat'];
+
+    % Copy Phase-Modulated Neural Network (PMNN) Learned Parameters:
+    copyfile([python_learn_obs_avoid_fb_tf_models_dir_path, param_filename], ...
+             data_LObsAvoidFB_task_type_PMNN_python_models_dir_path);
+
+    % Copy Phase-Modulated Neural Network (PMNN) Learning NMSEs:
+    copyfile([python_learn_obs_avoid_fb_tf_models_dir_path, nmse_filename], ...
+             data_LObsAvoidFB_task_type_PMNN_python_models_dir_path);
+
+    % Copy Phase-Modulated Neural Network (PMNN) Ground-Truth Variance:
+    copyfile([python_learn_obs_avoid_fb_tf_models_dir_path, var_gt_filename], ...
+             data_LObsAvoidFB_task_type_PMNN_python_models_dir_path);
+    
+    % Convert Phase-Modulated Neural Network (PMNN) Learned Parameters:
+    mat_filepath= [data_LObsAvoidFB_task_type_PMNN_python_models_dir_path, param_filename];
+    out_dirpath = [data_LObsAvoidFB_task_type_PMNN_cpp_models_dir_path, 'prim', num2str(np)];
 %     convertPMNNParamsFromMatFile2TxtFiles( NN_name, 6, mat_filepath, out_dirpath );
-% end
+end
 
 %% Test Dataset (with Particular Selection of Setting and Trial Number) Logging into *.txt Files (for Comparison between MATLAB and C++ Execution)
 

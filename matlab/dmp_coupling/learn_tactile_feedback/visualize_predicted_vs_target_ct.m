@@ -24,8 +24,10 @@ load(['dataset_Ct_tactile_asm_',task_type,'_augmented.mat']);
 is_plotting_position_ct_target      = 0;
 is_plotting_orientation_ct_target   = 1;
 
-reinit_selection_idx= dlmread([rel_dir_path, '../../../python/dmp_coupling/learn_tactile_feedback/models/reinit_selection_idx.txt']);
-TF_max_train_iters 	= dlmread([rel_dir_path, '../../../python/dmp_coupling/learn_tactile_feedback/models/TF_max_train_iters.txt']);
+python_learn_tactile_fb_models_dir_path = [rel_dir_path, '../../../python/dmp_coupling/learn_tactile_feedback/models/'];
+
+reinit_selection_idx= dlmread([python_learn_tactile_fb_models_dir_path, 'reinit_selection_idx.txt']);
+TF_max_train_iters 	= dlmread([python_learn_tactile_fb_models_dir_path, 'TF_max_train_iters.txt']);
 
 D                   = 3;
 N_prims             = size(dataset_Ct_tactile_asm.sub_Ct_target, 1);
@@ -40,12 +42,15 @@ model_path  = [rel_dir_path, '../../../data/dmp_coupling/learn_tactile_feedback/
 % for np=1:N_prims
 for np=2
     D_input             = size(dataset_Ct_tactile_asm.sub_X{np,1}{1,1}, 2);
-    regular_NN_hidden_layer_topology = [100];
+    regular_NN_hidden_layer_topology = dlmread([python_learn_tactile_fb_models_dir_path, 'regular_NN_hidden_layer_topology.txt']);
     N_phaseLWR_kernels  = size(dataset_Ct_tactile_asm.sub_normalized_phase_PSI_mult_phase_V{np,1}{1,1}, 2);
     D_output            = 6;
-
+    
+    regular_NN_hidden_layer_activation_func_list = readStringsToCell([python_learn_tactile_fb_models_dir_path, 'regular_NN_hidden_layer_activation_func_list.txt']);
+    
     NN_info.name        = 'my_ffNNphaseLWR';
     NN_info.topology    = [D_input, regular_NN_hidden_layer_topology, N_phaseLWR_kernels, D_output];
+    NN_info.activation_func_list= {'identity', regular_NN_hidden_layer_activation_func_list{:}, 'identity', 'identity'};
     NN_info.filepath    = [model_path, 'prim_', num2str(np), '_params_reinit_', num2str(reinit_selection_idx(1, np)), '_step_',num2str(TF_max_train_iters,'%07d'),'.mat'];
 
     for ns_idx=1:size(subset_settings_indices, 2)
