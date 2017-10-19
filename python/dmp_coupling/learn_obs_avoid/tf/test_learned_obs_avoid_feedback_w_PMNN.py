@@ -30,9 +30,9 @@ for prim_no in range(1, 2):
     print ("prim_no = ", prim_no)
 
     # dummy data for neural networks learning simulation/verification:
-    X = sio.loadmat('input_data/test_unroll_prim_'+str(prim_no)+'_X_raw_obs_avoid.mat', struct_as_record=True)['X']
-    Ct_target = sio.loadmat('input_data/test_unroll_prim_'+str(prim_no)+'_Ct_target_obs_avoid.mat', struct_as_record=True)['Ct_target']
-    normalized_phase_kernels = sio.loadmat('input_data/test_unroll_prim_'+str(prim_no)+'_normalized_phase_PSI_mult_phase_V_obs_avoid.mat', struct_as_record=True)['normalized_phase_PSI_mult_phase_V']
+    X = sio.loadmat('input_data/subsampled_test_unroll_prim_'+str(prim_no)+'_X_raw_obs_avoid.mat', struct_as_record=True)['X']
+    Ct_target = sio.loadmat('input_data/subsampled_test_unroll_prim_'+str(prim_no)+'_Ct_target_obs_avoid.mat', struct_as_record=True)['Ct_target']
+    normalized_phase_kernels = sio.loadmat('input_data/subsampled_test_unroll_prim_'+str(prim_no)+'_normalized_phase_PSI_mult_phase_V_obs_avoid.mat', struct_as_record=True)['normalized_phase_PSI_mult_phase_V']
     
     filepath = model_parent_dir_path + 'prim_' + str(prim_no) + '_params_reinit_' + str(reinit_selection_idx[prim_no-1]) + ('_step_%07d.mat' % TF_max_train_iters)
     

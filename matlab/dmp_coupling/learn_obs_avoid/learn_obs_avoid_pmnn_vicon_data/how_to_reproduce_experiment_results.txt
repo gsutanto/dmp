@@ -3,6 +3,7 @@ Execution Order for Reproducing Experimental Results:
  [1] Prepare the Training and Generalization Testing Dataset, by running the following scripts in amd_clmc_dmp/matlab/dmp_coupling/learn_obs_avoid/learn_obs_avoid_pmnn_vicon_data/:
      >> on MATLAB: convert_demo_to_supervised_obs_avoid_fb_dataset.m 
                    => tf_obs_avoid_data_preparation_robot_unroll.m
+                   => [optional] subsample_test_unroll_dataset.m
  [2] Perform Feedback Model Training in TensorFlow in Python:
      >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_obs_avoid/tf/learn_obs_avoid_feedback_w_PMNN.py
      (ensuring (is_performing_generalization_test == 0) on line 47 is selected...)

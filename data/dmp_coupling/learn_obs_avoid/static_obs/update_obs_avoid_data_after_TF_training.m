@@ -70,13 +70,13 @@ end
 
 %% Convert Unroll Test Dataset for Primitive 1 (for Comparing between Prediction Made in Python TensorFlow versus in MATLAB)
 
-load([python_learn_obs_avoid_fb_tf_inputs_dir_path, 'test_unroll_prim_1_X_raw_',task_type,'.mat']);
-load([python_learn_obs_avoid_fb_tf_inputs_dir_path, 'test_unroll_prim_1_normalized_phase_PSI_mult_phase_V_',task_type,'.mat']);
-load([python_learn_obs_avoid_fb_tf_inputs_dir_path, 'test_unroll_prim_1_Ct_target_',task_type,'.mat']);
+load([python_learn_obs_avoid_fb_tf_inputs_dir_path, 'subsampled_test_unroll_prim_1_X_raw_',task_type,'.mat']);
+load([python_learn_obs_avoid_fb_tf_inputs_dir_path, 'subsampled_test_unroll_prim_1_normalized_phase_PSI_mult_phase_V_',task_type,'.mat']);
+load([python_learn_obs_avoid_fb_tf_inputs_dir_path, 'subsampled_test_unroll_prim_1_Ct_target_',task_type,'.mat']);
 
-dlmwrite([data_LObsAvoidFB_task_type_PMNN_unroll_test_dir_path, 'test_unroll_prim_1_X_raw_',task_type,'.txt'], X, 'delimiter', ' ', 'precision', precision_string);
-dlmwrite([data_LObsAvoidFB_task_type_PMNN_unroll_test_dir_path, 'test_unroll_prim_1_normalized_phase_PSI_mult_phase_V_',task_type,'.txt'], normalized_phase_PSI_mult_phase_V, 'delimiter', ' ', 'precision', precision_string);
-dlmwrite([data_LObsAvoidFB_task_type_PMNN_unroll_test_dir_path, 'test_unroll_prim_1_Ct_target_',task_type,'.txt'], Ct_target, 'delimiter', ' ', 'precision', precision_string);
+dlmwrite([data_LObsAvoidFB_task_type_PMNN_unroll_test_dir_path, 'subsampled_test_unroll_prim_1_X_raw_',task_type,'.txt'], X, 'delimiter', ' ', 'precision', precision_string);
+dlmwrite([data_LObsAvoidFB_task_type_PMNN_unroll_test_dir_path, 'subsampled_test_unroll_prim_1_normalized_phase_PSI_mult_phase_V_',task_type,'.txt'], normalized_phase_PSI_mult_phase_V, 'delimiter', ' ', 'precision', precision_string);
+dlmwrite([data_LObsAvoidFB_task_type_PMNN_unroll_test_dir_path, 'subsampled_test_unroll_prim_1_Ct_target_',task_type,'.txt'], Ct_target, 'delimiter', ' ', 'precision', precision_string);
 
 %% Copy and Convert Phase-Modulated Neural Network (PMNN) Learned Parameters from *.mat (Python TensorFlow Result) to *.txt (for Loading by C++ Programs) Files
 

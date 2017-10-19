@@ -2,7 +2,9 @@ function [  ] = testTensorFlowTrainedPMNNFeedbackModel( task_type, learn_fb_task
                                                         amd_clmc_dmp_root_dir_path, ...
                                                         data_learn_fb_task_subdir_path, ...
                                                         python_learn_fb_task_TF_models_prefix_subdir_path, ...
-                                                        start_prim_num, end_prim_num, PMNN_name )
+                                                        start_prim_num, end_prim_num, ...
+                                                        test_unroll_datafiles_prefix, ...
+                                                        PMNN_name )
     data_root_dir_path          = [amd_clmc_dmp_root_dir_path, 'data/'];
     matlab_root_dir_path        = [amd_clmc_dmp_root_dir_path, 'matlab/'];
     python_root_dir_path        = [amd_clmc_dmp_root_dir_path, 'python/'];
@@ -22,9 +24,9 @@ function [  ] = testTensorFlowTrainedPMNNFeedbackModel( task_type, learn_fb_task
     TF_max_train_iters  = dlmread([python_learn_fb_task_TF_models_dir_path, 'TF_max_train_iters.txt']);
 
     for np = start_prim_num:end_prim_num
-        X               = dlmread([data_learn_fb_task_PMNN_unroll_test_dir_path, 'test_unroll_prim_',num2str(np),'_X_raw_',task_type,'.txt']);
-        normalized_phase_PSI_mult_phase_V   = dlmread([data_learn_fb_task_PMNN_unroll_test_dir_path, 'test_unroll_prim_',num2str(np),'_normalized_phase_PSI_mult_phase_V_',task_type,'.txt']);
-        Ct_target       = dlmread([data_learn_fb_task_PMNN_unroll_test_dir_path, 'test_unroll_prim_',num2str(np),'_Ct_target_',task_type,'.txt']);
+        X               = dlmread([data_learn_fb_task_PMNN_unroll_test_dir_path, test_unroll_datafiles_prefix, 'test_unroll_prim_',num2str(np),'_X_raw_',task_type,'.txt']);
+        normalized_phase_PSI_mult_phase_V   = dlmread([data_learn_fb_task_PMNN_unroll_test_dir_path, test_unroll_datafiles_prefix, 'test_unroll_prim_',num2str(np),'_normalized_phase_PSI_mult_phase_V_',task_type,'.txt']);
+        Ct_target       = dlmread([data_learn_fb_task_PMNN_unroll_test_dir_path, test_unroll_datafiles_prefix, 'test_unroll_prim_',num2str(np),'_Ct_target_',task_type,'.txt']);
 
         T               = load([data_learn_fb_task_PMNN_python_models_dir_path, 'prim_', num2str(np), '_Ctt_test_prediction.mat']);
         Ctt_test_prediction_TF  = T.('Ctt_test_prediction');
