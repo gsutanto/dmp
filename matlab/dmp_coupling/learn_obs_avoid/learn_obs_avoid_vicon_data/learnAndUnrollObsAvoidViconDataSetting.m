@@ -368,7 +368,7 @@ function [ varargout ] = learnAndUnrollObsAvoidViconDataSetting( varargin )
                 legend('ARD');
             hold off;
         end
-    
+        
         save([loa_feat_method_IDs, 'w_ard.mat'], 'w_ard');
 
         % end of Regression with ARD
@@ -684,7 +684,7 @@ function [ varargout ] = learnAndUnrollObsAvoidViconDataSetting( varargin )
     performance_metric.nmse_unroll          = nmse_unroll;
     performance_metric.mse_unroll           = mse_unroll;
     if (unrolling_param.is_comparing_with_cpp_implementation == 0)
-        performance_metric.nmse_test            = nmse_learn_test;
+        performance_metric.nmse_test       	= nmse_learn_test;
     end
         
     if (strcmp(loa_feat_param.feat_constraint_mode, '_CONSTRAINED_') == 1)

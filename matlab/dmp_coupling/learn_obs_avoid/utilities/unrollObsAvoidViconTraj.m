@@ -27,8 +27,10 @@ function [ varargout ] = unrollObsAvoidViconTraj( varargin )
         is_measuring_all_performance_metric = 1;
     end
     
-    if(loa_feat_methods == 7)
-        net             = learning_param.net;
+    if (isfield(learning_param, 'pmnn') == 1)
+        is_using_pmnn                       = 1;
+    else
+        is_using_pmnn                       = 0;
     end
     
     if (nargout > 9)
@@ -79,6 +81,12 @@ function [ varargout ] = unrollObsAvoidViconTraj( varargin )
         dcp_franzi('set_goal', d, cart_coord_dmp_baseline_params.mean_goal_local(d,1), 1);
 
         dcps(d).w   = cart_coord_dmp_baseline_params.w(:,d);
+        
+        if (d == 1)
+            psi     = dcps(d).psi.';
+            pv      = dcps(d).v;
+            normalized_phase_PSI_mult_phase_V   = psi .* repmat((pv ./ sum((psi+1.e-10),2)),1,cart_coord_dmp_baseline_params.n_rfs);
+        end
     end
     
     % initialize x3 and v3:
@@ -139,15 +147,20 @@ function [ varargout ] = unrollObsAvoidViconTraj( varargin )
         if (strcmp(learning_param.learning_constraint_mode, '_PER_AXIS_') == 1)
             ct       	= sum((x .* loa_feat_param.w.'), 2);
         elseif(loa_feat_methods == 7) % using Neural Network
-            goal_position_local     = cart_coord_dmp_baseline_params.mean_goal_local;
-            if (unrolling_param.verify_NN_inference == 1)
-                [ct, NN_net_inference_diff(i,1)]    = computeNNObsAvoidCt( point_obstacles_cart_position_local, ...
-                                                                           endeff_state, x, learning_param, px, pv, ...
-                                                                           goal_position_local );
+            if (is_using_pmnn == 1)
+                [ ct, ~, ...
+                  learning_param.pmnn ] = performPMNNPrediction( learning_param.pmnn, x, normalized_phase_PSI_mult_phase_V );
             else
-                ct    	= computeNNObsAvoidCt( point_obstacles_cart_position_local, ...
-                                               endeff_state, x, learning_param, px, pv, ...
-                                               goal_position_local );
+                goal_position_local     = cart_coord_dmp_baseline_params.mean_goal_local;
+                if (unrolling_param.verify_NN_inference == 1)
+                    [ct, NN_net_inference_diff(i,1)]    = computeNNObsAvoidCt( point_obstacles_cart_position_local, ...
+                                                                               endeff_state, x, learning_param, px, pv, ...
+                                                                               goal_position_local );
+                else
+                    ct    	= computeNNObsAvoidCt( point_obstacles_cart_position_local, ...
+                                                   endeff_state, x, learning_param, px, pv, ...
+                                                   goal_position_local );
+                end
             end
         else
             ct       	= x * loa_feat_param.w;
@@ -157,11 +170,15 @@ function [ varargout ] = unrollObsAvoidViconTraj( varargin )
         end
         Ct_unroll(i,:)  = ct.';
         for d=1:D
-            [y,yd,ydd,f,px,pv]      = dcp_franzi('run',d,tau_unroll,dt,ct(d,1));
+            [y,yd,ydd,f,px,pv,psi]  = dcp_franzi('run',d,tau_unroll,dt,ct(d,1));
 
             Y_unroll_local(i,d)     = y;
             Yd_unroll_local(i,d)    = yd;
             Ydd_unroll_local(i,d)   = ydd;
+            
+            if (d == 1)
+                normalized_phase_PSI_mult_phase_V   = psi .* repmat((pv ./ sum((psi+1.e-10),2)),1,cart_coord_dmp_baseline_params.n_rfs);
+            end
         end
 
         x3(:,1)         = Y_unroll_local(i,:)';
@@ -227,6 +244,10 @@ function [ varargout ] = unrollObsAvoidViconTraj( varargin )
         else
             varargout(10)   = {sub_X_unroll_per_obs_point_cell};
         end
+    else
+        varargout(10)       = {[]};
     end
-    
+    if (nargout > 10)
+        varargout(11)   = {learning_param.pmnn};
+    end
 end
