@@ -2,6 +2,8 @@ clear all;
 close all;
 clc;
 
+addpath('../utilities/');
+
 load('dataset_Ct_obs_avoid.mat');
 load('unroll_dataset_learned_Ct_obs_avoid.mat');
 
