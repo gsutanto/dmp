@@ -17,7 +17,7 @@ addpath('../../../cart_dmp/cart_coord_dmp/');
     feat_constraint_mode, ...
     loa_feat_methods, ...
     max_num_trajs_per_setting, ...
-    D, n_rfs, c_order ]                 = getConfigParams();
+    D, n_rfs, c_order ]        	= getConfigParams();
 
 %% Demo Dataset Loading
 
@@ -85,111 +85,135 @@ learning_param.pmnn         = NN_info;
 
 %% Unrolling Test
 
-N_settings  = size(data_global_coord.obs_avoid, 1);
-disp('Unrolling on Trained Obstacle Settings');
+is_unrolling_ct_with_dynamics_list  = [0,1];
 
-unroll_dataset_learned_Ct_obs_avoid.sub_Ct_target   = cell(1, N_settings);
-unroll_dataset_learned_Ct_obs_avoid.sub_X           = cell(1, N_settings);
-global_traj_unroll_setting_cell                     = cell(N_settings, 1);
-
-normed_closest_distance_to_obs_traj_human_1st_demo_setting  = cell(N_settings, 1);
-normed_closest_distance_to_obs_human_1st_demo_setting       = zeros(N_settings, 1);
-normed_closest_distance_to_obs_human_1st_demo_setting_idx   = zeros(N_settings, 1);
-final_distance_to_goal_vector_human_1st_demo_setting        = zeros(N_settings, 1);
-
-normed_closest_distance_to_obs_traj_per_trained_setting_cell= cell(N_settings, 1);
-normed_closest_distance_to_obs_per_trained_setting_cell    	= cell(N_settings, 1);
-normed_closest_distance_to_obs_per_trained_setting_idx_cell = cell(N_settings, 1);
-final_distance_to_goal_vector_per_trained_setting_cell     	= cell(N_settings, 1);
-normed_closest_distance_to_obs_overall_train_demos_per_setting 	= zeros(N_settings, 1);
-normed_closest_distance_to_obs_overall_train_demos_per_sett_idx = zeros(N_settings, 1);
-worst_final_distance_to_goal_per_trained_setting        = zeros(N_settings, 1);
-worst_final_distance_to_goal_per_trained_setting_idx    = zeros(N_settings, 1);
-for i=1:N_settings
-    if (unrolling_param.is_unrolling_only_1st_demo_each_trained_settings == 1)
-        N_demo_this_setting = 1;
-    else
-        N_demo_this_setting = min(max_num_trajs_per_setting, size(data_global_coord.obs_avoid{i,2}, 2));
+for iucwdl_idx=1:length(is_unrolling_ct_with_dynamics_list)
+    % is_unrolling_ct_with_dynamics   = 0;    % unrolling DMP with Ct computed from pre-extracted dataset (which some part of it is used in training the Ct model)
+    % is_unrolling_ct_with_dynamics   = 1;    % unrolling DMP with Ct computed online (feature's value dynamics is affected by previous values of Ct predictions)
+    is_unrolling_ct_with_dynamics   = is_unrolling_ct_with_dynamics_list(iucwdl_idx);
+    
+    if (is_unrolling_ct_with_dynamics ~= 0)
+        disp('unrolling DMP with Ct computed online (feature value dynamics is affected by previous values of Ct predictions)');
+    else    % if (is_unrolling_ct_with_dynamics == 0)
+        disp('unrolling DMP with Ct computed from pre-extracted dataset (which some part of it is used in training the Ct model)');
     end
-    
-    unroll_dataset_learned_Ct_obs_avoid.sub_Ct_target{1,i}  = cell(N_demo_this_setting, 1);
-    unroll_dataset_learned_Ct_obs_avoid.sub_X{1,i}          = cell(N_demo_this_setting, 1);
-    global_traj_unroll_setting_cell{i,1}                    = cell(3, N_demo_this_setting);
-    
-    normed_closest_distance_to_obs_traj_per_trained_setting_cell{i,1}   = cell(N_demo_this_setting, 1);
-    normed_closest_distance_to_obs_per_trained_setting_cell{i,1}    	= zeros(N_demo_this_setting, 1);
-    normed_closest_distance_to_obs_per_trained_setting_idx_cell{i,1}    = zeros(N_demo_this_setting, 1);
-    final_distance_to_goal_vector_per_trained_setting_cell{i,1}     	= zeros(N_demo_this_setting, 1);
-    for j=1:N_demo_this_setting
-        tic
-        disp(['   Setting #', num2str(i), ...
-              ' (', num2str(i), '/', num2str(N_settings), '), Demo #', num2str(j), '/', num2str(N_demo_this_setting)]);
 
-        if (j == 1)
-            is_measuring_demo_performance_metric    = 1;
+    N_settings  = size(data_global_coord.obs_avoid, 1);
+    disp('Unrolling on Trained Obstacle Settings');
+
+    unroll_dataset_learned_Ct_obs_avoid.sub_Ct_target   = cell(1, N_settings);
+    unroll_dataset_learned_Ct_obs_avoid.sub_X           = cell(1, N_settings);
+    global_traj_unroll_setting_cell                     = cell(N_settings, 1);
+
+    normed_closest_distance_to_obs_traj_human_1st_demo_setting  = cell(N_settings, 1);
+    normed_closest_distance_to_obs_human_1st_demo_setting       = zeros(N_settings, 1);
+    normed_closest_distance_to_obs_human_1st_demo_setting_idx   = zeros(N_settings, 1);
+    final_distance_to_goal_vector_human_1st_demo_setting        = zeros(N_settings, 1);
+
+    normed_closest_distance_to_obs_traj_per_trained_setting_cell= cell(N_settings, 1);
+    normed_closest_distance_to_obs_per_trained_setting_cell    	= cell(N_settings, 1);
+    normed_closest_distance_to_obs_per_trained_setting_idx_cell = cell(N_settings, 1);
+    final_distance_to_goal_vector_per_trained_setting_cell     	= cell(N_settings, 1);
+    normed_closest_distance_to_obs_overall_train_demos_per_setting 	= zeros(N_settings, 1);
+    normed_closest_distance_to_obs_overall_train_demos_per_sett_idx = zeros(N_settings, 1);
+    worst_final_distance_to_goal_per_trained_setting        = zeros(N_settings, 1);
+    worst_final_distance_to_goal_per_trained_setting_idx    = zeros(N_settings, 1);
+    for i=1:N_settings
+        if (unrolling_param.is_unrolling_only_1st_demo_each_trained_settings == 1)
+            N_demo_this_setting = 1;
         else
-            is_measuring_demo_performance_metric    = 0;
+            N_demo_this_setting = min(max_num_trajs_per_setting, size(data_global_coord.obs_avoid{i,2}, 2));
         end
 
-        [ unroll_dataset_learned_Ct_obs_avoid.sub_Ct_target{1,i}{j,1}, ...
-          global_traj_unroll_setting_cell{i,1}(1:3,j), ...
-          ~, ...
-          buf_normed_closest_distance_to_obs_traj_human_1st_demo_setting, ...
-          buf_final_distance_to_goal_vector_human_1st_demo_setting, ...
-          base_normed_closest_distance_to_obs_traj_human_1st_demo_setting, ...
-          base_final_distance_to_goal_vector_human_1st_demo_setting, ...
-          normed_closest_distance_to_obs_traj_per_trained_setting_cell{i,1}{j,1}, ...
-          final_distance_to_goal_vector_per_trained_setting_cell{i,1}(j,1), ...
-          unroll_dataset_learned_Ct_obs_avoid.sub_X{1,i}{j,1}, ...
-          learning_param.pmnn ] = unrollObsAvoidViconTraj(  data_global_coord.baseline(:,1),...
-                                                            data_global_coord.obs_avoid{i,2}(:,j), ...
-                                                            data_global_coord.obs_avoid{i,1}, ...
-                                                            data_global_coord.dt, ...
-                                                            dmp_baseline_params.cart_coord{1,1}, ...
-                                                            loa_feat_methods, ...
-                                                            loa_feat_param, ...
-                                                            learning_param, ...
-                                                            unrolling_param, ...
-                                                            is_measuring_demo_performance_metric );
-        if ((j == 1) && (isempty(buf_normed_closest_distance_to_obs_traj_human_1st_demo_setting) == 0) && ...
-            (isnan(buf_final_distance_to_goal_vector_human_1st_demo_setting) == 0))
+        unroll_dataset_learned_Ct_obs_avoid.sub_Ct_target{1,i}  = cell(N_demo_this_setting, 1);
+        unroll_dataset_learned_Ct_obs_avoid.sub_X{1,i}          = cell(N_demo_this_setting, 1);
+        global_traj_unroll_setting_cell{i,1}                    = cell(3, N_demo_this_setting);
 
-            normed_closest_distance_to_obs_traj_baseline_demo_setting{i,1}  = base_normed_closest_distance_to_obs_traj_human_1st_demo_setting;
-            final_distance_to_goal_vector_baseline_demo_setting(i,1)        = base_final_distance_to_goal_vector_human_1st_demo_setting;
+        normed_closest_distance_to_obs_traj_per_trained_setting_cell{i,1}   = cell(N_demo_this_setting, 1);
+        normed_closest_distance_to_obs_per_trained_setting_cell{i,1}    	= zeros(N_demo_this_setting, 1);
+        normed_closest_distance_to_obs_per_trained_setting_idx_cell{i,1}    = zeros(N_demo_this_setting, 1);
+        final_distance_to_goal_vector_per_trained_setting_cell{i,1}     	= zeros(N_demo_this_setting, 1);
+        for j=1:N_demo_this_setting
+            tic
+            disp(['   Setting #', num2str(i), ...
+                  ' (', num2str(i), '/', num2str(N_settings), '), Demo #', num2str(j), '/', num2str(N_demo_this_setting)]);
 
-            normed_closest_distance_to_obs_traj_human_1st_demo_setting{i,1} = buf_normed_closest_distance_to_obs_traj_human_1st_demo_setting;
-            final_distance_to_goal_vector_human_1st_demo_setting(i,1)       = buf_final_distance_to_goal_vector_human_1st_demo_setting;
+            if (j == 1)
+                is_measuring_demo_performance_metric    = 1;
+            else
+                is_measuring_demo_performance_metric    = 0;
+            end
+
+            [ unroll_dataset_learned_Ct_obs_avoid.sub_Ct_target{1,i}{j,1}, ...
+              global_traj_unroll_setting_cell{i,1}(1:3,j), ...
+              ~, ...
+              buf_normed_closest_distance_to_obs_traj_human_1st_demo_setting, ...
+              buf_final_distance_to_goal_vector_human_1st_demo_setting, ...
+              base_normed_closest_distance_to_obs_traj_human_1st_demo_setting, ...
+              base_final_distance_to_goal_vector_human_1st_demo_setting, ...
+              normed_closest_distance_to_obs_traj_per_trained_setting_cell{i,1}{j,1}, ...
+              final_distance_to_goal_vector_per_trained_setting_cell{i,1}(j,1), ...
+              unroll_dataset_learned_Ct_obs_avoid.sub_X{1,i}{j,1}, ...
+              learning_param.pmnn ] = unrollObsAvoidViconTraj(  data_global_coord.baseline(:,1),...
+                                                                data_global_coord.obs_avoid{i,2}(:,j), ...
+                                                                data_global_coord.obs_avoid{i,1}, ...
+                                                                data_global_coord.dt, ...
+                                                                dmp_baseline_params.cart_coord{1,1}, ...
+                                                                loa_feat_methods, ...
+                                                                loa_feat_param, ...
+                                                                learning_param, ...
+                                                                unrolling_param, ...
+                                                                is_measuring_demo_performance_metric, ...
+                                                                1, ...
+                                                                is_unrolling_ct_with_dynamics, ...
+                                                                dataset_Ct_obs_avoid.sub_X{1,i}{j,1});
+            if ((j == 1) && (isempty(buf_normed_closest_distance_to_obs_traj_human_1st_demo_setting) == 0) && ...
+                (isnan(buf_final_distance_to_goal_vector_human_1st_demo_setting) == 0))
+
+                normed_closest_distance_to_obs_traj_baseline_demo_setting{i,1}  = base_normed_closest_distance_to_obs_traj_human_1st_demo_setting;
+                final_distance_to_goal_vector_baseline_demo_setting(i,1)        = base_final_distance_to_goal_vector_human_1st_demo_setting;
+
+                normed_closest_distance_to_obs_traj_human_1st_demo_setting{i,1} = buf_normed_closest_distance_to_obs_traj_human_1st_demo_setting;
+                final_distance_to_goal_vector_human_1st_demo_setting(i,1)       = buf_final_distance_to_goal_vector_human_1st_demo_setting;
+            end
+
+            [ normed_closest_distance_to_obs_per_trained_setting_cell{i,1}(j,1), ...
+              normed_closest_distance_to_obs_per_trained_setting_idx_cell{i,1}(j,1) ]   = min(normed_closest_distance_to_obs_traj_per_trained_setting_cell{i,1}{j,1});
+
+            toc
         end
+        [normed_closest_distance_to_obs_baseline_demo_setting(i,1), ...
+         normed_closest_distance_to_obs_baseline_demo_setting_idx(i,1)]	= min(normed_closest_distance_to_obs_traj_baseline_demo_setting{i,1});
 
-        [ normed_closest_distance_to_obs_per_trained_setting_cell{i,1}(j,1), ...
-          normed_closest_distance_to_obs_per_trained_setting_idx_cell{i,1}(j,1) ]   = min(normed_closest_distance_to_obs_traj_per_trained_setting_cell{i,1}{j,1});
+        [normed_closest_distance_to_obs_human_1st_demo_setting(i,1), ...
+         normed_closest_distance_to_obs_human_1st_demo_setting_idx(i,1)]= min(normed_closest_distance_to_obs_traj_human_1st_demo_setting{i,1});
 
-        toc
+        [normed_closest_distance_to_obs_overall_train_demos_per_setting(i,1), ...
+         normed_closest_distance_to_obs_overall_train_demos_per_sett_idx(i,1)]    = min(normed_closest_distance_to_obs_per_trained_setting_cell{i,1});
+        [worst_final_distance_to_goal_per_trained_setting(i,1), ...
+         worst_final_distance_to_goal_per_trained_setting_idx(i,1)] = max(final_distance_to_goal_vector_per_trained_setting_cell{i,1});
     end
-    [normed_closest_distance_to_obs_baseline_demo_setting(i,1), ...
-     normed_closest_distance_to_obs_baseline_demo_setting_idx(i,1)]    = min(normed_closest_distance_to_obs_traj_baseline_demo_setting{i,1});
 
-    [normed_closest_distance_to_obs_human_1st_demo_setting(i,1), ...
-     normed_closest_distance_to_obs_human_1st_demo_setting_idx(i,1)]    = min(normed_closest_distance_to_obs_traj_human_1st_demo_setting{i,1});
 
-    [normed_closest_distance_to_obs_overall_train_demos_per_setting(i,1), ...
-     normed_closest_distance_to_obs_overall_train_demos_per_sett_idx(i,1)]    = min(normed_closest_distance_to_obs_per_trained_setting_cell{i,1});
-    [worst_final_distance_to_goal_per_trained_setting(i,1), ...
-     worst_final_distance_to_goal_per_trained_setting_idx(i,1)] = max(final_distance_to_goal_vector_per_trained_setting_cell{i,1});
+    [normed_closest_dist_to_obs_human_1st_demo_over_all_settings, ...
+     normed_closest_dist_to_obs_human_1st_demo_over_all_settings_idx]   = min(normed_closest_distance_to_obs_human_1st_demo_setting);
+    [worst_final_dist_to_goal_vector_human_1st_demo_overall_settings, ...
+     worst_final_dist_to_goal_vector_human_1st_demo_overall_sett_idx]   = min(final_distance_to_goal_vector_human_1st_demo_setting);
+
+    [normed_closest_distance_to_obs_over_all_trained_settings, ...
+     normed_closest_distance_to_obs_over_all_trained_settings_idx]  = min(normed_closest_distance_to_obs_overall_train_demos_per_setting);
+    [worst_final_distance_to_goal_over_all_trained_settings, ...
+     worst_final_distance_to_goal_over_all_trained_setting_idx] = max(worst_final_distance_to_goal_per_trained_setting);
+
+    if (is_unrolling_ct_with_dynamics ~= 0)
+        save(['unroll_dataset_learned_Ct_obs_avoid.mat'],'unroll_dataset_learned_Ct_obs_avoid');
+        save(['global_traj_unroll_setting_cell.mat'],'global_traj_unroll_setting_cell');
+    else    % if (is_unrolling_ct_with_dynamics == 0)
+        no_dynamics_unroll_dataset_learned_Ct_obs_avoid     = unroll_dataset_learned_Ct_obs_avoid;
+        no_dynamics_global_traj_unroll_setting_cell         = global_traj_unroll_setting_cell;
+        save(['no_dynamics_unroll_dataset_learned_Ct_obs_avoid.mat'],'no_dynamics_unroll_dataset_learned_Ct_obs_avoid');
+        save(['no_dynamics_global_traj_unroll_setting_cell.mat'],'no_dynamics_global_traj_unroll_setting_cell');
+    end
 end
-
-
-[normed_closest_dist_to_obs_human_1st_demo_over_all_settings, ...
- normed_closest_dist_to_obs_human_1st_demo_over_all_settings_idx]   = min(normed_closest_distance_to_obs_human_1st_demo_setting);
-[worst_final_dist_to_goal_vector_human_1st_demo_overall_settings, ...
- worst_final_dist_to_goal_vector_human_1st_demo_overall_sett_idx]   = min(final_distance_to_goal_vector_human_1st_demo_setting);
-
-[normed_closest_distance_to_obs_over_all_trained_settings, ...
- normed_closest_distance_to_obs_over_all_trained_settings_idx]  = min(normed_closest_distance_to_obs_overall_train_demos_per_setting);
-[worst_final_distance_to_goal_over_all_trained_settings, ...
- worst_final_distance_to_goal_over_all_trained_setting_idx] = max(worst_final_distance_to_goal_per_trained_setting);
-
-save(['unroll_dataset_learned_Ct_obs_avoid.mat'],'unroll_dataset_learned_Ct_obs_avoid');
-save(['global_traj_unroll_setting_cell.mat'],'global_traj_unroll_setting_cell');
 
 % end of Unrolling Test

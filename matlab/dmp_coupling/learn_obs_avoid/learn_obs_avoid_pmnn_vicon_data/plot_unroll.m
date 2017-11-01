@@ -7,6 +7,7 @@ addpath('../utilities/');
 load('data_multi_demo_vicon_static_global_coord.mat');
 load('dataset_Ct_obs_avoid.mat');
 load('unroll_dataset_learned_Ct_obs_avoid.mat');
+load('no_dynamics_unroll_dataset_learned_Ct_obs_avoid.mat');
 
 subset_settings_indices     = [1:22:222];
 subset_demos_indices        = [1:1];
@@ -27,9 +28,10 @@ for np=1:N_primitive
                 hold on;
                     plot(dataset_Ct_obs_avoid.sub_Ct_target{np,is}{id,1}(:,d),'r');
                     plot(unroll_dataset_learned_Ct_obs_avoid.sub_Ct_target{np,is}{id,1}(:,d),'b');
+                    plot(no_dynamics_unroll_dataset_learned_Ct_obs_avoid.sub_Ct_target{np,is}{id,1}(:,d),'g');
                     if (d==1)
-                        title(['coupling term: target vs unroll for setting #',num2str(is),', demo #',num2str(id)]);
-                        legend('target', 'unroll');
+                        title(['coupling term: target vs unroll vs unroll (no dynamics) for setting #',num2str(is),', demo #',num2str(id)]);
+                        legend('target', 'unroll', 'unroll (no dynamics)');
                     elseif (d==3)
                         xlabel('time');
                     end
