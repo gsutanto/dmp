@@ -11,9 +11,9 @@ import numpy as np
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../dmp_coupling/base/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../utilities/'))
+from definitions_base import *
 from TauCoupling import *
-
-MIN_TAU = 0.01
 
 class TauSystem:
     'Class defining computation of tau parameter for canonical system, transformation system, and goal evolution system, which sometime is coupled with an external variable.'
@@ -44,7 +44,7 @@ class TauSystem:
     def getCouplingTerm(self):
         accumulated_ctau = 0.0
         for tau_coupler_idx in range(len(self.tau_couplers_list)):
-            tau_coupling_value = self.tau_couplers_list[tau_coupler_idx].getValue()
-            assert (math.isnan(tau_coupling_value) == False), 'tau_coupling_value['+str(tau_coupler_idx)+'] is NaN!'
-            accumulated_ctau = accumulated_ctau + tau_coupling_value
+            ctau = self.tau_couplers_list[tau_coupler_idx].getValue()
+            assert (math.isnan(ctau) == False), 'ctau['+str(tau_coupler_idx)+'] is NaN!'
+            accumulated_ctau = accumulated_ctau + ctau
         return accumulated_ctau

@@ -16,3 +16,7 @@ class Coupling:
     
     def isValid(self):
         return True
+    
+    def getValue(self):
+        coupling_value = 0.0
+        return coupling_value

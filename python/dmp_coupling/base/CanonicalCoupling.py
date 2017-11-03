@@ -11,7 +11,3 @@ from Coupling import *
 
 class CanonicalCoupling(Coupling):
     'Class defining coupling terms for DMP canonical systems.'
-    
-    def getValue(self):
-        canonical_coupling_value = 0.0
-        return canonical_coupling_value

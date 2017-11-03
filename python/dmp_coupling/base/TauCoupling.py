@@ -11,7 +11,3 @@ from Coupling import *
 
 class TauCoupling(Coupling):
     'Class defining coupling terms for DMP tau systems.'
-    
-    def getValue(self):
-        tau_coupling_value = 0.0
-        return tau_coupling_value
