@@ -9,6 +9,7 @@ Created on Mon Oct 30 19:00:00 2017
 import numpy as np
 import os
 import sys
+import copy
 from CanonicalSystem import *
 
 class FunctionApproximator:

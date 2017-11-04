@@ -7,6 +7,7 @@ Created on Mon Oct 30 19:00:00 2017
 """
 
 import numpy as np
+import copy
 
 class Coupling:
     'Common base class for DMP coupling terms.'
