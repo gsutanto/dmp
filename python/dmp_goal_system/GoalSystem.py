@@ -18,10 +18,13 @@ from DMPState import *
 class GoalSystem:
     'Base class for goal evolution systems of DMPs.'
     
-    def __init__(self, name, dmp_num_dimensions_init, goal_num_dimensions_init, tau_system, current_goal_state=None, alpha_init=25.0/2.0):
+    def __init__(self, dmp_num_dimensions_init, tau_system, goal_num_dimensions_init=0, current_goal_state=None, alpha_init=25.0/2.0, name=""):
         self.name = name
         self.dmp_num_dimensions = dmp_num_dimensions_init
-        self.goal_num_dimensions = goal_num_dimensions_init
+        if (goal_num_dimensions_init > 0):
+            self.goal_num_dimensions = goal_num_dimensions_init
+        else:
+            self.goal_num_dimensions = self.dmp_num_dimensions
         self.tau_sys = tau_system
         if (current_goal_state != None):
             self.current_goal_state = current_goal_state

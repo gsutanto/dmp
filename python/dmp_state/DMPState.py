@@ -14,7 +14,7 @@ import copy
 class DMPState:
     'Base class for DMP states.'
     
-    def __init__(self, X_init=None, Xd_init=None, Xdd_init=None, time_init=0.0, name=None):
+    def __init__(self, X_init=None, Xd_init=None, Xdd_init=None, time_init=0.0, name=""):
         self.name = name
         self.time = time_init
         if ((X_init is None) and (Xd_init is None) and (Xdd_init is None)):

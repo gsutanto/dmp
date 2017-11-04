@@ -18,7 +18,7 @@ from TauCoupling import *
 class TauSystem:
     'Class defining computation of tau parameter for canonical system, transformation system, and goal evolution system, which sometime is coupled with an external variable.'
     
-    def __init__(self, name, tau_base_init, tau_ref=0.5, tau_couplers_list=[]):
+    def __init__(self, tau_base_init, tau_ref=0.5, tau_couplers_list=[], name=""):
         self.name = name
         self.tau_base = tau_base_init
         self.tau_reference = tau_ref

@@ -17,7 +17,7 @@ from CanonicalCoupling import *
 class CanonicalSystem:
     'Base class for canonical systems of DMPs.'
     
-    def __init__(self, name, tau_system, canonical_couplers_list):
+    def __init__(self, tau_system, canonical_couplers_list=[], name=""):
         self.name = name
         self.tau_sys = tau_system
         self.canonical_couplers_list = canonical_couplers_list

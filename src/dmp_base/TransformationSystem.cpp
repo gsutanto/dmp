@@ -158,8 +158,13 @@ namespace dmp
         {
             return false;
         }
+        if (rt_assert(accumulated_ct_vel.rows() == dmp_num_dimensions) == false)
+        {
+            return false;
+        }
 
         accumulated_ct_acc          = ZeroVectorN(dmp_num_dimensions);
+        accumulated_ct_vel          = ZeroVectorN(dmp_num_dimensions);
 
         if (transform_coupling)
         {

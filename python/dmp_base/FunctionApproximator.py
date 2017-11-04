@@ -14,7 +14,7 @@ from CanonicalSystem import *
 class FunctionApproximator:
     'Base class for function approximators of DMPs.'
     
-    def __init__(self, name, dmp_num_dimensions_init, model_size_init, canonical_system):
+    def __init__(self, dmp_num_dimensions_init, model_size_init, canonical_system, name=""):
         self.name = name
         self.dmp_num_dimensions = dmp_num_dimensions_init
         self.model_size = model_size_init
