@@ -15,11 +15,11 @@ from CanonicalSystem import *
 class LearningSystem:
     'Base class for learning systems of DMPs.'
     
-    def __init__(self, dmp_num_dimensions_init, model_size_init, transformation_system, name=""):
+    def __init__(self, transformation_system, name=""):
         self.name = name
-        self.dmp_num_dimensions = dmp_num_dimensions_init
-        self.model_size = model_size_init
         self.transform_sys = transformation_system
+        self.dmp_num_dimensions = self.transform_sys.func_approx.dmp_num_dimensions
+        self.model_size = self.transform_sys.func_approx.model_size
         self.learned_weights = np.zeros((self.dmp_num_dimensions, self.model_size))
     
     def isValid(self):

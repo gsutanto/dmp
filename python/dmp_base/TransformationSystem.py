@@ -24,16 +24,16 @@ from GoalSystem import *
 class TransformationSystem:
     'Base class for transformation systems of DMPs.'
     
-    def __init__(self, dmp_num_dimensions_init, canonical_system, function_approximator, 
+    def __init__(self, canonical_system, function_approximator, 
                  start_dmpstate=None, current_dmpstate=None, current_velocity_dmpstate=None, goal_system=None,
                  transform_couplers_list=[], name=""):
         self.name = name
-        self.dmp_num_dimensions = dmp_num_dimensions_init
-        self.is_using_coupling_term_at_dimension = [True] * self.dmp_num_dimensions
         self.canonical_sys = canonical_system
         self.tau_sys = self.canonical_sys.tau_sys
         self.func_approx = function_approximator
         self.transform_couplers_list = transform_couplers_list
+        self.dmp_num_dimensions = self.func_approx.dmp_num_dimensions
+        self.is_using_coupling_term_at_dimension = [True] * self.dmp_num_dimensions
         self.is_started = False
         if (start_dmpstate != None):
             self.start_state = start_dmpstate
