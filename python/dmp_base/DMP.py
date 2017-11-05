@@ -11,11 +11,13 @@ import os
 import sys
 import copy
 sys.path.append(os.path.join(os.path.dirname(__file__), '../dmp_param/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../utilities/'))
 from TauSystem import *
 from CanonicalSystem import *
 from FunctionApproximator import *
 from TransformationSystem import *
 from LearningSystem import *
+from DataIO import *
 
 class DMP:
     'Base class for DMPs.'

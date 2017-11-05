@@ -15,7 +15,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../dmp_base/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../dmp_coupling/base/'))
 from CanonicalSystem import *
 
-class CanonicalSystemDiscrete(CanonicalSystem):
+class CanonicalSystemDiscrete(CanonicalSystem, object):
     'Class for discrete canonical systems of DMPs.'
     
     def __init__(self, tau_system, cs_order=2, cs_alpha=None, cs_beta=None, canonical_couplers_list=[], name=""):
