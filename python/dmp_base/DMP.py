@@ -16,21 +16,19 @@ from TauSystem import *
 from CanonicalSystem import *
 from FunctionApproximator import *
 from TransformationSystem import *
-from LearningSystem import *
 from DataIO import *
 
 class DMP:
     'Base class for DMPs.'
     
-    def __init__(self, learning_system, name=""):
+    def __init__(self, transform_system, name=""):
         self.name = name
-        self.learning_sys = learning_system
-        self.transform_sys = self.learning_sys.transform_sys
+        self.transform_sys = transform_system
         self.func_approx = self.transform_sys.func_approx
         self.canonical_sys = self.transform_sys.canonical_sys
         self.tau_sys = self.canonical_sys.tau_sys
-        self.dmp_num_dimensions = self.learning_sys.dmp_num_dimensions
-        self.model_size = self.learning_sys.model_size
+        self.dmp_num_dimensions = self.func_approx.dmp_num_dimensions
+        self.model_size = self.func_approx.model_size
         self.is_started = False
         self.mean_start_position = np.zeros((self.dmp_num_dimensions,1))
         self.mean_goal_position = np.zeros((self.dmp_num_dimensions,1))
@@ -43,23 +41,18 @@ class DMP:
         assert (self.canonical_sys != None)
         assert (self.func_approx != None)
         assert (self.transform_sys != None)
-        assert (self.learning_sys != None)
         assert (self.tau_sys.isValid() == True)
         assert (self.canonical_sys.isValid() == True)
         assert (self.func_approx.isValid() == True)
         assert (self.transform_sys.isValid() == True)
-        assert (self.learning_sys.isValid() == True)
         assert (self.func_approx.dmp_num_dimensions == self.dmp_num_dimensions), "self.func_approx.dmp_num_dimensions=" + str(self.func_approx.dmp_num_dimensions) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
         assert (self.transform_sys.dmp_num_dimensions == self.dmp_num_dimensions), "self.transform_sys.dmp_num_dimensions=" + str(self.transform_sys.dmp_num_dimensions) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
-        assert (self.learning_sys.dmp_num_dimensions == self.dmp_num_dimensions), "self.learning_sys.dmp_num_dimensions=" + str(self.learning_sys.dmp_num_dimensions) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
         assert (self.func_approx.model_size == self.model_size), "self.func_approx.model_size=" + str(self.func_approx.model_size) + " is mis-matched with self.model_size=" + str(self.model_size) + "!"
-        assert (self.learning_sys.model_size == self.model_size), "self.learning_sys.model_size=" + str(self.learning_sys.model_size) + " is mis-matched with self.model_size=" + str(self.model_size) + "!"
         assert (self.tau_sys == self.canonical_sys.tau_sys)
         assert (self.tau_sys == self.transform_sys.tau_sys)
         assert (self.canonical_sys == self.func_approx.canonical_sys)
         assert (self.canonical_sys == self.transform_sys.canonical_sys)
         assert (self.func_approx == self.transform_sys.func_approx)
-        assert (self.transform_sys == self.learning_sys.transform_sys)
         assert (self.mean_start_position.shape[0] == self.transform_sys.getCurrentGoalState().getX().shape[0]), "self.mean_start_position.shape[0]=" + str(self.mean_start_position.shape[0]) + " is mis-matched with self.transform_sys.getCurrentGoalState().getX().shape[0]=" + str(self.transform_sys.getCurrentGoalState().getX().shape[0]) + "!"
         assert (self.mean_goal_position.shape[0] == self.transform_sys.getCurrentGoalState().getX().shape[0]), "self.mean_goal_position.shape[0]=" + str(self.mean_goal_position.shape[0]) + " is mis-matched with self.transform_sys.getCurrentGoalState().getX().shape[0]=" + str(self.transform_sys.getCurrentGoalState().getX().shape[0]) + "!"
         assert (self.mean_tau >= 0.0), "self.mean_tau=" + str(self.mean_tau) + " < 0.0 (invalid!)"
@@ -79,5 +72,6 @@ class DMP:
         assert (self.isValid() == True), "Post-condition(s) checking is failed: this DMP became invalid!"
         return None
     
-    def learn(self, training_data_dir_or_file_path, robot_task_servo_rate):
-        
+    def learnFromPath(self, training_data_dir_or_file_path, robot_task_servo_rate):
+        set_traj_input = self.extractSetTrajectories(training_data_dir_or_file_path)
+        self.learn(set_traj_input, robot_task_servo_rate)
