@@ -11,3 +11,4 @@ from Coupling import *
 
 class CanonicalCoupling(Coupling):
     'Class defining coupling terms for DMP canonical systems.'
+    pass

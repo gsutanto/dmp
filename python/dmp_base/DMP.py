@@ -63,5 +63,19 @@ class DMP:
         assert (self.mean_tau >= 0.0), "self.mean_tau=" + str(self.mean_tau) + " < 0.0 (invalid!)"
         return True
     
-    def preprocess(trajectory_set):
+    def preprocess(self, dmp_trajectories_list):
+        assert (self.isValid() == True), "Pre-condition(s) checking is failed: this DMP is invalid!"
+        N_traj = len(dmp_trajectories_list)
+        
+        self.mean_start_position = np.zeros((self.dmp_num_dimensions,1))
+        self.mean_goal_position = np.zeros((self.dmp_num_dimensions,1))
+        for dmp_trajectory in dmp_trajectories_list:
+            self.mean_start_position = self.mean_start_position + dmp_trajectory.X[:,[0]]
+            self.mean_goal_position = self.mean_goal_position + dmp_trajectory.X[:,[-1]]
+        self.mean_start_position = self.mean_start_position/N_traj
+        self.mean_goal_position = self.mean_goal_position/N_traj
+        assert (self.isValid() == True), "Post-condition(s) checking is failed: this DMP became invalid!"
+        return None
+    
+    def learn(self, training_data_dir_or_file_path, robot_task_servo_rate):
         

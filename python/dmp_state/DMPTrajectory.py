@@ -7,8 +7,11 @@ Created on Mon Oct 30 19:00:00 2017
 """
 
 import numpy as np
-from Coupling import *
+import os
+import sys
+import copy
+from DMPState import *
 
-class TauCoupling(Coupling):
-    'Class defining coupling terms for DMP tau systems.'
+class DMPTrajectory(DMPState):
+    'Class for DMP trajectories.'
     pass

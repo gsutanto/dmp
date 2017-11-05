@@ -14,7 +14,7 @@ import copy
 class DMPState:
     'Base class for DMP states.'
     
-    def __init__(self, X_init=None, Xd_init=None, Xdd_init=None, time_init=0.0, name=""):
+    def __init__(self, X_init=None, Xd_init=None, Xdd_init=None, time_init=np.zeros((1,1)), name=""):
         self.name = name
         self.time = time_init
         if ((X_init is None) and (Xd_init is None) and (Xdd_init is None)):
@@ -41,7 +41,10 @@ class DMPState:
         assert (self.X.shape[0] == self.dmp_num_dimensions), "Dimension self.X.shape[0]=" + str(self.X.shape[0]) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
         assert (self.Xd.shape[0] == self.dmp_num_dimensions), "Dimension self.Xd.shape[0]=" + str(self.Xd.shape[0]) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
         assert (self.Xdd.shape[0] == self.dmp_num_dimensions), "Dimension self.Xdd.shape[0]=" + str(self.Xdd.shape[0]) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
-        assert (self.time >= 0.0), "self.time=" + str(self.time) + " < 0!"
+        assert (self.X.shape[1] == self.Xd.shape[1])
+        assert (self.X.shape[1] == self.Xdd.shape[1])
+        assert (self.X.shape[1] == self.time.shape[1])
+        assert (np.amin(self.time) >= 0.0), "min(self.time)=" + str(np.amin(self.time)) + " < 0.0 (invalid!)"
         return True
     
     def getX(self):
@@ -79,7 +82,7 @@ class DMPState:
     
     def setTime(self, new_time):
         assert (self.isValid() == True), "Pre-condition(s) checking is failed: this DMPState is invalid!"
-        assert (new_time >= 0.0), "new_time=" + str(new_time) + " < 0.0 (invalid!)"
+        assert (np.amin(new_time) >= 0.0), "min(new_time)=" + str(np.amin(new_time)) + " < 0.0 (invalid!)"
         self.time = new_time
         assert (self.isValid() == True), "Post-condition(s) checking is failed: this DMPState became invalid!"
         return None
