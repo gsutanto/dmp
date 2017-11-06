@@ -141,6 +141,11 @@ bool TauSystem::getCouplingTerm(double& accumulated_ctau)
     return true;
 }
 
+double TauSystem::getTauReference()
+{
+    return tau_reference;
+}
+
 TauSystem::~TauSystem()
 {}
 

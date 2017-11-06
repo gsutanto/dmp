@@ -37,10 +37,11 @@ void FuncApproximatorDiscrete::initBasisFunctions()
 {
     uint    canonical_order = ((CanonicalSystemDiscrete*) canonical_sys)->getOrder();
     double  alpha_canonical = ((CanonicalSystemDiscrete*) canonical_sys)->getAlpha();
+    double  tau_reference   = canonical_sys->getTauSystemPointer()->getTauReference();
 
-    // centers are spanned evenly within 0.5 seconds period of
+    // centers are spanned evenly within <tau_reference> (normally 0.5 seconds) period of
     // the evolution of the canonical state position:
-    double  dt              = ((1.0-0.0)/(model_size-1)) * 0.5;
+    double  dt              = ((1.0-0.0)/(model_size-1)) * tau_reference;
 
     // distribute Gaussian centers within 0.5 seconds period of
     // the decaying-exponential evolution of the canonical state position:

@@ -25,8 +25,8 @@ class TauSystem:
         self.tau_couplers_list = tau_couplers_list
     
     def isValid(self):
-        assert (self.tau_base >= MIN_TAU), "TauSystem.tau_base have to be >= MIN_TAU"
-        assert (self.tau_reference >= MIN_TAU), "TauSystem.tau_reference have to be >= MIN_TAU"
+        assert (self.tau_base >= MIN_TAU), "TauSystem.tau_base=" + str(self.tau_base) + " < MIN_TAU"
+        assert (self.tau_reference >= MIN_TAU), "TauSystem.tau_reference=" + str(self.tau_reference) + " < MIN_TAU"
         return True
     
     def setTauBase(self, tau_base_new):

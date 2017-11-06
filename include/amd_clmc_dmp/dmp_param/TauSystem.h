@@ -88,6 +88,8 @@ public:
      */
     bool getCouplingTerm(double& accumulated_ctau);
 
+    double getTauReference();
+
     ~TauSystem();
 
 protected:

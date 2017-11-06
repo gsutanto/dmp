@@ -11,11 +11,14 @@ import os
 import sys
 import copy
 sys.path.append(os.path.join(os.path.dirname(__file__), '../dmp_param/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../dmp_state/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../utilities/'))
 from TauSystem import *
 from CanonicalSystem import *
 from FunctionApproximator import *
 from TransformationSystem import *
+from DMPState import *
+from DMPTrajectory import *
 from DataIO import *
 
 class DMP:
@@ -75,3 +78,23 @@ class DMP:
     def learnFromPath(self, training_data_dir_or_file_path, robot_task_servo_rate):
         set_traj_input = self.extractSetTrajectories(training_data_dir_or_file_path)
         self.learn(set_traj_input, robot_task_servo_rate)
+        tau_learn = self.mean_tau
+        critical_states_list_learn = []
+        critical_states_list_learn.append(DMPState(self.mean_start_position))
+        critical_states_list_learn.append(DMPState(self.mean_goal_position))
+        critical_states_learn = convertDMPStatesListIntoDMPTrajectory(critical_states_list_learn)
+        return tau_learn, critical_states_learn
+    
+    def start(self, dmp_unroll_init_parameters):
+        assert (dmp_unroll_init_parameters.isValid() == True)
+        return (self.start(dmp_unroll_init_parameters.critical_states, dmp_unroll_init_parameters.tau))
+    
+    def getTargetCouplingTermAndUpdateStates(self, current_state_demo_local, dt):
+        assert (self.is_started == True)
+        ct_acc_target = self.transform_sys.getTargetCouplingTerm(current_state_demo_local)
+        self.canonical_sys.updateCanonicalState(dt)
+        self.transform_sys.updateCurrentGoalState(dt)
+        return ct_acc_target
+    
+    def setTransformSystemCouplingTermUsagePerDimensions(self, is_using_transform_sys_coupling_term_at_dimension_init):
+        return self.transform_sys.setCouplingTermUsagePerDimensions(is_using_transform_sys_coupling_term_at_dimension_init)
