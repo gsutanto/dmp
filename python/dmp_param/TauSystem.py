@@ -6,7 +6,6 @@ Created on Mon Oct 30 19:00:00 2017
 @author: gsutanto
 """
 
-import math
 import numpy as np
 import os
 import sys
@@ -45,6 +44,6 @@ class TauSystem:
         accumulated_ctau = 0.0
         for tau_coupler_idx in range(len(self.tau_couplers_list)):
             ctau = self.tau_couplers_list[tau_coupler_idx].getValue()
-            assert (math.isnan(ctau) == False), 'ctau['+str(tau_coupler_idx)+'] is NaN!'
+            assert (np.isnan(ctau) == False), 'ctau['+str(tau_coupler_idx)+'] is NaN!'
             accumulated_ctau = accumulated_ctau + ctau
         return accumulated_ctau

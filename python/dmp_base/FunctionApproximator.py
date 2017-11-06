@@ -29,3 +29,13 @@ class FunctionApproximator:
         assert (self.canonical_sys.isValid() == True), "CanonicalSystem canonical_sys is invalid!"
         assert ((self.weights.shape[0] == self.dmp_num_dimensions) and (self.weights.shape[1] == self.model_size)), "Weights matrix dimensions=" + str(self.weights.shape[0]) + "X" + self.weights.shape[1] + " is/are mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + " and/or self.model_size=" + str(self.model_size)
         return True
+    
+    def getWeights(self):
+        assert (self.isValid() == True)
+        return copy.copy(self.weights)
+    
+    def setWeights(self, new_weights):
+        assert (self.isValid() == True)
+        assert (new_weights.shape == (self.dmp_num_dimensions, self.model_size))
+        self.weights = copy.copy(new_weights)
+        return None
