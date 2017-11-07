@@ -21,6 +21,8 @@ from TransformCoupling import *
 from DMPState import *
 from GoalSystem import *
 
+MIN_FABS_AMPLITUDE = 1.e-3
+
 class TransformationSystem:
     'Base class for transformation systems of DMPs.'
     
