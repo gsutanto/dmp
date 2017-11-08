@@ -62,6 +62,9 @@ class CanonicalSystemDiscrete(CanonicalSystem, object):
     def getCanonicalPosition(self):
         return copy.copy(self.x)
     
+    def getCanonicalVelocity(self):
+        return copy.copy(self.v)
+    
     def getCanonicalMultiplier(self):
         assert ((self.order == 1) or (self.order == 2)), "Discrete canonical system order=" + str(self.order) + " is not supported! The only supported discrete canonical system order is either order==1 or order==2."
         if (self.order == 1):

@@ -136,5 +136,33 @@ class TransformSystemDiscrete(TransformationSystem, object):
         assert (dmptrajectory_demo_local.isValid())
         assert (dmptrajectory_demo_local.dmp_num_dimensions == self.dmp_num_dimensions)
         
+        dt = 1.0/robot_task_servo_rate
         traj_length = dmptrajectory_demo_local.getTrajectoryLength()
-        return f_target
+        start_dmpstate_demo_local = dmptrajectory_demo_local.getDMPStateAtIndex(0)
+        goal_steady_dmpstate_demo_local = dmptrajectory_demo_local.getDMPStateAtIndex(traj_length-1)
+        tau = goal_steady_dmpstate_demo_local.getTime()[0,0] - start_dmpstate_demo_local.getTime()[0,0]
+        if (tau < MIN_TAU):
+            tau = (1.0 * (traj_length - 1))/robot_task_servo_rate
+        self.tau_sys.setTauBase(tau)
+        self.canonical_sys.start()
+        self.start(start_dmpstate_demo_local, goal_steady_dmpstate_demo_local)
+        X_list = []
+        V_list = []
+        G_list = []
+        for i in range(traj_length):
+            x = self.canonical_sys.getCanonicalPosition()
+            v = self.canonical_sys.getCanonicalVelocity()
+            g = self.goal_sys.getCurrentGoalState().getX()
+            X_list.append(x)
+            V_list.append(v)
+            G_list.append(g)
+            
+            self.canonical_sys.updateCanonicalState(dt)
+            self.updateCurrentGoalState(dt)
+        X = np.hstack(X_list).reshape((1,traj_length))
+        V = np.hstack(V_list).reshape((1,traj_length))
+        G = np.hstack(G)
+        self.is_started = False
+        self.canonical_sys.is_started = False
+        self.goal_sys.is_started = False
+        return forcing_term_trajectory_target

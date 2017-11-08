@@ -36,6 +36,11 @@ class DMPState:
                 self.Xdd = Xdd_init
             else:
                 self.Xdd = np.zeros((self.dmp_num_dimensions,1))
+            if (len(self.X.shape) == 1):
+                self.X.reshape((self.dmp_num_dimensions, 1))
+                self.Xd.reshape((self.dmp_num_dimensions, 1))
+                self.Xdd.reshape((self.dmp_num_dimensions, 1))
+                self.time.reshape((1, 1))
     
     def isValid(self):
         assert (self.X.shape[0] == self.dmp_num_dimensions), "Dimension self.X.shape[0]=" + str(self.X.shape[0]) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
