@@ -42,8 +42,8 @@ class FuncApproximatorDiscrete(FunctionApproximator, object):
         return None
     
     def isValid(self):
-        assert (super(FuncApproximatorDiscrete, self).isValid() == True)
-        assert (self.canonical_sys.isValid() == True)
+        assert (super(FuncApproximatorDiscrete, self).isValid())
+        assert (self.canonical_sys.isValid())
         assert (self.centers != None)
         assert (self.bandwidths != None)
         assert (self.psi != None)
@@ -53,20 +53,20 @@ class FuncApproximatorDiscrete(FunctionApproximator, object):
         return True
     
     def getForcingTerm(self):
-        assert (self.isValid() == True)
+        assert (self.isValid())
         
         self.psi = self.getBasisFunctionTensor(self.canonical_sys.getCanonicalPosition())
         assert (self.psi.shape == (self.model_size,1)), "self.psi must be a column vector of size self.model_size!"
-        assert (np.isnan(self.psi).any() == True), "self.psi contains NaN!"
+        assert (np.isnan(self.psi).any()), "self.psi contains NaN!"
         sum_psi = np.sum(self.psi) + (self.model_size * 1.e-10)
         forcing_term = self.weights * self.psi * self.canonical_sys.getCanonicalMultiplier() / sum_psi
-        assert (np.isnan(forcing_term).any() == True), "forcing_term contains NaN!"
+        assert (np.isnan(forcing_term).any()), "forcing_term contains NaN!"
         basis_function_vector = copy.copy(self.psi)
         
         return forcing_term, basis_function_vector
     
     def getBasisFunctionTensor(self, canonical_X):
-        assert (self.isValid() == True)
+        assert (self.isValid())
         
         if (type(canonical_X) != np.ndarray):
             cX = canonical_X * np.ones((1,1))

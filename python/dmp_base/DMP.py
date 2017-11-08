@@ -44,10 +44,10 @@ class DMP:
         assert (self.canonical_sys != None)
         assert (self.func_approx != None)
         assert (self.transform_sys != None)
-        assert (self.tau_sys.isValid() == True)
-        assert (self.canonical_sys.isValid() == True)
-        assert (self.func_approx.isValid() == True)
-        assert (self.transform_sys.isValid() == True)
+        assert (self.tau_sys.isValid())
+        assert (self.canonical_sys.isValid())
+        assert (self.func_approx.isValid())
+        assert (self.transform_sys.isValid())
         assert (self.func_approx.dmp_num_dimensions == self.dmp_num_dimensions), "self.func_approx.dmp_num_dimensions=" + str(self.func_approx.dmp_num_dimensions) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
         assert (self.transform_sys.dmp_num_dimensions == self.dmp_num_dimensions), "self.transform_sys.dmp_num_dimensions=" + str(self.transform_sys.dmp_num_dimensions) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
         assert (self.func_approx.model_size == self.model_size), "self.func_approx.model_size=" + str(self.func_approx.model_size) + " is mis-matched with self.model_size=" + str(self.model_size) + "!"
@@ -62,7 +62,7 @@ class DMP:
         return True
     
     def preprocess(self, dmp_trajectories_list):
-        assert (self.isValid() == True), "Pre-condition(s) checking is failed: this DMP is invalid!"
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMP is invalid!"
         N_traj = len(dmp_trajectories_list)
         
         self.mean_start_position = np.zeros((self.dmp_num_dimensions,1))
@@ -72,7 +72,7 @@ class DMP:
             self.mean_goal_position = self.mean_goal_position + dmp_trajectory.X[:,[-1]]
         self.mean_start_position = self.mean_start_position/N_traj
         self.mean_goal_position = self.mean_goal_position/N_traj
-        assert (self.isValid() == True), "Post-condition(s) checking is failed: this DMP became invalid!"
+        assert (self.isValid()), "Post-condition(s) checking is failed: this DMP became invalid!"
         return None
     
     def learnFromPath(self, training_data_dir_or_file_path, robot_task_servo_rate):
@@ -86,11 +86,11 @@ class DMP:
         return tau_learn, critical_states_learn
     
     def start(self, dmp_unroll_init_parameters):
-        assert (dmp_unroll_init_parameters.isValid() == True)
+        assert (dmp_unroll_init_parameters.isValid())
         return (self.start(dmp_unroll_init_parameters.critical_states, dmp_unroll_init_parameters.tau))
     
     def getTargetCouplingTermAndUpdateStates(self, current_state_demo_local, dt):
-        assert (self.is_started == True)
+        assert (self.is_started)
         ct_acc_target = self.transform_sys.getTargetCouplingTerm(current_state_demo_local)
         self.canonical_sys.updateCanonicalState(dt)
         self.transform_sys.updateCurrentGoalState(dt)

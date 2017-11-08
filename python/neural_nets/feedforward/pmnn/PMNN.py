@@ -133,7 +133,7 @@ class PMNN(FeedForwardNeuralNetwork):
                         hidden_dim[dim_out] = activation_func_output
                         hidden_drop_dim[dim_out] = tf.nn.dropout(hidden_dim[dim_out], dropout_keep_prob)
                     elif (i == self.N_layers - 2): # Final Hidden Layer with Phase LWR Gating/Modulation
-                        if (self.is_using_phase_kernel_modulation == True):
+                        if (self.is_using_phase_kernel_modulation):
                             hidden_dim[dim_out] = normalized_phase_kernels * (tf.matmul(hidden_drop_dim[dim_out], weights) + biases)
                             hidden_drop_dim[dim_out] = hidden_dim[dim_out] # no dropout
                         else:   # if NOT using phase kernel modulation:

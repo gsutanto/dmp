@@ -60,29 +60,29 @@ class DMPState:
         return copy.copy(self.time)
     
     def setX(self, new_X):
-        assert (self.isValid() == True), "Pre-condition(s) checking is failed: this DMPState is invalid!"
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPState is invalid!"
         assert (self.dmp_num_dimensions == new_X.shape[0]), "self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + " is mis-matched with new_X.shape[0]=" + str(new_X.shape[0]) + "!"
         self.X = copy.copy(new_X)
-        assert (self.isValid() == True), "Post-condition(s) checking is failed: this DMPState became invalid!"
+        assert (self.isValid()), "Post-condition(s) checking is failed: this DMPState became invalid!"
         return None
     
     def setXd(self, new_Xd):
-        assert (self.isValid() == True), "Pre-condition(s) checking is failed: this DMPState is invalid!"
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPState is invalid!"
         assert (self.dmp_num_dimensions == new_Xd.shape[0]), "self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + " is mis-matched with new_Xd.shape[0]=" + str(new_Xd.shape[0]) + "!"
         self.Xd = copy.copy(new_Xd)
-        assert (self.isValid() == True), "Post-condition(s) checking is failed: this DMPState became invalid!"
+        assert (self.isValid()), "Post-condition(s) checking is failed: this DMPState became invalid!"
         return None
     
     def setXdd(self, new_Xdd):
-        assert (self.isValid() == True), "Pre-condition(s) checking is failed: this DMPState is invalid!"
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPState is invalid!"
         assert (self.dmp_num_dimensions == new_Xdd.shape[0]), "self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + " is mis-matched with new_Xdd.shape[0]=" + str(new_Xdd.shape[0]) + "!"
         self.Xdd = copy.copy(new_Xdd)
-        assert (self.isValid() == True), "Post-condition(s) checking is failed: this DMPState became invalid!"
+        assert (self.isValid()), "Post-condition(s) checking is failed: this DMPState became invalid!"
         return None
     
     def setTime(self, new_time):
-        assert (self.isValid() == True), "Pre-condition(s) checking is failed: this DMPState is invalid!"
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPState is invalid!"
         assert (np.amin(new_time) >= 0.0), "min(new_time)=" + str(np.amin(new_time)) + " < 0.0 (invalid!)"
         self.time = new_time
-        assert (self.isValid() == True), "Post-condition(s) checking is failed: this DMPState became invalid!"
+        assert (self.isValid()), "Post-condition(s) checking is failed: this DMPState became invalid!"
         return None

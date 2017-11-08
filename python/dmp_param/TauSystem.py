@@ -34,7 +34,7 @@ class TauSystem:
         return None
     
     def getTauRelative(self):
-        assert (self.isValid() == True), "TauSystem is invalid!"
+        assert (self.isValid()), "TauSystem is invalid!"
         C_tau = self.getCouplingTerm()
         tau_relative = (1.0 + C_tau) * (self.tau_base / self.tau_reference)
         assert (tau_relative * self.tau_reference >= MIN_TAU), 'tau_relative is too small!'

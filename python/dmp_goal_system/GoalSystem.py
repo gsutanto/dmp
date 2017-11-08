@@ -37,47 +37,47 @@ class GoalSystem:
     def isValid(self):
         assert (self.dmp_num_dimensions > 0), "self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + " <= 0 (invalid!)"
         assert (self.current_goal_state != None), "self.current_goal_state cannot be None!"
-        assert (self.current_goal_state.isValid() == True), "DMPState current_goal_state is invalid!"
+        assert (self.current_goal_state.isValid()), "DMPState current_goal_state is invalid!"
         assert (self.current_goal_state.dmp_num_dimensions == self.dmp_num_dimensions), "self.current_goal_state.dmp_num_dimensions=" + str(self.current_goal_state.dmp_num_dimensions) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
         assert (self.G.shape[0] == self.current_goal_state.X.shape[0])
         assert (self.tau_sys != None), "self.tau_sys cannot be None!"
-        assert (self.tau_sys.isValid() == True), "TauSystem tau_sys is invalid!"
+        assert (self.tau_sys.isValid()), "TauSystem tau_sys is invalid!"
         assert (self.alpha > 0.0), "self.alpha=" + str(self.alpha) + " <= 0 (invalid!)"
         return True
     
     def start(self, current_goal_state_init, G_init):
-        assert (self.isValid() == True), "Pre-condition(s) checking is failed: this GoalSystem is invalid!"
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this GoalSystem is invalid!"
         self.setCurrentGoalState(current_goal_state_init)
         self.setSteadyStateGoalPosition(G_init)
         self.is_started = True
-        assert (self.isValid() == True), "Post-condition(s) checking is failed: this GoalSystem became invalid!"
+        assert (self.isValid()), "Post-condition(s) checking is failed: this GoalSystem became invalid!"
         return None
     
     def getSteadyStateGoalPosition(self):
         return copy.copy(self.G)
     
     def setSteadyStateGoalPosition(self, new_G):
-        assert (self.isValid() == True), "Pre-condition(s) checking is failed: this GoalSystem is invalid!"
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this GoalSystem is invalid!"
         assert (new_G.shape[0] == self.G.shape[0]), "new_G.shape[0]=" + str(new_G.shape[0]) + " is mis-matched with self.G.shape[0]=" + str(self.G.shape[0])
         self.G = copy.copy(new_G)
-        assert (self.isValid() == True), "Post-condition(s) checking is failed: this GoalSystem became invalid!"
+        assert (self.isValid()), "Post-condition(s) checking is failed: this GoalSystem became invalid!"
         return None
     
     def getCurrentGoalState(self):
         return copy.copy(self.current_goal_state)
     
     def setCurrentGoalState(self, new_current_goal_state):
-        assert (self.isValid() == True), "Pre-condition(s) checking is failed: this GoalSystem is invalid!"
-        assert (new_current_goal_state.isValid() == True), "new_current_goal_state is invalid!"
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this GoalSystem is invalid!"
+        assert (new_current_goal_state.isValid()), "new_current_goal_state is invalid!"
         assert (new_current_goal_state.dmp_num_dimensions == self.dmp_num_dimensions), "new_current_goal_state.dmp_num_dimensions=" + str(new_current_goal_state.dmp_num_dimensions) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
         assert (new_current_goal_state.X.shape[0] == self.current_goal_state.X.shape[0]), "new_current_goal_state.X.shape[0]=" + str(new_current_goal_state.X.shape[0]) + " is mis-matched with self.current_goal_state.X.shape[0]=" + str(self.current_goal_state.X.shape[0])
         self.current_goal_state = copy.copy(new_current_goal_state)
-        assert (self.isValid() == True), "Post-condition(s) checking is failed: this GoalSystem became invalid!"
+        assert (self.isValid()), "Post-condition(s) checking is failed: this GoalSystem became invalid!"
         return None
     
     def updateCurrentGoalState(self, dt):
-        assert (self.is_started == True), "GoalSystem is NOT yet started!"
-        assert (self.isValid() == True), "Pre-condition(s) checking is failed: this GoalSystem is invalid!"
+        assert (self.is_started), "GoalSystem is NOT yet started!"
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this GoalSystem is invalid!"
         assert (dt > 0.0), "dt=" + str(dt) + " <= 0.0 (invalid!)"
         
         tau = self.tau_sys.getTauRelative()
@@ -88,5 +88,5 @@ class GoalSystem:
         self.current_goal_state.setXd(gd)
         self.current_goal_state.setTime(self.current_goal_state.getTime() + dt)
         
-        assert (self.isValid() == True), "Post-condition(s) checking is failed: this GoalSystem became invalid!"
+        assert (self.isValid()), "Post-condition(s) checking is failed: this GoalSystem became invalid!"
         return None

@@ -43,14 +43,14 @@ class CanonicalSystemDiscrete(CanonicalSystem, object):
         self.vd = 0.0
     
     def isValid(self):
-        assert (super(CanonicalSystemDiscrete, self).isValid() == True), "CanonicalSystem is invalid!"
+        assert (super(CanonicalSystemDiscrete, self).isValid()), "CanonicalSystem is invalid!"
         assert ((self.order == 1) or (self.order == 2)), "Discrete canonical system order=" + str(self.order) + " is not supported! The only supported discrete canonical system order is either order==1 or order==2."
         assert (self.alpha > 0.0), "self.alpha=" + str(self.alpha) + " <= 0.0 (invalid!)"
         assert (self.beta >= 0.0), "self.beta=" + str(self.beta) + " < 0.0 (invalid!)"
         return True
     
     def start(self):
-        assert (self.isValid() == True), "Pre-condition(s) checking is failed: this CanonicalSystemDiscrete is invalid!"
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this CanonicalSystemDiscrete is invalid!"
         self.x = 1.0
         self.xd = 0.0
         self.xdd = 0.0
@@ -72,8 +72,8 @@ class CanonicalSystemDiscrete(CanonicalSystem, object):
             return None
     
     def updateCanonicalState(self, dt):
-        assert (self.is_started == True), "CanonicalSystemDiscrete is NOT yet started!"
-        assert (self.isValid() == True), "Pre-condition(s) checking is failed: this CanonicalSystemDiscrete is invalid!"
+        assert (self.is_started), "CanonicalSystemDiscrete is NOT yet started!"
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this CanonicalSystemDiscrete is invalid!"
         assert (dt > 0.0), "dt=" + str(dt) + " <= 0.0 (invalid!)"
         
         tau = self.tau_sys.getTauRelative()

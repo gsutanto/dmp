@@ -34,7 +34,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
         self.A_learn = np.zeros((self.dmp_num_dimensions,1))
     
     def isValid(self):
-        assert (super(TransformSystemDiscrete, self).isValid() == True)
+        assert (super(TransformSystemDiscrete, self).isValid())
         assert (self.alpha > 0.0)
         assert (self.beta > 0.0)
         assert (len(self.is_using_scaling) == self.dmp_num_dimensions)
@@ -42,9 +42,9 @@ class TransformSystemDiscrete(TransformationSystem, object):
         return None
     
     def start(self, start_state_init, goal_state_init):
-        assert (self.isValid() == True), "Pre-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
-        assert (start_state_init.isValid() == True)
-        assert (goal_state_init.isValid() == True)
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
+        assert (start_state_init.isValid())
+        assert (goal_state_init.isValid())
         assert (start_state_init.dmp_num_dimensions == self.dmp_num_dimensions)
         assert (goal_state_init.dmp_num_dimensions == self.dmp_num_dimensions)
         
@@ -74,12 +74,12 @@ class TransformSystemDiscrete(TransformationSystem, object):
         self.goal_sys.start(current_goal_state_init, G_init)
         self.is_started = True
         
-        assert (self.isValid() == True), "Post-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
+        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
         return None
     
     def getNextState(self, dt):
-        assert (self.is_started == True)
-        assert (self.isValid() == True), "Pre-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
+        assert (self.is_started)
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
         assert (dt > 0.0)
         
         tau = self.tau_sys.getTauRelative()
@@ -107,7 +107,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
         A = G - x0
         
         for d in range(self.dmp_num_dimensions):
-            if (self.is_using_scaling[d] == True):
+            if (self.is_using_scaling[d]):
                 if (np.fabs(self.A_learn[d,0]) < MIN_FABS_AMPLITUDE):
                     A[d,0] = 1.0
                 else:
@@ -116,7 +116,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
                 A[d,0] = 1.0
         
         vd = ((self.alpha * ((self.beta * (g - x)) - v)) + (forcing_term * A) + ct_acc) / tau
-        assert (np.isnan(vd).any() == True), "vd contains NaN!"
+        assert (np.isnan(vd).any()), "vd contains NaN!"
         
         xdd = vd / tau
         xd = (v + ct_vel) / tau
@@ -131,5 +131,10 @@ class TransformSystemDiscrete(TransformationSystem, object):
         
         return next_state, forcing_term, ct_acc, ct_vel, basis_function_vector
     
-    def getTargetForcingTerm(self, current_state_demo_local):
+    def getTargetForcingTerm(self, dmptrajectory_demo_local, robot_task_servo_rate):
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
+        assert (dmptrajectory_demo_local.isValid())
+        assert (dmptrajectory_demo_local.dmp_num_dimensions == self.dmp_num_dimensions)
+        
+        traj_length = dmptrajectory_demo_local.getTrajectoryLength()
         return f_target

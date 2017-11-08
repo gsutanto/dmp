@@ -39,7 +39,7 @@ class DMPUnrollInitParams:
         critical_dmpstates_list.append(goal_dmpstate)
         self.critical_states = []
         for critical_dmpstate in critical_dmpstates_list:
-            if (is_zeroing_out_velocity_and_acceleration == True):
+            if (is_zeroing_out_velocity_and_acceleration):
                 self.critical_states.append(DMPState(critical_dmpstate.getX()))
             else:
                 self.critical_states.append(copy.copy(critical_dmpstate))
@@ -48,7 +48,7 @@ class DMPUnrollInitParams:
         assert (self.tau >= MIN_TAU), "DMPUnrollInitParams.tau=" + str(self.tau) + " < MIN_TAU"
         assert (len(self.critical_states) >= 2)
         for critical_state in self.critical_states:
-            assert (critical_state.isValid() == True)
+            assert (critical_state.isValid())
         return True
 
 def getDMPUnrollInitParams(start_dmpstate, goal_dmpstate, tau_init=None, robot_task_servo_rate=None, is_zeroing_out_velocity_and_acceleration=True):

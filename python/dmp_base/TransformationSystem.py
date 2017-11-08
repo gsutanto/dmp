@@ -61,18 +61,18 @@ class TransformationSystem:
         assert (self.canonical_sys != None)
         assert (self.func_approx != None)
         assert (self.goal_sys != None)
-        assert (self.tau_sys.isValid() == True)
-        assert (self.canonical_sys.isValid() == True)
-        assert (self.func_approx.isValid() == True)
-        assert (self.goal_sys.isValid() == True)
+        assert (self.tau_sys.isValid())
+        assert (self.canonical_sys.isValid())
+        assert (self.func_approx.isValid())
+        assert (self.goal_sys.isValid())
         assert (self.tau_sys == self.canonical_sys.tau_sys)
         assert (self.tau_sys == self.goal_sys.tau_sys)
         assert (self.start_state != None)
         assert (self.current_state != None)
         assert (self.current_velocity_state != None)
-        assert (self.start_state.isValid() == True)
-        assert (self.current_state.isValid() == True)
-        assert (self.current_velocity_state.isValid() == True)
+        assert (self.start_state.isValid())
+        assert (self.current_state.isValid())
+        assert (self.current_velocity_state.isValid())
         assert (self.func_approx.dmp_num_dimensions == self.dmp_num_dimensions), "self.func_approx.dmp_num_dimensions=" + str(self.func_approx.dmp_num_dimensions) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
         assert (self.goal_sys.dmp_num_dimensions == self.dmp_num_dimensions), "self.goal_sys.dmp_num_dimensions=" + str(self.goal_sys.dmp_num_dimensions) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
         assert (self.start_state.dmp_num_dimensions == self.dmp_num_dimensions), "self.start_state.dmp_num_dimensions=" + str(self.start_state.dmp_num_dimensions) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
@@ -95,27 +95,27 @@ class TransformationSystem:
         return copy.copy(self.start_state)
     
     def setStartState(self, new_start_state):
-        assert (self.isValid() == True), "Pre-condition(s) checking is failed: this TransformationSystem is invalid!"
-        assert (new_start_state.isValid() == True)
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformationSystem is invalid!"
+        assert (new_start_state.isValid())
         assert (self.start_state.dmp_num_dimensions == new_start_state.dmp_num_dimensions), "self.start_state.dmp_num_dimensions=" + str(self.start_state.dmp_num_dimensions) + " is mis-matched with new_start_state.dmp_num_dimensions=" + str(new_start_state.dmp_num_dimensions) + "!"
         self.start_state = copy.copy(new_start_state)
-        assert (self.isValid() == True), "Post-condition(s) checking is failed: this TransformationSystem became invalid!"
+        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformationSystem became invalid!"
         return None
     
     def getCurrentState(self):
         return copy.copy(self.current_state)
     
     def setCurrentState(self, new_current_state):
-        assert (self.isValid() == True), "Pre-condition(s) checking is failed: this TransformationSystem is invalid!"
-        assert (new_current_state.isValid() == True)
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformationSystem is invalid!"
+        assert (new_current_state.isValid())
         assert (self.current_state.dmp_num_dimensions == new_current_state.dmp_num_dimensions), "self.current_state.dmp_num_dimensions=" + str(self.current_state.dmp_num_dimensions) + " is mis-matched with new_current_state.dmp_num_dimensions=" + str(new_current_state.dmp_num_dimensions) + "!"
         self.current_state = copy.copy(new_current_state)
         self.updateCurrentVelocityStateFromCurrentState()
-        assert (self.isValid() == True), "Post-condition(s) checking is failed: this TransformationSystem became invalid!"
+        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformationSystem became invalid!"
         return None
     
     def updateCurrentVelocityStateFromCurrentState(self):
-        assert (self.isValid() == True), "Pre-condition(s) checking is failed: this TransformationSystem is invalid!"
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformationSystem is invalid!"
         
         tau = self.tau_sys.getTauRelative()
         Xd = self.current_state.getXd()
@@ -125,7 +125,7 @@ class TransformationSystem:
         self.current_velocity_state.setX(V)
         self.current_velocity_state.setXd(Vd)
         
-        assert (self.isValid() == True), "Post-condition(s) checking is failed: this TransformationSystem became invalid!"
+        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformationSystem became invalid!"
         return None
     
     def getCurrentGoalState(self):

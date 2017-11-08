@@ -26,7 +26,7 @@ class CanonicalSystem:
     
     def isValid(self):
         assert (self.tau_sys != None), "TauSystem tau_sys does NOT exist!"
-        assert (self.tau_sys.isValid() == True), "TauSystem tau_sys is invalid!"
+        assert (self.tau_sys.isValid()), "TauSystem tau_sys is invalid!"
         return True
     
     def getCouplingTerm(self):
