@@ -131,7 +131,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
         
         return next_state, forcing_term, ct_acc, ct_vel, basis_function_vector
     
-    def getTargetForcingTerm(self, dmptrajectory_demo_local, robot_task_servo_rate):
+    def getGoalTrajAndCanonicalTrajAndTauFromDemo(self, dmptrajectory_demo_local, robot_task_servo_rate):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
         assert (dmptrajectory_demo_local.isValid())
         assert (dmptrajectory_demo_local.dmp_num_dimensions == self.dmp_num_dimensions)
@@ -165,4 +165,29 @@ class TransformSystemDiscrete(TransformationSystem, object):
         self.is_started = False
         self.canonical_sys.is_started = False
         self.goal_sys.is_started = False
-        return forcing_term_trajectory_target
+        
+        goal_position_trajectory = G
+        canonical_position_trajectory = X # might be used later during learning
+        canonical_velocity_trajectory = V # might be used later during learning
+        return goal_position_trajectory, canonical_position_trajectory, canonical_velocity_trajectory, tau
+    
+    def getTargetForcingTermTraj(self, dmptrajectory_demo_local, robot_task_servo_rate):
+        G, cX, cV, tau = self.getGoalTrajAndCanonicalTrajAndTauFromDemo(dmptrajectory_demo_local, robot_task_servo_rate)
+        
+        T = dmptrajectory_demo_local.getX()
+        Td = dmptrajectory_demo_local.getXd()
+        Tdd = dmptrajectory_demo_local.getXdd()
+        F_target = ((tau^2 * Tdd) - (self.alpha * ((self.beta * (G - T)) - (tau * Td))))
+        
+        return F_target, cX, cV
+    
+    def getTargetCouplingTermTraj(self, dmptrajectory_demo_local, robot_task_servo_rate):
+        G, cX, cV, tau = self.getGoalTrajAndCanonicalTrajAndTauFromDemo(dmptrajectory_demo_local, robot_task_servo_rate)
+        
+        T = dmptrajectory_demo_local.getX()
+        Td = dmptrajectory_demo_local.getXd()
+        Tdd = dmptrajectory_demo_local.getXdd()
+        F, PSI = getForcingTermTraj(cX, cV)
+        C_target = ((tau^2 * Tdd) - (self.alpha * ((self.beta * (G - T)) - (tau * Td))) - F)
+        
+        return C_target, F, PSI, cX, cV
