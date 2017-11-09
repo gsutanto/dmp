@@ -131,15 +131,19 @@ class TransformSystemDiscrete(TransformationSystem, object):
         
         return next_state, forcing_term, ct_acc, ct_vel, basis_function_vector
     
-    def getGoalTrajAndCanonicalTrajAndTauFromDemo(self, dmptrajectory_demo_local, robot_task_servo_rate):
+    def getGoalTrajAndCanonicalTrajAndTauFromDemo(self, dmptrajectory_demo_local, robot_task_servo_rate, steady_state_goal_position_local=None):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
         assert (dmptrajectory_demo_local.isValid())
         assert (dmptrajectory_demo_local.dmp_num_dimensions == self.dmp_num_dimensions)
+        assert (robot_task_servo_rate > 0.0)
         
         dt = 1.0/robot_task_servo_rate
         traj_length = dmptrajectory_demo_local.getTrajectoryLength()
         start_dmpstate_demo_local = dmptrajectory_demo_local.getDMPStateAtIndex(0)
-        goal_steady_dmpstate_demo_local = dmptrajectory_demo_local.getDMPStateAtIndex(traj_length-1)
+        if (steady_state_goal_position_local == None):
+            goal_steady_dmpstate_demo_local = dmptrajectory_demo_local.getDMPStateAtIndex(traj_length-1)
+        else:
+            goal_steady_dmpstate_demo_local = DMPState(steady_state_goal_position_local)
         tau = goal_steady_dmpstate_demo_local.getTime()[0,0] - start_dmpstate_demo_local.getTime()[0,0]
         if (tau < MIN_TAU):
             tau = (1.0 * (traj_length - 1))/robot_task_servo_rate
@@ -179,10 +183,10 @@ class TransformSystemDiscrete(TransformationSystem, object):
         Tdd = dmptrajectory_demo_local.getXdd()
         F_target = ((tau^2 * Tdd) - (self.alpha * ((self.beta * (G - T)) - (tau * Td))))
         
-        return F_target, cX, cV
+        return F_target, cX, cV, tau
     
-    def getTargetCouplingTermTraj(self, dmptrajectory_demo_local, robot_task_servo_rate):
-        G, cX, cV, tau = self.getGoalTrajAndCanonicalTrajAndTauFromDemo(dmptrajectory_demo_local, robot_task_servo_rate)
+    def getTargetCouplingTermTraj(self, dmptrajectory_demo_local, robot_task_servo_rate, steady_state_goal_position_local):
+        G, cX, cV, tau = self.getGoalTrajAndCanonicalTrajAndTauFromDemo(dmptrajectory_demo_local, robot_task_servo_rate, steady_state_goal_position_local)
         
         T = dmptrajectory_demo_local.getX()
         Td = dmptrajectory_demo_local.getXd()
@@ -190,4 +194,4 @@ class TransformSystemDiscrete(TransformationSystem, object):
         F, PSI = getForcingTermTraj(cX, cV)
         C_target = ((tau^2 * Tdd) - (self.alpha * ((self.beta * (G - T)) - (tau * Td))) - F)
         
-        return C_target, F, PSI, cX, cV
+        return C_target, F, PSI, cX, cV, tau

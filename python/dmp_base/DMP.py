@@ -24,11 +24,12 @@ from DataIO import *
 class DMP:
     'Base class for DMPs.'
     
-    def __init__(self, transform_system, name=""):
+    def __init__(self, canonical_system, function_approximator, transform_system, learning_system, name=""):
         self.name = name
+        self.learning_sys = learning_system
         self.transform_sys = transform_system
-        self.func_approx = self.transform_sys.func_approx
-        self.canonical_sys = self.transform_sys.canonical_sys
+        self.func_approx = function_approximator
+        self.canonical_sys = canonical_system
         self.tau_sys = self.canonical_sys.tau_sys
         self.dmp_num_dimensions = self.func_approx.dmp_num_dimensions
         self.model_size = self.func_approx.model_size
