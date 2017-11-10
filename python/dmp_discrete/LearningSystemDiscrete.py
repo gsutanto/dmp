@@ -30,5 +30,8 @@ class LearningSystemDiscrete(LearningSystem, object):
         assert (self.isValid())
         assert (robot_task_servo_rate > 0.0)
         
+        N_traj = len(set_dmptrajectory_demo_local)
+        assert (N_traj > 0)
+        
         
         return None
