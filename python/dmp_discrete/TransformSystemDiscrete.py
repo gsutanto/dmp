@@ -83,7 +83,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
         assert (dt > 0.0)
         
         tau = self.tau_sys.getTauRelative()
-        forcing_term, basis_function_vector = getForcingTerm()
+        forcing_term, basis_function_vector = self.func_approx.getForcingTerm()
         ct_acc, ct_vel = self.getCouplingTerm()
         for d in range(self.dmp_num_dimensions):
             if (self.is_using_coupling_term_at_dimension[d] == False):
@@ -196,3 +196,20 @@ class TransformSystemDiscrete(TransformationSystem, object):
         C_target = ((tau^2 * Tdd) - (self.alpha * ((self.beta * (G - T)) - (tau * Td))) - F)
         
         return C_target, F, PSI, cX, cV, tau
+    
+    def setScalingUsage(self, is_using_scaling_init):
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
+        assert (len(is_using_scaling_init) == self.dmp_num_dimensions)
+        self.is_using_scaling = is_using_scaling_init
+        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
+        return None
+    
+    def getLearningAmplitude(self):
+        return copy.copy(self.A_learn)
+    
+    def setLearningAmplitude(self, new_A_learn):
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
+        assert (new_A_learn.shape[0] == self.dmp_num_dimensions)
+        self.A_learn = new_A_learn
+        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
+        return None

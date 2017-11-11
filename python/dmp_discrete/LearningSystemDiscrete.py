@@ -70,6 +70,7 @@ class LearningSystemDiscrete(LearningSystem, object):
         W = np.vstack(list_w)
         assert (np.isnan(W).any()), "Learned W contains NaN!"
         self.transform_sys.func_approx.weights = W
+        self.transform_sys.A_learn = mean_A_learn
         Fp = np.matmul(W, PSI) * np.matmul(np.ones((1, self.transform_sys.dmp_num_dimensions)), (MULT * 1.0 / np.sum(PSI, axis=0).reshape((1,PSI.shape[1])))) # predicted forcing term
         NMSE = computeNMSE(Fp.T, Ft.T)
         print ('NMSE = '+ str(NMSE))
