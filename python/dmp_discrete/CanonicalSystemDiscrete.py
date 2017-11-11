@@ -82,13 +82,13 @@ class CanonicalSystemDiscrete(CanonicalSystem, object):
         tau = self.tau_sys.getTauRelative()
         C_c = self.getCouplingTerm()
         if (self.order == 2):
-            self.xdd = self.vd/tau
-            self.vd = ((self.alpha * ((self.beta * (0 - self.x)) - v)) + C_c) / tau
-            self.xd = self.v/tau
+            self.xdd = self.vd * 1.0 / tau
+            self.vd = ((self.alpha * ((self.beta * (0 - self.x)) - v)) + C_c) * 1.0 / tau
+            self.xd = self.v * 1.0 / tau
         elif (self.order == 1):
-            self.xdd = self.vd/tau
+            self.xdd = self.vd * 1.0 / tau
             self.vd = 0.0
-            self.xd = ((self.alpha * (0 - self.x)) + C_c) / tau
+            self.xd = ((self.alpha * (0 - self.x)) + C_c) * 1.0 / tau
         self.x = self.x + (self.xd * dt)
         self.v = self.v + (self.vd * dt)
         

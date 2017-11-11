@@ -66,7 +66,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
             xdd0 = start_state_init.getXdd()
             
             tau = self.tau_sys.getTauRelative()
-            g0 = ((((tau*tau*xdd0)/self.alpha) + (tau*xd0))/self.beta) + x0
+            g0 = ((((tau*tau*xdd0) * 1.0 / self.alpha) + (tau*xd0)) * 1.0 / self.beta) + x0
             current_goal_state_init = DMPState(g0)
         elif (self.canonical_sys.order == 1):
             current_goal_state_init = goal_state_init
@@ -111,15 +111,15 @@ class TransformSystemDiscrete(TransformationSystem, object):
                 if (np.fabs(self.A_learn[d,0]) < MIN_FABS_AMPLITUDE):
                     A[d,0] = 1.0
                 else:
-                    A[d,0] = A[d,0] / self.A_learn[d,0]
+                    A[d,0] = A[d,0] * 1.0 / self.A_learn[d,0]
             else:
                 A[d,0] = 1.0
         
-        vd = ((self.alpha * ((self.beta * (g - x)) - v)) + (forcing_term * A) + ct_acc) / tau
+        vd = ((self.alpha * ((self.beta * (g - x)) - v)) + (forcing_term * A) + ct_acc) * 1.0 / tau
         assert (np.isnan(vd).any()), "vd contains NaN!"
         
-        xdd = vd / tau
-        xd = (v + ct_vel) / tau
+        xdd = vd * 1.0 / tau
+        xd = (v + ct_vel) * 1.0 / tau
         
         v = v + (vd * dt)
         
@@ -131,7 +131,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
         
         return next_state, forcing_term, ct_acc, ct_vel, basis_function_vector
     
-    def getGoalTrajAndCanonicalTrajAndTauFromDemo(self, dmptrajectory_demo_local, robot_task_servo_rate, steady_state_goal_position_local=None):
+    def getGoalTrajAndCanonicalTrajAndTauAndALearnFromDemo(self, dmptrajectory_demo_local, robot_task_servo_rate, steady_state_goal_position_local=None):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
         assert (dmptrajectory_demo_local.isValid())
         assert (dmptrajectory_demo_local.dmp_num_dimensions == self.dmp_num_dimensions)
@@ -145,6 +145,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
         else:
             goal_steady_dmpstate_demo_local = DMPState(steady_state_goal_position_local)
         tau = goal_steady_dmpstate_demo_local.getTime()[0,0] - start_dmpstate_demo_local.getTime()[0,0]
+        A_learn = goal_steady_dmpstate_demo_local.getX() - start_dmpstate_demo_local.getX()
         if (tau < MIN_TAU):
             tau = (1.0 * (traj_length - 1))/robot_task_servo_rate
         self.tau_sys.setTauBase(tau)
@@ -173,20 +174,20 @@ class TransformSystemDiscrete(TransformationSystem, object):
         goal_position_trajectory = G
         canonical_position_trajectory = X # might be used later during learning
         canonical_velocity_trajectory = V # might be used later during learning
-        return goal_position_trajectory, canonical_position_trajectory, canonical_velocity_trajectory, tau
+        return goal_position_trajectory, canonical_position_trajectory, canonical_velocity_trajectory, tau, A_learn
     
     def getTargetForcingTermTraj(self, dmptrajectory_demo_local, robot_task_servo_rate):
-        G, cX, cV, tau = self.getGoalTrajAndCanonicalTrajAndTauFromDemo(dmptrajectory_demo_local, robot_task_servo_rate)
+        G, cX, cV, tau, A_learn = self.getGoalTrajAndCanonicalTrajAndTauAndALearnFromDemo(dmptrajectory_demo_local, robot_task_servo_rate)
         
         T = dmptrajectory_demo_local.getX()
         Td = dmptrajectory_demo_local.getXd()
         Tdd = dmptrajectory_demo_local.getXdd()
         F_target = ((tau^2 * Tdd) - (self.alpha * ((self.beta * (G - T)) - (tau * Td))))
         
-        return F_target, cX, cV, tau
+        return F_target, cX, cV, tau, A_learn
     
     def getTargetCouplingTermTraj(self, dmptrajectory_demo_local, robot_task_servo_rate, steady_state_goal_position_local):
-        G, cX, cV, tau = self.getGoalTrajAndCanonicalTrajAndTauFromDemo(dmptrajectory_demo_local, robot_task_servo_rate, steady_state_goal_position_local)
+        G, cX, cV, tau, A_learn = self.getGoalTrajAndCanonicalTrajAndTauAndALearnFromDemo(dmptrajectory_demo_local, robot_task_servo_rate, steady_state_goal_position_local)
         
         T = dmptrajectory_demo_local.getX()
         Td = dmptrajectory_demo_local.getXd()

@@ -82,7 +82,7 @@ class GoalSystem:
         
         tau = self.tau_sys.getTauRelative()
         g = self.current_goal_state.getX()
-        gd = (self.alpha/tau) * (self.G - g)
+        gd = (self.alpha * 1.0 / tau) * (self.G - g)
         g = g + (gd * dt)
         self.current_goal_state.setX(g)
         self.current_goal_state.setXd(gd)

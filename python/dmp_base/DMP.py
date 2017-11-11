@@ -71,8 +71,8 @@ class DMP:
         for dmp_trajectory in dmp_trajectories_list:
             self.mean_start_position = self.mean_start_position + dmp_trajectory.X[:,[0]]
             self.mean_goal_position = self.mean_goal_position + dmp_trajectory.X[:,[-1]]
-        self.mean_start_position = self.mean_start_position/N_traj
-        self.mean_goal_position = self.mean_goal_position/N_traj
+        self.mean_start_position = self.mean_start_position * 1.0 / N_traj
+        self.mean_goal_position = self.mean_goal_position * 1.0 / N_traj
         assert (self.isValid()), "Post-condition(s) checking is failed: this DMP became invalid!"
         return None
     

@@ -70,7 +70,7 @@ class FuncApproximatorDiscrete(FunctionApproximator, object):
         assert (self.psi.shape == (self.model_size,1)), "self.psi must be a column vector of size self.model_size!"
         assert (np.isnan(self.psi).any()), "self.psi contains NaN!"
         sum_psi = np.sum(self.psi + 1.e-10)
-        forcing_term = np.matmul(self.weights, self.psi) * self.canonical_sys.getCanonicalMultiplier() / sum_psi
+        forcing_term = np.matmul(self.weights, self.psi) * self.canonical_sys.getCanonicalMultiplier() * 1.0 / sum_psi
         assert (np.isnan(forcing_term).any()), "forcing_term contains NaN!"
         basis_function_vector = copy.copy(self.psi)
         
@@ -86,11 +86,11 @@ class FuncApproximatorDiscrete(FunctionApproximator, object):
         assert (PSI.shape[0] == self.model_size)
         assert (np.isnan(PSI).any()), "PSI contains NaN!"
         if (canonical_order == 1):
-            forcing_term_trajectory = np.matmul(self.weights, PSI) * np.matmul(np.ones((1, self.dmp_num_dimensions)), (X / np.sum(PSI, axis=0).reshape((1,traj_length))))
-            #forcing_term_trajectory = np.matmul(self.weights, PSI) * np.matmul(np.ones((1, self.dmp_num_dimensions)), (X / np.sum(PSI + 1.e-10, axis=0).reshape((1,traj_length))))
+            forcing_term_trajectory = np.matmul(self.weights, PSI) * np.matmul(np.ones((1, self.dmp_num_dimensions)), (X * 1.0 / np.sum(PSI, axis=0).reshape((1,traj_length))))
+            #forcing_term_trajectory = np.matmul(self.weights, PSI) * np.matmul(np.ones((1, self.dmp_num_dimensions)), (X * 1.0 / np.sum(PSI + 1.e-10, axis=0).reshape((1,traj_length))))
         elif (canonical_order == 2):
-            forcing_term_trajectory = np.matmul(self.weights, PSI) * np.matmul(np.ones((1, self.dmp_num_dimensions)), (V / np.sum(PSI, axis=0).reshape((1,traj_length))))
-            #forcing_term_trajectory = np.matmul(self.weights, PSI) * np.matmul(np.ones((1, self.dmp_num_dimensions)), (V / np.sum(PSI + 1.e-10, axis=0).reshape((1,traj_length))))
+            forcing_term_trajectory = np.matmul(self.weights, PSI) * np.matmul(np.ones((1, self.dmp_num_dimensions)), (V * 1.0 / np.sum(PSI, axis=0).reshape((1,traj_length))))
+            #forcing_term_trajectory = np.matmul(self.weights, PSI) * np.matmul(np.ones((1, self.dmp_num_dimensions)), (V * 1.0 / np.sum(PSI + 1.e-10, axis=0).reshape((1,traj_length))))
         assert (np.isnan(forcing_term_trajectory).any()), "forcing_term_trajectory contains NaN!"
         basis_function_trajectory = PSI
         
