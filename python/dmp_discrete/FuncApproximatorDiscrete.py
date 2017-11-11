@@ -44,12 +44,11 @@ class FuncApproximatorDiscrete(FunctionApproximator, object):
     def isValid(self):
         assert (super(FuncApproximatorDiscrete, self).isValid())
         assert (self.canonical_sys.isValid())
-        assert (self.centers != None)
-        assert (self.bandwidths != None)
-        assert (self.psi != None)
         assert (self.centers.shape[0] == self.model_size)
         assert (self.bandwidths.shape[0] == self.model_size)
         assert (self.psi.shape[0] == self.model_size)
+        assert (np.array_equal(self.centers, np.zeros((self.model_size,1))) == False)
+        assert (np.array_equal(self.bandwidths, np.zeros((self.model_size,1))) == False)
         return True
     
     def getBasisFunctionTensor(self, canonical_X):
@@ -68,10 +67,10 @@ class FuncApproximatorDiscrete(FunctionApproximator, object):
         
         self.psi = self.getBasisFunctionTensor(self.canonical_sys.getCanonicalPosition())
         assert (self.psi.shape == (self.model_size,1)), "self.psi must be a column vector of size self.model_size!"
-        assert (np.isnan(self.psi).any()), "self.psi contains NaN!"
+        assert (np.isnan(self.psi).any() == False), "self.psi contains NaN!"
         sum_psi = np.sum(self.psi + 1.e-10)
         forcing_term = np.matmul(self.weights, self.psi) * self.canonical_sys.getCanonicalMultiplier() * 1.0 / sum_psi
-        assert (np.isnan(forcing_term).any()), "forcing_term contains NaN!"
+        assert (np.isnan(forcing_term).any() == False), "forcing_term contains NaN!"
         basis_function_vector = copy.copy(self.psi)
         
         return forcing_term, basis_function_vector
@@ -84,14 +83,14 @@ class FuncApproximatorDiscrete(FunctionApproximator, object):
         V = canonical_velocity_trajectory
         PSI = self.getBasisFunctionTensor(X)
         assert (PSI.shape[0] == self.model_size)
-        assert (np.isnan(PSI).any()), "PSI contains NaN!"
+        assert (np.isnan(PSI).any() == False), "PSI contains NaN!"
         if (canonical_order == 1):
             forcing_term_trajectory = np.matmul(self.weights, PSI) * np.matmul(np.ones((1, self.dmp_num_dimensions)), (X * 1.0 / np.sum(PSI, axis=0).reshape((1,traj_length))))
             #forcing_term_trajectory = np.matmul(self.weights, PSI) * np.matmul(np.ones((1, self.dmp_num_dimensions)), (X * 1.0 / np.sum(PSI + 1.e-10, axis=0).reshape((1,traj_length))))
         elif (canonical_order == 2):
             forcing_term_trajectory = np.matmul(self.weights, PSI) * np.matmul(np.ones((1, self.dmp_num_dimensions)), (V * 1.0 / np.sum(PSI, axis=0).reshape((1,traj_length))))
             #forcing_term_trajectory = np.matmul(self.weights, PSI) * np.matmul(np.ones((1, self.dmp_num_dimensions)), (V * 1.0 / np.sum(PSI + 1.e-10, axis=0).reshape((1,traj_length))))
-        assert (np.isnan(forcing_term_trajectory).any()), "forcing_term_trajectory contains NaN!"
+        assert (np.isnan(forcing_term_trajectory).any() == False), "forcing_term_trajectory contains NaN!"
         basis_function_trajectory = PSI
         
         return forcing_term_trajectory, basis_function_trajectory

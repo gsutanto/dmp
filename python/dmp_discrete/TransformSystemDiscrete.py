@@ -19,12 +19,13 @@ from CanonicalSystemDiscrete import *
 class TransformSystemDiscrete(TransformationSystem, object):
     'Class for transformation systems of discrete DMPs.'
     
-    def __init__(self, canonical_system_discrete, func_approximator_discrete, 
+    def __init__(self, dmp_num_dimensions_init, canonical_system_discrete, func_approximator_discrete, 
                  is_using_scaling_init, ts_alpha=25.0, ts_beta=25.0/4.0,
                  start_dmpstate_discrete=None, current_dmpstate_discrete=None, 
                  current_velocity_dmpstate_discrete=None, goal_system_discrete=None,
                  transform_couplers_list=[], name=""):
-        super(TransformSystemDiscrete, self).__init__(canonical_system_discrete, func_approximator_discrete, 
+        super(TransformSystemDiscrete, self).__init__(dmp_num_dimensions_init,
+                                                      canonical_system_discrete, func_approximator_discrete, 
                                                       start_dmpstate_discrete, current_dmpstate_discrete, 
                                                       current_velocity_dmpstate_discrete, goal_system_discrete,
                                                       transform_couplers_list, name)
@@ -39,7 +40,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
         assert (self.beta > 0.0)
         assert (len(self.is_using_scaling) == self.dmp_num_dimensions)
         assert (self.A_learn.shape[0] == self.dmp_num_dimensions)
-        return None
+        return True
     
     def start(self, start_state_init, goal_state_init):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
@@ -116,7 +117,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
                 A[d,0] = 1.0
         
         vd = ((self.alpha * ((self.beta * (g - x)) - v)) + (forcing_term * A) + ct_acc) * 1.0 / tau
-        assert (np.isnan(vd).any()), "vd contains NaN!"
+        assert (np.isnan(vd).any() == False), "vd contains NaN!"
         
         xdd = vd * 1.0 / tau
         xd = (v + ct_vel) * 1.0 / tau
@@ -166,7 +167,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
             self.updateCurrentGoalState(dt)
         X = np.hstack(X_list).reshape((1,traj_length))
         V = np.hstack(V_list).reshape((1,traj_length))
-        G = np.hstack(G)
+        G = np.hstack(G_list)
         self.is_started = False
         self.canonical_sys.is_started = False
         self.goal_sys.is_started = False
@@ -174,28 +175,29 @@ class TransformSystemDiscrete(TransformationSystem, object):
         goal_position_trajectory = G
         canonical_position_trajectory = X # might be used later during learning
         canonical_velocity_trajectory = V # might be used later during learning
-        return goal_position_trajectory, canonical_position_trajectory, canonical_velocity_trajectory, tau, A_learn
+        tau_relative = self.tau_sys.getTauRelative()
+        return goal_position_trajectory, canonical_position_trajectory, canonical_velocity_trajectory, tau, tau_relative, A_learn
     
     def getTargetForcingTermTraj(self, dmptrajectory_demo_local, robot_task_servo_rate):
-        G, cX, cV, tau, A_learn = self.getGoalTrajAndCanonicalTrajAndTauAndALearnFromDemo(dmptrajectory_demo_local, robot_task_servo_rate)
+        G, cX, cV, tau, tau_relative, A_learn = self.getGoalTrajAndCanonicalTrajAndTauAndALearnFromDemo(dmptrajectory_demo_local, robot_task_servo_rate)
         
         T = dmptrajectory_demo_local.getX()
         Td = dmptrajectory_demo_local.getXd()
         Tdd = dmptrajectory_demo_local.getXdd()
-        F_target = ((tau^2 * Tdd) - (self.alpha * ((self.beta * (G - T)) - (tau * Td))))
+        F_target = ((np.square(tau_relative) * Tdd) - (self.alpha * ((self.beta * (G - T)) - (tau_relative * Td))))
         
-        return F_target, cX, cV, tau, A_learn
+        return F_target, cX, cV, tau, tau_relative, A_learn, G
     
     def getTargetCouplingTermTraj(self, dmptrajectory_demo_local, robot_task_servo_rate, steady_state_goal_position_local):
-        G, cX, cV, tau, A_learn = self.getGoalTrajAndCanonicalTrajAndTauAndALearnFromDemo(dmptrajectory_demo_local, robot_task_servo_rate, steady_state_goal_position_local)
+        G, cX, cV, tau, tau_relative, A_learn = self.getGoalTrajAndCanonicalTrajAndTauAndALearnFromDemo(dmptrajectory_demo_local, robot_task_servo_rate, steady_state_goal_position_local)
         
         T = dmptrajectory_demo_local.getX()
         Td = dmptrajectory_demo_local.getXd()
         Tdd = dmptrajectory_demo_local.getXdd()
         F, PSI = getForcingTermTraj(cX, cV)
-        C_target = ((tau^2 * Tdd) - (self.alpha * ((self.beta * (G - T)) - (tau * Td))) - F)
+        C_target = ((np.square(tau_relative) * Tdd) - (self.alpha * ((self.beta * (G - T)) - (tau_relative * Td))) - F)
         
-        return C_target, F, PSI, cX, cV, tau
+        return C_target, F, PSI, cX, cV, tau, tau_relative, G
     
     def setScalingUsage(self, is_using_scaling_init):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"

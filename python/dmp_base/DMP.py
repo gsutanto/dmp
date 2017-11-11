@@ -79,15 +79,15 @@ class DMP:
     
     def learnFromPath(self, training_data_dir_or_file_path, robot_task_servo_rate):
         set_traj_input = self.extractSetTrajectories(training_data_dir_or_file_path)
-        self.learn(set_traj_input, robot_task_servo_rate)
+        W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI = self.learn(set_traj_input, robot_task_servo_rate)
         tau_learn = self.mean_tau
         critical_states_list_learn = []
         critical_states_list_learn.append(DMPState(self.mean_start_position))
         critical_states_list_learn.append(DMPState(self.mean_goal_position))
         critical_states_learn = convertDMPStatesListIntoDMPTrajectory(critical_states_list_learn)
-        return tau_learn, critical_states_learn
+        return tau_learn, critical_states_learn, W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI
     
-    def start(self, dmp_unroll_init_parameters):
+    def startWithUnrollParams(self, dmp_unroll_init_parameters):
         assert (dmp_unroll_init_parameters.isValid())
         return (self.start(dmp_unroll_init_parameters.critical_states, dmp_unroll_init_parameters.tau))
     
@@ -97,6 +97,15 @@ class DMP:
         self.canonical_sys.updateCanonicalState(dt)
         self.transform_sys.updateCurrentGoalState(dt)
         return ct_acc_target
+    
+    def getMeanStartPosition(self):
+        return copy.copy(self.mean_start_position)
+    
+    def getMeanGoalPosition(self):
+        return copy.copy(self.mean_goal_position)
+    
+    def getMeanTau(self):
+        return copy.copy(self.mean_tau)
     
     def setTransformSystemCouplingTermUsagePerDimensions(self, is_using_transform_sys_coupling_term_at_dimension_init):
         return self.transform_sys.setCouplingTermUsagePerDimensions(is_using_transform_sys_coupling_term_at_dimension_init)

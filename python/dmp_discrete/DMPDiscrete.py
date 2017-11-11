@@ -28,6 +28,7 @@ class DMPDiscrete(DMP, object):
         self.transform_sys_discrete = transform_system_discrete
         self.func_approx_discrete = FuncApproximatorDiscrete(dmp_num_dimensions_init, model_size_init,
                                                              self.canonical_sys_discrete, name)
+        self.transform_sys_discrete.func_approx = self.func_approx_discrete
         self.learning_sys_discrete = LearningSystemDiscrete(self.transform_sys_discrete, name)
         super(DMPDiscrete, self).__init__(self.canonical_sys_discrete, self.func_approx_discrete,
                                           self.transform_sys_discrete, self.learning_sys_discrete, 
@@ -48,11 +49,11 @@ class DMPDiscrete(DMP, object):
         assert (robot_task_servo_rate > 0.0)
         
         list_preprocessed_dmptrajectory_demo_local = self.preprocess(list_dmptrajectory_demo_local)
-        W, mean_A_learn, mean_tau = self.learning_sys_discrete.learnApproximator(list_preprocessed_dmptrajectory_demo_local, robot_task_servo_rate)
+        W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI = self.learning_sys_discrete.learnApproximator(list_preprocessed_dmptrajectory_demo_local, robot_task_servo_rate)
         self.mean_tau = mean_tau
         assert (self.mean_tau >= MIN_TAU)
         assert (self.isValid()), "Post-condition(s) checking is failed: this DMPDiscrete became invalid!"
-        return None
+        return W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI
     
     def start(self, critical_states, tau_init):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPDiscrete is invalid!"
@@ -85,7 +86,7 @@ class DMPDiscrete(DMP, object):
         self.transform_sys_discrete.updateCurrentGoalState(dt)
         
         assert (self.isValid()), "Post-condition(s) checking is failed: this DMPDiscrete became invalid!"
-        return None
+        return next_state, forcing_term, ct_acc, ct_vel, basis_function_vector
     
     def getCurrentState(self):
         return self.transform_sys_discrete.getCurrentState()

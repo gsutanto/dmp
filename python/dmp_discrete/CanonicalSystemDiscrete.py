@@ -83,7 +83,7 @@ class CanonicalSystemDiscrete(CanonicalSystem, object):
         C_c = self.getCouplingTerm()
         if (self.order == 2):
             self.xdd = self.vd * 1.0 / tau
-            self.vd = ((self.alpha * ((self.beta * (0 - self.x)) - v)) + C_c) * 1.0 / tau
+            self.vd = ((self.alpha * ((self.beta * (0 - self.x)) - self.v)) + C_c) * 1.0 / tau
             self.xd = self.v * 1.0 / tau
         elif (self.order == 1):
             self.xdd = self.vd * 1.0 / tau
