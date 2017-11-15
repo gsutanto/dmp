@@ -34,6 +34,8 @@
 ../software_test/execute_cpp_test.sh "./amd_clmc_dmp_cart_coord_dmp_multi_traj_training_demo -f 0 -c 2" test_cpp_cart_coord_dmp_multi_traj_training_test_0_2.txt
 ../software_test/compare_execution_result.sh "./amd_clmc_dmp_cart_coord_dmp_multi_traj_training_demo -f 1 -c 2" result_cart_coord_dmp_multi_traj_training_test_1_2.txt
 
+python ../software_test/execute_python_tests_and_compare_w_cpp_tests.py
+
 ../software_test/execute_cpp_test.sh "./amd_clmc_dmp_quat_dmp_unroll_demo" test_cpp_quat_dmp_unroll_test.txt
 
 ../software_test/execute_cpp_test.sh "./amd_clmc_dmp_pmnn_demo" test_cpp_pmnn_test.txt

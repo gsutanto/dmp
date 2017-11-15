@@ -21,8 +21,8 @@ from CanonicalSystemDiscrete import *
 from DMPDiscrete1D import *
 from utilities import *
 
-def dmp_1D_test(canonical_order=2, time_reproduce_max=0.0, time_goal_change=0.0, 
-                new_goal_scalar=0.0, tau_reproduce=0.0):
+def dmp_1D_test(amd_clmc_dmp_home_dir_path="../../../", canonical_order=2, time_reproduce_max=0.0, time_goal_change=0.0, 
+                new_goal_scalar=0.0, tau_reproduce=0.0, unroll_traj_save_dir_path="", unroll_traj_save_filename=""):
     task_servo_rate = 1000.0
     model_size = 25
     tau = MIN_TAU
@@ -40,7 +40,7 @@ def dmp_1D_test(canonical_order=2, time_reproduce_max=0.0, time_goal_change=0.0,
     dmp_discrete_1D = DMPDiscrete1D(model_size, can_sys_discr)
     [tau_learn, critical_states_learn, 
      W, mean_A_learn, mean_tau, 
-     Ft, Fp, G, cX, cV, PSI] = dmp_discrete_1D.learnFromPath("../../../data/dmp_1D/sample_traj_1.txt", task_servo_rate)
+     Ft, Fp, G, cX, cV, PSI] = dmp_discrete_1D.learnFromPath(amd_clmc_dmp_home_dir_path + "/data/dmp_1D/sample_traj_1.txt", task_servo_rate)
     
     ## Reproduce
     if (time_reproduce_max <= 0.0):
@@ -65,6 +65,10 @@ def dmp_1D_test(canonical_order=2, time_reproduce_max=0.0, time_goal_change=0.0,
         list_time_and_dmpstate.append(np.array([dmpstate.getTime()[0,0], dmpstate.getX()[0,0], dmpstate.getXd()[0,0], dmpstate.getXdd()[0,0]]))
     
     unroll_traj = np.vstack(list_time_and_dmpstate)
+    
+    if (os.path.isdir(unroll_traj_save_dir_path)):
+        np.savetxt(unroll_traj_save_dir_path + "/" + unroll_traj_save_filename, unroll_traj)
+    
     return unroll_traj, W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI
 
 if __name__ == "__main__":
