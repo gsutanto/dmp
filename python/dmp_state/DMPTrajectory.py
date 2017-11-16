@@ -16,8 +16,7 @@ class DMPTrajectory(DMPState, object):
     'Class for DMP trajectories.'
     
     def getTrajectoryLength(self):
-        assert (super(DMPTrajectory, self).isValid()), "DMPTrajectory is invalid!"
-        return self.time.shape[1]
+        return (super(DMPTrajectory, self).getLength())
     
     def getDMPStateAtIndex(self, i):
         assert (super(DMPTrajectory, self).isValid()), "DMPTrajectory is invalid!"

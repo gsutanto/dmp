@@ -91,3 +91,7 @@ class DMPState:
         self.time = new_time
         assert (self.isValid()), "Post-condition(s) checking is failed: this DMPState became invalid!"
         return None
+    
+    def getLength(self):
+        assert (self.isValid())
+        return self.time.shape[1]
