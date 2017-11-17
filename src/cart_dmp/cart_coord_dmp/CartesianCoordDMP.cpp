@@ -970,6 +970,8 @@ bool CartesianCoordDMP::saveParams(const char* dir_path,
                                               file_name_mean_tau))  &&
             rt_assert(data_logger_loader_discrete.writeMatrixToFile(dir_path, file_name_mean_start_position_local, mean_start_local_position))    &&
             rt_assert(data_logger_loader_discrete.writeMatrixToFile(dir_path, file_name_mean_goal_position_local, mean_goal_local_position))      &&
+            rt_assert(data_logger_loader_discrete.writeMatrixToFile(dir_path, file_name_mean_start_position_global, mean_start_global_position))    &&
+            rt_assert(data_logger_loader_discrete.writeMatrixToFile(dir_path, file_name_mean_goal_position_global, mean_goal_global_position))      &&
             rt_assert(data_logger_loader_discrete.writeMatrixToFile(dir_path, file_name_ctraj_hmg_transform_local_to_global_matrix, ctraj_hmg_transform_local_to_global_matrix))    &&
             rt_assert(data_logger_loader_discrete.writeMatrixToFile(dir_path, file_name_ctraj_hmg_transform_global_to_local_matrix, ctraj_hmg_transform_global_to_local_matrix)));
 }

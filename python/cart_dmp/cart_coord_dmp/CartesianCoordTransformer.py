@@ -49,9 +49,10 @@ class CartesianCoordTransformer:
     
     def computeCTrajCoordTransforms(self, cart_dmptrajectory, ctraj_local_coordinate_frame_selection):
         assert (self.isValid())
-        cart_dmptrajectory_length = cart_dmptrajectory.getTrajectoryLength()
+        cart_dmptrajectory_length = cart_dmptrajectory.getLength()
         assert (cart_dmptrajectory_length >= 2)
-        assert (((ctraj_local_coordinate_frame_selection == 3) and (cart_dmptrajectory_length < 3)) == False)
+        assert (((ctraj_local_coordinate_frame_selection == _KROEMER_LOCAL_COORD_FRAME_) and 
+                 (cart_dmptrajectory_length < 3)) == False)
         assert (cart_dmptrajectory.isValid())
         assert (cart_dmptrajectory.dmp_num_dimensions == 3)
         assert ((ctraj_local_coordinate_frame_selection >= MIN_CTRAJ_LOCAL_COORD_OPTION_NO) and (ctraj_local_coordinate_frame_selection <= MAX_CTRAJ_LOCAL_COORD_OPTION_NO))
@@ -208,5 +209,6 @@ class CartesianCoordTransformer:
             cart_vector_new = np.matmul(rel_homogen_transform_matrix_old_to_new[0:3,0:3], cart_vector_old)
         elif (cart_vector_old.shape[0] == 4):
             cart_vector_new = np.matmul(rel_homogen_transform_matrix_old_to_new, cart_vector_old)
+            assert (cart_vector_new[3,0] == 1.0), 'NOT a valid homogeneous vector!'
         
         return cart_vector_new

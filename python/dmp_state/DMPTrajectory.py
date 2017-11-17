@@ -15,13 +15,23 @@ from DMPState import *
 class DMPTrajectory(DMPState, object):
     'Class for DMP trajectories.'
     
-    def getTrajectoryLength(self):
-        return (super(DMPTrajectory, self).getLength())
-    
     def getDMPStateAtIndex(self, i):
-        assert (super(DMPTrajectory, self).isValid()), "DMPTrajectory is invalid!"
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPTrajectory is invalid!"
         assert ((i >= 0) and (i < self.time.shape[1])), "Index i=" + str(i) + " is out-of-range (TrajectoryLength=" + str(self.time.shape[1]) + ")!"
-        return DMPState(self.X[:,i:i+1], self.Xd[:,i:i+1], self.Xdd[:,i:i+1], self.time[:,i:i+1])
+        return DMPState(self.X[:,i], self.Xd[:,i], self.Xdd[:,i], self.time[:,i])
+    
+    def setDMPStateAtIndex(self, i, dmpstate):
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPTrajectory is invalid!"
+        assert ((i >= 0) and (i < self.time.shape[1])), "Index i=" + str(i) + " is out-of-range (TrajectoryLength=" + str(self.time.shape[1]) + ")!"
+        assert (dmpstate.isValid())
+        assert (self.dmp_num_dimensions == dmpstate.dmp_num_dimensions)
+        self.X[:,i] = dmpstate.getX().reshape(dmpstate.dmp_num_dimensions,)
+        self.Xd[:,i] = dmpstate.getXd().reshape(dmpstate.dmp_num_dimensions,)
+        self.Xdd[:,i] = dmpstate.getXdd().reshape(dmpstate.dmp_num_dimensions,)
+        self.time[:,i] = dmpstate.getTime().reshape(1,)
+        
+        assert (self.isValid()), "Post-condition(s) checking is failed: this DMPTrajectory became invalid!"
+        return None
 
 def convertDMPStatesListIntoDMPTrajectory(dmpstates_list):
     X_list = []

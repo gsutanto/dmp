@@ -139,7 +139,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
         assert (robot_task_servo_rate > 0.0)
         
         dt = 1.0/robot_task_servo_rate
-        traj_length = dmptrajectory_demo_local.getTrajectoryLength()
+        traj_length = dmptrajectory_demo_local.getLength()
         start_dmpstate_demo_local = dmptrajectory_demo_local.getDMPStateAtIndex(0)
         if (steady_state_goal_position_local == None):
             goal_steady_dmpstate_demo_local = dmptrajectory_demo_local.getDMPStateAtIndex(traj_length-1)

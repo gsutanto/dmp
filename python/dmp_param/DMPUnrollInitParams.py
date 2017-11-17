@@ -19,7 +19,7 @@ class DMPUnrollInitParams:
     'Class for DMP Unroll Initialization Parameters.'
     
     def __init__(self, critical_dmptraj_init, tau_init=None, robot_task_servo_rate=None, is_zeroing_out_velocity_and_acceleration=True):
-        traj_size = critical_dmptraj_init.getTrajectoryLength()
+        traj_size = critical_dmptraj_init.getLength()
         assert (traj_size >= 2)
         start_dmpstate = critical_dmptraj_init.getDMPStateAtIndex(0)
         goal_dmpstate = critical_dmptraj_init.getDMPStateAtIndex(traj_size-1)

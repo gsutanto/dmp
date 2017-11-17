@@ -53,8 +53,8 @@ def dmp_1D_test(amd_clmc_dmp_home_dir_path="../../../", canonical_order=2, time_
     dmp_unroll_init_parameters = DMPUnrollInitParams(critical_states_learn, tau)
     dmp_discrete_1D.startWithUnrollParams(dmp_unroll_init_parameters)
     dt = 1.0/task_servo_rate
-    list_time_and_dmpstate = []
     
+    unroll_traj = np.zeros((int(np.round(time_reproduce_max*task_servo_rate) + 1), 4))
     for i in range(int(np.round(time_reproduce_max*task_servo_rate) + 1)):
         if (i == int(np.round(time_goal_change*task_servo_rate) + 1)):
             dmp_discrete_1D.setNewSteadyStateGoalPosition(new_goal)
@@ -62,9 +62,10 @@ def dmp_1D_test(amd_clmc_dmp_home_dir_path="../../../", canonical_order=2, time_
         [dmpstate, forcing_term, 
          ct_acc, ct_vel, 
          basis_function_vector] = dmp_discrete_1D.getNextState(dt, True)
-        list_time_and_dmpstate.append(np.array([dmpstate.getTime()[0,0], dmpstate.getX()[0,0], dmpstate.getXd()[0,0], dmpstate.getXdd()[0,0]]))
-    
-    unroll_traj = np.vstack(list_time_and_dmpstate)
+        unroll_traj[i,0] = dmpstate.getTime()[0,0]
+        unroll_traj[i,1] = dmpstate.getX()[0,0]
+        unroll_traj[i,2] = dmpstate.getXd()[0,0]
+        unroll_traj[i,3] = dmpstate.getXdd()[0,0]
     
     if (os.path.isdir(unroll_traj_save_dir_path)):
         np.savetxt(unroll_traj_save_dir_path + "/" + unroll_traj_save_filename, unroll_traj)
