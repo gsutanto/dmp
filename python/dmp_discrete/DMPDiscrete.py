@@ -44,12 +44,12 @@ class DMPDiscrete(DMP, object):
         assert (self.learning_sys_discrete.isValid())
         return True
     
-    def learn(self, list_dmptrajectory_demo_local, robot_task_servo_rate):
+    def learn(self, list_dmptrajectory_demo_global, robot_task_servo_rate):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPDiscrete is invalid!"
         assert (robot_task_servo_rate > 0.0)
         
-        list_preprocessed_dmptrajectory_demo_local = self.preprocess(list_dmptrajectory_demo_local)
-        W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI = self.learning_sys_discrete.learnApproximator(list_preprocessed_dmptrajectory_demo_local, robot_task_servo_rate)
+        list_dmptrajectory_demo_local = self.preprocess(list_dmptrajectory_demo_global)
+        W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI = self.learning_sys_discrete.learnApproximator(list_dmptrajectory_demo_local, robot_task_servo_rate)
         self.mean_tau = mean_tau
         assert (self.mean_tau >= MIN_TAU)
         assert (self.isValid()), "Post-condition(s) checking is failed: this DMPDiscrete became invalid!"

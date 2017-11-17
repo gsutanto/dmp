@@ -29,7 +29,7 @@ _SCHAAL_LOCAL_COORD_FRAME_ = 2
 _KROEMER_LOCAL_COORD_FRAME_ = 3
 
 class CartesianCoordTransformer:
-    'Class for one-dimensional (1D) discrete DMPs.'
+    'Class for coordinate transformations of discrete Cartesian Coordinate DMPs.'
     
     def __init__(self, name=""):
         self.name = name
