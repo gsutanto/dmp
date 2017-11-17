@@ -20,38 +20,38 @@ from utilities import *
 PARALLEL_VECTOR_PROJECTION_THRESHOLD = 0.9
 MIN_CTRAJ_LOCAL_COORD_OPTION_NO = 0
 MAX_CTRAJ_LOCAL_COORD_OPTION_NO = 3
-N_GSUTANTO_LOCAL_COORD_FRAME_BASIS_VECTORS = 5
+NGSUTANTO_LOCAL_COORD_FRAMEBASIS_VECTORS = 5
 
 # CartCoordDMPLocalCoordinateFrameMethod
-_NO_LOCAL_COORD_FRAME_ = 0
-_GSUTANTO_LOCAL_COORD_FRAME_ = 1
-_SCHAAL_LOCAL_COORD_FRAME_ = 2
-_KROEMER_LOCAL_COORD_FRAME_ = 3
+NO_LOCAL_COORD_FRAME = 0
+GSUTANTO_LOCAL_COORD_FRAME = 1
+SCHAAL_LOCAL_COORD_FRAME = 2
+KROEMER_LOCAL_COORD_FRAME = 3
 
 class CartesianCoordTransformer:
     'Class for coordinate transformations of discrete Cartesian Coordinate DMPs.'
     
     def __init__(self, name=""):
         self.name = name
-        # the followings are only relevant for _GSUTANTO_LOCAL_COORD_FRAME_ selection:
-        self.theta_kernel_centers = np.zeros((N_GSUTANTO_LOCAL_COORD_FRAME_BASIS_VECTORS,1))
-        self.theta_kernel_Ds = np.zeros((N_GSUTANTO_LOCAL_COORD_FRAME_BASIS_VECTORS,1))
-        self.basis_vector_weights_unnormalized = np.zeros((N_GSUTANTO_LOCAL_COORD_FRAME_BASIS_VECTORS,1))
-        self.basis_matrix = np.zeros((3, N_GSUTANTO_LOCAL_COORD_FRAME_BASIS_VECTORS))
+        # the followings are only relevant for GSUTANTO_LOCAL_COORD_FRAME selection:
+        self.theta_kernel_centers = np.zeros((NGSUTANTO_LOCAL_COORD_FRAMEBASIS_VECTORS,1))
+        self.theta_kernel_Ds = np.zeros((NGSUTANTO_LOCAL_COORD_FRAMEBASIS_VECTORS,1))
+        self.basis_vector_weights_unnormalized = np.zeros((NGSUTANTO_LOCAL_COORD_FRAMEBASIS_VECTORS,1))
+        self.basis_matrix = np.zeros((3, NGSUTANTO_LOCAL_COORD_FRAMEBASIS_VECTORS))
     
     def isValid(self):
-        # the followings are only relevant for _GSUTANTO_LOCAL_COORD_FRAME_ selection:
-        assert (self.theta_kernel_centers.shape == (N_GSUTANTO_LOCAL_COORD_FRAME_BASIS_VECTORS,1))
-        assert (self.theta_kernel_Ds.shape == (N_GSUTANTO_LOCAL_COORD_FRAME_BASIS_VECTORS,1))
-        assert (self.basis_vector_weights_unnormalized.shape == (N_GSUTANTO_LOCAL_COORD_FRAME_BASIS_VECTORS,1))
-        assert (self.basis_matrix.shape == (3,N_GSUTANTO_LOCAL_COORD_FRAME_BASIS_VECTORS))
+        # the followings are only relevant for GSUTANTO_LOCAL_COORD_FRAME selection:
+        assert (self.theta_kernel_centers.shape == (NGSUTANTO_LOCAL_COORD_FRAMEBASIS_VECTORS,1))
+        assert (self.theta_kernel_Ds.shape == (NGSUTANTO_LOCAL_COORD_FRAMEBASIS_VECTORS,1))
+        assert (self.basis_vector_weights_unnormalized.shape == (NGSUTANTO_LOCAL_COORD_FRAMEBASIS_VECTORS,1))
+        assert (self.basis_matrix.shape == (3,NGSUTANTO_LOCAL_COORD_FRAMEBASIS_VECTORS))
         return True
     
     def computeCTrajCoordTransforms(self, cart_dmptrajectory, ctraj_local_coordinate_frame_selection):
         assert (self.isValid())
         cart_dmptrajectory_length = cart_dmptrajectory.getLength()
         assert (cart_dmptrajectory_length >= 2)
-        assert (((ctraj_local_coordinate_frame_selection == _KROEMER_LOCAL_COORD_FRAME_) and 
+        assert (((ctraj_local_coordinate_frame_selection == KROEMER_LOCAL_COORD_FRAME) and 
                  (cart_dmptrajectory_length < 3)) == False)
         assert (cart_dmptrajectory.isValid())
         assert (cart_dmptrajectory.dmp_num_dimensions == 3)
@@ -60,16 +60,18 @@ class CartesianCoordTransformer:
         start_cart_position = cart_dmptrajectory.getDMPStateAtIndex(0).getX()
         goal_cart_position = cart_dmptrajectory.getDMPStateAtIndex(cart_dmptrajectory_length-1).getX()
         
+        translation_vector = start_cart_position
+        
         global_x_axis = np.array([[1.0],[0.0],[0.0]])
         global_y_axis = np.array([[0.0],[1.0],[0.0]])
         global_z_axis = np.array([[0.0],[0.0],[1.0]])
         
-        if (ctraj_local_coordinate_frame_selection == _NO_LOCAL_COORD_FRAME_):
+        if (ctraj_local_coordinate_frame_selection == NO_LOCAL_COORD_FRAME):
             local_x_axis = global_x_axis
             local_y_axis = global_y_axis
             local_z_axis = global_z_axis
             translation_vector = np.zeros((3,1))
-        elif (ctraj_local_coordinate_frame_selection == _GSUTANTO_LOCAL_COORD_FRAME_):
+        elif (ctraj_local_coordinate_frame_selection == GSUTANTO_LOCAL_COORD_FRAME):
             local_x_axis = goal_cart_position - start_cart_position
             local_x_axis = local_x_axis/np.linalg.norm(local_x_axis)
             
@@ -78,12 +80,12 @@ class CartesianCoordTransformer:
             theta = np.abs(np.arccos(cos_theta))
             
             # compute the kernel centers and spread/standard deviation (D):
-            self.theta_kernel_centers = np.linspace(0,np.pi,N_GSUTANTO_LOCAL_COORD_FRAME_BASIS_VECTORS).reshape(N_GSUTANTO_LOCAL_COORD_FRAME_BASIS_VECTORS,1)
+            self.theta_kernel_centers = np.linspace(0,np.pi,NGSUTANTO_LOCAL_COORD_FRAMEBASIS_VECTORS).reshape(NGSUTANTO_LOCAL_COORD_FRAMEBASIS_VECTORS,1)
             self.theta_kernel_Ds = np.square(np.diff(self.theta_kernel_centers,axis=0)*0.55)
             self.theta_kernel_Ds = 1.0/np.vstack((self.theta_kernel_Ds,self.theta_kernel_Ds[-1,0]))
             
             # compute the kernel/basis vector weights:
-            self.basis_vector_weights_unnormalized = np.exp(-0.5 * np.square((theta*np.ones((N_GSUTANTO_LOCAL_COORD_FRAME_BASIS_VECTORS,1)))-self.theta_kernel_centers) * self.theta_kernel_Ds)
+            self.basis_vector_weights_unnormalized = np.exp(-0.5 * np.square((theta*np.ones((NGSUTANTO_LOCAL_COORD_FRAMEBASIS_VECTORS,1)))-self.theta_kernel_centers) * self.theta_kernel_Ds)
             
             # theta == 0 (local_x_axis is perfectly aligned with global_z_axis) corresponds to anchor_local_z_axis = global_y_axis:
             self.basis_matrix[:,0] = global_y_axis.reshape(3,)
@@ -104,7 +106,7 @@ class CartesianCoordTransformer:
             local_y_axis = local_y_axis/np.linalg.norm(local_y_axis)
             local_z_axis = np.cross(local_x_axis.reshape(3,), local_y_axis.reshape(3,)).reshape(3,1)
             local_z_axis = local_z_axis/np.linalg.norm(local_z_axis)
-        elif (ctraj_local_coordinate_frame_selection == _SCHAAL_LOCAL_COORD_FRAME_):
+        elif (ctraj_local_coordinate_frame_selection == SCHAAL_LOCAL_COORD_FRAME):
             # =============================================================================
             # [IMPORTANT] Notice the IF-ELSE block below:
             # >> IF   block: condition handled: local x-axis is "NOT TOO parallel" to global z-axis
@@ -134,7 +136,7 @@ class CartesianCoordTransformer:
                 local_z_axis = local_z_axis/np.linalg.norm(local_z_axis)
                 local_y_axis = np.cross(local_z_axis.reshape(3,), local_x_axis.reshape(3,)).reshape(3,1)
                 local_y_axis = local_y_axis/np.linalg.norm(local_y_axis)
-        elif (ctraj_local_coordinate_frame_selection == _KROEMER_LOCAL_COORD_FRAME_):
+        elif (ctraj_local_coordinate_frame_selection == KROEMER_LOCAL_COORD_FRAME):
             # =============================================================================
             # See O.B. Kroemer, R. Detry, J. Piater, and J. Peters;
             #     Combining active learning and reactive control for robot grasping;
@@ -170,11 +172,11 @@ class CartesianCoordTransformer:
         
         rel_homogen_transform_matrix_local_to_global = np.eye(4)
         rel_homogen_transform_matrix_local_to_global[0:3,0:3] = rotation_matrix
-        rel_homogen_transform_matrix_local_to_global[0:3,3] = translation_vector
+        rel_homogen_transform_matrix_local_to_global[0:3,3] = translation_vector.reshape(3,)
         
         rel_homogen_transform_matrix_global_to_local = np.eye(4)
         rel_homogen_transform_matrix_global_to_local[0:3,0:3] = rotation_matrix.T
-        rel_homogen_transform_matrix_global_to_local[0:3,3] = np.matmul(-rotation_matrix.T, translation_vector)
+        rel_homogen_transform_matrix_global_to_local[0:3,3] = np.matmul(-rotation_matrix.T, translation_vector).reshape(3,)
         
         return rel_homogen_transform_matrix_local_to_global, rel_homogen_transform_matrix_global_to_local
     
@@ -184,7 +186,7 @@ class CartesianCoordTransformer:
         cart_dmptrajectory_length = cart_dmptrajectory_old.getLength()
         assert (cart_dmptrajectory_length >= 1)
         
-        X_new = np.matmul(rel_homogen_transform_matrix_old_to_new, np.vstack(cart_dmptrajectory_old.getX(), np.ones((1,cart_dmptrajectory_length))))[0:3,:]
+        X_new = np.matmul(rel_homogen_transform_matrix_old_to_new, np.vstack([cart_dmptrajectory_old.getX(), np.ones((1,cart_dmptrajectory_length))]))[0:3,:]
         Xd_new = np.matmul(rel_homogen_transform_matrix_old_to_new[0:3,0:3], cart_dmptrajectory_old.getXd())
         Xdd_new = np.matmul(rel_homogen_transform_matrix_old_to_new[0:3,0:3], cart_dmptrajectory_old.getXdd())
         time_new = cart_dmptrajectory_old.getTime()

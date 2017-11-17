@@ -58,10 +58,10 @@ class DMPDiscrete(DMP, object):
     def start(self, critical_states, tau_init):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPDiscrete is invalid!"
         
-        traj_size = len(critical_states)
+        traj_size = critical_states.getLength()
         assert (traj_size >= 2)
-        start_state_init = critical_states[0]
-        goal_state_init = critical_states[traj_size-1]
+        start_state_init = critical_states.getDMPStateAtIndex(0)
+        goal_state_init = critical_states.getDMPStateAtIndex(traj_size-1)
         assert (start_state_init.isValid())
         assert (goal_state_init.isValid())
         assert (start_state_init.dmp_num_dimensions == self.dmp_num_dimensions)

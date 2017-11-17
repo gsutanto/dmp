@@ -18,7 +18,10 @@ class DMPTrajectory(DMPState, object):
     def getDMPStateAtIndex(self, i):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPTrajectory is invalid!"
         assert ((i >= 0) and (i < self.time.shape[1])), "Index i=" + str(i) + " is out-of-range (TrajectoryLength=" + str(self.time.shape[1]) + ")!"
-        return DMPState(self.X[:,i], self.Xd[:,i], self.Xdd[:,i], self.time[:,i])
+        return DMPState(self.X[:,i].reshape(self.dmp_num_dimensions,1), 
+                        self.Xd[:,i].reshape(self.dmp_num_dimensions,1), 
+                        self.Xdd[:,i].reshape(self.dmp_num_dimensions,1), 
+                        self.time[:,i].reshape(1,1))
     
     def setDMPStateAtIndex(self, i, dmpstate):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPTrajectory is invalid!"

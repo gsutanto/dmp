@@ -35,11 +35,11 @@ class CartesianCoordDMP(DMPDiscrete, object):
         self.cart_coord_transformer = CartesianCoordTransformer()
         self.ctraj_local_coord_selection = ctraj_local_coordinate_frame_selection
         is_using_scaling_init = [True] * 3
-        if ((self.ctraj_local_coord_selection == _GSUTANTO_LOCAL_COORD_FRAME_) or 
-            (self.ctraj_local_coord_selection == _SCHAAL_LOCAL_COORD_FRAME_)):
+        if ((self.ctraj_local_coord_selection == GSUTANTO_LOCAL_COORD_FRAME) or 
+            (self.ctraj_local_coord_selection == SCHAAL_LOCAL_COORD_FRAME)):
             is_using_scaling_init[1] = False
             is_using_scaling_init[2] = False
-        elif (self.ctraj_local_coord_selection == _KROEMER_LOCAL_COORD_FRAME_):
+        elif (self.ctraj_local_coord_selection == KROEMER_LOCAL_COORD_FRAME):
             is_using_scaling_init[2] = False
         self.setScalingUsage(is_using_scaling_init)
         self.ctraj_hmg_transform_local_to_global_matrix = np.zeros((4,4))
@@ -82,7 +82,7 @@ class CartesianCoordDMP(DMPDiscrete, object):
         
         critical_states_length = critical_states.getLength()
         assert (critical_states_length >= 2)
-        assert (((self.ctraj_local_coord_selection == _KROEMER_LOCAL_COORD_FRAME_) and 
+        assert (((self.ctraj_local_coord_selection == KROEMER_LOCAL_COORD_FRAME) and 
                  (critical_states_length < 3)) == False)
         assert (critical_states.isValid())
         assert (critical_states.dmp_num_dimensions == 3)
@@ -185,7 +185,7 @@ class CartesianCoordDMP(DMPDiscrete, object):
         
         self.ctraj_critical_states_local_coord.setDMPStateAtIndex(0, self.transform_sys_discrete_cart_coord.getStartState())
         self.ctraj_critical_states_local_coord.setDMPStateAtIndex(1, self.transform_sys_discrete_cart_coord.getCurrentState())
-        self.ctraj_critical_states_local_coord.setDMPStateAtIndex(2, transform_sys_discrete_cart_coord.getCurrentGoalState())
+        self.ctraj_critical_states_local_coord.setDMPStateAtIndex(2, self.transform_sys_discrete_cart_coord.getCurrentGoalState())
         # self.ctraj_critical_states_local_coord.setDMPStateAtIndex(self.ctraj_critical_states_local_coord.getLength()-2, self.ctraj_critical_states_local_coord.getDMPStateAtIndex(3))
         self.ctraj_critical_states_local_coord.setDMPStateAtIndex(self.ctraj_critical_states_local_coord.getLength()-1, DMPState(self.transform_sys_discrete_cart_coord.getSteadyStateGoalPosition()))
         

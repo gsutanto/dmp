@@ -38,14 +38,23 @@ class DMPState:
                 self.Xdd = np.zeros((self.dmp_num_dimensions,1))
             if (len(self.X.shape) == 1):
                 self.X.reshape((self.dmp_num_dimensions, 1))
+            if (len(self.Xd.shape) == 1):
                 self.Xd.reshape((self.dmp_num_dimensions, 1))
+            if (len(self.Xdd.shape) == 1):
                 self.Xdd.reshape((self.dmp_num_dimensions, 1))
+            if (len(self.time.shape) == 1):
                 self.time.reshape((1, 1))
+            assert (self.isValid())
     
     def isValid(self):
+        assert (len(self.X.shape) == 2), "self.X.shape =" + str(self.X.shape)
+        assert (len(self.Xd.shape) == 2), "self.Xd.shape =" + str(self.Xd.shape)
+        assert (len(self.Xdd.shape) == 2), "self.Xdd.shape =" + str(self.Xdd.shape)
+        assert (len(self.time.shape) == 2), "self.time.shape =" + str(self.time.shape)
         assert (self.X.shape[0] == self.dmp_num_dimensions), "Dimension self.X.shape[0]=" + str(self.X.shape[0]) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
         assert (self.Xd.shape[0] == self.dmp_num_dimensions), "Dimension self.Xd.shape[0]=" + str(self.Xd.shape[0]) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
         assert (self.Xdd.shape[0] == self.dmp_num_dimensions), "Dimension self.Xdd.shape[0]=" + str(self.Xdd.shape[0]) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
+        assert (self.time.shape[0] == 1)
         assert (self.X.shape[1] == self.Xd.shape[1])
         assert (self.X.shape[1] == self.Xdd.shape[1])
         assert (self.X.shape[1] == self.time.shape[1])
