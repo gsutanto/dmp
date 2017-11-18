@@ -35,23 +35,24 @@ class LearningSystemDiscrete(LearningSystem, object):
         N_traj = len(list_dmptrajectory_demo_local)
         assert (N_traj > 0)
         
-        list_Ft = []
-        list_cX = []
-        list_cV = []
-        list_tau = []
-        list_A_learn = []
-        list_G = []
-        list_PSI = []
-        for dmptrajectory_demo_local in list_dmptrajectory_demo_local:
+        list_Ft = [None] * N_traj
+        list_cX = [None] * N_traj
+        list_cV = [None] * N_traj
+        list_tau = [None] * N_traj
+        list_A_learn = [None] * N_traj
+        list_G = [None] * N_traj
+        list_PSI = [None] * N_traj
+        for i in range(N_traj):
+            dmptrajectory_demo_local = list_dmptrajectory_demo_local[i]
             Ft_inst, cX_inst, cV_inst, tau_inst, tau_relative_inst, A_learn_inst, G_inst = self.transform_sys.getTargetForcingTermTraj(dmptrajectory_demo_local, robot_task_servo_rate)
-            list_Ft.append(Ft_inst)
-            list_cX.append(cX_inst)
-            list_cV.append(cV_inst)
-            list_tau.append(tau_inst)
-            list_A_learn.append(A_learn_inst)
-            list_G.append(G_inst)
+            list_Ft[i] = Ft_inst
+            list_cX[i] = cX_inst
+            list_cV[i] = cV_inst
+            list_tau[i] = tau_inst
+            list_A_learn[i] = A_learn_inst
+            list_G[i] = G_inst
             PSI_inst = self.transform_sys.func_approx.getBasisFunctionTensor(cX_inst)
-            list_PSI.append(PSI_inst)
+            list_PSI[i] = PSI_inst
         mean_tau = np.mean(list_tau)
         mean_A_learn = np.mean(list_A_learn, axis=0)
         Ft = np.hstack(list_Ft)
@@ -65,11 +66,11 @@ class LearningSystemDiscrete(LearningSystem, object):
         elif (self.transform_sys.canonical_sys.order == 1):
             MULT = cX
         sx2 = np.sum(np.matmul(np.ones((self.transform_sys.func_approx.model_size,1)), np.square(MULT)) * PSI, axis=1)
-        list_w = []
+        list_w = [None] * self.transform_sys.dmp_num_dimensions
         for i in range(self.transform_sys.dmp_num_dimensions):
             sxtd = np.sum(np.matmul(np.ones((self.transform_sys.func_approx.model_size,1)), (MULT * Ft[[i],:])) * PSI, axis=1)
             w_dim = sxtd * 1.0 / (sx2+1.e-10)
-            list_w.append(w_dim.T)
+            list_w[i] = w_dim.T
         W = np.vstack(list_w)
         assert (np.isnan(W).any() == False), "Learned W contains NaN!"
         self.transform_sys.func_approx.weights = W

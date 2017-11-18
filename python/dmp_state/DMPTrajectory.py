@@ -37,15 +37,16 @@ class DMPTrajectory(DMPState, object):
         return None
 
 def convertDMPStatesListIntoDMPTrajectory(dmpstates_list):
-    X_list = []
-    Xd_list = []
-    Xdd_list = []
-    time_list = []
-    for dmpstate in dmpstates_list:
-        X_list.append(dmpstate.X)
-        Xd_list.append(dmpstate.Xd)
-        Xdd_list.append(dmpstate.Xdd)
-        time_list.append(dmpstate.time)
+    dmpstates_list_size = len(dmpstates_list)
+    X_list = [None] * dmpstates_list_size
+    Xd_list = [None] * dmpstates_list_size
+    Xdd_list = [None] * dmpstates_list_size
+    time_list = [None] * dmpstates_list_size
+    for i in range(dmpstates_list_size):
+        X_list[i] = dmpstates_list[i].X
+        Xd_list[i] = dmpstates_list[i].Xd
+        Xdd_list[i] = dmpstates_list[i].Xdd
+        time_list[i] = dmpstates_list[i].time
     return DMPTrajectory(np.concatenate(X_list,axis=1),
                          np.concatenate(Xd_list,axis=1),
                          np.concatenate(Xdd_list,axis=1),

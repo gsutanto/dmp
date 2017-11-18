@@ -138,30 +138,33 @@ class TransformSystemDiscrete(TransformationSystem, object):
         assert (dmptrajectory_demo_local.dmp_num_dimensions == self.dmp_num_dimensions)
         assert (robot_task_servo_rate > 0.0)
         
-        dt = 1.0/robot_task_servo_rate
         traj_length = dmptrajectory_demo_local.getLength()
         start_dmpstate_demo_local = dmptrajectory_demo_local.getDMPStateAtIndex(0)
         if (steady_state_goal_position_local == None):
             goal_steady_dmpstate_demo_local = dmptrajectory_demo_local.getDMPStateAtIndex(traj_length-1)
         else:
             goal_steady_dmpstate_demo_local = DMPState(steady_state_goal_position_local)
-        tau = goal_steady_dmpstate_demo_local.getTime()[0,0] - start_dmpstate_demo_local.getTime()[0,0]
         A_learn = goal_steady_dmpstate_demo_local.getX() - start_dmpstate_demo_local.getX()
+        dt = (goal_steady_dmpstate_demo_local.getTime()[0,0] - start_dmpstate_demo_local.getTime()[0,0])/(traj_length - 1.0)
+        if (dt <= 0.0):
+            dt = 1.0/robot_task_servo_rate
+        tau = goal_steady_dmpstate_demo_local.getTime()[0,0] - start_dmpstate_demo_local.getTime()[0,0]
         if (tau < MIN_TAU):
             tau = (1.0 * (traj_length - 1))/robot_task_servo_rate
         self.tau_sys.setTauBase(tau)
         self.canonical_sys.start()
         self.start(start_dmpstate_demo_local, goal_steady_dmpstate_demo_local)
-        X_list = []
-        V_list = []
-        G_list = []
+        tau_relative = self.tau_sys.getTauRelative()
+        X_list = [None] * traj_length
+        V_list = [None] * traj_length
+        G_list = [None] * traj_length
         for i in range(traj_length):
             x = self.canonical_sys.getCanonicalPosition()
             v = self.canonical_sys.getCanonicalVelocity()
             g = self.goal_sys.getCurrentGoalState().getX()
-            X_list.append(x)
-            V_list.append(v)
-            G_list.append(g)
+            X_list[i] = x
+            V_list[i] = v
+            G_list[i] = g
             
             self.canonical_sys.updateCanonicalState(dt)
             self.updateCurrentGoalState(dt)
@@ -175,7 +178,6 @@ class TransformSystemDiscrete(TransformationSystem, object):
         goal_position_trajectory = G
         canonical_position_trajectory = X # might be used later during learning
         canonical_velocity_trajectory = V # might be used later during learning
-        tau_relative = self.tau_sys.getTauRelative()
         return goal_position_trajectory, canonical_position_trajectory, canonical_velocity_trajectory, tau, tau_relative, A_learn
     
     def getTargetForcingTermTraj(self, dmptrajectory_demo_local, robot_task_servo_rate):

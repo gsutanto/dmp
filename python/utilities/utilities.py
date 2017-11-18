@@ -6,6 +6,7 @@ Created on Thu Mar 30  9:30:00 2017
 @author: gsutanto
 """
 
+import re
 import numpy as np
 
 def chunks(l, n):
@@ -52,3 +53,8 @@ def compareTwoNumericFiles(file_1_path, file_2_path, scalar_max_abs_diff_thresho
                          str(file_1[scalar_max_abs_diff_row, scalar_max_abs_diff_col]) + ' vs ' + 
                          str(file_2[scalar_max_abs_diff_row, scalar_max_abs_diff_col]) + ' !')
     return None
+
+def naturalSort(l): 
+    convert = lambda text: int(text) if text.isdigit() else text.lower() 
+    alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
+    return sorted(l, key = alphanum_key)

@@ -63,15 +63,17 @@ class CartesianCoordDMP(DMPDiscrete, object):
         # in this case preprocessing is conversion of the trajectories representation 
         # from the global to local coordinate system:
         list_intermed_processed_ctraj_global = super(CartesianCoordDMP, self).preprocess(list_ctraj_global)
-        list_ctraj_local = []
-        for intermed_processed_ctraj_global in list_intermed_processed_ctraj_global:
+        list_intermed_processed_ctraj_global_size = len(list_intermed_processed_ctraj_global)
+        list_ctraj_local = [None] * list_intermed_processed_ctraj_global_size
+        for i in range(list_intermed_processed_ctraj_global_size):
+            intermed_processed_ctraj_global = list_intermed_processed_ctraj_global[i]
             # computing the transformation to local coordinate system (for each individual trajectory):
             [self.ctraj_hmg_transform_local_to_global_matrix,
              self.ctraj_hmg_transform_global_to_local_matrix] = self.cart_coord_transformer.computeCTrajCoordTransforms(intermed_processed_ctraj_global, 
                                                                                                                         self.ctraj_local_coord_selection)
             ctraj_local = self.cart_coord_transformer.convertCTrajAtOldToNewCoordSys(intermed_processed_ctraj_global,
                                                                                      self.ctraj_hmg_transform_global_to_local_matrix)
-            list_ctraj_local.append(ctraj_local)
+            list_ctraj_local[i] = ctraj_local
         return list_ctraj_local
     
     def learnFromPath(self, training_data_dir_or_file_path, robot_task_servo_rate):

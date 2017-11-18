@@ -81,9 +81,9 @@ class DMP:
         set_traj_input = self.extractSetTrajectories(training_data_dir_or_file_path)
         W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI = self.learn(set_traj_input, robot_task_servo_rate)
         tau_learn = self.mean_tau
-        critical_states_list_learn = []
-        critical_states_list_learn.append(DMPState(self.mean_start_position))
-        critical_states_list_learn.append(DMPState(self.mean_goal_position))
+        critical_states_list_learn = [None] * 2
+        critical_states_list_learn[0] = DMPState(self.mean_start_position)
+        critical_states_list_learn[-1] = DMPState(self.mean_goal_position)
         critical_states_learn = convertDMPStatesListIntoDMPTrajectory(critical_states_list_learn)
         return tau_learn, critical_states_learn, W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI
     
