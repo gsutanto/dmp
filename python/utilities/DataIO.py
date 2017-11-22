@@ -32,3 +32,6 @@ def extractSetNDTrajectories(dir_or_file_path, N=-1):
         trajectory = DMPTrajectory(np.transpose(trajectory_file_content[:,1:N+1]), np.transpose(trajectory_file_content[:,N+1:(2*N)+1]), np.transpose(trajectory_file_content[:,(2*N)+1:(3*N)+1]), np.transpose(trajectory_file_content[:,0:1]))
         trajectories_list[i] = trajectory
     return trajectories_list
+
+def extractSetCartCoordTrajectories(dir_or_file_path):
+    return extractSetNDTrajectories(dir_or_file_path, 3)

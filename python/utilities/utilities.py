@@ -8,6 +8,11 @@ Created on Thu Mar 30  9:30:00 2017
 
 import re
 import numpy as np
+import os
+import sys
+import copy
+import glob
+import pickle
 
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""
@@ -58,3 +63,20 @@ def naturalSort(l):
     convert = lambda text: int(text) if text.isdigit() else text.lower() 
     alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
     return sorted(l, key = alphanum_key)
+
+def countNumericSubdirs(dir_path):
+    num_subdirs_count = 1
+    subdir_path = dir_path + "/" + str(num_subdirs_count) + "/"
+    while (os.path.isdir(subdir_path)):
+        num_subdirs_count += 1
+        subdir_path = dir_path + "/" + str(num_subdirs_count) + "/"
+    num_subdirs_count -= 1
+    return num_subdirs_count
+
+def saveObj(obj, file_path):
+    with open(file_path, 'wb') as f:
+        pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
+
+def loadObj(file_path):
+    with open(file_path, 'rb') as f:
+        return pickle.load(f)
