@@ -28,3 +28,9 @@ data_global_coord = prepareDemoDatasetLOAVicon()
 saveObj(data_global_coord, 'data_multi_demo_vicon_static_global_coord.pkl')
 
 # end of Demo Dataset Preparation
+
+## Baseline Primitive Learning
+
+
+
+# end of Baseline Primitive Learning
