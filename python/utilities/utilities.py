@@ -35,12 +35,23 @@ def computeWNMSE(predictions, ground_truth, weight):
     wnmse = np.divide(wmse, wvar_gt)    # Normalized Weighted Mean-Squared Error (NWMSE)
     return wnmse
 
-def compareTwoNumericFiles(file_1_path, file_2_path, scalar_max_abs_diff_threshold=1.001e-5, scalar_max_rel_abs_diff_threshold=1.501e-3):
+def compareTwoNumericFiles(file_1_path, file_2_path, 
+                           scalar_max_abs_diff_threshold=1.001e-5, 
+                           scalar_max_rel_abs_diff_threshold=1.501e-3):
     file_1 = np.loadtxt(file_1_path)
     file_2 = np.loadtxt(file_2_path)
-    assert (file_1.shape == file_2.shape), 'File dimension mis-match!'
+    return compareTwoMatrices(file_1, file_2, 
+                              scalar_max_abs_diff_threshold, 
+                              scalar_max_rel_abs_diff_threshold,
+                              file_1_path, file_2_path)
+
+def compareTwoMatrices(matrix1, matrix2, 
+                       scalar_max_abs_diff_threshold=1.001e-5, 
+                       scalar_max_rel_abs_diff_threshold=1.501e-3,
+                       name1='', name2=''):
+    assert (matrix1.shape == matrix2.shape), 'File dimension mis-match!'
     
-    file_diff = file_1 - file_2
+    file_diff = matrix1 - matrix2
     abs_diff = np.abs(file_diff)
     rowvec_max_abs_diff = np.max(abs_diff,axis=0)
     rowvec_max_idx_abs_diff = np.argmax(abs_diff,axis=0)
@@ -50,13 +61,13 @@ def compareTwoNumericFiles(file_1_path, file_2_path, scalar_max_abs_diff_thresho
     
     if (scalar_max_abs_diff > scalar_max_abs_diff_threshold):
         print ('Comparing:')
-        print (file_1_path)
+        print (name1)
         print ('and')
-        print (file_2_path)
+        print (name2)
         assert (False), ('Two files are NOT similar: scalar_max_abs_diff=' + str(scalar_max_abs_diff) + 
                          ' is beyond threshold at [row,col]=[' + str(scalar_max_abs_diff_row) + ',' + str(scalar_max_abs_diff_col) + '], i.e. ' + 
-                         str(file_1[scalar_max_abs_diff_row, scalar_max_abs_diff_col]) + ' vs ' + 
-                         str(file_2[scalar_max_abs_diff_row, scalar_max_abs_diff_col]) + ' !')
+                         str(matrix1[scalar_max_abs_diff_row, scalar_max_abs_diff_col]) + ' vs ' + 
+                         str(matrix2[scalar_max_abs_diff_row, scalar_max_abs_diff_col]) + ' !')
     return None
 
 def naturalSort(l): 

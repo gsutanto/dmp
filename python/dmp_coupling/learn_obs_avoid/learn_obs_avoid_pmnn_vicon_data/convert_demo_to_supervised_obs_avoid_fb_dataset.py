@@ -34,12 +34,12 @@ saveObj(data_global_coord, 'data_multi_demo_vicon_static_global_coord.pkl')
 ## Baseline Primitive Learning
 
 print('Processing Local Coordinate System for Demonstrated Baseline Trajectories ...')
-[cart_coord_dmp_baseline_params,
- cart_coord_dmp_baseline_unroll_global_traj,
- cart_coord_dmp_baseline_unroll_local_traj,
- cart_coord_dmp_baseline_unroll_forcing_term_traj] = learnCartPrimitiveMultiOnLocalCoord(data_global_coord["baseline"], 
-                                                                                         data_global_coord["dt"],
-                                                                                         n_rfs, 
-                                                                                         c_order)
+[ccdmp_baseline_params,
+ ccdmp_baseline_unroll_global_traj,
+ _,
+ _] = learnCartPrimitiveMultiOnLocalCoord(data_global_coord["baseline"], 
+                                          data_global_coord["dt"],
+                                          n_rfs, 
+                                          c_order)
 
 # end of Baseline Primitive Learning

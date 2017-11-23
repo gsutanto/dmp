@@ -51,7 +51,7 @@ def learnCartPrimitiveMultiOnLocalCoord(cart_global_traj, train_data_dt,
     
     if (unroll_traj_length == -1):
         unroll_tau = mean_tau
-        unroll_traj_length = int(np.round(unroll_tau / dt)) + 1
+        unroll_traj_length = int(np.round(unroll_tau / unroll_dt)) + 1
     else:
         unroll_tau = 1.0 * unroll_dt * (unroll_traj_length - 1)
     
