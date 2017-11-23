@@ -38,17 +38,17 @@ def dmp_1D_test(amd_clmc_dmp_home_dir_path="../../../", canonical_order=2, time_
     tau_sys = TauSystem(MIN_TAU)
     can_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
     dmp_discrete_1D = DMPDiscrete1D(model_size, can_sys_discr)
-    [tau_learn, critical_states_learn, 
+    [critical_states_learn, 
      W, mean_A_learn, mean_tau, 
      Ft, Fp, G, cX, cV, PSI] = dmp_discrete_1D.learnFromPath(amd_clmc_dmp_home_dir_path + "/data/dmp_1D/sample_traj_1.txt", task_servo_rate)
     
     ## Reproduce
     if (time_reproduce_max <= 0.0):
-        time_reproduce_max = tau_learn
+        time_reproduce_max = mean_tau
     if (new_goal[0,0] <= 0.0):
         new_goal = dmp_discrete_1D.getMeanGoalPosition()
     if (tau_reproduce <= 0.0):
-        tau_reproduce = tau_learn
+        tau_reproduce = mean_tau
     tau = tau_reproduce
     dmp_unroll_init_parameters = DMPUnrollInitParams(critical_states_learn, tau)
     dmp_discrete_1D.startWithUnrollParams(dmp_unroll_init_parameters)

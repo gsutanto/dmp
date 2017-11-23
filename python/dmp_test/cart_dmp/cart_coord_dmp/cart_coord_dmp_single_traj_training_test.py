@@ -39,17 +39,18 @@ def cart_coord_dmp_single_traj_training_test(amd_clmc_dmp_home_dir_path="../../.
     tau_sys = TauSystem(MIN_TAU)
     canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
     cart_dmp = CartesianCoordDMP(model_size, canonical_sys_discr, GSUTANTO_LOCAL_COORD_FRAME)
-    [tau_learn, critical_states_learn, 
+    [critical_states_learn, 
      W, mean_A_learn, mean_tau, 
-     Ft, Fp, G, cX, cV, PSI] = cart_dmp.learnFromPath(amd_clmc_dmp_home_dir_path + "/data/cart_dmp/cart_coord_dmp/single_traj_training/sample_traj_3D_1.txt", task_servo_rate)
+     Ft, Fp, G, cX, cV, 
+     PSI] = cart_dmp.learnFromPath(amd_clmc_dmp_home_dir_path + "/data/cart_dmp/cart_coord_dmp/single_traj_training/sample_traj_3D_1.txt", task_servo_rate)
     
     ## Reproduce
     if (time_reproduce_max <= 0.0):
-        time_reproduce_max = tau_learn
+        time_reproduce_max = mean_tau
     if (time_goal_change <= 0.0):
         time_goal_change = time_reproduce_max
     if (tau_reproduce <= 0.0):
-        tau_reproduce = tau_learn
+        tau_reproduce = mean_tau
     tau = tau_reproduce
     dmp_unroll_init_parameters = DMPUnrollInitParams(critical_states_learn, tau)
     

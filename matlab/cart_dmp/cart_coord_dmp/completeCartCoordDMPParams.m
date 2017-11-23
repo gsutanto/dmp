@@ -54,4 +54,3 @@ function [ cart_coord_dmp_params_complete ] = completeCartCoordDMPParams( cart_c
     cart_coord_dmp_params_complete.T_local_to_global_H 	= T_mean_local_to_global_H;
     cart_coord_dmp_params_complete.T_global_to_local_H  = T_mean_global_to_local_H;
 end
-

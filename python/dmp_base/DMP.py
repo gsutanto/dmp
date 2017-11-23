@@ -83,12 +83,11 @@ class DMP:
     
     def learnGetDefaultUnrollParams(self, set_traj_input, robot_task_servo_rate):
         W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI = self.learn(set_traj_input, robot_task_servo_rate)
-        tau_learn = self.mean_tau
         critical_states_list_learn = [None] * 2
         critical_states_list_learn[0] = DMPState(self.mean_start_position)
         critical_states_list_learn[-1] = DMPState(self.mean_goal_position)
         critical_states_learn = convertDMPStatesListIntoDMPTrajectory(critical_states_list_learn)
-        return tau_learn, critical_states_learn, W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI
+        return critical_states_learn, W, mean_A_learn, self.mean_tau, Ft, Fp, G, cX, cV, PSI
     
     def startWithUnrollParams(self, dmp_unroll_init_parameters):
         assert (dmp_unroll_init_parameters.isValid())

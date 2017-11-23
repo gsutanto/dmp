@@ -52,7 +52,7 @@ def cart_coord_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_path="../../..
         elif (k == 1): # With Obstacle
             sub_cart_coord_dmp_training_path = "/data/dmp_coupling/learn_obs_avoid/static_obs/data_sph_new/SubjectNo1/1/endeff_trajs/"
         
-        [tau_learn, critical_states_learn, 
+        [critical_states_learn, 
          W, mean_A_learn, mean_tau, 
          Ft, Fp, G, cX, cV, 
          PSI] = cart_dmp.learnFromPath(amd_clmc_dmp_home_dir_path + sub_cart_coord_dmp_training_path, task_servo_rate)
