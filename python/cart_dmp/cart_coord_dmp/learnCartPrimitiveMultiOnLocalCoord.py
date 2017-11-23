@@ -44,7 +44,11 @@ def learnCartPrimitiveMultiOnLocalCoord(self, cart_global_traj, train_data_dt,
     cart_dmp = CartesianCoordDMP(dmp_basis_funcs_size, canonical_sys_discr, ctraj_local_coordinate_frame_selection)
     cart_dmp.setScalingUsage(is_using_scaling)
     
-    W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI = cart_dmp.learn(cart_global_traj, 1.0/train_data_dt)
+    [tau_learn, critical_states_learn, 
+     W, mean_A_learn, mean_tau, 
+     Ft, Fp, 
+     G, cX, cV, 
+     PSI] = cart_dmp.learnGetDefaultUnrollParams(cart_global_traj, 1.0/train_data_dt)
     
     cart_coord_dmp_params_basic = {}
     # cart_coord_dmp_params_basic['dt'] = train_data_dt

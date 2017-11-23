@@ -214,3 +214,7 @@ class CartesianCoordTransformer:
             assert (cart_vector_new[3,0] == 1.0), 'NOT a valid homogeneous vector!'
         
         return cart_vector_new
+    
+    def computeCPosAtNewCoordSys(self, pos_3D_old, rel_homogen_transform_matrix_old_to_new):
+        pos_3D_H_old = np.vstack([pos_3D_old,np.array([[1.0]])])
+        return self.computeCVecAtNewCoordSys(pos_3D_H_old, rel_homogen_transform_matrix_old_to_new)

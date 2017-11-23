@@ -79,6 +79,9 @@ class DMP:
     
     def learnFromPath(self, training_data_dir_or_file_path, robot_task_servo_rate):
         set_traj_input = self.extractSetTrajectories(training_data_dir_or_file_path)
+        return self.learnGetDefaultUnrollParams(set_traj_input, robot_task_servo_rate)
+    
+    def learnGetDefaultUnrollParams(self, set_traj_input, robot_task_servo_rate):
         W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI = self.learn(set_traj_input, robot_task_servo_rate)
         tau_learn = self.mean_tau
         critical_states_list_learn = [None] * 2

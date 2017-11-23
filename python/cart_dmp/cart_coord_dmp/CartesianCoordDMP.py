@@ -63,6 +63,8 @@ class CartesianCoordDMP(DMPDiscrete, object):
         # in this case preprocessing is conversion of the trajectories representation 
         # from the global to local coordinate system:
         list_intermed_processed_ctraj_global = super(CartesianCoordDMP, self).preprocess(list_ctraj_global)
+        self.mean_start_global_position = self.getMeanStartPosition()
+        self.mean_goal_global_position = self.getMeanGoalPosition()
         list_intermed_processed_ctraj_global_size = len(list_intermed_processed_ctraj_global)
         list_ctraj_local = [None] * list_intermed_processed_ctraj_global_size
         for i in range(list_intermed_processed_ctraj_global_size):
@@ -74,6 +76,12 @@ class CartesianCoordDMP(DMPDiscrete, object):
             ctraj_local = self.cart_coord_transformer.convertCTrajAtOldToNewCoordSys(intermed_processed_ctraj_global,
                                                                                      self.ctraj_hmg_transform_global_to_local_matrix)
             list_ctraj_local[i] = ctraj_local
+        
+        self.mean_start_local_position = self.cart_coord_transformer.computeCPosAtNewCoordSys(self.mean_start_global_position,
+                                                                                              self.ctraj_hmg_transform_global_to_local_matrix)
+        self.mean_goal_local_position = self.cart_coord_transformer.computeCPosAtNewCoordSys(self.mean_goal_global_position,
+                                                                                              self.ctraj_hmg_transform_global_to_local_matrix)
+        
         return list_ctraj_local
     
     def learnFromPath(self, training_data_dir_or_file_path, robot_task_servo_rate):

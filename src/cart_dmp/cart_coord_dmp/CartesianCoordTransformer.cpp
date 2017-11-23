@@ -563,6 +563,39 @@ bool CartesianCoordTransformer::computeCTrajAtNewCoordSys(Vector4* cart_H_old,
 }
 
 /**
+ * Computes a Cartesian position (x-y-z) representation on the new coordinate system.
+ */
+bool CartesianCoordTransformer::computeCPosAtNewCoordSys(const Vector3& pos_3D_old,
+                                                         const Matrix4x4& rel_homogen_transform_matrix_old_to_new,
+                                                         Vector3& pos_3D_new)
+{
+    // pre-conditions checking
+    if (rt_assert(CartesianCoordTransformer::isValid()) == false)
+    {
+        return false;
+    }
+    // input checking:
+    if (rt_assert(rel_homogen_transform_matrix_old_to_new.isZero() == false) == false)
+    {
+        return false;
+    }
+
+    Vector4 pos_3D_H_old        = ZeroVector4;
+    Vector4 pos_3D_H_new        = ZeroVector4;
+
+    pos_3D_H_old.block(0,0,3,1) = pos_3D_old;
+    pos_3D_H_old(3)             = 1.0;
+    pos_3D_H_new                = rel_homogen_transform_matrix_old_to_new * pos_3D_H_old;
+    if (rt_assert(pos_3D_H_new(3) == 1.0) == false)
+    {
+        return false;
+    }
+    pos_3D_new                  = pos_3D_H_new.block(0,0,3,1);
+
+    return true;
+}
+
+/**
  * Convert the Cartesian trajectory from its matrices representation into its vectors of DMPState representation.
  *
  * @param ctraj_H_matrix Matrix of homogeneous coordinates of the Cartesian position

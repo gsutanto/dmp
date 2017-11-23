@@ -200,6 +200,9 @@ bool CartesianCoordDMP::preprocess(TrajectorySet& trajectory_set)
         return false;
     }
 
+    mean_start_global_position  = mean_start_position.block(0,0,3,1);
+    mean_goal_global_position   = mean_goal_position.block(0,0,3,1);
+
     int N_traj                  = trajectory_set.size();  // size of Cartesian coordinate trajectory
     for (uint i=0; i<N_traj; ++i)
     {
@@ -219,6 +222,20 @@ bool CartesianCoordDMP::preprocess(TrajectorySet& trajectory_set)
         {
             return false;
         }
+    }
+
+    if (rt_assert(cart_coord_transformer.computeCPosAtNewCoordSys(mean_start_global_position,
+                                                                  ctraj_hmg_transform_global_to_local_matrix,
+                                                                  mean_start_local_position)) == false)
+    {
+        return false;
+    }
+
+    if (rt_assert(cart_coord_transformer.computeCPosAtNewCoordSys(mean_goal_global_position,
+                                                                  ctraj_hmg_transform_global_to_local_matrix,
+                                                                  mean_goal_local_position)) == false)
+    {
+        return false;
     }
 
     return true;

@@ -166,6 +166,13 @@ public:
                                    Vector3* cart_vector_new);
 
     /**
+     * Computes a Cartesian position (x-y-z) representation on the new coordinate system.
+     */
+    bool computeCPosAtNewCoordSys(const Vector3& pos_3D_old,
+                                  const Matrix4x4& rel_homogen_transform_matrix_old_to_new,
+                                  Vector3& pos_3D_new);
+
+    /**
      * Convert the Cartesian trajectory from its matrices representation into its vectors of DMPState representation.
      *
      * @param ctraj_H_matrix Matrix of homogeneous coordinates of the Cartesian position
