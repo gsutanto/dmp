@@ -201,8 +201,8 @@ class CartesianCoordTransformer:
     
     def computeCVecAtNewCoordSys(self, cart_vector_old, rel_homogen_transform_matrix_old_to_new):
         assert (self.isValid())
-        assert (cart_vector_old.shape[1] >= 1)
-        assert ((cart_vector_old.shape[0] == 3) or (cart_vector_old.shape[0] == 4))
+        assert (cart_vector_old.shape[1] >= 1), 'cart_vector_old.shape[1] = ' + str(cart_vector_old.shape[1])
+        assert ((cart_vector_old.shape[0] == 3) or (cart_vector_old.shape[0] == 4)), 'cart_vector_old.shape[0] = ' + str(cart_vector_old.shape[0])
         if (cart_vector_old.shape[0] == 4):
             assert (np.array_equal(cart_vector_old[3,:].reshape(1,cart_vector_old.shape[1]), 
                                    np.ones((1,cart_vector_old.shape[1])))), 'Input is NOT a valid homogeneous vector(s)!'

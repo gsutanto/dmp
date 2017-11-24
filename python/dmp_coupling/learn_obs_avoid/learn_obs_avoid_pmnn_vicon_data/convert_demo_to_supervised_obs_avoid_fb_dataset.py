@@ -14,11 +14,13 @@ import glob
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../cart_dmp/cart_coord_dmp/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../vicon/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../utilities/'))
 from CartesianCoordTransformer import *
 from learnCartPrimitiveMultiOnLocalCoord import *
 from DataIO import *
 from utilities import *
 from vicon_obs_avoid_utils import *
+from computeSubFeatMatAndSubTargetCt import *
 
 
 n_rfs = 25  # Number of basis functions used to represent the forcing term of DMP
@@ -38,10 +40,11 @@ print('Processing Local Coordinate System for Demonstrated Baseline Trajectories
 [ccdmp_baseline_params,
  ccdmp_baseline_unroll_global_traj,
  _,
- _] = learnCartPrimitiveMultiOnLocalCoord(data_global_coord["baseline"], 
-                                          data_global_coord["dt"],
-                                          n_rfs, 
-                                          c_order)
+ _,
+ cart_coord_dmp] = learnCartPrimitiveMultiOnLocalCoord(data_global_coord["baseline"], 
+                                                       data_global_coord["dt"],
+                                                       n_rfs, 
+                                                       c_order)
 
 dmp_baseline_params = {}
 dmp_baseline_params["cart_coord"] = [ccdmp_baseline_params]
@@ -64,8 +67,6 @@ dataset_Ct_obs_avoid["sub_normalized_phase_PSI_mult_phase_V"] = [[None] * N_sett
 dataset_Ct_obs_avoid["sub_data_point_priority"] = [[None] * N_settings]
 dataset_Ct_obs_avoid["trial_idx_ranked_by_outlier_metric_w_exclusion"] = [[None] * N_settings]
 min_num_considered_demo = 0
-
-cart_coord_transformer = CartesianCoordTransformer()
 
 for ns in range(N_settings):
     N_demos = len(data_global_coord["obs_avoid"][1][ns])
@@ -91,7 +92,7 @@ for ns in range(N_settings):
                                                          data_global_coord["obs_avoid"][0][ns],
                                                          data_global_coord["dt"],
                                                          ccdmp_baseline_params,
-                                                         cart_coord_transformer)
+                                                         cart_coord_dmp)
         
         phase_V = dataset_Ct_obs_avoid["sub_phase_V"][0][ns][nd]
         phase_PSI = dataset_Ct_obs_avoid["sub_phase_PSI"][0][ns][nd]

@@ -140,7 +140,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
         
         traj_length = dmptrajectory_demo_local.getLength()
         start_dmpstate_demo_local = dmptrajectory_demo_local.getDMPStateAtIndex(0)
-        if (steady_state_goal_position_local == None):
+        if (steady_state_goal_position_local is None):
             goal_steady_dmpstate_demo_local = dmptrajectory_demo_local.getDMPStateAtIndex(traj_length-1)
         else:
             goal_steady_dmpstate_demo_local = DMPState(steady_state_goal_position_local)
@@ -196,7 +196,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
         T = dmptrajectory_demo_local.getX()
         Td = dmptrajectory_demo_local.getXd()
         Tdd = dmptrajectory_demo_local.getXdd()
-        F, PSI = getForcingTermTraj(cX, cV)
+        F, PSI = self.func_approx.getForcingTermTraj(cX, cV)
         C_target = ((np.square(tau_relative) * Tdd) - (self.alpha * ((self.beta * (G - T)) - (tau_relative * Td))) - F)
         
         return C_target, F, PSI, cX, cV, tau, tau_relative, G
