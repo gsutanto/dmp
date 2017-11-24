@@ -12,13 +12,16 @@ import sys
 import copy
 import glob
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_state/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../cart_dmp/cart_coord_dmp/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/'))
+from DMPState import *
 from DMPTrajectory import *
+from CartesianCoordTransformer import *
 from DataIO import *
 from utilities import *
 
 def computeSubFeatMatAndSubTargetCt(demo_obs_avoid_traj_global, point_obstacles_cart_position_global, 
-                                    dt, cart_coord_dmp_baseline_params):
+                                    dt, cart_coord_dmp_baseline_params, cart_coord_transformer):
     max_critical_point_distance_baseline_vs_oa_demo = 0.1 # in meter
     
     start_position_global_obs_avoid_demo = demo_obs_avoid_traj_global.getDMPStateAtIndex(0).getX()
@@ -35,5 +38,11 @@ def computeSubFeatMatAndSubTargetCt(demo_obs_avoid_traj_global, point_obstacles_
         is_good_demo = False
     else:
         is_good_demo = True
+    
+    demo_obs_avoid_traj_local = cart_coord_transformer.computeCTrajAtNewCoordSys(demo_obs_avoid_traj_global,
+                                                                                 cart_coord_dmp_baseline_params['T_global_to_local_H'])
+    
+    point_obstacles_cart_position_local = cart_coord_transformer.computeCPosAtNewCoordSys(point_obstacles_cart_position_global,
+                                                                                          cart_coord_dmp_baseline_params['T_global_to_local_H'])
     
     return sub_X, sub_Ct_target, sub_phase_PSI, sub_phase_V, sub_phase_X, is_good_demo

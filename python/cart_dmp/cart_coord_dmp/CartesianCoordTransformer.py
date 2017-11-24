@@ -201,20 +201,22 @@ class CartesianCoordTransformer:
     
     def computeCVecAtNewCoordSys(self, cart_vector_old, rel_homogen_transform_matrix_old_to_new):
         assert (self.isValid())
-        assert (cart_vector_old.shape[1] == 1)
+        assert (cart_vector_old.shape[1] >= 1)
         assert ((cart_vector_old.shape[0] == 3) or (cart_vector_old.shape[0] == 4))
         if (cart_vector_old.shape[0] == 4):
-            assert (cart_vector_old[3,0] == 1.0), 'NOT a valid homogeneous vector!'
+            assert (np.array_equal(cart_vector_old[3,:].reshape(1,cart_vector_old.shape[1]), 
+                                   np.ones((1,cart_vector_old.shape[1])))), 'Input is NOT a valid homogeneous vector(s)!'
         assert (np.count_nonzero(rel_homogen_transform_matrix_old_to_new) > 0)
         
         if (cart_vector_old.shape[0] == 3):
             cart_vector_new = np.matmul(rel_homogen_transform_matrix_old_to_new[0:3,0:3], cart_vector_old)
         elif (cart_vector_old.shape[0] == 4):
             cart_vector_new = np.matmul(rel_homogen_transform_matrix_old_to_new, cart_vector_old)
-            assert (cart_vector_new[3,0] == 1.0), 'NOT a valid homogeneous vector!'
+            assert (np.array_equal(cart_vector_new[3,:].reshape(1,cart_vector_new.shape[1]), 
+                                   np.ones((1,cart_vector_new.shape[1])))), 'Output is NOT a valid homogeneous vector(s)!'
         
         return cart_vector_new
     
     def computeCPosAtNewCoordSys(self, pos_3D_old, rel_homogen_transform_matrix_old_to_new):
-        pos_3D_H_old = np.vstack([pos_3D_old,np.array([[1.0]])])
+        pos_3D_H_old = np.vstack([pos_3D_old,np.ones((1,pos_3D_old.shape[1]))])
         return self.computeCVecAtNewCoordSys(pos_3D_H_old, rel_homogen_transform_matrix_old_to_new)

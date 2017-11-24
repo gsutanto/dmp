@@ -14,6 +14,7 @@ import glob
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../cart_dmp/cart_coord_dmp/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../vicon/'))
+from CartesianCoordTransformer import *
 from learnCartPrimitiveMultiOnLocalCoord import *
 from DataIO import *
 from utilities import *
@@ -64,6 +65,8 @@ dataset_Ct_obs_avoid["sub_data_point_priority"] = [[None] * N_settings]
 dataset_Ct_obs_avoid["trial_idx_ranked_by_outlier_metric_w_exclusion"] = [[None] * N_settings]
 min_num_considered_demo = 0
 
+cart_coord_transformer = CartesianCoordTransformer()
+
 for ns in range(N_settings):
     N_demos = len(data_global_coord["obs_avoid"][1][ns])
     
@@ -87,7 +90,8 @@ for ns in range(N_settings):
          is_good_demo] = computeSubFeatMatAndSubTargetCt(data_global_coord["obs_avoid"][1][ns][nd],
                                                          data_global_coord["obs_avoid"][0][ns],
                                                          data_global_coord["dt"],
-                                                         ccdmp_baseline_params)
+                                                         ccdmp_baseline_params,
+                                                         cart_coord_transformer)
         
         phase_V = dataset_Ct_obs_avoid["sub_phase_V"][0][ns][nd]
         phase_PSI = dataset_Ct_obs_avoid["sub_phase_PSI"][0][ns][nd]
