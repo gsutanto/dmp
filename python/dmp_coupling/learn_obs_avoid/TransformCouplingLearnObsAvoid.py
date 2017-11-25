@@ -12,10 +12,10 @@ import os
 import sys
 import copy
 import glob
-sys.path.append(os.path.join(os.path.dirname(__file__), '../base/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../dmp_state/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../dmp_discrete/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../cart_dmp/cart_coord_dmp/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../dmp_coupling/base/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../utilities/'))
 from DMPState import *
 from DMPTrajectory import *

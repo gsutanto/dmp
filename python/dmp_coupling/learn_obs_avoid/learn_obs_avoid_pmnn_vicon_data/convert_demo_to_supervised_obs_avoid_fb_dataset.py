@@ -14,9 +14,8 @@ import glob
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_state/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../cart_dmp/cart_coord_dmp/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_coupling/learn_obs_avoid/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_coupling/learn_obs_avoid/vicon/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '../vicon/'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '../utilities/'))
 from DMPState import *
 from CartesianCoordTransformer import *
 from learnCartPrimitiveMultiOnLocalCoord import *
