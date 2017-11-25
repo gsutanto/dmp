@@ -11,16 +11,21 @@ import os
 import sys
 import copy
 import glob
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_state/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../cart_dmp/cart_coord_dmp/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_coupling/learn_obs_avoid/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../vicon/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../utilities/'))
+from DMPState import *
 from CartesianCoordTransformer import *
 from learnCartPrimitiveMultiOnLocalCoord import *
 from DataIO import *
 from utilities import *
 from vicon_obs_avoid_utils import *
-from computeSubFeatMatAndSubTargetCt import *
+from ObstacleStates import *
+from TransformCouplingLearnObsAvoid import *
+from TCLearnObsAvoidFeatureParameter import *
 
 
 n_rfs = 25  # Number of basis functions used to represent the forcing term of DMP
@@ -55,6 +60,15 @@ saveObj(ccdmp_baseline_unroll_global_traj, 'ccdmp_baseline_unroll_global_traj.pk
 
 ## Conversion of Demonstration Dataset into Supervised Obstacle Avoidance Feedback Model Dataset
 
+endeff_cart_state_global = DMPState(np.zeros((3,1)))
+point_obstacles_cart_state_global = ObstacleStates(np.zeros((3,21)),
+                                                   np.zeros((3,21)),
+                                                   np.zeros((3,21)),
+                                                   np.zeros((1,1)))
+loa_parameters = TCLearnObsAvoidFeatureParameter()
+tcloa = TransformCouplingLearnObsAvoid(loa_parameters, cart_coord_dmp.tau_sys,
+                                       endeff_cart_state_global, point_obstacles_cart_state_global)
+
 N_settings = len(data_global_coord["obs_avoid"][0])
 
 dataset_Ct_obs_avoid = {}
@@ -82,17 +96,17 @@ for ns in range(N_settings):
     dataset_Ct_obs_avoid["trial_idx_ranked_by_outlier_metric_w_exclusion"][0][ns] = []
     
     for nd in range(N_demos):
-        print ('Setting #' + str(ns) + '/' + str(N_settings) + ', Demo #' + str(nd) + '/' + str(N_demos))
+        print ('Setting #' + str(ns+1) + '/' + str(N_settings) + ', Demo #' + str(nd+1) + '/' + str(N_demos))
         [dataset_Ct_obs_avoid["sub_X"][0][ns][nd],
          dataset_Ct_obs_avoid["sub_Ct_target"][0][ns][nd],
          dataset_Ct_obs_avoid["sub_phase_PSI"][0][ns][nd],
          dataset_Ct_obs_avoid["sub_phase_V"][0][ns][nd],
          dataset_Ct_obs_avoid["sub_phase_X"][0][ns][nd],
-         is_good_demo] = computeSubFeatMatAndSubTargetCt(data_global_coord["obs_avoid"][1][ns][nd],
-                                                         data_global_coord["obs_avoid"][0][ns],
-                                                         data_global_coord["dt"],
-                                                         ccdmp_baseline_params,
-                                                         cart_coord_dmp)
+         is_good_demo] = tcloa.computeSubFeatMatAndSubTargetCt(data_global_coord["obs_avoid"][1][ns][nd],
+                                                               data_global_coord["obs_avoid"][0][ns],
+                                                               data_global_coord["dt"],
+                                                               ccdmp_baseline_params,
+                                                               cart_coord_dmp)
         
         phase_V = dataset_Ct_obs_avoid["sub_phase_V"][0][ns][nd]
         phase_PSI = dataset_Ct_obs_avoid["sub_phase_PSI"][0][ns][nd]

@@ -12,9 +12,11 @@ import sys
 import copy
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../dmp_param/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../dmp_state/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../dmp_coupling/learn_obs_avoid/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../utilities/'))
 from DMPTrajectory import *
 from DMPState import *
+from ObstacleStates import *
 from utilities import *
 
 PARALLEL_VECTOR_PROJECTION_THRESHOLD = 0.9
@@ -193,7 +195,10 @@ class CartesianCoordTransformer:
         if (cart_dmptrajectory_length == 1):
             cart_dmptrajectory_new = DMPState(X_new, Xd_new, Xdd_new, time_new)
         elif (cart_dmptrajectory_length > 1):
-            cart_dmptrajectory_new = DMPTrajectory(X_new, Xd_new, Xdd_new, time_new)
+            if (time_new.shape[1] > 1):
+                cart_dmptrajectory_new = DMPTrajectory(X_new, Xd_new, Xdd_new, time_new)
+            elif (time_new.shape[1] == 1):
+                cart_dmptrajectory_new = ObstacleStates(X_new, Xd_new, Xdd_new, time_new)
         return cart_dmptrajectory_new
     
     def convertCTrajAtOldToNewCoordSys(self, cart_dmptrajectory_old, rel_homogen_transform_matrix_old_to_new):
@@ -219,4 +224,4 @@ class CartesianCoordTransformer:
     
     def computeCPosAtNewCoordSys(self, pos_3D_old, rel_homogen_transform_matrix_old_to_new):
         pos_3D_H_old = np.vstack([pos_3D_old,np.ones((1,pos_3D_old.shape[1]))])
-        return self.computeCVecAtNewCoordSys(pos_3D_H_old, rel_homogen_transform_matrix_old_to_new)
+        return self.computeCVecAtNewCoordSys(pos_3D_H_old, rel_homogen_transform_matrix_old_to_new)[0:3,:]

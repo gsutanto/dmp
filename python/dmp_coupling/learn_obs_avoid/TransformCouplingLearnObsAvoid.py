@@ -7,6 +7,7 @@ Created on Mon Oct 30 19:00:00 2017
 """
 
 import numpy as np
+import numpy.matlib
 import os
 import sys
 import copy
@@ -112,19 +113,14 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         
         sub_X = self.constructObsAvoidViconFeatMat(demo_obs_avoid_traj_local,
                                                    point_obstacles_cart_position_local,
-                                                   traj_dt,
-                                                   cart_coord_dmp_baseline_params,
-                                                   cart_coord_dmp)
+                                                   traj_dt)
         
         return sub_X, sub_Ct_target, sub_phase_PSI, sub_phase_V, sub_phase_X, is_good_demo
     
     def constructObsAvoidViconFeatMat(self, demo_obs_avoid_traj_local,
                                       point_obstacles_cart_position_local,
-                                      dt,
-                                      cart_coord_dmp_baseline_params,
-                                      cart_coord_dmp):
+                                      dt):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformCouplingLearnObsAvoid is invalid!"
-        assert (self.tau_sys == cart_coord_dmp.tau_sys)
         
         Y_obs_local = demo_obs_avoid_traj_local.getX()
         Yd_obs_local = demo_obs_avoid_traj_local.getXd()
@@ -150,8 +146,10 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         list_sub_X_vectors = [None] * traj_length
         
         self.point_obstacles_ccstate_local.X = point_obstacles_cart_position_local.T
-        self.point_obstacles_ccstate_local.Xd = np.zeros(point_obstacles_cart_position_local.shape)
-        self.point_obstacles_ccstate_local.Xdd = np.zeros(point_obstacles_cart_position_local.shape)
+        self.point_obstacles_ccstate_local.Xd = np.zeros(point_obstacles_cart_position_local.T.shape)
+        self.point_obstacles_ccstate_local.Xdd = np.zeros(point_obstacles_cart_position_local.T.shape)
+        
+        self.tau_sys.setTauBase(tau)
         
         for i in xrange(traj_length):
             self.endeff_ccstate_local.X = Y_obs_local_shifted[:,i].reshape(3,1)
@@ -162,10 +160,7 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
             self.point_obstacles_ccstate_local.time = demo_obs_avoid_traj_local.time[:,i].reshape(1,1)
             
             sub_X_vector = self.computeObsAvoidCtFeat(self.point_obstacles_ccstate_local,
-                                                      self.endeff_ccstate_local,
-                                                      tau,
-                                                      cart_coord_dmp_baseline_params,
-                                                      cart_coord_dmp)
+                                                      self.endeff_ccstate_local)
             
             list_sub_X_vectors[i] = sub_X_vector
         
@@ -174,9 +169,50 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         return sub_X
     
     def computeObsAvoidCtFeat(self, point_obstacles_cart_coord_state_local,
-                              endeff_cart_coord_state_local,
-                              tau,
-                              cart_coord_dmp_baseline_params,
-                              cart_coord_dmp):
+                              endeff_cart_coord_state_local):
+        tau_rel = self.tau_sys.getTauRelative()
+        
+        x3 = endeff_cart_coord_state_local.X
+        v3 = endeff_cart_coord_state_local.Xd
+        
+        tau_v3 = tau_rel * v3
+        
+        O3 = point_obstacles_cart_coord_state_local.X
+        
+        o3_center = np.mean(O3, axis=1).reshape(3,1)
+        
+        N_obs = point_obstacles_cart_coord_state_local.getLength()
+        
+        N_closest_obs = 3
+        
+        o3_centerx = o3_center - x3
+        
+        OX3 = (O3 - np.matlib.repmat(x3, 1, N_obs))
+        
+        # norm of euclidean distances between the endeff and each obstacle
+        OX3_norm = np.linalg.norm(OX3, axis=0)
+        
+        closest_obs_idx = np.argsort(OX3_norm)
+        
+        selected_idx_OX3 = closest_obs_idx[0:N_closest_obs]
+        
+        reshaped_sel_OX3_vecs = OX3[:,selected_idx_OX3].reshape((3*N_closest_obs),1)
+        
+        ox3 = OX3[:,closest_obs_idx[0]].reshape(3,1)
+        num_thresh = 0.0
+        if ((np.linalg.norm(v3) > num_thresh) and (np.linalg.norm(ox3) > num_thresh)):
+            cos_theta = (np.matmul(ox3.T, v3)[0,0])/(np.linalg.norm(ox3)*np.linalg.norm(v3))
+#            clamped_cos_theta = cos_theta
+#            if (clamped_cos_theta < 0.0):
+#                clamped_cos_theta = 0.0
+        else:
+            cos_theta = -1.0
+#            clamped_cos_theta = 0.0
+        
+        sub_X_vector = np.vstack([o3_centerx, 
+                                  reshaped_sel_OX3_vecs, 
+                                  tau_v3,
+                                  np.linalg.norm(o3_centerx),
+                                  cos_theta])
         
         return sub_X_vector

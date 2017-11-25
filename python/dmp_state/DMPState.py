@@ -26,16 +26,18 @@ class DMPState:
             if (X_init is not None):
                 self.dmp_num_dimensions = X_init.shape[0]
                 self.X = X_init
+            else:
+                assert (False), 'X_init CANNOT be empty!'
             if (Xd_init is not None):
                 assert (self.dmp_num_dimensions == Xd_init.shape[0]), "Dimension Xd_init.shape[0]=" + str(Xd_init.shape[0]) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
                 self.Xd = Xd_init
             else:
-                self.Xd = np.zeros((self.dmp_num_dimensions,1))
+                self.Xd = np.zeros((self.dmp_num_dimensions,self.X.shape[1]))
             if (Xdd_init is not None):
                 assert (self.dmp_num_dimensions == Xdd_init.shape[0]), "Dimension Xdd_init.shape[0]=" + str(Xdd_init.shape[0]) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
                 self.Xdd = Xdd_init
             else:
-                self.Xdd = np.zeros((self.dmp_num_dimensions,1))
+                self.Xdd = np.zeros((self.dmp_num_dimensions,self.X.shape[1]))
             if (len(self.X.shape) == 1):
                 self.X.reshape((self.dmp_num_dimensions, 1))
             if (len(self.Xd.shape) == 1):
@@ -103,4 +105,4 @@ class DMPState:
     
     def getLength(self):
         assert (self.isValid())
-        return self.time.shape[1]
+        return self.X.shape[1]
