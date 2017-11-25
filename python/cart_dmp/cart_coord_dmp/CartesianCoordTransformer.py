@@ -186,9 +186,9 @@ class CartesianCoordTransformer:
         cart_dmptrajectory_length = cart_dmptrajectory_old.getLength()
         assert (cart_dmptrajectory_length >= 1)
         
-        X_new = np.matmul(rel_homogen_transform_matrix_old_to_new, np.vstack([cart_dmptrajectory_old.getX(), np.ones((1,cart_dmptrajectory_length))]))[0:3,:]
-        Xd_new = np.matmul(rel_homogen_transform_matrix_old_to_new[0:3,0:3], cart_dmptrajectory_old.getXd())
-        Xdd_new = np.matmul(rel_homogen_transform_matrix_old_to_new[0:3,0:3], cart_dmptrajectory_old.getXdd())
+        X_new = np.matmul(rel_homogen_transform_matrix_old_to_new, np.vstack([cart_dmptrajectory_old.X, np.ones((1,cart_dmptrajectory_length))]))[0:3,:]
+        Xd_new = np.matmul(rel_homogen_transform_matrix_old_to_new[0:3,0:3], cart_dmptrajectory_old.Xd)
+        Xdd_new = np.matmul(rel_homogen_transform_matrix_old_to_new[0:3,0:3], cart_dmptrajectory_old.Xdd)
         time_new = cart_dmptrajectory_old.getTime()
         if (cart_dmptrajectory_length == 1):
             cart_dmptrajectory_new = DMPState(X_new, Xd_new, Xdd_new, time_new)

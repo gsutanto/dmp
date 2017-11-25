@@ -18,6 +18,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../cart_dmp/cart_coo
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../utilities/'))
 from DMPState import *
 from DMPTrajectory import *
+from ObstacleStates import *
 from TransformSystemDiscrete import *
 from CartesianCoordDMP import *
 from CartesianCoordTransformer import *
@@ -29,22 +30,57 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
     
     def __init__(self, loa_parameters, tau_system,
                  endeff_cart_state_global, point_obstacles_cart_state_global, 
-                 cart_traj_homogeneous_transform_global_to_local_matrix, name=""):
+                 cart_traj_homogeneous_transform_global_to_local_matrix=np.eye(4), name=""):
         super(TransformCouplingLearnObsAvoid, self).__init__(3, name)
         self.loa_param = loa_parameters
         self.tau_sys = tau_system
         self.cart_coord_transformer = CartesianCoordTransformer()
-        self.endeff_ccstate_global = endeff_cart_state_global
-        self.endeff_ccstate_local = DMPState(np.zeros((3,1)))
-        self.point_obstacles_ccstate_global = point_obstacles_cart_state_global
         self.ctraj_hmg_transform_global_to_local_matrix = cart_traj_homogeneous_transform_global_to_local_matrix
+        self.endeff_ccstate_global = endeff_cart_state_global
+        self.endeff_ccstate_local = self.cart_coord_transformer.computeCTrajAtNewCoordSys(self.endeff_ccstate_global, 
+                                                                                          self.ctraj_hmg_transform_global_to_local_matrix)
+        self.point_obstacles_ccstate_global = point_obstacles_cart_state_global
+        self.point_obstacles_ccstate_local = self.cart_coord_transformer.computeCTrajAtNewCoordSys(self.point_obstacles_ccstate_global, 
+                                                                                                   self.ctraj_hmg_transform_global_to_local_matrix)
+    
+    def isValid(self):
+        assert (super(TransformCouplingLearnObsAvoid, self).isValid())
+        assert (self.loa_param is not None)
+        assert (self.tau_sys is not None)
+        assert (self.cart_coord_transformer is not None)
+        assert (self.ctraj_hmg_transform_global_to_local_matrix is not None)
+        assert (self.endeff_ccstate_global is not None)
+        assert (self.endeff_ccstate_local is not None)
+        assert (self.point_obstacles_ccstate_global is not None)
+        assert (self.point_obstacles_ccstate_local is not None)
+        assert (self.loa_param.isValid())
+        assert (self.tau_sys.isValid())
+        assert (self.cart_coord_transformer.isValid())
+        assert (self.ctraj_hmg_transform_global_to_local_matrix.shape == (4, 4))
+        assert (self.endeff_ccstate_global.isValid())
+        assert (self.endeff_ccstate_local.isValid())
+        assert (self.point_obstacles_ccstate_global.isValid())
+        assert (self.point_obstacles_ccstate_local.isValid())
+        return True
     
     def computeSubFeatMatAndSubTargetCt(self, demo_obs_avoid_traj_global, point_obstacles_cart_position_global, 
                                         dt, cart_coord_dmp_baseline_params, cart_coord_dmp):
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformCouplingLearnObsAvoid is invalid!"
+        assert (self.tau_sys == cart_coord_dmp.tau_sys)
+        
         max_critical_point_distance_baseline_vs_oa_demo = 0.1 # in meter
         
-        start_position_global_obs_avoid_demo = demo_obs_avoid_traj_global.getDMPStateAtIndex(0).getX()
-        goal_position_global_obs_avoid_demo = demo_obs_avoid_traj_global.getDMPStateAtIndex(demo_obs_avoid_traj_global.getLength()-1).getX()
+        traj_length = demo_obs_avoid_traj_global.getLength()
+        
+        start_state_global_obs_avoid_demo = demo_obs_avoid_traj_global.getDMPStateAtIndex(0)
+        goal_state_global_obs_avoid_demo = demo_obs_avoid_traj_global.getDMPStateAtIndex(traj_length-1)
+        
+        traj_dt = (goal_state_global_obs_avoid_demo.time[0,0] - start_state_global_obs_avoid_demo.time[0,0])/(traj_length - 1.0)
+        if (traj_dt <= 0.0):
+            traj_dt = dt
+        
+        start_position_global_obs_avoid_demo = start_state_global_obs_avoid_demo.X
+        goal_position_global_obs_avoid_demo = goal_state_global_obs_avoid_demo.X
         
         # some error checking on the demonstration:
         # (distance between start position of baseline DMP and obstacle avoidance demonstration,
@@ -60,23 +96,23 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         
         cart_coord_dmp.setParams(cart_coord_dmp_baseline_params['W'], cart_coord_dmp_baseline_params['A_learn'])
         
-        demo_obs_avoid_traj_local = cart_coord_dmp.cart_coord_transformer.computeCTrajAtNewCoordSys(demo_obs_avoid_traj_global,
-                                                                                                    cart_coord_dmp_baseline_params['T_global_to_local_H'])
+        demo_obs_avoid_traj_local = self.cart_coord_transformer.computeCTrajAtNewCoordSys(demo_obs_avoid_traj_global,
+                                                                                          cart_coord_dmp_baseline_params['T_global_to_local_H'])
         
-        point_obstacles_cart_position_local = cart_coord_dmp.cart_coord_transformer.computeCPosAtNewCoordSys(point_obstacles_cart_position_global.T,
-                                                                                                             cart_coord_dmp_baseline_params['T_global_to_local_H'])
+        point_obstacles_cart_position_local = self.cart_coord_transformer.computeCPosAtNewCoordSys(point_obstacles_cart_position_global.T,
+                                                                                                   cart_coord_dmp_baseline_params['T_global_to_local_H'])
         point_obstacles_cart_position_local = point_obstacles_cart_position_local.T
         
         [sub_Ct_target, _, 
          sub_phase_PSI, sub_phase_X, sub_phase_V, 
          _, _, 
          _] = cart_coord_dmp.transform_sys_discrete.getTargetCouplingTermTraj(demo_obs_avoid_traj_local, 
-                                                                              1.0/dt,
+                                                                              1.0/traj_dt,
                                                                               cart_coord_dmp_baseline_params['mean_goal_local_position'])
         
         sub_X = self.constructObsAvoidViconFeatMat(demo_obs_avoid_traj_local,
                                                    point_obstacles_cart_position_local,
-                                                   dt,
+                                                   traj_dt,
                                                    cart_coord_dmp_baseline_params,
                                                    cart_coord_dmp)
         
@@ -87,8 +123,8 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
                                       dt,
                                       cart_coord_dmp_baseline_params,
                                       cart_coord_dmp):
-        
-        cart_coord_dmp.setParams(cart_coord_dmp_baseline_params['W'], cart_coord_dmp_baseline_params['A_learn'])
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformCouplingLearnObsAvoid is invalid!"
+        assert (self.tau_sys == cart_coord_dmp.tau_sys)
         
         Y_obs_local = demo_obs_avoid_traj_local.getX()
         Yd_obs_local = demo_obs_avoid_traj_local.getXd()
@@ -113,15 +149,20 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         
         list_sub_X_vectors = [None] * traj_length
         
-        endeff_state = {}
+        self.point_obstacles_ccstate_local.X = point_obstacles_cart_position_local.T
+        self.point_obstacles_ccstate_local.Xd = np.zeros(point_obstacles_cart_position_local.shape)
+        self.point_obstacles_ccstate_local.Xdd = np.zeros(point_obstacles_cart_position_local.shape)
         
         for i in xrange(traj_length):
-            endeff_state['X'] = Y_obs_local_shifted[:,i]
-            endeff_state['Xd'] = Yd_obs_local_shifted[:,i]
-            endeff_state['Xdd'] = Ydd_obs_local_shifted[:,i]
+            self.endeff_ccstate_local.X = Y_obs_local_shifted[:,i].reshape(3,1)
+            self.endeff_ccstate_local.Xd = Yd_obs_local_shifted[:,i].reshape(3,1)
+            self.endeff_ccstate_local.Xdd = Ydd_obs_local_shifted[:,i].reshape(3,1)
+            self.endeff_ccstate_local.time = demo_obs_avoid_traj_local.time[:,i].reshape(1,1)
             
-            sub_X_vector = self.computeObsAvoidCtFeat(point_obstacles_cart_position_local,
-                                                      endeff_state,
+            self.point_obstacles_ccstate_local.time = demo_obs_avoid_traj_local.time[:,i].reshape(1,1)
+            
+            sub_X_vector = self.computeObsAvoidCtFeat(self.point_obstacles_ccstate_local,
+                                                      self.endeff_ccstate_local,
                                                       tau,
                                                       cart_coord_dmp_baseline_params,
                                                       cart_coord_dmp)
@@ -132,8 +173,8 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         
         return sub_X
     
-    def computeObsAvoidCtFeat(self, point_obstacles_cart_position_local,
-                              endeff_state,
+    def computeObsAvoidCtFeat(self, point_obstacles_cart_coord_state_local,
+                              endeff_cart_coord_state_local,
                               tau,
                               cart_coord_dmp_baseline_params,
                               cart_coord_dmp):

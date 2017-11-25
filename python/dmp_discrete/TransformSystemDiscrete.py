@@ -151,11 +151,11 @@ class TransformSystemDiscrete(TransformationSystem, object):
             goal_steady_dmpstate_demo_local = dmptrajectory_demo_local.getDMPStateAtIndex(traj_length-1)
         else:
             goal_steady_dmpstate_demo_local = DMPState(steady_state_goal_position_local)
-        A_learn = goal_steady_dmpstate_demo_local.getX() - start_dmpstate_demo_local.getX()
-        dt = (goal_steady_dmpstate_demo_local.getTime()[0,0] - start_dmpstate_demo_local.getTime()[0,0])/(traj_length - 1.0)
+        A_learn = goal_steady_dmpstate_demo_local.X - start_dmpstate_demo_local.X
+        dt = (goal_steady_dmpstate_demo_local.time[0,0] - start_dmpstate_demo_local.time[0,0])/(traj_length - 1.0)
         if (dt <= 0.0):
             dt = 1.0/robot_task_servo_rate
-        tau = goal_steady_dmpstate_demo_local.getTime()[0,0] - start_dmpstate_demo_local.getTime()[0,0]
+        tau = goal_steady_dmpstate_demo_local.time[0,0] - start_dmpstate_demo_local.time[0,0]
         if (tau < MIN_TAU):
             tau = (1.0 * (traj_length - 1))/robot_task_servo_rate
         self.tau_sys.setTauBase(tau)

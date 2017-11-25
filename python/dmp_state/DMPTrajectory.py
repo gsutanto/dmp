@@ -15,6 +15,11 @@ from DMPState import *
 class DMPTrajectory(DMPState, object):
     'Class for DMP trajectories.'
     
+    def isValid(self):
+        assert (super(DMPTrajectory, self).isValid())
+        assert (self.X.shape[1] == self.time.shape[1])
+        return True
+        
     def getDMPStateAtIndex(self, i):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPTrajectory is invalid!"
         assert ((i >= 0) and (i < self.time.shape[1])), "Index i=" + str(i) + " is out-of-range (TrajectoryLength=" + str(self.time.shape[1]) + ")!"

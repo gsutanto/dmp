@@ -57,7 +57,7 @@ class DMPState:
         assert (self.time.shape[0] == 1)
         assert (self.X.shape[1] == self.Xd.shape[1])
         assert (self.X.shape[1] == self.Xdd.shape[1])
-        assert (self.X.shape[1] == self.time.shape[1])
+        assert (self.time.shape[1] >= 1)
         assert (np.amin(self.time) >= 0.0), "min(self.time)=" + str(np.amin(self.time)) + " < 0.0 (invalid!)"
         return True
     
