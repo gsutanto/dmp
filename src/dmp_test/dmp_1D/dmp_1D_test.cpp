@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <getopt.h>
+#include <ctime>
 
 #include "amd_clmc_dmp/utility/DefinitionsDerived.h"
 #include "amd_clmc_dmp/dmp_state/DMPState.h"
@@ -180,6 +181,7 @@ int main(int argc, char** argv)
     {
         return (-1);
     }
+    // std::clock_t begin = std::clock();
     for(uint i = 0; i < (round(time_reproduce_max*task_servo_rate) + 1); i++)
 	{
 		// try changing goal here during movement reproduction:
@@ -200,6 +202,9 @@ int main(int argc, char** argv)
 
         printf("%.05f %.05f %.05f %.05f\n", state.getTime(), state.getX()[0], state.getXd()[0], state.getXdd()[0]);
 	}
+    // std::clock_t end = std::clock();
+    // double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    // std::cout << "elapsed_secs = " << elapsed_secs << std::endl;
     dmp_discrete_1D.stopCollectingTrajectoryDataSet();
     if (rt_assert_main(dmp_discrete_1D.saveTrajectoryDataSet()) == false)
     {

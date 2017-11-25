@@ -35,6 +35,26 @@ class DMPTrajectory(DMPState, object):
         
         assert (self.isValid()), "Post-condition(s) checking is failed: this DMPTrajectory became invalid!"
         return None
+    
+    def accessDMPPositionAtIndex(self, i): # for quick (pointer-like) access, NO copying
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPTrajectory is invalid!"
+        assert ((i >= 0) and (i < self.time.shape[1])), "Index i=" + str(i) + " is out-of-range (TrajectoryLength=" + str(self.time.shape[1]) + ")!"
+        return self.X[:,i].reshape(self.dmp_num_dimensions,1)
+    
+    def accessDMPVelocityAtIndex(self, i): # for quick (pointer-like) access, NO copying
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPTrajectory is invalid!"
+        assert ((i >= 0) and (i < self.time.shape[1])), "Index i=" + str(i) + " is out-of-range (TrajectoryLength=" + str(self.time.shape[1]) + ")!"
+        return self.Xd[:,i].reshape(self.dmp_num_dimensions,1)
+    
+    def accessDMPAccelerationAtIndex(self, i): # for quick (pointer-like) access, NO copying
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPTrajectory is invalid!"
+        assert ((i >= 0) and (i < self.time.shape[1])), "Index i=" + str(i) + " is out-of-range (TrajectoryLength=" + str(self.time.shape[1]) + ")!"
+        return self.Xdd[:,i].reshape(self.dmp_num_dimensions,1)
+    
+    def accessDMPTimeAtIndex(self, i): # for quick (pointer-like) access, NO copying
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPTrajectory is invalid!"
+        assert ((i >= 0) and (i < self.time.shape[1])), "Index i=" + str(i) + " is out-of-range (TrajectoryLength=" + str(self.time.shape[1]) + ")!"
+        return self.time[:,i].reshape(1,1)
 
 def convertDMPStatesListIntoDMPTrajectory(dmpstates_list):
     dmpstates_list_size = len(dmpstates_list)

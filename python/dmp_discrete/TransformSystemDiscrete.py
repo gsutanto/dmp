@@ -91,17 +91,17 @@ class TransformSystemDiscrete(TransformationSystem, object):
                 ct_acc[d,0] = 0.0
                 ct_vel[d,0] = 0.0
         
-        time = self.current_state.getTime()
-        x0 = self.start_state.getX()
-        x = self.current_state.getX()
-        xd = self.current_state.getXd()
-        xdd = self.current_state.getXdd()
+        time = self.current_state.time
+        x0 = self.start_state.X
+        x = self.current_state.X
+        xd = self.current_state.Xd
+        xdd = self.current_state.Xdd
         
-        v = self.current_velocity_state.getX()
-        vd = self.current_velocity_state.getXd()
+        v = self.current_velocity_state.X
+        vd = self.current_velocity_state.Xd
         
-        G = self.goal_sys.getSteadyStateGoalPosition()
-        g = self.goal_sys.getCurrentGoalState().getX()
+        G = self.goal_sys.G
+        g = self.goal_sys.current_goal_state.X
         
         x = x + (xd * dt)
         
@@ -126,8 +126,15 @@ class TransformSystemDiscrete(TransformationSystem, object):
         
         time = time + dt
         
-        self.current_state = DMPState(x, xd, xdd, time)
-        self.current_velocity_state = DMPState(v, vd, np.zeros((self.dmp_num_dimensions,1)), time)
+        # self.current_state = DMPState(x, xd, xdd, time)
+        # self.current_velocity_state = DMPState(v, vd, np.zeros((self.dmp_num_dimensions,1)), time)
+        self.current_state.X = x
+        self.current_state.Xd = xd
+        self.current_state.Xdd = xdd
+        self.current_state.time = time
+        self.current_velocity_state.X = v
+        self.current_velocity_state.Xd = vd
+        self.current_velocity_state.time = time
         next_state = self.current_state
         
         return next_state, forcing_term, ct_acc, ct_vel, basis_function_vector
