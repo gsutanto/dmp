@@ -28,7 +28,7 @@ if (is_converting_demo_to_supervised_obs_avoid_fb_dataset):
      min_num_considered_demo] = convertDemoToSupervisedObsAvoidFbDataset()
 else:
     data_global_coord = loadObj('data_multi_demo_vicon_static_global_coord.pkl')
-    dmp_baseline_params = loadObj('dmp_baseline_params.pkl')
+    dmp_baseline_params = loadObj('dmp_baseline_params_' + task_type + '.pkl')
     ccdmp_baseline_unroll_global_traj = loadObj('ccdmp_baseline_unroll_global_traj.pkl')
     dataset_Ct_obs_avoid = loadObj('dataset_Ct_' + task_type + '.pkl')
 
@@ -49,3 +49,27 @@ out_data_dir = ''
                                     generalization_subset_outlier_ranked_demo_indices,
                                     post_filename_stacked_data,
                                     out_data_dir)
+
+generalization_test_id_string = ''
+generalization_test_sub_path = ''
+prim_no = 1
+
+mX = sio.loadmat('../tf/input_data/'+generalization_test_sub_path+'prim_'+str(prim_no)+'_X_raw_obs_avoid'+generalization_test_id_string+'.mat', struct_as_record=True)['X'].astype(np.float32)
+mCt_target = sio.loadmat('../tf/input_data/'+generalization_test_sub_path+'prim_'+str(prim_no)+'_Ct_target_obs_avoid'+generalization_test_id_string+'.mat', struct_as_record=True)['Ct_target'].astype(np.float32)
+mnormalized_phase_kernels = sio.loadmat('../tf/input_data/'+generalization_test_sub_path+'prim_'+str(prim_no)+'_normalized_phase_PSI_mult_phase_V_obs_avoid'+generalization_test_id_string+'.mat', struct_as_record=True)['normalized_phase_PSI_mult_phase_V'].astype(np.float32)
+mdata_point_priority = sio.loadmat('../tf/input_data/'+generalization_test_sub_path+'prim_'+str(prim_no)+'_data_point_priority_obs_avoid'+generalization_test_id_string+'.mat', struct_as_record=True)['data_point_priority'].astype(np.float32)
+
+mX_generalization_test = sio.loadmat('../tf/input_data/'+generalization_test_sub_path+'test_unroll_prim_'+str(prim_no)+'_X_raw_obs_avoid'+generalization_test_id_string+'.mat', struct_as_record=True)['X'].astype(np.float32)
+mCtt_generalization_test = sio.loadmat('../tf/input_data/'+generalization_test_sub_path+'test_unroll_prim_'+str(prim_no)+'_Ct_target_obs_avoid'+generalization_test_id_string+'.mat', struct_as_record=True)['Ct_target'].astype(np.float32)
+mnPSI_generalization_test = sio.loadmat('../tf/input_data/'+generalization_test_sub_path+'test_unroll_prim_'+str(prim_no)+'_normalized_phase_PSI_mult_phase_V_obs_avoid'+generalization_test_id_string+'.mat', struct_as_record=True)['normalized_phase_PSI_mult_phase_V'].astype(np.float32)
+mW_generalization_test = sio.loadmat('../tf/input_data/'+generalization_test_sub_path+'test_unroll_prim_'+str(prim_no)+'_data_point_priority_obs_avoid'+generalization_test_id_string+'.mat', struct_as_record=True)['data_point_priority'].astype(np.float32)
+
+compareTwoMatrices(X[0][0], mX, 1.02e-4)
+compareTwoMatrices(Ct_target[0][0], mCt_target, 4.5e-3)
+compareTwoMatrices(normalized_phase_PSI_mult_phase_V[0][0], mnormalized_phase_kernels)
+compareTwoMatrices(data_point_priority[0][0], mdata_point_priority)
+
+compareTwoMatrices(X[1][0], mX_generalization_test, 1.01e-4)
+compareTwoMatrices(Ct_target[1][0], mCtt_generalization_test, 4.2e-3)
+compareTwoMatrices(normalized_phase_PSI_mult_phase_V[1][0], mnPSI_generalization_test)
+compareTwoMatrices(data_point_priority[1][0], mW_generalization_test)
