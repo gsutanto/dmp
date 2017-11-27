@@ -7,6 +7,7 @@ Created on Wed Apr 10 15:00:00 2017
 """
 
 import scipy.io as sio
+import numpy as np
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
@@ -24,7 +25,7 @@ class PMNN(FeedForwardNeuralNetwork):
     def __init__(self, name, D_input, 
                  regular_hidden_layer_topology, regular_hidden_layer_activation_func_list, 
                  N_phaseLWR_kernels, D_output, 
-                 filepath="", is_using_phase_kernel_modulation=True):
+                 filepath="", is_using_phase_kernel_modulation=True, is_predicting_only=False):
         self.name = name
         
         self.neural_net_topology = [D_input] + regular_hidden_layer_topology + [N_phaseLWR_kernels, D_output]
@@ -44,9 +45,13 @@ class PMNN(FeedForwardNeuralNetwork):
         print "Neural Network Activation Function List:"
         print self.neural_net_activation_func_list
         
-        if (filepath == ""):
-            self.num_params = self.defineNeuralNetworkModel()
-        else:
+        self.is_predicting_only = is_predicting_only
+        if (self.is_predicting_only == False): # means both predicting and learning, i.e. this requires to be called from inside a TensorFlow session.
+            if (filepath == ""):
+                self.num_params = self.defineNeuralNetworkModel()
+            else:
+                self.num_params = self.loadNeuralNetworkFromMATLABMatFile(filepath)
+        else: # only doing predictions, do NOT need to be called from inside a TensorFlow session
             self.num_params = self.loadNeuralNetworkFromMATLABMatFile(filepath)
         
         self.is_using_phase_kernel_modulation = is_using_phase_kernel_modulation
@@ -66,6 +71,8 @@ class PMNN(FeedForwardNeuralNetwork):
         """
         Define the Neural Network model.
         """
+        assert (self.is_predicting_only == False), 'Needs to be inside a TensorFlow session, therefore self.is_predicting_only must be False!'
+        
         num_params = 0
         for i in range(1, self.N_layers):
             layer_name = self.getLayerName(i)
@@ -102,7 +109,7 @@ class PMNN(FeedForwardNeuralNetwork):
         assert layer_num < self.N_layers, "layer_num must be < N_layers"
         hidden_dim = [None] * self.D_output
         hidden_drop_dim = [dataset] * self.D_output
-        output_dim = list()
+        output_dim = [None] * self.D_output
         for i in range(1, layer_num+1):
             layer_name = self.getLayerName(i)
     
@@ -114,36 +121,67 @@ class PMNN(FeedForwardNeuralNetwork):
                 else: # Output Layer
                     current_layer_dim_size = 1
                 
-                with tf.variable_scope(self.name+'_'+layer_dim_ID, reuse=True):
-                    weights = tf.get_variable('weights', [self.neural_net_topology[i-1], current_layer_dim_size])
+                if (self.is_predicting_only == False):
+                    with tf.variable_scope(self.name+'_'+layer_dim_ID, reuse=True):
+                        weights = tf.get_variable('weights', [self.neural_net_topology[i-1], current_layer_dim_size])
+                        if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
+                            biases = tf.get_variable('biases', [current_layer_dim_size])
+                        
+                        if (i < self.N_layers - 2):  # Regular Hidden Layer
+                            affine_intermediate_result = tf.matmul(hidden_drop_dim[dim_out], weights) + biases
+                            if (self.neural_net_activation_func_list[i] == 'identity'):
+                                activation_func_output = affine_intermediate_result
+                            elif (self.neural_net_activation_func_list[i] == 'tanh'):
+                                activation_func_output = tf.nn.tanh(affine_intermediate_result)
+                            elif (self.neural_net_activation_func_list[i] == 'relu'):
+                                activation_func_output = tf.nn.relu(affine_intermediate_result)
+                            else:
+                                sys.exit('Unrecognized activation function: ' + self.neural_net_activation_func_list[i])
+                            
+                            hidden_dim[dim_out] = activation_func_output
+                            hidden_drop_dim[dim_out] = tf.nn.dropout(hidden_dim[dim_out], dropout_keep_prob)
+                        elif (i == self.N_layers - 2): # Final Hidden Layer with Phase LWR Gating/Modulation
+                            if (self.is_using_phase_kernel_modulation):
+                                hidden_dim[dim_out] = normalized_phase_kernels * (tf.matmul(hidden_drop_dim[dim_out], weights) + biases)
+                                hidden_drop_dim[dim_out] = hidden_dim[dim_out] # no dropout
+                            else:   # if NOT using phase kernel modulation:
+                                hidden_dim[dim_out] = tf.nn.tanh(tf.matmul(hidden_drop_dim[dim_out], weights) + biases)
+                                hidden_drop_dim[dim_out] = tf.nn.dropout(hidden_dim[dim_out], dropout_keep_prob)
+                        else: # Output Layer
+                            output_current_dim = tf.matmul(hidden_drop_dim[dim_out], weights)
+                            output_dim[dim_out] = output_current_dim
+                else:
+                    weights = self.model_params[self.name+'_'+layer_dim_ID+"_weights"]
                     if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
-                        biases = tf.get_variable('biases', [current_layer_dim_size])
+                        biases = self.model_params[self.name+'_'+layer_dim_ID+"_biases"]
                     
                     if (i < self.N_layers - 2):  # Regular Hidden Layer
-                        affine_intermediate_result = tf.matmul(hidden_drop_dim[dim_out], weights) + biases
+                        affine_intermediate_result = np.matmul(hidden_drop_dim[dim_out], weights) + biases
                         if (self.neural_net_activation_func_list[i] == 'identity'):
                             activation_func_output = affine_intermediate_result
                         elif (self.neural_net_activation_func_list[i] == 'tanh'):
-                            activation_func_output = tf.nn.tanh(affine_intermediate_result)
+                            activation_func_output = np.tanh(affine_intermediate_result)
                         elif (self.neural_net_activation_func_list[i] == 'relu'):
-                            activation_func_output = tf.nn.relu(affine_intermediate_result)
+                            activation_func_output = affine_intermediate_result * (affine_intermediate_result > 0)
                         else:
                             sys.exit('Unrecognized activation function: ' + self.neural_net_activation_func_list[i])
                         
                         hidden_dim[dim_out] = activation_func_output
-                        hidden_drop_dim[dim_out] = tf.nn.dropout(hidden_dim[dim_out], dropout_keep_prob)
+                        hidden_drop_dim[dim_out] = hidden_dim[dim_out]
                     elif (i == self.N_layers - 2): # Final Hidden Layer with Phase LWR Gating/Modulation
                         if (self.is_using_phase_kernel_modulation):
-                            hidden_dim[dim_out] = normalized_phase_kernels * (tf.matmul(hidden_drop_dim[dim_out], weights) + biases)
-                            hidden_drop_dim[dim_out] = hidden_dim[dim_out] # no dropout
+                            hidden_dim[dim_out] = normalized_phase_kernels * (np.matmul(hidden_drop_dim[dim_out], weights) + biases)
                         else:   # if NOT using phase kernel modulation:
-                            hidden_dim[dim_out] = tf.nn.tanh(tf.matmul(hidden_drop_dim[dim_out], weights) + biases)
-                            hidden_drop_dim[dim_out] = tf.nn.dropout(hidden_dim[dim_out], dropout_keep_prob)
+                            hidden_dim[dim_out] = np.tanh(np.matmul(hidden_drop_dim[dim_out], weights) + biases)
+                        hidden_drop_dim[dim_out] = hidden_dim[dim_out]
                     else: # Output Layer
-                        output_current_dim = tf.matmul(hidden_drop_dim[dim_out], weights)
-                        output_dim.append(output_current_dim)
+                        output_current_dim = np.matmul(hidden_drop_dim[dim_out], weights)
+                        output_dim[dim_out] = output_current_dim
         if (layer_num == self.N_layers-1):
-            output = tf.concat(1, output_dim)
+            if (self.is_predicting_only == False):
+                output = tf.concat(1, output_dim)
+            else:
+                output = np.hstack(output_dim)
             return output
         else:
             return hidden_dim
@@ -157,6 +195,8 @@ class PMNN(FeedForwardNeuralNetwork):
         :param initial_learning_rate: initial learning rate
         :param beta: L2 regularization constant
         """
+        assert (self.is_predicting_only == False), 'Needs to be inside a TensorFlow session, therefore self.is_predicting_only must be False!'
+        
         # Create an operation that calculates L2 prediction loss.
         pred_l2_loss = tf.nn.l2_loss(prediction - ground_truth, name='my_pred_L2_loss')
     
@@ -207,6 +247,8 @@ class PMNN(FeedForwardNeuralNetwork):
         :param beta: L2 regularization constant
         :param dim_out: output dimension being considered
         """
+        assert (self.is_predicting_only == False), 'Needs to be inside a TensorFlow session, therefore self.is_predicting_only must be False!'
+        
         # Create an operation that calculates L2 prediction loss.
         pred_l2_loss_dim = tf.nn.l2_loss(prediction[:,dim_out] - ground_truth[:,dim_out])
         
@@ -255,6 +297,8 @@ class PMNN(FeedForwardNeuralNetwork):
         :param dim_out: output dimension being considered
         :param weight: weight vector corresponding to the prediction/dataset
         """
+        assert (self.is_predicting_only == False), 'Needs to be inside a TensorFlow session, therefore self.is_predicting_only must be False!'
+        
         # Create an operation that calculates L2 prediction loss.
         pred_l2_loss_dim = 0.5 * tf.reduce_sum(weight * tf.square(prediction[:,dim_out] - ground_truth[:,dim_out]))
         
@@ -297,6 +341,8 @@ class PMNN(FeedForwardNeuralNetwork):
         """
         Save the Neural Network model into a MATLAB *.m file.
         """
+        assert (self.is_predicting_only == False), 'Needs to be inside a TensorFlow session, therefore self.is_predicting_only must be False!'
+        
         model_params={}
         for i in range(1, self.N_layers):
             layer_name = self.getLayerName(i)
@@ -324,6 +370,8 @@ class PMNN(FeedForwardNeuralNetwork):
         """
         num_params = 0
         model_params = sio.loadmat(filepath, struct_as_record=True)
+        if (self.is_predicting_only):
+            self.model_params = model_params
         for i in range(1, self.N_layers):
             layer_name = self.getLayerName(i)
     
@@ -333,13 +381,21 @@ class PMNN(FeedForwardNeuralNetwork):
                     current_layer_dim_size = self.neural_net_topology[i]
                 else: # Output Layer
                     current_layer_dim_size = 1
-                with tf.variable_scope(self.name+'_'+layer_dim_ID, reuse=False):
-                    weights = tf.get_variable('weights', initializer=model_params[self.name+'_'+layer_dim_ID+"_weights"])
-                    weights_dim = weights.get_shape().as_list()
+                if (self.is_predicting_only == False):
+                    with tf.variable_scope(self.name+'_'+layer_dim_ID, reuse=False):
+                        weights = tf.get_variable('weights', initializer=model_params[self.name+'_'+layer_dim_ID+"_weights"])
+                        weights_dim = weights.get_shape().as_list()
+                        num_params += weights_dim[0] * weights_dim[1]
+                        if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
+                            biases = tf.get_variable('biases', initializer=model_params[self.name+'_'+layer_dim_ID+"_biases"][0,:])
+                            num_params += biases.get_shape().as_list()[0]
+                else:
+                    weights = self.model_params[self.name+'_'+layer_dim_ID+"_weights"]
+                    weights_dim = list(weights.shape)
                     num_params += weights_dim[0] * weights_dim[1]
                     if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
-                        biases = tf.get_variable('biases', initializer=model_params[self.name+'_'+layer_dim_ID+"_biases"][0,:])
-                        num_params += biases.get_shape().as_list()[0]
+                        biases = self.model_params[self.name+'_'+layer_dim_ID+"_biases"]
+                        num_params += list(biases.shape)[0]
         num_params /= self.D_output
         print("Total # of Parameters = %d" % num_params)
         return num_params
