@@ -14,7 +14,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../dmp_state/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../dmp_param/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../dmp_base/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../dmp_discrete/'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../cart_dmp/cart_coord_dmp'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../cart_dmp/cart_coord_dmp/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../utilities/'))
 from DMPTrajectory import *
 from DMPState import *

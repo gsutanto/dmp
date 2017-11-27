@@ -11,11 +11,14 @@ import os
 import sys
 import copy
 
+PMNN_MODEL = 0
+
 class TCLearnObsAvoidFeatureParameter:
     'Class for a group/bundle of states of obstacles.'
     
-    def __init__(self, name=""):
+    def __init__(self, model=PMNN_MODEL, name=""):
         self.name = name
+        self.model = model
     
     def isValid(self):
         return True

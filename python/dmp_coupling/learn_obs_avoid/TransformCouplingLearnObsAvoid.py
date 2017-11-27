@@ -29,20 +29,27 @@ from utilities import *
 class TransformCouplingLearnObsAvoid(TransformCoupling, object):
     'Class defining learnable obstacle avoidance coupling terms for DMP transformation systems.'
     
-    def __init__(self, loa_parameters, tau_system,
-                 endeff_cart_state_global, point_obstacles_cart_state_global, 
-                 cart_traj_homogeneous_transform_global_to_local_matrix=np.eye(4), name=""):
+    def __init__(self, loa_parameters, tau_system, cart_coord_dmp=None,
+                 point_obstacles_cart_state_global=None, name=""):
         super(TransformCouplingLearnObsAvoid, self).__init__(3, name)
         self.loa_param = loa_parameters
         self.tau_sys = tau_system
-        self.cart_coord_transformer = CartesianCoordTransformer()
-        self.ctraj_hmg_transform_global_to_local_matrix = cart_traj_homogeneous_transform_global_to_local_matrix
-        self.endeff_ccstate_global = endeff_cart_state_global
-        self.endeff_ccstate_local = self.cart_coord_transformer.computeCTrajAtNewCoordSys(self.endeff_ccstate_global, 
-                                                                                          self.ctraj_hmg_transform_global_to_local_matrix)
         self.point_obstacles_ccstate_global = point_obstacles_cart_state_global
-        self.point_obstacles_ccstate_local = self.cart_coord_transformer.computeCTrajAtNewCoordSys(self.point_obstacles_ccstate_global, 
-                                                                                                   self.ctraj_hmg_transform_global_to_local_matrix)
+        self.ccdmp = cart_coord_dmp
+        if ((self.ccdmp is not None) and (self.ccdmp.isValid())):
+            self.cart_coord_transformer = self.ccdmp.cart_coord_transformer
+            self.ctraj_hmg_transform_global_to_local_matrix = self.ccdmp.ctraj_hmg_transform_global_to_local_matrix
+            self.endeff_ccstate_local = self.ccdmp.transform_sys_discrete_cart_coord.current_state
+            if (self.point_obstacles_ccstate_global is not None):
+                self.point_obstacles_ccstate_local = self.cart_coord_transformer.computeCTrajAtNewCoordSys(self.point_obstacles_ccstate_global, 
+                                                                                                           self.ctraj_hmg_transform_global_to_local_matrix)
+            else:
+                self.point_obstacles_ccstate_local = None
+        else:
+            self.cart_coord_transformer = None
+            self.ctraj_hmg_transform_global_to_local_matrix = None
+            self.endeff_ccstate_local = None
+            self.point_obstacles_ccstate_local = None
     
     def isValid(self):
         assert (super(TransformCouplingLearnObsAvoid, self).isValid())
@@ -50,7 +57,6 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         assert (self.tau_sys is not None)
         assert (self.cart_coord_transformer is not None)
         assert (self.ctraj_hmg_transform_global_to_local_matrix is not None)
-        assert (self.endeff_ccstate_global is not None)
         assert (self.endeff_ccstate_local is not None)
         assert (self.point_obstacles_ccstate_global is not None)
         assert (self.point_obstacles_ccstate_local is not None)
@@ -58,11 +64,26 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         assert (self.tau_sys.isValid())
         assert (self.cart_coord_transformer.isValid())
         assert (self.ctraj_hmg_transform_global_to_local_matrix.shape == (4, 4))
-        assert (self.endeff_ccstate_global.isValid())
         assert (self.endeff_ccstate_local.isValid())
         assert (self.point_obstacles_ccstate_global.isValid())
         assert (self.point_obstacles_ccstate_local.isValid())
         return True
+    
+    def setCartCoordDMP(self, cart_coord_dmp):
+        assert (cart_coord_dmp is not None)
+        assert (cart_coord_dmp.isValid())
+        
+        self.ccdmp = cart_coord_dmp
+        self.cart_coord_transformer = self.ccdmp.cart_coord_transformer
+        self.ctraj_hmg_transform_global_to_local_matrix = self.ccdmp.ctraj_hmg_transform_global_to_local_matrix
+        self.endeff_ccstate_local = self.ccdmp.transform_sys_discrete_cart_coord.current_state
+        if (self.point_obstacles_ccstate_global is not None):
+            self.point_obstacles_ccstate_local = self.cart_coord_transformer.computeCTrajAtNewCoordSys(self.point_obstacles_ccstate_global, 
+                                                                                                       self.ctraj_hmg_transform_global_to_local_matrix)
+        else:
+            self.point_obstacles_ccstate_local = None
+        
+        return None
     
     def computeSubFeatMatAndSubTargetCt(self, demo_obs_avoid_traj_global, point_obstacles_cart_position_global, 
                                         dt, cart_coord_dmp_baseline_params, cart_coord_dmp):
