@@ -33,20 +33,18 @@ from unrollLearnedObsAvoidViconTraj import *
 from DataStacking import *
 from utilities import *
 
-task_type = 'obs_avoid'
-
 ## Demo Dataset Loading
 data_global_coord = loadObj('data_multi_demo_vicon_static_global_coord.pkl')
 # end of Demo Dataset Loading
 
 ## Baseline Primitive Loading
-dmp_baseline_params = loadObj('dmp_baseline_params_' + task_type + '.pkl')
+dmp_baseline_params = loadObj('dmp_baseline_params_obs_avoid.pkl')
 # end of Baseline Primitive Loading
 
 ccdmp_baseline_params = dmp_baseline_params["cart_coord"][0]
 
 ## Supervised Obstacle Avoidance Feedback Dataset Loading
-dataset_Ct_obs_avoid = loadObj('dataset_Ct_' + task_type + '.pkl')
+dataset_Ct_obs_avoid = loadObj('dataset_Ct_obs_avoid.pkl')
 # end of Supervised Obstacle Avoidance Feedback Dataset Loading
 
 D_input = 17
