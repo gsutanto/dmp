@@ -25,7 +25,7 @@ unroll_dataset_Ct_obs_avoid = loadObj('unroll_dataset_Ct_obs_avoid.pkl')
 N_settings = len(data_global_coord["obs_avoid"][0])
 
 subset_settings_indices = range(N_settings)
-subset_demos_indices = range(3)
+subset_demos_indices = range(1)
 mode_stack_dataset = 2
 feature_type = 'raw'
 N_primitive = 1

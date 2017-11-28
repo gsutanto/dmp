@@ -49,7 +49,9 @@ dataset_Ct_obs_avoid = loadObj('dataset_Ct_obs_avoid.pkl')
 
 D_input = 17
 D_output = 3
-pmnn_model_parent_dir_path='../tf/models/'
+pmnn_model_parent_dir_path = '../tf/models/'
+# pmnn_model_file_path = None
+pmnn_model_file_path = '../tf/models/iterative_unroll/prim_1_params_step_0003200.mat'
 pmnn_name = 'my_PMNN_obs_avoid_fb'
 
 dmp_basis_funcs_size = 25
@@ -62,6 +64,7 @@ canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
 loa_parameters = TCLearnObsAvoidFeatureParameter(D_input,
                                                  dmp_basis_funcs_size, D_output,
                                                  pmnn_model_parent_dir_path, 
+                                                 pmnn_model_file_path,
                                                  PMNN_MODEL, pmnn_name)
 tcloa = TransformCouplingLearnObsAvoid(loa_parameters, tau_sys)
 transform_couplers_list = [tcloa]
