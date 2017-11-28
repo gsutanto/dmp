@@ -23,6 +23,7 @@ from ObstacleStates import *
 from TransformSystemDiscrete import *
 from CartesianCoordDMP import *
 from CartesianCoordTransformer import *
+from TCLearnObsAvoidFeatureParameter import *
 from DataIO import *
 from utilities import *
 
@@ -35,8 +36,40 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         self.loa_param = loa_parameters
         self.tau_sys = tau_system
         self.point_obstacles_ccstate_global = point_obstacles_cart_state_global
+        self.setCartCoordDMP(cart_coord_dmp)
+        if ((self.loa_param is not None) and (self.loa_param.isValid())):
+            self.pmnn_input_vector = np.zeros((1,self.loa_param.D_input))
+        else:
+            self.pmnn_input_vector = None
+    
+    def isValid(self):
+        assert (super(TransformCouplingLearnObsAvoid, self).isValid())
+        assert (self.tau_sys is not None)
+        assert (self.canonical_sys_discrete is not None)
+        assert (self.ccdmp is not None)
+        assert (self.cart_coord_transformer is not None)
+        assert (self.ctraj_hmg_transform_global_to_local_matrix is not None)
+        assert (self.endeff_ccstate_local is not None)
+        assert (self.point_obstacles_ccstate_global is not None)
+        assert (self.point_obstacles_ccstate_local is not None)
+        if (self.loa_param is not None):
+            assert (self.loa_param.isValid())
+        assert (self.tau_sys.isValid())
+        assert (self.canonical_sys_discrete.isValid())
+        assert (self.ccdmp.isValid())
+        assert (self.cart_coord_transformer.isValid())
+        assert (self.ctraj_hmg_transform_global_to_local_matrix.shape == (4, 4))
+        assert (self.endeff_ccstate_local.isValid())
+        assert (self.point_obstacles_ccstate_global.isValid())
+        assert (self.point_obstacles_ccstate_local.isValid())
+        assert (self.func_approx_basis_functions.shape == (1,self.ccdmp.func_approx_discrete.model_size))
+        assert (self.pmnn_input_vector.shape == (1,self.loa_param.D_input))
+        return True
+    
+    def setCartCoordDMP(self, cart_coord_dmp):
         self.ccdmp = cart_coord_dmp
         if ((self.ccdmp is not None) and (self.ccdmp.isValid())):
+            self.canonical_sys_discrete = self.ccdmp.canonical_sys_discrete
             self.cart_coord_transformer = self.ccdmp.cart_coord_transformer
             self.ctraj_hmg_transform_global_to_local_matrix = self.ccdmp.ctraj_hmg_transform_global_to_local_matrix
             self.endeff_ccstate_local = self.ccdmp.transform_sys_discrete_cart_coord.current_state
@@ -45,46 +78,24 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
                                                                                                            self.ctraj_hmg_transform_global_to_local_matrix)
             else:
                 self.point_obstacles_ccstate_local = None
+            self.func_approx_basis_functions = np.zeros((1,self.ccdmp.func_approx_discrete.model_size))
         else:
+            self.canonical_sys_discrete = None
             self.cart_coord_transformer = None
             self.ctraj_hmg_transform_global_to_local_matrix = None
             self.endeff_ccstate_local = None
             self.point_obstacles_ccstate_local = None
+            self.func_approx_basis_functions = None
+        
+        return None
     
-    def isValid(self):
-        assert (super(TransformCouplingLearnObsAvoid, self).isValid())
-        assert (self.loa_param is not None)
-        assert (self.tau_sys is not None)
+    def setPointObstaclesCCStateGlobal(self, new_point_obstacles_ccstate_global):
         assert (self.ccdmp is not None)
-        assert (self.cart_coord_transformer is not None)
-        assert (self.ctraj_hmg_transform_global_to_local_matrix is not None)
-        assert (self.endeff_ccstate_local is not None)
-        assert (self.point_obstacles_ccstate_global is not None)
-        assert (self.point_obstacles_ccstate_local is not None)
-        assert (self.loa_param.isValid())
-        assert (self.tau_sys.isValid())
         assert (self.ccdmp.isValid())
-        assert (self.cart_coord_transformer.isValid())
-        assert (self.ctraj_hmg_transform_global_to_local_matrix.shape == (4, 4))
-        assert (self.endeff_ccstate_local.isValid())
-        assert (self.point_obstacles_ccstate_global.isValid())
-        assert (self.point_obstacles_ccstate_local.isValid())
-        return True
-    
-    def setCartCoordDMP(self, cart_coord_dmp):
-        assert (cart_coord_dmp is not None)
-        assert (cart_coord_dmp.isValid())
         
-        self.ccdmp = cart_coord_dmp
-        self.cart_coord_transformer = self.ccdmp.cart_coord_transformer
-        self.ctraj_hmg_transform_global_to_local_matrix = self.ccdmp.ctraj_hmg_transform_global_to_local_matrix
-        self.endeff_ccstate_local = self.ccdmp.transform_sys_discrete_cart_coord.current_state
-        if (self.point_obstacles_ccstate_global is not None):
-            self.point_obstacles_ccstate_local = self.cart_coord_transformer.computeCTrajAtNewCoordSys(self.point_obstacles_ccstate_global, 
-                                                                                                       self.ctraj_hmg_transform_global_to_local_matrix)
-        else:
-            self.point_obstacles_ccstate_local = None
-        
+        self.point_obstacles_ccstate_global = new_point_obstacles_ccstate_global
+        self.point_obstacles_ccstate_local = self.cart_coord_transformer.computeCTrajAtNewCoordSys(self.point_obstacles_ccstate_global, 
+                                                                                                   self.ctraj_hmg_transform_global_to_local_matrix)
         return None
     
     def computeSubFeatMatAndSubTargetCt(self, demo_obs_avoid_traj_global, point_obstacles_cart_position_global, 
@@ -239,3 +250,24 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
                                   cos_theta])
         
         return sub_X_vector
+    
+    def getValue(self):
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformCouplingLearnObsAvoid is invalid!"
+        assert (self.loa_param.model == PMNN_MODEL)
+        
+        self.point_obstacles_ccstate_local = self.cart_coord_transformer.computeCTrajAtNewCoordSys(self.point_obstacles_ccstate_global, 
+                                                                                                   self.ctraj_hmg_transform_global_to_local_matrix)
+        
+        self.pmnn_input_vector = self.computeObsAvoidCtFeat(self.point_obstacles_ccstate_local,
+                                                            self.endeff_ccstate_local).T
+        assert (self.pmnn_input_vector.shape == (1,self.loa_param.D_input))
+        
+        canonical_multiplier = self.canonical_sys_discrete.getCanonicalMultiplier()
+        sum_psi = np.sum(self.func_approx_basis_functions + 1.e-10)
+        normalized_phase_kernels = self.func_approx_basis_functions * (canonical_multiplier/sum_psi)
+        
+        ct_acc = self.loa_param.pmnn.performNeuralNetworkPrediction(self.pmnn_input_vector, normalized_phase_kernels).T
+        
+        ct_vel = np.zeros((self.dmp_num_dimensions, 1))
+        
+        return ct_acc, ct_vel

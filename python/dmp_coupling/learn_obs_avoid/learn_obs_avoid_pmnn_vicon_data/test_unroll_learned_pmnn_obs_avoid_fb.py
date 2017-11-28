@@ -29,6 +29,7 @@ from CartesianCoordDMP import *
 from TCLearnObsAvoidFeatureParameter import *
 from TransformCouplingLearnObsAvoid import *
 from convertDemoToSupervisedObsAvoidFbDataset import *
+from unrollLearnedObsAvoidViconTraj import *
 from DataStacking import *
 from utilities import *
 
@@ -42,24 +43,60 @@ data_global_coord = loadObj('data_multi_demo_vicon_static_global_coord.pkl')
 dmp_baseline_params = loadObj('dmp_baseline_params_' + task_type + '.pkl')
 # end of Baseline Primitive Loading
 
+ccdmp_baseline_params = dmp_baseline_params["cart_coord"][0]
+
 ## Supervised Obstacle Avoidance Feedback Dataset Loading
 dataset_Ct_obs_avoid = loadObj('dataset_Ct_' + task_type + '.pkl')
 # end of Supervised Obstacle Avoidance Feedback Dataset Loading
 
-dmp_basis_funcs_size=25
-canonical_order=2
-ctraj_local_coordinate_frame_selection=GSUTANTO_LOCAL_COORD_FRAME
-is_using_scaling=[False] * 3 # NOT using scaling on CartCoordDMP for now...
+D_input = 17
+D_output = 3
+pmnn_model_parent_dir_path='../tf/models/'
+pmnn_name = 'my_PMNN_obs_avoid_fb'
+
+dmp_basis_funcs_size = 25
+canonical_order = 2
+ctraj_local_coordinate_frame_selection = GSUTANTO_LOCAL_COORD_FRAME
+is_using_scaling = [False] * D_output # NOT using scaling on CartCoordDMP for now...
                                         
 tau_sys = TauSystem(MIN_TAU)
 canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
-loa_parameters = TCLearnObsAvoidFeatureParameter()
+loa_parameters = TCLearnObsAvoidFeatureParameter(D_input,
+                                                 dmp_basis_funcs_size, D_output,
+                                                 pmnn_model_parent_dir_path, 
+                                                 PMNN_MODEL, pmnn_name)
 tcloa = TransformCouplingLearnObsAvoid(loa_parameters, tau_sys)
 transform_couplers_list = [tcloa]
 cart_coord_dmp = CartesianCoordDMP(dmp_basis_funcs_size, canonical_sys_discr, 
                                    ctraj_local_coordinate_frame_selection,
                                    transform_couplers_list)
 cart_coord_dmp.setScalingUsage(is_using_scaling)
-tcloa.setCartCoordDMP(cart_coord_dmp)
 
 N_settings = len(data_global_coord["obs_avoid"][0])
+prim_no = 0 # There is only one (1) primitive here.
+
+unroll_dataset_Ct_obs_avoid = {}
+unroll_dataset_Ct_obs_avoid["sub_X"] = [[None] * N_settings]
+unroll_dataset_Ct_obs_avoid["sub_Ct_target"] = [[None] * N_settings]
+global_traj_unroll = [[None] * N_settings]
+
+for ns in range(3):
+    N_demos = len(data_global_coord["obs_avoid"][1][ns])
+    
+    # the index 0 before ns seems unnecessary, but this is just for the sake of generality, if we have multiple primitives
+    unroll_dataset_Ct_obs_avoid["sub_X"][prim_no][ns] = [None] * N_demos
+    unroll_dataset_Ct_obs_avoid["sub_Ct_target"][prim_no][ns] = [None] * N_demos
+    global_traj_unroll[prim_no][ns] = [None] * N_demos
+    
+    for nd in range(N_demos):
+        print ('Setting #' + str(ns+1) + '/' + str(N_settings) + ', Demo #' + str(nd+1) + '/' + str(N_demos))
+        [unroll_dataset_Ct_obs_avoid["sub_X"][prim_no][ns][nd],
+         unroll_dataset_Ct_obs_avoid["sub_Ct_target"][prim_no][ns][nd],
+         global_traj_unroll[prim_no][ns][nd]] = unrollLearnedObsAvoidViconTraj(data_global_coord["obs_avoid"][1][ns][nd],
+                                                                          data_global_coord["obs_avoid"][0][ns],
+                                                                          data_global_coord["dt"],
+                                                                          ccdmp_baseline_params,
+                                                                          cart_coord_dmp)
+
+saveObj(unroll_dataset_Ct_obs_avoid, 'unroll_dataset_Ct_obs_avoid.pkl')
+saveObj(global_traj_unroll, 'global_traj_unroll.pkl')

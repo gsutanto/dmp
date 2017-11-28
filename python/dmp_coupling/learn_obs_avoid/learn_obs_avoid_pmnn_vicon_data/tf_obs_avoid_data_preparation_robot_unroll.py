@@ -17,7 +17,7 @@ from convertDemoToSupervisedObsAvoidFbDataset import *
 from DataStacking import *
 from utilities import *
 
-is_converting_demo_to_supervised_obs_avoid_fb_dataset = False
+is_converting_demo_to_supervised_obs_avoid_fb_dataset = True
 task_type = 'obs_avoid'
 
 if (is_converting_demo_to_supervised_obs_avoid_fb_dataset):

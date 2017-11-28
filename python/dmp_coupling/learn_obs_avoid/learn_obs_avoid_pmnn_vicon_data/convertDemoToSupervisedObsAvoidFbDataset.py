@@ -65,8 +65,8 @@ def convertDemoToSupervisedObsAvoidFbDataset():
                                                        np.zeros((3,21)),
                                                        np.zeros((3,21)),
                                                        np.zeros((1,1)))
-    loa_parameters = TCLearnObsAvoidFeatureParameter()
-    tcloa = TransformCouplingLearnObsAvoid(loa_parameters, cart_coord_dmp.tau_sys,
+    loa_parameters = None
+    tcloa = TransformCouplingLearnObsAvoid(loa_parameters, cart_coord_dmp.tau_sys, cart_coord_dmp,
                                            endeff_cart_state_global, point_obstacles_cart_state_global)
     
     N_settings = len(data_global_coord["obs_avoid"][0])
@@ -82,46 +82,48 @@ def convertDemoToSupervisedObsAvoidFbDataset():
     dataset_Ct_obs_avoid["trial_idx_ranked_by_outlier_metric_w_exclusion"] = [[None] * N_settings]
     min_num_considered_demo = 0
     
+    prim_no = 0 # There is only one (1) primitive here.
+    
     for ns in range(N_settings):
         N_demos = len(data_global_coord["obs_avoid"][1][ns])
         
         # the index 0 before ns seems unnecessary, but this is just for the sake of generality, if we have multiple primitives
-        dataset_Ct_obs_avoid["sub_X"][0][ns] = [None] * N_demos
-        dataset_Ct_obs_avoid["sub_Ct_target"][0][ns] = [None] * N_demos
-        dataset_Ct_obs_avoid["sub_phase_PSI"][0][ns] = [None] * N_demos
-        dataset_Ct_obs_avoid["sub_phase_V"][0][ns] = [None] * N_demos
-        dataset_Ct_obs_avoid["sub_phase_X"][0][ns] = [None] * N_demos
-        dataset_Ct_obs_avoid["sub_normalized_phase_PSI_mult_phase_V"][0][ns] = [None] * N_demos
-        dataset_Ct_obs_avoid["sub_data_point_priority"][0][ns] = [None] * N_demos
-        dataset_Ct_obs_avoid["trial_idx_ranked_by_outlier_metric_w_exclusion"][0][ns] = []
+        dataset_Ct_obs_avoid["sub_X"][prim_no][ns] = [None] * N_demos
+        dataset_Ct_obs_avoid["sub_Ct_target"][prim_no][ns] = [None] * N_demos
+        dataset_Ct_obs_avoid["sub_phase_PSI"][prim_no][ns] = [None] * N_demos
+        dataset_Ct_obs_avoid["sub_phase_V"][prim_no][ns] = [None] * N_demos
+        dataset_Ct_obs_avoid["sub_phase_X"][prim_no][ns] = [None] * N_demos
+        dataset_Ct_obs_avoid["sub_normalized_phase_PSI_mult_phase_V"][prim_no][ns] = [None] * N_demos
+        dataset_Ct_obs_avoid["sub_data_point_priority"][prim_no][ns] = [None] * N_demos
+        dataset_Ct_obs_avoid["trial_idx_ranked_by_outlier_metric_w_exclusion"][prim_no][ns] = []
         
         for nd in range(N_demos):
             print ('Setting #' + str(ns+1) + '/' + str(N_settings) + ', Demo #' + str(nd+1) + '/' + str(N_demos))
-            [dataset_Ct_obs_avoid["sub_X"][0][ns][nd],
-             dataset_Ct_obs_avoid["sub_Ct_target"][0][ns][nd],
-             dataset_Ct_obs_avoid["sub_phase_PSI"][0][ns][nd],
-             dataset_Ct_obs_avoid["sub_phase_V"][0][ns][nd],
-             dataset_Ct_obs_avoid["sub_phase_X"][0][ns][nd],
+            [dataset_Ct_obs_avoid["sub_X"][prim_no][ns][nd],
+             dataset_Ct_obs_avoid["sub_Ct_target"][prim_no][ns][nd],
+             dataset_Ct_obs_avoid["sub_phase_PSI"][prim_no][ns][nd],
+             dataset_Ct_obs_avoid["sub_phase_V"][prim_no][ns][nd],
+             dataset_Ct_obs_avoid["sub_phase_X"][prim_no][ns][nd],
              is_good_demo] = tcloa.computeSubFeatMatAndSubTargetCt(data_global_coord["obs_avoid"][1][ns][nd],
                                                                    data_global_coord["obs_avoid"][0][ns],
                                                                    data_global_coord["dt"],
                                                                    ccdmp_baseline_params,
                                                                    cart_coord_dmp)
             
-            phase_V = dataset_Ct_obs_avoid["sub_phase_V"][0][ns][nd]
-            phase_PSI = dataset_Ct_obs_avoid["sub_phase_PSI"][0][ns][nd]
+            phase_V = dataset_Ct_obs_avoid["sub_phase_V"][prim_no][ns][nd]
+            phase_PSI = dataset_Ct_obs_avoid["sub_phase_PSI"][prim_no][ns][nd]
             traj_length = phase_PSI.shape[1]
             normalized_phase_PSI_mult_phase_V = phase_PSI * np.matmul(np.ones((n_rfs, 1)), (phase_V * 1.0 / np.sum(phase_PSI, axis=0).reshape((1,traj_length))))
-            dataset_Ct_obs_avoid["sub_normalized_phase_PSI_mult_phase_V"][0][ns][nd] = normalized_phase_PSI_mult_phase_V
-            dataset_Ct_obs_avoid["sub_data_point_priority"][0][ns][nd] = range(traj_length,0,-1)
+            dataset_Ct_obs_avoid["sub_normalized_phase_PSI_mult_phase_V"][prim_no][ns][nd] = normalized_phase_PSI_mult_phase_V
+            dataset_Ct_obs_avoid["sub_data_point_priority"][prim_no][ns][nd] = range(traj_length,0,-1)
             
             if (is_good_demo):
-                dataset_Ct_obs_avoid["trial_idx_ranked_by_outlier_metric_w_exclusion"][0][ns].append(nd)
+                dataset_Ct_obs_avoid["trial_idx_ranked_by_outlier_metric_w_exclusion"][prim_no][ns].append(nd)
         
         if (ns == 0):
-            min_num_considered_demo = len(dataset_Ct_obs_avoid["trial_idx_ranked_by_outlier_metric_w_exclusion"][0][ns])
+            min_num_considered_demo = len(dataset_Ct_obs_avoid["trial_idx_ranked_by_outlier_metric_w_exclusion"][prim_no][ns])
         else:
-            min_num_considered_demo = min(min_num_considered_demo, len(dataset_Ct_obs_avoid["trial_idx_ranked_by_outlier_metric_w_exclusion"][0][ns]))
+            min_num_considered_demo = min(min_num_considered_demo, len(dataset_Ct_obs_avoid["trial_idx_ranked_by_outlier_metric_w_exclusion"][prim_no][ns]))
     
     print ('Minimum # of Considered Demonstrations = ' + str(min_num_considered_demo))
     saveObj(dataset_Ct_obs_avoid, 'dataset_Ct_obs_avoid.pkl')

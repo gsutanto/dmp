@@ -85,8 +85,8 @@ class TransformationSystem:
         accumulated_ct_vel = np.zeros((self.dmp_num_dimensions,1))
         for transform_coupler_idx in range(len(self.transform_couplers_list)):
             ct_acc, ct_vel = self.transform_couplers_list[transform_coupler_idx].getValue()
-            assert (np.isnan(ct_acc) == False), 'ct_acc['+str(transform_coupler_idx)+'] is NaN!'
-            assert (np.isnan(ct_vel) == False), 'ct_vel['+str(transform_coupler_idx)+'] is NaN!'
+            assert (np.isnan(ct_acc).all() == False), 'ct_acc['+str(transform_coupler_idx)+'] is NaN!'
+            assert (np.isnan(ct_vel).all() == False), 'ct_vel['+str(transform_coupler_idx)+'] is NaN!'
             accumulated_ct_acc = accumulated_ct_acc + ct_acc
             accumulated_ct_vel = accumulated_ct_vel + ct_vel
         return accumulated_ct_acc, accumulated_ct_vel
