@@ -63,6 +63,13 @@ def unrollLearnedObsAvoidViconTraj(demo_obs_avoid_traj_global,
     tcloa.func_approx_basis_functions = cart_coord_dmp.func_approx_discrete.getBasisFunctionTensor(tcloa.canonical_sys_discrete.getCanonicalPosition()).T
     
     for i in range(unroll_traj_length):
+# =============================================================================
+#         # if unrolling coupling term without dynamics:
+#         if (i == 0):
+#             tcloa.endeff_ccstate_global = demo_obs_avoid_traj_global.getDMPStateAtIndex(i)
+#         else:
+#             tcloa.endeff_ccstate_global = demo_obs_avoid_traj_global.getDMPStateAtIndex(i-1)
+# =============================================================================
         [current_state_global, 
          _, 
          _, 

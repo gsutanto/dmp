@@ -71,6 +71,7 @@ cart_coord_dmp = CartesianCoordDMP(dmp_basis_funcs_size, canonical_sys_discr,
                                    ctraj_local_coordinate_frame_selection,
                                    transform_couplers_list)
 cart_coord_dmp.setScalingUsage(is_using_scaling)
+cart_coord_dmp.setParams(ccdmp_baseline_params['W'], ccdmp_baseline_params['A_learn'])
 
 N_settings = len(data_global_coord["obs_avoid"][0])
 prim_no = 0 # There is only one (1) primitive here.
@@ -80,7 +81,7 @@ unroll_dataset_Ct_obs_avoid["sub_X"] = [[None] * N_settings]
 unroll_dataset_Ct_obs_avoid["sub_Ct_target"] = [[None] * N_settings]
 global_traj_unroll = [[None] * N_settings]
 
-for ns in range(3):
+for ns in range(N_settings):
     N_demos = len(data_global_coord["obs_avoid"][1][ns])
     
     # the index 0 before ns seems unnecessary, but this is just for the sake of generality, if we have multiple primitives
@@ -93,10 +94,10 @@ for ns in range(3):
         [unroll_dataset_Ct_obs_avoid["sub_X"][prim_no][ns][nd],
          unroll_dataset_Ct_obs_avoid["sub_Ct_target"][prim_no][ns][nd],
          global_traj_unroll[prim_no][ns][nd]] = unrollLearnedObsAvoidViconTraj(data_global_coord["obs_avoid"][1][ns][nd],
-                                                                          data_global_coord["obs_avoid"][0][ns],
-                                                                          data_global_coord["dt"],
-                                                                          ccdmp_baseline_params,
-                                                                          cart_coord_dmp)
+                                                                               data_global_coord["obs_avoid"][0][ns],
+                                                                               data_global_coord["dt"],
+                                                                               ccdmp_baseline_params,
+                                                                               cart_coord_dmp)
 
 saveObj(unroll_dataset_Ct_obs_avoid, 'unroll_dataset_Ct_obs_avoid.pkl')
 saveObj(global_traj_unroll, 'global_traj_unroll.pkl')

@@ -89,6 +89,8 @@ class TransformationSystem:
             assert (np.isnan(ct_vel).all() == False), 'ct_vel['+str(transform_coupler_idx)+'] is NaN!'
             accumulated_ct_acc = accumulated_ct_acc + ct_acc
             accumulated_ct_vel = accumulated_ct_vel + ct_vel
+        assert (accumulated_ct_acc.shape == (self.dmp_num_dimensions,1))
+        assert (accumulated_ct_vel.shape == (self.dmp_num_dimensions,1))
         return accumulated_ct_acc, accumulated_ct_vel
     
     def getStartState(self):

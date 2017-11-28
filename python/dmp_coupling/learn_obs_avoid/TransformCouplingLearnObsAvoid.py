@@ -35,6 +35,7 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         super(TransformCouplingLearnObsAvoid, self).__init__(3, name)
         self.loa_param = loa_parameters
         self.tau_sys = tau_system
+        self.endeff_ccstate_global = None
         self.point_obstacles_ccstate_global = point_obstacles_cart_state_global
         self.setCartCoordDMP(cart_coord_dmp)
         if ((self.loa_param is not None) and (self.loa_param.isValid())):
@@ -254,6 +255,10 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
     def getValue(self):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformCouplingLearnObsAvoid is invalid!"
         assert (self.loa_param.model == PMNN_MODEL)
+        
+        if (self.endeff_ccstate_global is not None):
+            self.endeff_ccstate_local = self.cart_coord_transformer.computeCTrajAtNewCoordSys(self.endeff_ccstate_global, 
+                                                                                              self.ctraj_hmg_transform_global_to_local_matrix)
         
         self.point_obstacles_ccstate_local = self.cart_coord_transformer.computeCTrajAtNewCoordSys(self.point_obstacles_ccstate_global, 
                                                                                                    self.ctraj_hmg_transform_global_to_local_matrix)
