@@ -102,13 +102,21 @@ def stackDataset(dataset,
             list_X_setting[ns_idx] = np.hstack([dataset["sub_X"][primitive_no][setting_no][nd] for nd in subset_demos_indices])
         
         list_Ct_target_setting[ns_idx] = np.hstack([dataset["sub_Ct_target"][primitive_no][setting_no][nd] for nd in subset_demos_indices])
-        list_normalized_phase_PSI_mult_phase_V_setting[ns_idx] = np.hstack([dataset["sub_normalized_phase_PSI_mult_phase_V"][primitive_no][setting_no][nd] for nd in subset_demos_indices])
-        list_data_point_priority_setting[ns_idx] = np.hstack([dataset["sub_data_point_priority"][primitive_no][setting_no][nd] for nd in subset_demos_indices])
+        if "sub_normalized_phase_PSI_mult_phase_V" in dataset:
+            list_normalized_phase_PSI_mult_phase_V_setting[ns_idx] = np.hstack([dataset["sub_normalized_phase_PSI_mult_phase_V"][primitive_no][setting_no][nd] for nd in subset_demos_indices])
+        if "sub_data_point_priority" in dataset:
+            list_data_point_priority_setting[ns_idx] = np.hstack([dataset["sub_data_point_priority"][primitive_no][setting_no][nd] for nd in subset_demos_indices])
     
     X = np.hstack(list_X_setting).T
     Ct_target = np.hstack(list_Ct_target_setting).T
-    normalized_phase_PSI_mult_phase_V = np.hstack(list_normalized_phase_PSI_mult_phase_V_setting).T
-    data_point_priority = np.hstack(list_data_point_priority_setting)
-    data_point_priority = data_point_priority.reshape(data_point_priority.shape[0],1)
+    if "sub_normalized_phase_PSI_mult_phase_V" in dataset:
+        normalized_phase_PSI_mult_phase_V = np.hstack(list_normalized_phase_PSI_mult_phase_V_setting).T
+    else:
+        normalized_phase_PSI_mult_phase_V = None
+    if "sub_data_point_priority" in dataset:
+        data_point_priority = np.hstack(list_data_point_priority_setting)
+        data_point_priority = data_point_priority.reshape(data_point_priority.shape[0],1)
+    else:
+        data_point_priority = None
     
     return X, Ct_target, normalized_phase_PSI_mult_phase_V, data_point_priority
