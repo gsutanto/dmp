@@ -97,7 +97,7 @@ unroll_dataset_Ct_obs_avoid["sub_Ct_target"] = [[None] * N_settings]
 model_parent_dir_path = '../tf/models/'
 reinit_selection_idx = list(np.loadtxt(model_parent_dir_path+'reinit_selection_idx.txt', dtype=np.int, ndmin=1))
 TF_max_train_iters = np.loadtxt(model_parent_dir_path+'TF_max_train_iters.txt', dtype=np.int, ndmin=0)
-init_model_param_filepath = model_parent_dir_path + 'prim_' + str(prim_no) + '_params_reinit_' + str(reinit_selection_idx[prim_no-1]) + ('_step_%07d.mat' % TF_max_train_iters)
+init_model_param_filepath = model_parent_dir_path + 'prim_' + str(prim_no+1) + '_params_reinit_' + str(reinit_selection_idx[prim_no]) + ('_step_%07d.mat' % TF_max_train_iters)
 
 regular_NN_hidden_layer_topology = list(np.loadtxt(model_parent_dir_path+'regular_NN_hidden_layer_topology.txt', dtype=np.int, ndmin=1))
 regular_NN_hidden_layer_activation_func_list = list(np.loadtxt(model_parent_dir_path+'regular_NN_hidden_layer_activation_func_list.txt', dtype=np.str, ndmin=1))
@@ -171,9 +171,6 @@ with ff_nn_graph.as_default():
     # merge all summaries into a single "operation" which we can execute in a session
     summary_op = tf.summary.merge_all()
 
-    # Predictions for the training, validation, and test data.
-    train_prediction = pmnn.performNeuralNetworkPrediction(tf_train_X, tf_train_nPSI, 1.0)
-
 # Test Random Vector Generation at Output Layer's Biases:
 #expected_rv_output_biases  = np.array([ -1.65803023e-14, -3.75096513e-15, 5.12945704e-15, -1.96647209e-16, -8.87342059e-15, 2.00303844e-14 ])
 
@@ -182,13 +179,6 @@ with tf.Session(graph=ff_nn_graph) as session:
     # Run the Op to initialize the variables.
     tf.global_variables_initializer().run()
     print("Initialized")
-    
-    if (pmnn.num_params < N_train_dataset):
-        print("OK: pmnn.num_params=%d < %d=N_train_dataset" % (pmnn.num_params, N_train_dataset))
-    else:
-        print(Fore.RED + "WARNING: pmnn.num_params=%d >= %d=N_train_dataset" % (pmnn.num_params, N_train_dataset))
-        print(Style.RESET_ALL)
-#         sys.exit("ERROR: pmnn.num_params=%d >= %d=N_train_dataset" % (pmnn.num_params, N_train_dataset))
     
     # create log writer object
     writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
@@ -205,7 +195,7 @@ with tf.Session(graph=ff_nn_graph) as session:
             unroll_dataset_Ct_obs_avoid["sub_Ct_target"][prim_no][ns] = [None] * N_demos
             
             for nd in range(N_demos_per_setting):
-                print ('Setting #' + str(ns+1) + ', Demo #' + str(nd+1) + '/' + str(N_demos_per_setting))
+#                print ('Setting #' + str(ns+1) + ', Demo #' + str(nd+1) + '/' + str(N_demos_per_setting))
                 [unroll_dataset_Ct_obs_avoid["sub_X"][prim_no][ns][nd],
                  unroll_dataset_Ct_obs_avoid["sub_Ct_target"][prim_no][ns][nd],
                  _] = unrollLearnedObsAvoidViconTraj(data_global_coord["obs_avoid"][1][ns][nd],
@@ -239,12 +229,12 @@ with tf.Session(graph=ff_nn_graph) as session:
                            feature_type, 
                            prim_no)
         nmse_unroll = computeNMSE(Ct_unroll, Ct_target)
-        print ('nmse_unroll        = ' + str(nmse_unroll))
+#        print ('nmse_unroll        = ' + str(nmse_unroll))
         
-        print('X.shape                        =', X.shape)
-        print('Ct_target.shape                =', Ct_target.shape)
-        print('normalized_phase_kernels.shape =', normalized_phase_kernels.shape)
-        print('data_point_priority.shape      =', data_point_priority.shape)
+#        print('X.shape                        =', X.shape)
+#        print('Ct_target.shape                =', Ct_target.shape)
+#        print('normalized_phase_kernels.shape =', normalized_phase_kernels.shape)
+#        print('data_point_priority.shape      =', data_point_priority.shape)
         
         N_data = X.shape[0]
         permuted_idx_train_dataset = list(np.random.permutation(N_data))[0:batch_size]
@@ -254,7 +244,7 @@ with tf.Session(graph=ff_nn_graph) as session:
         Ctt_train = Ct_target[permuted_idx_train_dataset,:]
         W_train = data_point_priority[permuted_idx_train_dataset,:]
         
-        print('X_train.shape                  =', X_train.shape)
+#        print('X_train.shape                  =', X_train.shape)
 
         batch_X = X_train
         batch_nPSI = nPSI_train
@@ -279,28 +269,26 @@ with tf.Session(graph=ff_nn_graph) as session:
         NN_model_params = pmnn.saveNeuralNetworkToMATLABMatFile()
         tcloa.loa_param.pmnn.model_params = NN_model_params
         
+        print("Step %d: NMSE = " % step, computeNMSE(tr_batch_prediction, batch_Ctt))
         if (step % 10 == 0):
-            print("Minibatch loss at step %d: [%f, %f, %f]" % (step, loss_value_0, loss_value_1, loss_value_2))
-            print("Minibatch NMSE :", computeNMSE(tr_batch_prediction, batch_Ctt))
-        if (step % 50 == 0):
             nmse = {}
             print("")
             if ((is_performing_weighted_training) and (step % 50 == 0) and (step > 0)):
-                wnmse_train = computeWNMSE(train_prediction.eval(), Ctt_train, W_train)
+                wnmse_train = computeWNMSE(tr_batch_prediction, batch_Ctt, W_train)
 #                 print("Training            WNMSE: ", wnmse_train)
                 nmse["wnmse_train"] = wnmse_train
-            nmse_train = computeNMSE(train_prediction.eval(), Ctt_train)
+            nmse_train = computeNMSE(tr_batch_prediction, batch_Ctt)
             var_ground_truth_Ctt_train = np.var(Ctt_train, axis=0)
             print("Training             NMSE: ", nmse_train)
             print("Training         Variance: ", var_ground_truth_Ctt_train)
             print("")
 #             if ((step > 0) and ((step == np.power(10,(np.floor(np.log10(step)))).astype(np.int32)) or (step == 5 * np.power(10,(np.floor(np.log10(step/5)))).astype(np.int32)))):
-            sio.savemat((model_output_dir_path+'prim_'+str(prim_no)+'_params_step_%07d'%step+'.mat'), NN_model_params)
+            sio.savemat((model_output_dir_path+'prim_'+str(prim_no+1)+'_params_step_%07d'%step+'.mat'), NN_model_params)
             nmse["nmse_train"] = nmse_train
-            sio.savemat((model_output_dir_path+'prim_'+str(prim_no)+'_nmse_step_%07d'%step+'.mat'), nmse)
+            sio.savemat((model_output_dir_path+'prim_'+str(prim_no+1)+'_nmse_step_%07d'%step+'.mat'), nmse)
             var_ground_truth = {}
             var_ground_truth["var_ground_truth_Ctt_train"] = var_ground_truth_Ctt_train
-            sio.savemat((model_output_dir_path+'prim_'+str(prim_no)+'_var_ground_truth.mat'), var_ground_truth)
+            sio.savemat((model_output_dir_path+'prim_'+str(prim_no+1)+'_var_ground_truth.mat'), var_ground_truth)
     print("")
 #     if (is_performing_weighted_training):
 #     print("Final Training            WNMSE: ", wnmse_train)
