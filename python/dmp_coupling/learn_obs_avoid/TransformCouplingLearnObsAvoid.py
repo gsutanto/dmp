@@ -254,7 +254,7 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
     
     def getValue(self):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformCouplingLearnObsAvoid is invalid!"
-        assert (self.loa_param.model == PMNN_MODEL)
+        assert (self.loa_param.model == PMNN_MODEL), "self.loa_param.model == " + str(self.loa_param.model)
         
         if (self.endeff_ccstate_global is not None):
             self.endeff_ccstate_local = self.cart_coord_transformer.computeCTrajAtNewCoordSys(self.endeff_ccstate_global, 

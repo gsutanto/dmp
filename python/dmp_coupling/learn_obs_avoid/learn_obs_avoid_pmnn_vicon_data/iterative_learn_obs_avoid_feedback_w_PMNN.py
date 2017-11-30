@@ -57,6 +57,7 @@ dataset_Ct_obs_avoid = loadObj('dataset_Ct_obs_avoid.pkl')
 D_input = 17
 D_output = 3
 pmnn_model_parent_dir_path='../tf/models/'
+pmnn_model_file_path = None
 pmnn_name = 'my_PMNN_obs_avoid_fb'
 
 dmp_basis_funcs_size = 25
@@ -69,6 +70,7 @@ canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
 loa_parameters = TCLearnObsAvoidFeatureParameter(D_input,
                                                  dmp_basis_funcs_size, D_output,
                                                  pmnn_model_parent_dir_path, 
+                                                 pmnn_model_file_path,
                                                  PMNN_MODEL, pmnn_name)
 tcloa = TransformCouplingLearnObsAvoid(loa_parameters, tau_sys)
 transform_couplers_list = [tcloa]
@@ -120,8 +122,6 @@ beta = 0.0
 
 logs_path = "/tmp/pmnn/"
 
-NN_name = 'my_PMNN_obs_avoid_fb'
-
 is_performing_weighted_training = 1
 
 # Initial Learning Rate
@@ -148,7 +148,7 @@ with ff_nn_graph.as_default():
     tf_train_Ctt_batch = tf.placeholder(tf.float32, shape=[batch_size, D_output], name="tf_train_Ctt_batch_placeholder")
     
     # PMNN is initialized with parameters specified in filepath:
-    pmnn = PMNN(NN_name, D_input, 
+    pmnn = PMNN(pmnn_name, D_input, 
                 regular_NN_hidden_layer_topology, regular_NN_hidden_layer_activation_func_list, 
                 N_phaseLWR_kernels, D_output, init_model_param_filepath, is_using_phase_kernel_modulation, False)
 
@@ -186,6 +186,7 @@ with tf.Session(graph=ff_nn_graph) as session:
     # Start the training loop.
     for step in range(TF_max_train_iters):
         list_batch_settings = list(np.random.permutation(N_settings))[0:N_settings_per_batch]
+        list_batch_setting_demos = list(np.random.permutation(3))[0:N_demos_per_setting]
         
         for ns in list_batch_settings:
             N_demos = len(data_global_coord["obs_avoid"][1][ns])
@@ -194,7 +195,7 @@ with tf.Session(graph=ff_nn_graph) as session:
             unroll_dataset_Ct_obs_avoid["sub_X"][prim_no][ns] = [None] * N_demos
             unroll_dataset_Ct_obs_avoid["sub_Ct_target"][prim_no][ns] = [None] * N_demos
             
-            for nd in range(N_demos_per_setting):
+            for nd in list_batch_setting_demos:
 #                print ('Setting #' + str(ns+1) + ', Demo #' + str(nd+1) + '/' + str(N_demos_per_setting))
                 [unroll_dataset_Ct_obs_avoid["sub_X"][prim_no][ns][nd],
                  unroll_dataset_Ct_obs_avoid["sub_Ct_target"][prim_no][ns][nd],
@@ -205,7 +206,7 @@ with tf.Session(graph=ff_nn_graph) as session:
                                                      cart_coord_dmp)
         
         subset_settings_indices = list_batch_settings
-        subset_demos_indices = range(N_demos_per_setting)
+        subset_demos_indices = list_batch_setting_demos
         mode_stack_dataset = 2
         feature_type = 'raw'
         
