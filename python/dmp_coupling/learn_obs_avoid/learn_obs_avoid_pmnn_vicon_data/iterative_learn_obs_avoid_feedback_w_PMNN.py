@@ -137,6 +137,11 @@ model_output_dir_path = '../tf/models/iterative_unroll/'
 if not os.path.isdir(model_output_dir_path):
     os.makedirs(model_output_dir_path)
 
+
+batch_nmse_train_log = np.zeros((TF_max_train_iters, D_output))
+nmse_averaging_window = 20
+
+
 # Build the complete graph for feeding inputs, training, and saving checkpoints.
 ff_nn_graph = tf.Graph()
 with ff_nn_graph.as_default():
@@ -270,8 +275,10 @@ with tf.Session(graph=ff_nn_graph) as session:
         NN_model_params = pmnn.saveNeuralNetworkToMATLABMatFile()
         tcloa.loa_param.pmnn.model_params = NN_model_params
         
-        print("Step %d: NMSE = " % step, computeNMSE(tr_batch_prediction, batch_Ctt))
-        if (step % 10 == 0):
+        batch_nmse_train = computeNMSE(tr_batch_prediction, batch_Ctt)
+        print("Step %d: NMSE = " % step, batch_nmse_train)
+        batch_nmse_train_log[step, :] = batch_nmse_train
+        if ((step > 0) and (step % nmse_averaging_window == 0)):
             nmse = {}
             print("")
             if ((is_performing_weighted_training) and (step % 50 == 0) and (step > 0)):
@@ -280,8 +287,9 @@ with tf.Session(graph=ff_nn_graph) as session:
                 nmse["wnmse_train"] = wnmse_train
             nmse_train = computeNMSE(tr_batch_prediction, batch_Ctt)
             var_ground_truth_Ctt_train = np.var(Ctt_train, axis=0)
-            print("Training             NMSE: ", nmse_train)
-            print("Training         Variance: ", var_ground_truth_Ctt_train)
+            #print("Training             NMSE: ", nmse_train)
+            #print("Training         Variance: ", var_ground_truth_Ctt_train)
+            print ("Average "+str(nmse_averaging_window)+"-last Batch Training NMSE = ", np.mean(batch_nmse_train_log[(step-nmse_averaging_window):step,:], axis=0))
             print("")
 #             if ((step > 0) and ((step == np.power(10,(np.floor(np.log10(step)))).astype(np.int32)) or (step == 5 * np.power(10,(np.floor(np.log10(step/5)))).astype(np.int32)))):
             sio.savemat((model_output_dir_path+'prim_'+str(prim_no+1)+'_params_step_%07d'%step+'.mat'), NN_model_params)
@@ -290,6 +298,8 @@ with tf.Session(graph=ff_nn_graph) as session:
             var_ground_truth = {}
             var_ground_truth["var_ground_truth_Ctt_train"] = var_ground_truth_Ctt_train
             sio.savemat((model_output_dir_path+'prim_'+str(prim_no+1)+'_var_ground_truth.mat'), var_ground_truth)
+        if (step % 50 == 0):
+            np.savetxt((model_output_dir_path+'batch_nmse_train_log.txt'), batch_nmse_train_log[0:step,:])
     print("")
 #     if (is_performing_weighted_training):
 #     print("Final Training            WNMSE: ", wnmse_train)
