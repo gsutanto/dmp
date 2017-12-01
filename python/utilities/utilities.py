@@ -13,6 +13,7 @@ import sys
 import copy
 import glob
 import pickle
+import shutil
 
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""
@@ -91,3 +92,8 @@ def saveObj(obj, file_path):
 def loadObj(file_path):
     with open(file_path, 'rb') as f:
         return pickle.load(f)
+
+def recreateDir(dir_path):
+    if (os.path.isdir(dir_path)):
+        shutil.rmtree(dir_path)
+    os.makedirs(dir_path)

@@ -11,7 +11,9 @@ import numpy as np
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/'))
 from FeedForwardNeuralNetwork import *
+from utilities import *
 from copy import deepcopy
 
 class PMNN(FeedForwardNeuralNetwork):
@@ -336,7 +338,7 @@ class PMNN(FeedForwardNeuralNetwork):
         
         return train_op_dim, loss_dim
 
-    # Save model.
+    # Save model in MATLAB format.
     def saveNeuralNetworkToMATLABMatFile(self):
         """
         Save the Neural Network model into a MATLAB *.m file.
@@ -362,7 +364,7 @@ class PMNN(FeedForwardNeuralNetwork):
     
         return model_params
 
-    # Load model.
+    # Load model from MATLAB format.
     def loadNeuralNetworkFromMATLABMatFile(self, filepath):
         """
         Load a Neural Network model from a MATLAB *.m file. Functionally comparable to the defineNeuralNetworkModel() function.
@@ -399,3 +401,39 @@ class PMNN(FeedForwardNeuralNetwork):
         num_params /= self.D_output
         print("Total # of Parameters = %d" % num_params)
         return num_params
+
+    # Save model in *.txt format.
+    def saveNeuralNetworkToTextFiles(self, dirpath):
+        """
+        Save the Neural Network model into text (*.txt) files in directory specified by dirpath.
+        """
+        recreateDir(dirpath)
+        
+        for dim_out in range(self.D_output):
+            os.makedirs(dirpath + '/' + str(dim_out))
+        
+        for i in range(1, self.N_layers):
+            layer_name = self.getLayerName(i)
+    
+            for dim_out in range(self.D_output):
+                layer_dim_ID = layer_name + '_' + str(dim_out)
+                if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation)
+                    current_layer_dim_size = self.neural_net_topology[i]
+                else: # Output Layer
+                    current_layer_dim_size = 1
+                if (self.is_predicting_only == False):
+                    with tf.variable_scope(self.name+'_'+layer_dim_ID, reuse=True):
+                        weights_tf = tf.get_variable('weights', [self.neural_net_topology[i-1], current_layer_dim_size])
+                        weights = weights_tf.eval()
+                        if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
+                            biases_tf = tf.get_variable('biases', [current_layer_dim_size])
+                            biases = biases_tf.eval()
+                else:
+                    weights = self.model_params[self.name+'_'+layer_dim_ID+"_weights"]
+                    if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
+                        biases = self.model_params[self.name+'_'+layer_dim_ID+"_biases"]
+                np.savetxt(dirpath + "/" + str(dim_out) + "/w" + str(i-1), weights)
+                if (i < self.N_layers - 1):
+                    np.savetxt(dirpath + "/" + str(dim_out) + "/b" + str(i-1), biases)
+    
+        return None
