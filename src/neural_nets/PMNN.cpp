@@ -13,15 +13,18 @@ namespace dmp
     /**
      * @param num_dimensions_init Initialization of the number of dimensions that will be used
      * @param topology_init Initialization of the neural network topology that will be used
+     * @param activation_functions_init Initialization of the neural network topology's activation functions that will be used
      * @param real_time_assertor Real-Time Assertor for troubleshooting and debugging
      */
-    PMNN::PMNN(uint num_dimensions_init, std::vector< uint > topology_init, RealTimeAssertor* real_time_assertor):
+    PMNN::PMNN(uint num_dimensions_init, std::vector< uint > topology_init,
+               std::vector< uint > activation_functions_init, RealTimeAssertor* real_time_assertor):
         num_dimensions(num_dimensions_init),
         data_io(DataIO(real_time_assertor)), rt_assertor(real_time_assertor)
     {
-        bool is_real_time   = false;
+        bool is_real_time       = false;
 
-        topology    = topology_init;
+        topology                = topology_init;
+        activation_functions    = activation_functions_init;
         weights.resize(num_dimensions_init);
         biases.resize(num_dimensions_init);
         for (uint i=0; i<num_dimensions_init; ++i)
@@ -69,6 +72,18 @@ namespace dmp
         if (rt_assert(topology[topology.size()-1] == 1) == false)
         {
             return false;
+        }
+        if (rt_assert(topology.size() == activation_functions.size()) == false)
+        {
+            return false;
+        }
+        for (uint i=0; i<activation_functions.size(); ++i)
+        {
+            if (rt_assert((rt_assert(activation_functions[i] >= _IDENTITY_)) &&
+                          (rt_assert(activation_functions[i] <= _RELU_))) == false)
+            {
+                return false;
+            }
         }
         for (uint i=0; i<num_dimensions; ++i)
         {
@@ -219,28 +234,43 @@ namespace dmp
         for (uint dim_idx = start_index; dim_idx < (end_index+1); ++dim_idx)
         {
             intermediate_layer_input        = input.transpose();
-            for (uint l=0; l<topology.size()-1; ++l)
+            for (uint l=1; l<topology.size(); ++l)
             {
-                intermediate_layer_output.resize(1, topology[l+1]);
-                intermediate_layer_output   = intermediate_layer_input * *(weights[dim_idx][l]);
-                if (l < topology.size()-2)
+                intermediate_layer_output.resize(1, topology[l]);
+                intermediate_layer_output   = intermediate_layer_input * *(weights[dim_idx][l-1]);
+                if (l < topology.size()-1)
                 {
-                    intermediate_layer_output   = intermediate_layer_output + *(biases[dim_idx][l]);
+                    intermediate_layer_output   = intermediate_layer_output + *(biases[dim_idx][l-1]);
                 }
-                if (l < topology.size()-3)
+                if (l < topology.size()-2)
                 {
                     for (uint ilo_idx=0; ilo_idx<intermediate_layer_output.cols(); ++ilo_idx)
                     {
-                        intermediate_layer_output(0,ilo_idx)    = tanh(intermediate_layer_output(0,ilo_idx));
+                        if (activation_functions[l] == _IDENTITY_)
+                        {
+                            intermediate_layer_output(0, ilo_idx)   = intermediate_layer_output(0, ilo_idx);
+                        }
+                        else if (activation_functions[l] == _TANH_)
+                        {
+                            intermediate_layer_output(0, ilo_idx)   = tanh(intermediate_layer_output(0, ilo_idx));
+                        }
+                        else if (activation_functions[l] == _RELU_)
+                        {
+                            intermediate_layer_output(0, ilo_idx)   = fmax(intermediate_layer_output(0, ilo_idx), 0);
+                        }
+                        else
+                        {
+                            return false;
+                        }
                     }
                 }
-                if (l == topology.size()-3)
+                if (l == topology.size()-2)
                 {
                     intermediate_layer_output   = intermediate_layer_output.cwiseProduct(phase_kernel_modulation.transpose());
                 }
-                if (l < topology.size()-2)
+                if (l < topology.size()-1)
                 {
-                    intermediate_layer_input.resize(1, topology[l+1]);
+                    intermediate_layer_input.resize(1, topology[l]);
                     intermediate_layer_input    = intermediate_layer_output;
                 }
             }

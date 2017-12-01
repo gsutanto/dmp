@@ -116,8 +116,11 @@ bool TransformCouplingLearnTactileFeedback::getValue(VectorN& ct_acc, VectorN& c
         return false;
     }
 
-    pmnn->computePrediction(*pmnn_input_vector, *pmnn_phase_kernel_modulation, *pmnn_output_vector,
-                            start_index, start_index+dmp_num_dimensions-1);
+    if (rt_assert(pmnn->computePrediction(*pmnn_input_vector, *pmnn_phase_kernel_modulation, *pmnn_output_vector,
+                                          start_index, start_index+dmp_num_dimensions-1)) == false)
+    {
+        return false;
+    }
 
     ct_acc.block(0,0,dmp_num_dimensions,1)  = pmnn_output_vector->block(start_index,0,dmp_num_dimensions,1);
 

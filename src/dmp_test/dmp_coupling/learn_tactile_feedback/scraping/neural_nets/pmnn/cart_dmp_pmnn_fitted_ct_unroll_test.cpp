@@ -49,6 +49,12 @@ int main(int argc, char** argv)
     topology[2]         = 25;
     topology[3]         = 1;
 
+    std::vector< uint > activation_functions(4);
+    activation_functions[0] = _IDENTITY_;
+    activation_functions[1] = _TANH_;
+    activation_functions[2] = _IDENTITY_;
+    activation_functions[3] = _IDENTITY_;
+
     char    output_plot_dir_path[1000];
     get_plot_path(output_plot_dir_path,"/dmp_coupling/learn_tactile_feedback/scraping/");
     char    rt_err_file_path[1000];
@@ -327,7 +333,7 @@ int main(int argc, char** argv)
     for (uint np=0; np<N_prims; ++np)
     {
         // Initialize Neural Network-LWR (NN-LWR):
-        pmnn[np]    = boost::make_shared<PMNN>(N_total_act_dimensionality, topology, &rt_assertor);
+        pmnn[np]    = boost::make_shared<PMNN>(N_total_act_dimensionality, topology, activation_functions, &rt_assertor);
 
         sprintf(pmnn_model_path, "%sprim%u/",
                 get_data_path("/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/cpp_models/").c_str(),

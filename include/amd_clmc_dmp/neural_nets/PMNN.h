@@ -22,6 +22,13 @@ namespace dmp
 
 #define MAX_NN_NUM_NODES_PER_LAYER      100
 
+enum NNActivationFunction
+{
+    _IDENTITY_                          = 0,
+    _TANH_                              = 1,
+    _RELU_                              = 2
+};
+
 typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::AutoAlign, MAX_NN_NUM_NODES_PER_LAYER, MAX_NN_NUM_NODES_PER_LAYER> MatrixNN_NxN;
 typedef Eigen::Matrix<double, Eigen::Dynamic, 1, Eigen::AutoAlign, MAX_NN_NUM_NODES_PER_LAYER>                                          VectorNN_N;
 typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::AutoAlign, 2, MAX_NN_NUM_NODES_PER_LAYER>                          MatrixNN_2xN;
@@ -45,6 +52,8 @@ typedef boost::shared_ptr< MatrixNN_2xN >   MatrixNN_2xNPtr;
 
         std::vector< uint >                             topology;
 
+        std::vector< uint >                             activation_functions;   // activation functions corresponding to the specified topology
+
         DataIO                                          data_io;
 
         RealTimeAssertor*                               rt_assertor;
@@ -56,9 +65,11 @@ typedef boost::shared_ptr< MatrixNN_2xN >   MatrixNN_2xNPtr;
         /**
          * @param num_dimensions_init Initialization of the number of dimensions that will be used
          * @param topology_init Initialization of the neural network topology that will be used
+         * @param activation_functions_init Initialization of the neural network topology's activation functions that will be used
          * @param real_time_assertor Real-Time Assertor for troubleshooting and debugging
          */
-        PMNN(uint num_dimensions_init, std::vector< uint > topology_init, RealTimeAssertor* real_time_assertor);
+        PMNN(uint num_dimensions_init, std::vector< uint > topology_init,
+             std::vector< uint > activation_functions_init, RealTimeAssertor* real_time_assertor);
 
         /**
          * Checks whether this special neural network is valid or not.

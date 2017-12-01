@@ -25,6 +25,12 @@ int main(int argc, char** argv)
     topology[2]         = 25;
     topology[3]         = 1;
 
+    std::vector< uint > activation_functions(4);
+    activation_functions[0] = _IDENTITY_;
+    activation_functions[1] = _TANH_;
+    activation_functions[2] = _IDENTITY_;
+    activation_functions[3] = _IDENTITY_;
+
     char    rt_err_file_path[1000];
     get_rt_errors_path(rt_err_file_path,"/rt_err.txt");
 
@@ -58,7 +64,7 @@ int main(int argc, char** argv)
 
     DataIO                          data_io(&rt_assertor);
 
-    PMNN                            pmnn(6, topology, &rt_assertor);
+    PMNN                            pmnn(6, topology, activation_functions, &rt_assertor);
 
     if (rt_assert_main(pmnn.loadParams(get_data_path("/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/cpp_models/prim1/").c_str(),
                                        0)) == false)
