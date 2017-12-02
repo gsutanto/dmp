@@ -1725,70 +1725,78 @@ bool TransformCouplingLearnObsAvoid::getValue(VectorN& ct_acc, VectorN& ct_vel)
             return false;
         }
 
-        VectorloaNN_O   NN_loa_output(3);
-        if (rt_assert(TransformCouplingLearnObsAvoid::computeNNInference(*(loa_feat_param->cart_coord_loa_feature_vector),
-                                                                         NN_loa_output)) == false)
+        if (loa_feat_param->pmnn != NULL)
         {
-            return false;
-        }
-
-        ct_acc_3D.block(0,0,3,1)        = NN_loa_output;
-        ct_acc_3D(0,0)                  = 0.0;
-
-        // post-processing:
-        Vector4         goal_cart_position_global_H = ZeroVector4;
-        Vector4         goal_cart_position_local_H  = ZeroVector4;
-        goal_cart_position_global_H.block(0,0,3,1)  = *goal_cartesian_position_global;
-        goal_cart_position_global_H(3,0)            = 1.0;
-
-        if (rt_assert(cart_coord_transformer.computeCTrajAtNewCoordSys(&goal_cart_position_global_H, NULL, NULL, NULL,
-                                                                       *ctraj_hmg_transform_global_to_local_matrix,
-                                                                       &goal_cart_position_local_H, NULL, NULL, NULL)) == false)
-        {
-            return false;
-        }
-        goal_cartesian_position_local.block(0,0,3,1)= goal_cart_position_local_H.block(0,0,3,1);
-
-        Vector3         o3_center                           = ZeroVector3;
-        Vector3         point_obstacle_cart_position_local  = ZeroVector3;
-        double          min_x;
-        double          max_x;
-        for (uint i=0; i<point_obstacles_cartesian_state_local->size(); i++)
-        {
-            point_obstacle_cart_position_local              = (*point_obstacles_cartesian_state_local)[i].getX();
-            if (i == 0)
+            loa_feat_param->pmnn_input_vector->block(0,0,loa_feat_param->cart_coord_loa_feature_vector->rows(),1)   = *(loa_feat_param->cart_coord_loa_feature_vector);
+            if (rt_assert(loa_feat_param->pmnn->computePrediction(*(loa_feat_param->pmnn_input_vector),
+                                                                  *(loa_feat_param->pmnn_phase_kernel_modulation),
+                                                                  *(loa_feat_param->pmnn_output_vector),
+                                                                  0,2)) == false)
             {
-                min_x   = point_obstacle_cart_position_local(0,0);
-                max_x   = point_obstacle_cart_position_local(0,0);
+                return false;
             }
-            else
-            {
-                if (point_obstacle_cart_position_local(0,0) < min_x)
-                {
-                    min_x   = point_obstacle_cart_position_local(0,0);
-                }
-                if (point_obstacle_cart_position_local(0,0) > max_x)
-                {
-                    max_x   = point_obstacle_cart_position_local(0,0);
-                }
+            ct_acc_3D.block(0, 0, 3, 1) = *(loa_feat_param->pmnn_output_vector);
+        }
+        else
+        {
+            VectorloaNN_O   NN_loa_output(3);
+            if (rt_assert(TransformCouplingLearnObsAvoid::computeNNInference(
+                    *(loa_feat_param->cart_coord_loa_feature_vector),
+                    NN_loa_output)) == false) {
+                return false;
             }
-            o3_center   += point_obstacle_cart_position_local;
-        }
-        o3_center       /= point_obstacles_cartesian_state_local->size();
 
-        Vector3 x3      = endeff_cartesian_state_local->getX();
+            ct_acc_3D.block(0, 0, 3, 1) = NN_loa_output;
+            ct_acc_3D(0, 0) = 0.0;
 
-        if (x3(0,0) > max_x)
-        {
-            ct_acc_3D   = ct_acc_3D * exp(-10.0 * ((x3(0,0) - max_x) * (x3(0,0) - max_x)));
-        }
-        if (goal_cartesian_position_local(0,0) < min_x)
-        {
-            ct_acc_3D   = ZeroVector3;
-        }
+            // post-processing:
+            Vector4 goal_cart_position_global_H = ZeroVector4;
+            Vector4 goal_cart_position_local_H = ZeroVector4;
+            goal_cart_position_global_H.block(0, 0, 3, 1) = *goal_cartesian_position_global;
+            goal_cart_position_global_H(3, 0) = 1.0;
 
-        //double          s_multiplier    = loa_feat_param->canonical_sys_discrete->getCanonicalMultiplier();
-        //ct_acc_3D       = ct_acc_3D * s_multiplier;
+            if (rt_assert(
+                        cart_coord_transformer.computeCTrajAtNewCoordSys(&goal_cart_position_global_H, NULL, NULL, NULL,
+                                                                         *ctraj_hmg_transform_global_to_local_matrix,
+                                                                         &goal_cart_position_local_H, NULL, NULL,
+                                                                         NULL)) == false) {
+                return false;
+            }
+            goal_cartesian_position_local.block(0, 0, 3, 1) = goal_cart_position_local_H.block(0, 0, 3, 1);
+
+            Vector3 o3_center = ZeroVector3;
+            Vector3 point_obstacle_cart_position_local = ZeroVector3;
+            double min_x;
+            double max_x;
+            for (uint i = 0; i < point_obstacles_cartesian_state_local->size(); i++) {
+                point_obstacle_cart_position_local = (*point_obstacles_cartesian_state_local)[i].getX();
+                if (i == 0) {
+                    min_x = point_obstacle_cart_position_local(0, 0);
+                    max_x = point_obstacle_cart_position_local(0, 0);
+                } else {
+                    if (point_obstacle_cart_position_local(0, 0) < min_x) {
+                        min_x = point_obstacle_cart_position_local(0, 0);
+                    }
+                    if (point_obstacle_cart_position_local(0, 0) > max_x) {
+                        max_x = point_obstacle_cart_position_local(0, 0);
+                    }
+                }
+                o3_center += point_obstacle_cart_position_local;
+            }
+            o3_center /= point_obstacles_cartesian_state_local->size();
+
+            Vector3 x3 = endeff_cartesian_state_local->getX();
+
+            if (x3(0, 0) > max_x) {
+                ct_acc_3D = ct_acc_3D * exp(-10.0 * ((x3(0, 0) - max_x) * (x3(0, 0) - max_x)));
+            }
+            if (goal_cartesian_position_local(0, 0) < min_x) {
+                ct_acc_3D = ZeroVector3;
+            }
+
+            //double          s_multiplier    = loa_feat_param->canonical_sys_discrete->getCanonicalMultiplier();
+            //ct_acc_3D       = ct_acc_3D * s_multiplier;
+        }
     }
 
     if (rt_assert(containsNaN(ct_acc_3D) == false) == false)

@@ -41,7 +41,11 @@ TCLearnObsAvoidFeatureParameter::TCLearnObsAvoidFeatureParameter():
     NN_N_input(0),
     NN_N_hidden_layer_1(0),
     NN_N_hidden_layer_2(0),
-    NN_N_output(0)
+    NN_N_output(0),
+    pmnn(NULL),
+    pmnn_input_vector(NULL),
+    pmnn_phase_kernel_modulation(NULL),
+    pmnn_output_vector(NULL)
 {}
 
 /**
@@ -75,7 +79,10 @@ TCLearnObsAvoidFeatureParameter::TCLearnObsAvoidFeatureParameter(RealTimeAsserto
                                                                  uint Num_NN_hidden_layer_1,
                                                                  uint Num_NN_hidden_layer_2,
                                                                  uint Num_NN_output,
-                                                                 const char* NN_params_directory_path):
+                                                                 const char* NN_params_directory_path,
+                                                                 VectorNN_N* pmnn_input_vector_ptr,
+                                                                 VectorNN_N* pmnn_phase_kernel_modulation_ptr,
+                                                                 VectorNN_N* pmnn_output_vector_ptr):
     loa_data_io(LearnObsAvoidDataIO(real_time_assertor)),
     rt_assertor(real_time_assertor),
     canonical_sys_discrete(canonical_system_discrete),
@@ -112,7 +119,11 @@ TCLearnObsAvoidFeatureParameter::TCLearnObsAvoidFeatureParameter(RealTimeAsserto
     NN_N_input(Num_NN_input),
     NN_N_hidden_layer_1(Num_NN_hidden_layer_1),
     NN_N_hidden_layer_2(Num_NN_hidden_layer_2),
-    NN_N_output(Num_NN_output)
+    NN_N_output(Num_NN_output),
+    pmnn(NULL),
+    pmnn_input_vector(pmnn_input_vector_ptr),
+    pmnn_phase_kernel_modulation(pmnn_phase_kernel_modulation_ptr),
+    pmnn_output_vector(pmnn_output_vector_ptr)
 {
     bool is_real_time           = false;
 
@@ -1354,6 +1365,34 @@ bool TCLearnObsAvoidFeatureParameter::isValid()
                                         NN_N_output, 1)) == false)
         {
             return false;
+        }
+        if (pmnn != NULL)
+        {
+            if (rt_assert(pmnn->isValid()) == false)
+            {
+                return false;
+            }
+            if (rt_assert((rt_assert(pmnn_input_vector != NULL)) &&
+                          (rt_assert(pmnn_phase_kernel_modulation != NULL)) &&
+                          (rt_assert(pmnn_output_vector != NULL))) == false)
+            {
+                return false;
+            }
+            if (rt_assert((rt_assert(pmnn_input_vector->rows() >= 0)) &&
+                          (rt_assert(pmnn_input_vector->rows() <= MAX_NN_NUM_NODES_PER_LAYER))) == false)
+            {
+                return false;
+            }
+            if (rt_assert((rt_assert(pmnn_phase_kernel_modulation->rows() >= 0)) &&
+                          (rt_assert(pmnn_phase_kernel_modulation->rows() <= MAX_MODEL_SIZE))) == false)
+            {
+                return false;
+            }
+            if (rt_assert((rt_assert(pmnn_output_vector->rows() >= 0)) &&
+                          (rt_assert(pmnn_output_vector->rows() <= 3))) == false)
+            {
+                return false;
+            }
         }
     }
     return true;

@@ -23,9 +23,10 @@
 
 #include "amd_clmc_dmp/utility/utility.h"
 #include "amd_clmc_dmp/dmp_state/DMPState.h"
-#include "amd_clmc_dmp/dmp_coupling/learn_obs_avoid/DefinitionsLearnObsAvoid.h"
 #include "amd_clmc_dmp/dmp_discrete/CanonicalSystemDiscrete.h"
+#include "amd_clmc_dmp/dmp_coupling/learn_obs_avoid/DefinitionsLearnObsAvoid.h"
 #include "amd_clmc_dmp/dmp_coupling/learn_obs_avoid/LearnObsAvoidDataIO.h"
+#include "amd_clmc_dmp/neural_nets/PMNN.h"
 
 namespace dmp
 {
@@ -227,6 +228,12 @@ private:
 
 public:
 
+    PMNN*       pmnn;                           // (pointer to) the PMNN prediction model; this pointer might be shared by other TransformCouplingLearnTactileFeedback object
+
+    VectorNN_N* pmnn_input_vector;              // (pointer to) the input vector; this pointer might be shared by other TransformCouplingLearnTactileFeedback object
+    VectorNN_N* pmnn_phase_kernel_modulation;   // (pointer to) the phase kernel modulator, modulating the final hidden layer of the pmnn model; this pointer might be shared by other TransformCouplingLearnTactileFeedback object
+    VectorNN_N* pmnn_output_vector;             // (pointer to) the output vector
+
     /**
      * NON-REAL-TIME!!!
      */
@@ -263,7 +270,10 @@ public:
                                     uint Num_NN_hidden_layer_1=0,
                                     uint Num_NN_hidden_layer_2=0,
                                     uint Num_NN_output=0,
-                                    const char* NN_params_directory_path="");
+                                    const char* NN_params_directory_path="",
+                                    VectorNN_N* pmnn_input_vector_ptr=NULL,
+                                    VectorNN_N* pmnn_phase_kernel_modulation_ptr=NULL,
+                                    VectorNN_N* pmnn_output_vector_ptr=NULL);
 
     /**
      * Checks the validity of this data structure.

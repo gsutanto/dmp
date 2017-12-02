@@ -47,6 +47,8 @@ class PMNN(FeedForwardNeuralNetwork):
         print "Neural Network Activation Function List:"
         print self.neural_net_activation_func_list
         
+        self.model_params = {}
+        
         self.is_predicting_only = is_predicting_only
         if (self.is_predicting_only == False): # means both predicting and learning, i.e. this requires to be called from inside a TensorFlow session.
             if (filepath == ""):
@@ -345,7 +347,7 @@ class PMNN(FeedForwardNeuralNetwork):
         """
         assert (self.is_predicting_only == False), 'Needs to be inside a TensorFlow session, therefore self.is_predicting_only must be False!'
         
-        model_params={}
+        self.model_params={}
         for i in range(1, self.N_layers):
             layer_name = self.getLayerName(i)
     
@@ -357,12 +359,12 @@ class PMNN(FeedForwardNeuralNetwork):
                     current_layer_dim_size = 1
                 with tf.variable_scope(self.name+'_'+layer_dim_ID, reuse=True):
                     weights = tf.get_variable('weights', [self.neural_net_topology[i-1], current_layer_dim_size])
-                    model_params[self.name+'_'+layer_dim_ID+"_weights"] = weights.eval()
+                    self.model_params[self.name+'_'+layer_dim_ID+"_weights"] = weights.eval()
                     if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
                         biases = tf.get_variable('biases', [current_layer_dim_size])
-                        model_params[self.name+'_'+layer_dim_ID+"_biases"] = biases.eval()
+                        self.model_params[self.name+'_'+layer_dim_ID+"_biases"] = biases.eval()
     
-        return model_params
+        return self.model_params
 
     # Load model from MATLAB format.
     def loadNeuralNetworkFromMATLABMatFile(self, filepath):
@@ -371,9 +373,7 @@ class PMNN(FeedForwardNeuralNetwork):
         :param filepath: (relative) path in the directory structure specifying the location of the file to be loaded.
         """
         num_params = 0
-        model_params = sio.loadmat(filepath, struct_as_record=True)
-        if (self.is_predicting_only):
-            self.model_params = model_params
+        self.model_params = sio.loadmat(filepath, struct_as_record=True)
         for i in range(1, self.N_layers):
             layer_name = self.getLayerName(i)
     
@@ -385,11 +385,11 @@ class PMNN(FeedForwardNeuralNetwork):
                     current_layer_dim_size = 1
                 if (self.is_predicting_only == False):
                     with tf.variable_scope(self.name+'_'+layer_dim_ID, reuse=False):
-                        weights = tf.get_variable('weights', initializer=model_params[self.name+'_'+layer_dim_ID+"_weights"])
+                        weights = tf.get_variable('weights', initializer=self.model_params[self.name+'_'+layer_dim_ID+"_weights"])
                         weights_dim = weights.get_shape().as_list()
                         num_params += weights_dim[0] * weights_dim[1]
                         if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
-                            biases = tf.get_variable('biases', initializer=model_params[self.name+'_'+layer_dim_ID+"_biases"][0,:])
+                            biases = tf.get_variable('biases', initializer=self.model_params[self.name+'_'+layer_dim_ID+"_biases"][0,:])
                             num_params += biases.get_shape().as_list()[0]
                 else:
                     weights = self.model_params[self.name+'_'+layer_dim_ID+"_weights"]
@@ -433,7 +433,47 @@ class PMNN(FeedForwardNeuralNetwork):
                     if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
                         biases = self.model_params[self.name+'_'+layer_dim_ID+"_biases"]
                 np.savetxt(dirpath + "/" + str(dim_out) + "/w" + str(i-1), weights)
-                if (i < self.N_layers - 1):
+                if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
                     np.savetxt(dirpath + "/" + str(dim_out) + "/b" + str(i-1), biases)
     
         return None
+
+    # Load model from *.txt files format.
+    def loadNeuralNetworkFromTextFiles(self, dirpath):
+        """
+        Load a Neural Network model from text (*.txt) files in directory specified by dirpath. 
+        Functionally comparable to the defineNeuralNetworkModel() function.
+        :param dirpath: (relative) path in the directory structure specifying the location of the files to be loaded.
+        """
+        num_params = 0
+        self.model_params = {}
+        for i in range(1, self.N_layers):
+            layer_name = self.getLayerName(i)
+            
+            for dim_out in range(self.D_output):
+                layer_dim_ID = layer_name + '_' + str(dim_out)
+                if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation)
+                    current_layer_dim_size = self.neural_net_topology[i]
+                else: # Output Layer
+                    current_layer_dim_size = 1
+                self.model_params[self.name+'_'+layer_dim_ID+"_weights"] = np.loadtxt(dirpath + "/" + str(dim_out) + "/w" + str(i-1))
+                if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
+                    self.model_params[self.name+'_'+layer_dim_ID+"_biases"] = np.loadtxt(dirpath + "/" + str(dim_out) + "/b" + str(i-1))
+                if (self.is_predicting_only == False):
+                    with tf.variable_scope(self.name+'_'+layer_dim_ID, reuse=False):
+                        weights = tf.get_variable('weights', initializer=self.model_params[self.name+'_'+layer_dim_ID+"_weights"])
+                        weights_dim = weights.get_shape().as_list()
+                        num_params += weights_dim[0] * weights_dim[1]
+                        if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
+                            biases = tf.get_variable('biases', initializer=self.model_params[self.name+'_'+layer_dim_ID+"_biases"][0,:])
+                            num_params += biases.get_shape().as_list()[0]
+                else:
+                    weights = self.model_params[self.name+'_'+layer_dim_ID+"_weights"]
+                    weights_dim = list(weights.shape)
+                    num_params += weights_dim[0] * weights_dim[1]
+                    if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
+                        biases = self.model_params[self.name+'_'+layer_dim_ID+"_biases"]
+                        num_params += list(biases.shape)[0]
+        num_params /= self.D_output
+        print("Total # of Parameters = %d" % num_params)
+        return num_params
