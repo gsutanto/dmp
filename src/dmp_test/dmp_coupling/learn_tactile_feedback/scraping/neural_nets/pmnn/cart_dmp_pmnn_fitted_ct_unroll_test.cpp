@@ -32,6 +32,7 @@ int main(int argc, char** argv)
     double  task_servo_rate         = 300.0;    // demonstration/training data frequency
     double  dt                      = 1.0/task_servo_rate;
     uint    model_size              = 25;
+    uint    NN_input_size           = 45;
 
     uint    formula_type            = _SCHAAL_DMP_;
     uint    canonical_order         = 2;        // default is using 2nd order canonical system
@@ -44,9 +45,9 @@ int main(int argc, char** argv)
     uint    N_act                   = 2;
 
     std::vector< uint > topology(4);
-    topology[0]         = 45;
+    topology[0]         = NN_input_size;
     topology[1]         = 100;
-    topology[2]         = 25;
+    topology[2]         = model_size;
     topology[3]         = 1;
 
     std::vector< uint > activation_functions(4);
@@ -181,8 +182,6 @@ int main(int argc, char** argv)
     // Coupling term prediction (result) matrix:
 //    std::vector<MatrixTxSBC>                    Ct(N_prims);
     VectorNN_N                                  Ct_vector(N_total_act_dimensionality);
-
-    double                                      canonical_multiplier;
 
     std::vector< boost::shared_ptr<PMNN> >      pmnn(N_prims);
 
@@ -332,7 +331,7 @@ int main(int argc, char** argv)
     char pmnn_model_path[1000]    = "";
     for (uint np=0; np<N_prims; ++np)
     {
-        // Initialize Neural Network-LWR (NN-LWR):
+        // Initialize Phase-Modulated Neural Network (PMNN):
         pmnn[np]    = boost::make_shared<PMNN>(N_total_act_dimensionality, topology, activation_functions, &rt_assertor);
 
         sprintf(pmnn_model_path, "%sprim%u/",
@@ -340,7 +339,7 @@ int main(int argc, char** argv)
                 np+1);
         if (rt_assert_main(pmnn[np]->loadParams(pmnn_model_path, 0)) == false)
         {
-            printf("Failed loading NN-LWR params for primitive #%u\n", np+1);
+            printf("Failed loading PMNN params for primitive #%u\n", np+1);
             return (-1);
         }
     }
@@ -531,6 +530,10 @@ int main(int argc, char** argv)
                           - sense_state[m]->getX(); // DeltaX = Xsense - Xnominal;
             }
 
+            double canonical_multiplier         = can_sys_discr.getCanonicalMultiplier();
+            double sum_psi                      = (func_approx_basis_functions.colwise().sum())(0,0) + (model_size * 1.e-10);
+            normalized_phase_PSI_mult_phase_V   = func_approx_basis_functions * (canonical_multiplier/sum_psi);
+
             // Get the next state of the canonical system
             if (t > 0)
             {
@@ -540,10 +543,6 @@ int main(int argc, char** argv)
                     return (-1);
                 }
             }
-
-            canonical_multiplier    = can_sys_discr.getCanonicalMultiplier();
-            double sum_psi          = (func_approx_basis_functions.colwise().sum())(0,0) + (model_size * 1.e-10);
-            normalized_phase_PSI_mult_phase_V   = func_approx_basis_functions * (canonical_multiplier/sum_psi);
 
             for (uint a=0; a<N_act; ++a)
             {

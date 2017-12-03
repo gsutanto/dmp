@@ -282,9 +282,9 @@ DMPState DMPDiscrete::getCurrentState()
  *                 current canonical multiplier, each vector component for each DMP dimension (return variable)
  * @return Success or failure
  */
-bool DMPDiscrete::getForcingTerm(VectorN& result_f)
+bool DMPDiscrete::getForcingTerm(VectorN& result_f, VectorM* basis_function_vector)
 {
-    return (rt_assert(func_approx_discrete.getForcingTerm(result_f)));
+    return (rt_assert(func_approx_discrete.getForcingTerm(result_f, basis_function_vector)));
 }
 
 /**

@@ -156,7 +156,7 @@ public:
      *                 current canonical multiplier, each vector component for each DMP dimension (return variable)
      * @return Success or failure
      */
-    bool getForcingTerm(VectorN& result_f);
+    bool getForcingTerm(VectorN& result_f, VectorM* basis_function_vector=NULL);
 
     /**
      * Returns current goal position.

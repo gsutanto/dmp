@@ -119,7 +119,7 @@ function [] = testCoupledCartDMPUnroll(output_dir_path)
 
     % end of Computing Sensor Traces Deviation
 
-    %% NN-LWR Coupling Term Prediction
+    %% PMNN Coupling Term Prediction
 
     model_path  = [rel_dir_path, '../../../data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/python_models/'];
 
@@ -142,7 +142,7 @@ function [] = testCoupledCartDMPUnroll(output_dir_path)
         [ Ctt_test_prediction_MATLAB_cell{np,1}, NN_LWR_layer_cell_cell{np,1} ] = performPMNNPrediction( NN_info, X_cell{np,1}, normalized_phase_PSI_mult_phase_V_cell{np,1} );
     end
 
-    % end of NN-LWR Coupling Term Prediction
+    % end of PMNN Coupling Term Prediction
 
     %% Unrolling with Coupling Terms on CartCoordDMP
 

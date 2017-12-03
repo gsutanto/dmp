@@ -132,6 +132,9 @@ target_link_libraries(amd_clmc_dmp_ct_loa_so_sb_multi_demo_vicon_unrolling_demo 
 add_executable(amd_clmc_dmp_ct_loa_so_sb_multi_demo_vicon_NN_unrolling_demo src/dmp_test/dmp_coupling/learn_obs_avoid/static_obs/single_baseline/ct_loa_so_sb_multi_demo_vicon_NN_unrolling_test.cpp)
 target_link_libraries(amd_clmc_dmp_ct_loa_so_sb_multi_demo_vicon_NN_unrolling_demo ${PROJECT_NAME} ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
+add_executable(amd_clmc_dmp_ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_demo src/dmp_test/dmp_coupling/learn_obs_avoid/static_obs/single_baseline/ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test.cpp)
+target_link_libraries(amd_clmc_dmp_ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_demo ${PROJECT_NAME} ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+
 add_executable(amd_clmc_dmp_pmnn_demo src/dmp_test/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/pmnn_test.cpp)
 target_link_libraries(amd_clmc_dmp_pmnn_demo ${PROJECT_NAME} ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 

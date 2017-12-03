@@ -205,7 +205,7 @@ public:
      * @param result_f Computed forcing term at current canonical position and current canonical multiplier (return variable)
      * @return Success or failure
      */
-    virtual bool getForcingTerm(VectorN& result_f) = 0;
+    virtual bool getForcingTerm(VectorN& result_f, VectorM* basis_function_vector=NULL) = 0;
 
     /**
      * Returns current goal position.
