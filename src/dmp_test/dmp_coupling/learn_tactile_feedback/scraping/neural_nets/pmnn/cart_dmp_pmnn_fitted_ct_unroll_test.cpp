@@ -514,25 +514,24 @@ int main(int argc, char** argv)
                 }
                 else
                 {
+                    VectorM normalized_phase_PSI_mult_phase_V_temp(model_size);
                     // Get the next state of the sensory primitives
                     if (rt_assert_main(dmp_discrete_sense[m]->getNextState(dt, false, *(sense_state[m]),
                                                                            NULL, NULL, NULL,
-                                                                           &func_approx_basis_functions)) == false)
+                                                                           &func_approx_basis_functions,
+                                                                           &normalized_phase_PSI_mult_phase_V_temp)) == false)
                     {
                         printf("Failed sensory primitive unrolling at time t=%u for sensing modality %s, primitive #%u\n", t,
                                sense_name[m].c_str(), np+1);
                         return (-1);
                     }
+                    normalized_phase_PSI_mult_phase_V   = normalized_phase_PSI_mult_phase_V_temp.block(0,0,model_size,1);
                 }
                 X_vector.block(sense_start_idx_in_aggreg_feat_vec[m], 0, sense_dimensionality[m], 1)
                         = (X_sensor_trace[m][np]->block(t, 0, 1, sense_dimensionality[m]).transpose()
                            - X_sensor_offset[m][np].block(0, 0, sense_dimensionality[m], 1))
                           - sense_state[m]->getX(); // DeltaX = Xsense - Xnominal;
             }
-
-            double canonical_multiplier         = can_sys_discr.getCanonicalMultiplier();
-            double sum_psi                      = (func_approx_basis_functions.colwise().sum())(0,0) + (model_size * 1.e-10);
-            normalized_phase_PSI_mult_phase_V   = func_approx_basis_functions * (canonical_multiplier/sum_psi);
 
             // Get the next state of the canonical system
             if (t > 0)
@@ -543,6 +542,10 @@ int main(int argc, char** argv)
                     return (-1);
                 }
             }
+
+            double canonical_multiplier         = can_sys_discr.getCanonicalMultiplier();
+            double sum_psi                      = (func_approx_basis_functions.colwise().sum())(0,0) + (model_size * 1.e-10);
+            normalized_phase_PSI_mult_phase_V   = func_approx_basis_functions * (canonical_multiplier/sum_psi);
 
             for (uint a=0; a<N_act; ++a)
             {

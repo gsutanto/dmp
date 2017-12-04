@@ -113,9 +113,13 @@ bool FuncApproximatorDiscrete::isValid()
  * @param result_f Computed forcing term vector at current canonical position and \n
  *                 current canonical multiplier, each vector component for each DMP dimension (return variable)
  * @param basis_function_vector [optional] If also interested in the basis function vector value, put its pointer here (return variable)
+ * @param normalized_basis_func_vector_mult_phase_multiplier [optional] If also interested in \n
+ *              the <normalized basis function vector multiplied by the canonical phase multiplier (phase position or phase velocity)> value, \n
+ *              put its pointer here (return variable)
  * @return Success or failure
  */
-bool FuncApproximatorDiscrete::getForcingTerm(VectorN& result_f, VectorM* basis_function_vector)
+bool FuncApproximatorDiscrete::getForcingTerm(VectorN& result_f, VectorM* basis_function_vector,
+                                              VectorM* normalized_basis_func_vector_mult_phase_multiplier)
 {
     // pre-condition checking
     if (rt_assert(FuncApproximatorDiscrete::isValid()) == false)
@@ -148,8 +152,14 @@ bool FuncApproximatorDiscrete::getForcingTerm(VectorN& result_f, VectorM* basis_
         *basis_function_vector  = *psi;
     }
 
+    if (normalized_basis_func_vector_mult_phase_multiplier != NULL)
+    {
+        (*normalized_basis_func_vector_mult_phase_multiplier) =
+                (*psi) * ((canonical_sys->getCanonicalMultiplier()) / sum_psi);
+    }
+
     VectorN f(dmp_num_dimensions);
-    f   = ((*weights) * (*psi)) * ((canonical_sys->getCanonicalMultiplier()) / sum_psi);
+    f   = ((*weights) * (*psi) * ((canonical_sys->getCanonicalMultiplier()) / sum_psi));
 
     if (rt_assert(containsNaN(f) == false) == false)
     {

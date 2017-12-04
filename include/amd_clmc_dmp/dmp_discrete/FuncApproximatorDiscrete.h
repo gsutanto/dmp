@@ -79,9 +79,13 @@ public:
      * @param result_f Computed forcing term vector at current canonical position and \n
      *                 current canonical multiplier, each vector component for each DMP dimension (return variable)
      * @param basis_function_vector [optional] If also interested in the basis function vector value, put its pointer here (return variable)
+     * @param normalized_basis_func_vector_mult_phase_multiplier [optional] If also interested in \n
+     *              the <normalized basis function vector multiplied by the canonical phase multiplier (phase position or phase velocity)> value, \n
+     *              put its pointer here (return variable)
      * @return Success or failure
      */
-    bool getForcingTerm(VectorN& result_f, VectorM* basis_function_vector=NULL);
+    bool getForcingTerm(VectorN& result_f, VectorM* basis_function_vector=NULL,
+                        VectorM* normalized_basis_func_vector_mult_phase_multiplier=NULL);
 
     /**
      * Returns the vector variables required for learning the weights of the basis functions.

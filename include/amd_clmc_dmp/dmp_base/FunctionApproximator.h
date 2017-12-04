@@ -84,9 +84,14 @@ public:
      *
      * @param result_f Computed forcing term at current canonical position and current canonical multiplier (return variable)
      * @param basis_function_vector [optional] If also interested in the basis function vector value, put its pointer here (return variable)
+     * @param normalized_basis_func_vector_mult_phase_multiplier [optional] If also interested in \n
+     *              the <normalized basis function vector multiplied by the canonical phase multiplier (phase position or phase velocity)> value, \n
+     *              put its pointer here (return variable)
      * @return Success or failure
      */
-    virtual bool getForcingTerm(VectorN& result_f, VectorM* basis_function_vector=NULL) = 0;
+    virtual bool getForcingTerm(VectorN& result_f,
+                                VectorM* basis_function_vector=NULL,
+                                VectorM* normalized_basis_func_vector_mult_phase_multiplier=NULL) = 0;
 
     /**
      * Get the current weights of the basis functions.

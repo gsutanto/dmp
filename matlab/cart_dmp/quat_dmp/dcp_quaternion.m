@@ -428,8 +428,6 @@ switch lower(action)
         varargout(4) = {dcps(ID).omega};
         varargout(5) = {dcps(ID).omegad};
         varargout(6) = {f};
-        varargout(7) = {dcps(ID).x};
-        varargout(8) = {dcps(ID).v};
         
         % .........................................................................
     case 'batch_fit'

@@ -246,6 +246,9 @@ public:
      *                                        the velocity-level coupling term value \n
      *                                        of the next state, please put the pointer here
      * @param func_approx_basis_functions (optional) (Pointer to) vector of basis functions constructing the forcing term
+     * @param func_approx_normalized_basis_func_vector_mult_phase_multiplier (optional) If also interested in \n
+     *              the <normalized basis function vector multiplied by the canonical phase multiplier (phase position or phase velocity)> value, \n
+     *              put its pointer here (return variable)
      * @return Success or failure
      */
     bool getNextState(double dt, bool update_canonical_state,
@@ -253,7 +256,8 @@ public:
                       VectorN* transform_sys_forcing_term=NULL,
                       VectorN* transform_sys_coupling_term_acc=NULL,
                       VectorN* transform_sys_coupling_term_vel=NULL,
-                      VectorM* func_approx_basis_functions=NULL);
+                      VectorM* func_approx_basis_functions=NULL,
+                      VectorM* func_approx_normalized_basis_func_vector_mult_phase_multiplier=NULL);
 
     /**
      * Runs one step of the DMP based on the time step dt.
@@ -272,6 +276,9 @@ public:
      *                                        the velocity-level coupling term value \n
      *                                        of the next state, please put the pointer here
      * @param func_approx_basis_functions (optional) (Pointer to) vector of basis functions constructing the forcing term
+     * @param func_approx_normalized_basis_func_vector_mult_phase_multiplier (optional) If also interested in \n
+     *              the <normalized basis function vector multiplied by the canonical phase multiplier (phase position or phase velocity)> value, \n
+     *              put its pointer here (return variable)
      * @return Success or failure
      */
     bool getNextState(double dt, bool update_canonical_state,
@@ -279,7 +286,8 @@ public:
                       VectorN* transform_sys_forcing_term=NULL,
                       VectorN* transform_sys_coupling_term_acc=NULL,
                       VectorN* transform_sys_coupling_term_vel=NULL,
-                      VectorM* func_approx_basis_functions=NULL);
+                      VectorM* func_approx_basis_functions=NULL,
+                      VectorM* func_approx_normalized_basis_func_vector_mult_phase_multiplier=NULL);
 
     /**
      * Returns current (global) DMP state.

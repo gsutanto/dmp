@@ -293,13 +293,17 @@ bool TransformSystemDiscrete::start(const DMPState& start_state_init, const DMPS
  * @param coupling_term_vel (optional) If you also want to know the velocity-level \n
  *                          coupling term value of the next state, please put the pointer here
  * @param basis_functions_out (optional) (Pointer to) vector of basis functions constructing the forcing term
+ * @param normalized_basis_func_vector_mult_phase_multiplier (optional) If also interested in \n
+ *              the <normalized basis function vector multiplied by the canonical phase multiplier (phase position or phase velocity)> value, \n
+ *              put its pointer here (return variable)
  * @return Success or failure
  */
 bool TransformSystemDiscrete::getNextState(double dt, DMPState& next_state,
                                            VectorN* forcing_term,
                                            VectorN* coupling_term_acc,
                                            VectorN* coupling_term_vel,
-                                           VectorM* basis_functions_out)
+                                           VectorM* basis_functions_out,
+                                           VectorM* normalized_basis_func_vector_mult_phase_multiplier)
 {
     // pre-conditions checking
     if (rt_assert(is_started == true) == false)
@@ -332,7 +336,8 @@ bool TransformSystemDiscrete::getNextState(double dt, DMPState& next_state,
 
     VectorN     f(dmp_num_dimensions);
     VectorM     basis_functions(func_approx->getModelSize());
-    if (rt_assert(func_approx->getForcingTerm(f, &basis_functions)) == false)
+    if (rt_assert(func_approx->getForcingTerm(f, &basis_functions,
+                                              normalized_basis_func_vector_mult_phase_multiplier)) == false)
     {
         return false;
     }

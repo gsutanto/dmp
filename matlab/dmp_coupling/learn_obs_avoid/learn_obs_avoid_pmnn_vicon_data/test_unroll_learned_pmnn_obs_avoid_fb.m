@@ -78,7 +78,7 @@ NN_info.name                = PMNN_name;
 NN_info.topology            = [D_input, regular_NN_hidden_layer_topology, N_phaseLWR_kernels, D_output];
 NN_info.activation_func_list= {'identity', regular_NN_hidden_layer_activation_func_list{:}, 'identity', 'identity'};
 % NN_info.filepath            = [data_learn_fb_task_PMNN_python_models_dir_path, 'prim_', num2str(np), '_params_reinit_',num2str(reinit_selection_idx(1,np)),'_step_',num2str(TF_max_train_iters,'%07d'),'.mat'];
-NN_info.filepath            = [python_learn_fb_task_TF_models_dir_path, 'iterative_unroll/prim_1_params_step_0035220.mat'];
+NN_info.filepath            = [python_learn_fb_task_TF_models_dir_path, 'iterative_unroll/prim_1_params_step_0044300.mat'];
 
 learning_param.pmnn         = NN_info;
 

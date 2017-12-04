@@ -119,12 +119,16 @@ public:
      * @param coupling_term_vel (optional) If you also want to know the velocity-level \n
      *                          coupling term value of the next state, please put the pointer here
      * @param basis_functions_out (optional) (Pointer to) vector of basis functions constructing the forcing term
+     * @param normalized_basis_func_vector_mult_phase_multiplier (optional) If also interested in \n
+     *              the <normalized basis function vector multiplied by the canonical phase multiplier (phase position or phase velocity)> value, \n
+     *              put its pointer here (return variable)
      * @return Success or failure
      */
     virtual bool getNextState(double dt, DMPState& next_state,
                               VectorN* forcing_term=NULL,
                               VectorN* coupling_term_acc=NULL, VectorN* coupling_term_vel=NULL,
-                              VectorM* basis_functions_out=NULL) = 0;
+                              VectorM* basis_functions_out=NULL,
+                              VectorM* normalized_basis_func_vector_mult_phase_multiplier=NULL) = 0;
 
     /**
      * Based on the start state, current state, evolving goal state and steady-state goal position,

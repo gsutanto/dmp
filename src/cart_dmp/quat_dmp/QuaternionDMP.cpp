@@ -148,13 +148,17 @@ namespace dmp
      *                                        the velocity-level coupling term value \n
      *                                        of the next state, please put the pointer here
      * @param func_approx_basis_functions (optional) (Pointer to) vector of basis functions constructing the forcing term
+     * @param func_approx_normalized_basis_func_vector_mult_phase_multiplier (optional) If also interested in \n
+     *              the <normalized basis function vector multiplied by the canonical phase multiplier (phase position or phase velocity)> value, \n
+     *              put its pointer here (return variable)
      * @return Success or failure
      */
     bool QuaternionDMP::getNextQuaternionState(double dt, bool update_canonical_state,
                                                QuaternionDMPState& next_state, VectorN* transform_sys_forcing_term,
                                                VectorN* transform_sys_coupling_term_acc,
                                                VectorN* transform_sys_coupling_term_vel,
-                                               VectorM* func_approx_basis_functions)
+                                               VectorM* func_approx_basis_functions,
+                                               VectorM* func_approx_normalized_basis_func_vector_mult_phase_multiplier)
     {
         // pre-conditions checking
         if (rt_assert(is_started == true) == false)
@@ -171,7 +175,8 @@ namespace dmp
                                                                          transform_sys_forcing_term,
                                                                          transform_sys_coupling_term_acc,
                                                                          transform_sys_coupling_term_vel,
-                                                                         func_approx_basis_functions)) == false)
+                                                                         func_approx_basis_functions,
+                                                                         func_approx_normalized_basis_func_vector_mult_phase_multiplier)) == false)
         {
             return false;
         }

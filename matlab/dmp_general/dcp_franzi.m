@@ -425,14 +425,17 @@ switch lower(action),
         else
             in = dcps(ID).x;
         end
-        f            = sum(in*(dcps(ID).w+cw).*dcps(ID).psi)/sum(dcps(ID).psi+1.e-10) * amp;
-        dcps(ID).f   = f;
+        curr_phase_x    = dcps(ID).x;
+        curr_phase_v    = dcps(ID).v;
+        curr_phase_psi  = dcps(ID).psi.';
+        curr_f          = sum(in*(dcps(ID).w+cw).*dcps(ID).psi)/sum(dcps(ID).psi+1.e-10) * amp;
+        dcps(ID).f      = curr_f;
         
         if (~is_y_integration_time_misaligned)
             dcps(ID).y  = dcps(ID).yd*dt+dcps(ID).y;
         end
         
-        dcps(ID).zd = (dcps(ID).alpha_z*(dcps(ID).beta_z*(dcps(ID).g-dcps(ID).y)-dcps(ID).z)+f+ct)*tau*ct_tau;
+        dcps(ID).zd = (dcps(ID).alpha_z*(dcps(ID).beta_z*(dcps(ID).g-dcps(ID).y)-dcps(ID).z)+curr_f+ct)*tau*ct_tau;
         dcps(ID).ydd= dcps(ID).zd*tau*ct_tau;
         dcps(ID).yd = dcps(ID).z*tau*ct_tau;
         
@@ -460,13 +463,20 @@ switch lower(action),
             dcps(ID).y  = dcps(ID).yd*dt+dcps(ID).y;
         end
         
+        next_phase_x    = dcps(ID).x;
+        next_phase_v    = dcps(ID).v;
+        next_phase_psi  = (exp(-0.5*((dcps(ID).x-dcps(ID).c).^2).*dcps(ID).D)).';
+        
         varargout(1) = {dcps(ID).y};
         varargout(2) = {dcps(ID).yd};
         varargout(3) = {dcps(ID).ydd};
-        varargout(4) = {f};
-        varargout(5) = {dcps(ID).x};
-        varargout(6) = {dcps(ID).v};
-        varargout(7) = {dcps(ID).psi.'};
+        varargout(4) = {curr_f};
+        varargout(5) = {next_phase_x};
+        varargout(6) = {next_phase_v};
+        varargout(7) = {curr_phase_psi};
+        varargout(8) = {curr_phase_x};
+        varargout(9) = {curr_phase_v};
+        varargout(10)= {curr_phase_psi};
         
         % .........................................................................
     case 'run_fit'
