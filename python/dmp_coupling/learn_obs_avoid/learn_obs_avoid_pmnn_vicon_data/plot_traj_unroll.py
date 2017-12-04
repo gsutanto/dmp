@@ -15,5 +15,5 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/'))
 from utilities import *
 
 
-global_traj_unroll_before_iter_learn_unroll = loadObj('global_traj_unroll_before_iterative_learning_unroll.pkl')
+global_traj_unroll_before_iter_learn_unroll = loadObj('global_traj_unroll_before_iterative_learn_unroll.pkl')
 global_traj_unroll_after_iter_learn_unroll = loadObj('global_traj_unroll.pkl')

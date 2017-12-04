@@ -56,6 +56,8 @@ dataset_Ct_obs_avoid = loadObj('dataset_Ct_obs_avoid.pkl')
 
 D_input = 17
 D_output = 3
+print('D_input  =', D_input)
+print('D_output =', D_output)
 pmnn_model_parent_dir_path='../tf/models/'
 pmnn_model_file_path = None
 pmnn_name = 'my_PMNN_obs_avoid_fb'
@@ -104,13 +106,8 @@ init_model_param_filepath = model_parent_dir_path + 'prim_' + str(prim_no+1) + '
 regular_NN_hidden_layer_topology = list(np.loadtxt(model_parent_dir_path+'regular_NN_hidden_layer_topology.txt', dtype=np.int, ndmin=1))
 regular_NN_hidden_layer_activation_func_list = list(np.loadtxt(model_parent_dir_path+'regular_NN_hidden_layer_activation_func_list.txt', dtype=np.str, ndmin=1))
 
-D_input = 17
-D_output = 3
-print('D_input  =', D_input)
-print('D_output =', D_output)
-
 # Define Neural Network Topology
-N_phaseLWR_kernels = 25
+N_phaseLWR_kernels = dmp_basis_funcs_size
 NN_topology = [D_input] + regular_NN_hidden_layer_topology + [N_phaseLWR_kernels, D_output]
 
 
@@ -133,7 +130,7 @@ is_using_phase_kernel_modulation = True
 input_X_descriptor_string = 'raw_reg_hidden_layer_100relu_75tanh'
 print ("input_X_descriptor_string = ", input_X_descriptor_string)
 
-model_output_dir_path = '../tf/models/iterative_unroll/'
+model_output_dir_path = '../tf/models/iterative_learn_unroll/'
 if not os.path.isdir(model_output_dir_path):
     os.makedirs(model_output_dir_path)
 

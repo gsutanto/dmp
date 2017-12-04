@@ -42,7 +42,7 @@ regular_NN_hidden_layer_topology = list(np.loadtxt(model_parent_dir_path+'regula
 regular_NN_hidden_layer_activation_func_list = list(np.loadtxt(model_parent_dir_path+'regular_NN_hidden_layer_activation_func_list.txt', dtype=np.str, ndmin=1))
 N_phaseLWR_kernels = 25
 D_output = 3
-init_model_param_filepath = model_parent_dir_path + 'iterative_unroll/prim_1_params_step_0035220.mat'
+init_model_param_filepath = model_parent_dir_path + 'iterative_learn_unroll/prim_1_params_step_0044300.mat'
 pmnn_model_out_dirpath = '../../../../data/dmp_coupling/learn_obs_avoid/static_obs/neural_nets/pmnn/cpp_models/prim1/'
 
 pmnn = PMNN(pmnn_name, D_input, 

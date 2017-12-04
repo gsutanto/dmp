@@ -51,7 +51,7 @@ D_input = 17
 D_output = 3
 pmnn_model_parent_dir_path = '../tf/models/'
 # pmnn_model_file_path = None
-pmnn_model_file_path = '../tf/models/iterative_unroll/prim_1_params_step_0003200.mat'
+pmnn_model_file_path = '../tf/models/iterative_learn_unroll/prim_1_params_step_0044300.mat'
 pmnn_name = 'my_PMNN_obs_avoid_fb'
 
 dmp_basis_funcs_size = 25
