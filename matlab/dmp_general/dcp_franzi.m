@@ -471,12 +471,12 @@ switch lower(action),
         varargout(2) = {dcps(ID).yd};
         varargout(3) = {dcps(ID).ydd};
         varargout(4) = {curr_f};
-        varargout(5) = {next_phase_x};
-        varargout(6) = {next_phase_v};
+        varargout(5) = {curr_phase_x};
+        varargout(6) = {curr_phase_v};
         varargout(7) = {curr_phase_psi};
-        varargout(8) = {curr_phase_x};
-        varargout(9) = {curr_phase_v};
-        varargout(10)= {curr_phase_psi};
+        varargout(8) = {next_phase_x};
+        varargout(9) = {next_phase_v};
+        varargout(10)= {next_phase_psi};
         
         % .........................................................................
     case 'run_fit'

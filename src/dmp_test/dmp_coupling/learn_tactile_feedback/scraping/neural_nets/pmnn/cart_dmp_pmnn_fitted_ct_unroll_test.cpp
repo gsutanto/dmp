@@ -533,6 +533,10 @@ int main(int argc, char** argv)
                           - sense_state[m]->getX(); // DeltaX = Xsense - Xnominal;
             }
 
+            double canonical_multiplier         = can_sys_discr.getCanonicalMultiplier();
+            double sum_psi                      = (func_approx_basis_functions.colwise().sum())(0,0) + (model_size * 1.e-10);
+            normalized_phase_PSI_mult_phase_V   = func_approx_basis_functions * (canonical_multiplier/sum_psi);
+
             // Get the next state of the canonical system
             if (t > 0)
             {
@@ -542,10 +546,6 @@ int main(int argc, char** argv)
                     return (-1);
                 }
             }
-
-            double canonical_multiplier         = can_sys_discr.getCanonicalMultiplier();
-            double sum_psi                      = (func_approx_basis_functions.colwise().sum())(0,0) + (model_size * 1.e-10);
-            normalized_phase_PSI_mult_phase_V   = func_approx_basis_functions * (canonical_multiplier/sum_psi);
 
             for (uint a=0; a<N_act; ++a)
             {
