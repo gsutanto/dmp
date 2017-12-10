@@ -43,7 +43,8 @@ class TauSystem:
     def getCouplingTerm(self):
         accumulated_ctau = 0.0
         for tau_coupler_idx in range(len(self.tau_couplers_list)):
-            ctau = self.tau_couplers_list[tau_coupler_idx].getValue()
-            assert (np.isnan(ctau) == False), 'ctau['+str(tau_coupler_idx)+'] is NaN!'
-            accumulated_ctau = accumulated_ctau + ctau
+            if (self.tau_couplers_list[tau_coupler_idx] is not None):
+                ctau = self.tau_couplers_list[tau_coupler_idx].getValue()
+                assert (np.isnan(ctau) == False), 'ctau['+str(tau_coupler_idx)+'] is NaN!'
+                accumulated_ctau = accumulated_ctau + ctau
         return accumulated_ctau

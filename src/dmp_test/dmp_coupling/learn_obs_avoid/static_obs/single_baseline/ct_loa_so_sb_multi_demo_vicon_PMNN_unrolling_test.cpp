@@ -50,7 +50,11 @@ int main(int argc, char** argv)
     activation_functions[4] = _IDENTITY_;
 
     char        loa_data_dir_path[1000];
-    get_data_path(loa_data_dir_path,"/dmp_coupling/learn_obs_avoid/static_obs/data_multi_demo_vicon_static/");
+    get_data_path(loa_data_dir_path,"/dmp_coupling/learn_obs_avoid/");
+    char        loa_data_prim_dir_path[1000];
+    sprintf(loa_data_prim_dir_path, "%s/static_obs/learned_prims_params/position/prim1/", loa_data_dir_path);
+    char        loa_data_vicon_dir_path[1000];
+    sprintf(loa_data_vicon_dir_path, "%s/static_obs/data_multi_demo_vicon_static/", loa_data_dir_path);
     char        loa_plot_dir_path[1000];
     get_plot_path(loa_plot_dir_path,"/dmp_coupling/learn_obs_avoid/feature_trajectory/static_obs/single_baseline/multi_demo_vicon/");
     char        dmp_plot_dir_path[1000];
@@ -158,7 +162,7 @@ int main(int argc, char** argv)
 
     // Load trained Neural Network parameters for obstacle avoidance coupling term:
     char                            NN_param_dir_path[1000];
-    sprintf(NN_param_dir_path, "%s/trained_NN_params/", loa_data_dir_path);
+    sprintf(NN_param_dir_path, "%s/trained_NN_params/", loa_data_vicon_dir_path);
     TCLearnObsAvoidFeatureParameter tc_loa_feat_param(&rt_assertor,
                                                       &canonical_sys_discr,
                                                       _VICON_MARKERS_DATA_FILE_FORMAT_,
@@ -186,23 +190,24 @@ int main(int argc, char** argv)
                                                       &Ct_vector);
     tc_loa_feat_param.pmnn          = pmnn.get();
 
-    TransformCouplingLearnObsAvoid	transform_coupling_learn_obs_avoid(&tc_loa_feat_param,
-                                                                       &tau_sys,
-                                                                       &ee_cart_state_global,
-                                                                       &point_obstacles_cart_state_global,
-                                                                       &ctraj_hmg_transform_global_to_local_matrix,
-                                                                       &rt_assertor,
-                                                                       true,
-                                                                       true,
-                                                                       loa_plot_dir_path,
-                                                                       &goal_cart_position_global);
-
     std::vector<TransformCoupling*>	transform_couplers(1);
 
     // Initialize Cartesian Coordinate DMP
     CartesianCoordDMP               cart_dmp(&canonical_sys_discr, model_size,
                                              formula_type, learning_method, &rt_assertor,
                                              _GSUTANTO_LOCAL_COORD_FRAME_, "", &transform_couplers);
+
+    TransformCouplingLearnObsAvoid	transform_coupling_learn_obs_avoid(&tc_loa_feat_param,
+                                                                         &tau_sys,
+                                                                         &ee_cart_state_global,
+                                                                         &point_obstacles_cart_state_global,
+                                                                         &ctraj_hmg_transform_global_to_local_matrix,
+                                                                         &rt_assertor,
+                                                                         true,
+                                                                         true,
+                                                                         loa_plot_dir_path,
+                                                                         &goal_cart_position_global,
+                                                                         (FuncApproximatorDiscrete*) cart_dmp.getFunctionApproximatorPointer());
 
     // Turn-off all scaling for now:
     std::vector<bool>               is_using_scaling_init    = std::vector<bool>(3, false);
@@ -251,7 +256,7 @@ int main(int argc, char** argv)
         return false;
     }
 
-    if (rt_assert_main(transform_coupling_learn_obs_avoid.extractObstacleAvoidanceTrainingDataVicon(loa_data_dir_path,
+    if (rt_assert_main(transform_coupling_learn_obs_avoid.extractObstacleAvoidanceTrainingDataVicon(loa_data_vicon_dir_path,
                                                                                                     *input_demo_group_set_obs_avoid_global,
                                                                                                     *vector_point_obstacles_cart_position_global,
                                                                                                     N_demo_settings,
@@ -263,14 +268,16 @@ int main(int argc, char** argv)
     }
 
     // Load baseline DMP (forcing term weights and other parameter):
-    char                            baseline_param_dir_path[1000];
-    sprintf(baseline_param_dir_path, "%s/baseline/", loa_plot_dir_path);
-    if (rt_assert_main(cart_dmp.loadParams(baseline_param_dir_path,
-                                           "f_baseline_weights_matrix.txt",
-                                           "f_baseline_A_learn_matrix.txt",
-                                           "baseline_mean_start_position.txt",
-                                           "baseline_mean_goal_position.txt",
-                                           "baseline_mean_tau.txt")) == false)
+    if (rt_assert_main(cart_dmp.loadParams(loa_data_prim_dir_path,
+                                           "w",
+                                           "A_learn",
+                                           "start_local",
+                                           "goal_local",
+                                           "start_global",
+                                           "goal_global",
+                                           "T_local_to_global_H",
+                                           "T_global_to_local_H",
+                                           "tau")) == false)
     {
         return (-1);
     }
@@ -294,11 +301,11 @@ int main(int argc, char** argv)
     }
 
     // Run DMP and print state values:
-    if (rt_assert_main(cart_dmp.startCollectingTrajectoryDataSet()) == false)
-    {
-        return (-1);
-    }
-    for (uint i = 0; i < (round(tau_reproduce*task_servo_rate) + 1); ++i)
+//    if (rt_assert_main(cart_dmp.startCollectingTrajectoryDataSet()) == false)
+//    {
+//        return (-1);
+//    }
+    for (uint i = 1; i <= (round(tau_reproduce*task_servo_rate) + 1); ++i)
     {
         double  time = 1.0 * (i*dt);
 
@@ -309,14 +316,14 @@ int main(int argc, char** argv)
         }
 
         // Log state trajectory:
-        //printf("%.05f %.05f %.05f %.05f\n", time, current_state.getX()[0], current_state.getX()[1], current_state.getX()[2]);
+        printf("%.05f %.05f %.05f\n", current_state.getX()[0], current_state.getX()[1], current_state.getX()[2]);
     }
-    cart_dmp.stopCollectingTrajectoryDataSet();
-    sprintf(var_output_file_path, "%s/baseline/", dmp_plot_dir_path);
-    if (rt_assert_main(cart_dmp.saveTrajectoryDataSet(var_output_file_path)) == false)
-    {
-        return (-1);
-    }
+//    cart_dmp.stopCollectingTrajectoryDataSet();
+//    sprintf(var_output_file_path, "%s/baseline/", dmp_plot_dir_path);
+//    if (rt_assert_main(cart_dmp.saveTrajectoryDataSet(var_output_file_path)) == false)
+//    {
+//        return (-1);
+//    }
     /****************** without obstacle (END) ******************/
 
     if (rt_assert_main((demo_group_set_dmp_unroll_init_params->size() == N_demo_settings) &&
@@ -332,7 +339,7 @@ int main(int argc, char** argv)
     {
         for (uint j = 0; j < (*demo_group_set_dmp_unroll_init_params)[n].size(); j++)
         {
-            std::cout << "Unrolling learned obstacle avoidance on Demo Setting #" << (n+1) << "/" << N_demo_settings << ", demo #" << (j+1) << "/" << (*demo_group_set_dmp_unroll_init_params)[n].size() << " ..." << std::endl;
+//            std::cout << "Unrolling learned obstacle avoidance on Demo Setting #" << (n+1) << "/" << N_demo_settings << ", demo #" << (j+1) << "/" << (*demo_group_set_dmp_unroll_init_params)[n].size() << " ..." << std::endl;
 
             tau_reproduce                   = (*demo_group_set_dmp_unroll_init_params)[n][j].tau;
 
@@ -356,19 +363,11 @@ int main(int argc, char** argv)
             }
 
             // Run DMP and print state values:
-            if (rt_assert_main(cart_dmp.startCollectingTrajectoryDataSet()) == false)
-            {
-                return (-1);
-            }
-            VectorN forcing_term(3);    // dummy variable, only a proxy to get the initial func_approx_basis_functions value...
-            if (rt_assert_main(cart_dmp.getForcingTerm(forcing_term, &func_approx_basis_functions)) == false)
-            {
-                return (-1);
-            }
-            double canonical_multiplier         = canonical_sys_discr.getCanonicalMultiplier();
-            double sum_psi                      = (func_approx_basis_functions.colwise().sum())(0,0) + (model_size * 1.e-10);
-            normalized_phase_PSI_mult_phase_V   = func_approx_basis_functions * (canonical_multiplier/sum_psi);
-            for (uint i = 0; i < (round(tau_reproduce*task_servo_rate) + 1); ++i)
+//            if (rt_assert_main(cart_dmp.startCollectingTrajectoryDataSet()) == false)
+//            {
+//                return (-1);
+//            }
+            for (uint i = 1; i <= (round(tau_reproduce*task_servo_rate) + 1); ++i)
             {
                 double  time = 1.0 * (i*dt);
 
@@ -383,16 +382,10 @@ int main(int argc, char** argv)
                 goal_cart_position_global           = cart_dmp.getMeanGoalPosition();
 
                 // Get the next state of the Cartesian DMP
-                if (rt_assert_main(cart_dmp.getNextState(dt, false, current_state,
-                                                         NULL, NULL, NULL,
-                                                         &func_approx_basis_functions)) == false)
+                if (rt_assert_main(cart_dmp.getNextState(dt, false, current_state)) == false)
                 {
                     return (-1);
                 }
-
-                double canonical_multiplier         = canonical_sys_discr.getCanonicalMultiplier();
-                double sum_psi                      = (func_approx_basis_functions.colwise().sum())(0,0) + (model_size * 1.e-10);
-                normalized_phase_PSI_mult_phase_V   = func_approx_basis_functions * (canonical_multiplier/sum_psi);
 
                 if (rt_assert_main(canonical_sys_discr.updateCanonicalState(dt)) == false)
                 {
@@ -401,14 +394,14 @@ int main(int argc, char** argv)
                 }
 
                 // Log state trajectory:
-                //printf("%.05f %.05f %.05f %.05f\n", time, current_state.getX()[0], current_state.getX()[1], current_state.getX()[2]);
+                printf("%.05f %.05f %.05f\n", current_state.getX()[0], current_state.getX()[1], current_state.getX()[2]);
             }
-            cart_dmp.stopCollectingTrajectoryDataSet();
-            sprintf(var_output_file_path, "%s/%u/%u/", dmp_plot_dir_path, (n+1), (j+1));
-            if (rt_assert_main(cart_dmp.saveTrajectoryDataSet(var_output_file_path)) == false)
-            {
-                return (-1);
-            }
+//            cart_dmp.stopCollectingTrajectoryDataSet();
+//            sprintf(var_output_file_path, "%s/%u/%u/", dmp_plot_dir_path, (n+1), (j+1));
+//            if (rt_assert_main(cart_dmp.saveTrajectoryDataSet(var_output_file_path)) == false)
+//            {
+//                return (-1);
+//            }
         }
     }
     /****************** with obstacle (END) ******************/

@@ -18,7 +18,8 @@ TransformCouplingLearnObsAvoid::TransformCouplingLearnObsAvoid():
     point_obstacles_cartesian_state_global(NULL),
     ctraj_hmg_transform_global_to_local_matrix(NULL),
     goal_cartesian_position_global(NULL),
-    goal_cartesian_position_local(ZeroVector3)
+    goal_cartesian_position_local(ZeroVector3),
+    func_approx_discrete(NULL)
 {
     strcpy(data_directory_path, "");
 }
@@ -39,7 +40,8 @@ TransformCouplingLearnObsAvoid::TransformCouplingLearnObsAvoid(TCLearnObsAvoidFe
                                                                bool opt_is_constraining_Rp_yd_relationship,
                                                                bool opt_is_logging_learning_data,
                                                                const char* opt_data_directory_path,
-                                                               Vector3* goal_position_global):
+                                                               Vector3* goal_position_global,
+                                                               FuncApproximatorDiscrete* function_approximator_discrete):
     TransformCoupling(3, real_time_assertor),
     loa_feat_param(loa_feature_parameter),
     cart_coord_transformer(CartesianCoordTransformer(real_time_assertor)),
@@ -53,7 +55,8 @@ TransformCouplingLearnObsAvoid::TransformCouplingLearnObsAvoid(TCLearnObsAvoidFe
     point_obstacles_cartesian_state_global(point_obstacles_cart_state_global),
     ctraj_hmg_transform_global_to_local_matrix(cart_traj_homogeneous_transform_global_to_local_matrix),
     goal_cartesian_position_global(goal_position_global),
-    goal_cartesian_position_local(ZeroVector3)
+    goal_cartesian_position_local(ZeroVector3),
+    func_approx_discrete(function_approximator_discrete)
 {
     bool is_real_time           = false;
 
@@ -132,6 +135,21 @@ bool TransformCouplingLearnObsAvoid::isValid()
     if (rt_assert(loa_data_io.getFeatureVectorSize() == loa_feat_param->feature_vector_size) == false)
     {
         return false;
+    }
+    if (loa_feat_param->pmnn != NULL)
+    {
+        if (rt_assert(func_approx_discrete != NULL) == false)
+        {
+            return false;
+        }
+        if (rt_assert(func_approx_discrete->isValid()) == false)
+        {
+            return false;
+        }
+        if (rt_assert(func_approx_discrete->getCanonicalSystemPointer()->getTauSystemPointer() == tau_sys) == false)
+        {
+            return false;
+        }
     }
     return true;
 }
@@ -1728,6 +1746,12 @@ bool TransformCouplingLearnObsAvoid::getValue(VectorN& ct_acc, VectorN& ct_vel)
         if (loa_feat_param->pmnn != NULL)
         {
             loa_feat_param->pmnn_input_vector->block(0,0,loa_feat_param->cart_coord_loa_feature_vector->rows(),1)   = *(loa_feat_param->cart_coord_loa_feature_vector);
+            VectorM normalized_basis_func_vector_mult_phase_multiplier  = ZeroVectorM(func_approx_discrete->getModelSize());
+            if (rt_assert(func_approx_discrete->getNormalizedBasisFunctionVectorMultipliedPhaseMultiplier(normalized_basis_func_vector_mult_phase_multiplier)) == false)
+            {
+                return false;
+            }
+            *(loa_feat_param->pmnn_phase_kernel_modulation) = normalized_basis_func_vector_mult_phase_multiplier;
             if (rt_assert(loa_feat_param->pmnn->computePrediction(*(loa_feat_param->pmnn_input_vector),
                                                                   *(loa_feat_param->pmnn_phase_kernel_modulation),
                                                                   *(loa_feat_param->pmnn_output_vector),

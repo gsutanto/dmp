@@ -376,6 +376,11 @@ namespace dmp
         return (rt_assert(transform_sys->setCouplingTermUsagePerDimensions(is_using_transform_sys_coupling_term_at_dimension_init)));
     }
 
+    FunctionApproximator* DMP::getFunctionApproximatorPointer()
+    {
+        return func_approx;
+    }
+
     DMP::~DMP()
     {}
 

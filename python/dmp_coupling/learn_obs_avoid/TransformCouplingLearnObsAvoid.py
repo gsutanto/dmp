@@ -12,6 +12,7 @@ import os
 import sys
 import copy
 import glob
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../dmp_param/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../dmp_state/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../dmp_discrete/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../cart_dmp/cart_coord_dmp/'))
@@ -20,7 +21,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../utilities/'))
 from DMPState import *
 from DMPTrajectory import *
 from ObstacleStates import *
+from TauSystem import *
 from TransformSystemDiscrete import *
+from FuncApproximatorDiscrete import *
 from CartesianCoordDMP import *
 from CartesianCoordTransformer import *
 from TCLearnObsAvoidFeatureParameter import *
@@ -63,8 +66,11 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         assert (self.endeff_ccstate_local.isValid())
         assert (self.point_obstacles_ccstate_global.isValid())
         assert (self.point_obstacles_ccstate_local.isValid())
-        assert (self.func_approx_basis_functions.shape == (1,self.ccdmp.func_approx_discrete.model_size))
         assert (self.pmnn_input_vector.shape == (1,self.loa_param.D_input))
+        if (self.loa_param.model == PMNN_MODEL):
+            assert (self.func_approx_discrete is not None)
+            assert (self.func_approx_discrete.isValid())
+            assert (self.func_approx_discrete.canonical_sys.tau_sys == self.tau_sys)
         return True
     
     def setCartCoordDMP(self, cart_coord_dmp):
@@ -79,14 +85,14 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
                                                                                                            self.ctraj_hmg_transform_global_to_local_matrix)
             else:
                 self.point_obstacles_ccstate_local = None
-            self.func_approx_basis_functions = np.zeros((1,self.ccdmp.func_approx_discrete.model_size))
+            self.func_approx_discrete = self.ccdmp.func_approx_discrete
         else:
             self.canonical_sys_discrete = None
             self.cart_coord_transformer = None
             self.ctraj_hmg_transform_global_to_local_matrix = None
             self.endeff_ccstate_local = None
             self.point_obstacles_ccstate_local = None
-            self.func_approx_basis_functions = None
+            self.func_approx_discrete = None
         
         return None
     
@@ -253,8 +259,8 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         return sub_X_vector
     
     def getValue(self):
-        assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformCouplingLearnObsAvoid is invalid!"
         assert (self.loa_param.model == PMNN_MODEL), "self.loa_param.model == " + str(self.loa_param.model)
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformCouplingLearnObsAvoid is invalid!"
         
         if (self.endeff_ccstate_global is not None):
             self.endeff_ccstate_local = self.cart_coord_transformer.computeCTrajAtNewCoordSys(self.endeff_ccstate_global, 
@@ -267,9 +273,7 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
                                                             self.endeff_ccstate_local).T
         assert (self.pmnn_input_vector.shape == (1,self.loa_param.D_input))
         
-        canonical_multiplier = self.canonical_sys_discrete.getCanonicalMultiplier()
-        sum_psi = np.sum(self.func_approx_basis_functions + 1.e-10)
-        normalized_phase_kernels = self.func_approx_basis_functions * (canonical_multiplier/sum_psi)
+        normalized_phase_kernels = self.func_approx_discrete.getNormalizedBasisFunctionVectorMultipliedPhaseMultiplier().T
         
         ct_acc = self.loa_param.pmnn.performNeuralNetworkPrediction(self.pmnn_input_vector, normalized_phase_kernels).T
         

@@ -62,14 +62,23 @@ class FuncApproximatorDiscrete(FunctionApproximator, object):
         basis_function_tensor = np.exp(-0.5 * np.square(np.matmul(np.ones(self.centers.shape), cX) - np.matmul(self.centers, np.ones(cX.shape))) * np.matmul(self.bandwidths, np.ones(cX.shape)))
         return basis_function_tensor
     
-    def getForcingTerm(self):
+    def getNormalizedBasisFunctionVectorMultipliedPhaseMultiplier(self):
         assert (self.isValid())
         
         self.psi = self.getBasisFunctionTensor(self.canonical_sys.getCanonicalPosition())
         assert (self.psi.shape == (self.model_size,1)), "self.psi must be a column vector of size self.model_size!"
         assert (np.isnan(self.psi).any() == False), "self.psi contains NaN!"
         sum_psi = np.sum(self.psi + 1.e-10)
-        forcing_term = np.matmul(self.weights, self.psi) * self.canonical_sys.getCanonicalMultiplier() * 1.0 / sum_psi
+        normalized_basis_func_vector_mult_phase_multiplier = self.psi * self.canonical_sys.getCanonicalMultiplier() * 1.0 / sum_psi
+        assert (np.isnan(normalized_basis_func_vector_mult_phase_multiplier).any() == False), "normalized_basis_func_vector_mult_phase_multiplier contains NaN!"
+        
+        return normalized_basis_func_vector_mult_phase_multiplier
+    
+    def getForcingTerm(self):
+        assert (self.isValid())
+        
+        normalized_basis_func_vector_multiplied_phase_multiplier = self.getNormalizedBasisFunctionVectorMultipliedPhaseMultiplier()
+        forcing_term = np.matmul(self.weights, normalized_basis_func_vector_multiplied_phase_multiplier)
         assert (np.isnan(forcing_term).any() == False), "forcing_term contains NaN!"
         basis_function_vector = copy.copy(self.psi)
         

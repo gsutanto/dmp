@@ -27,7 +27,7 @@ class PMNN(FeedForwardNeuralNetwork):
     def __init__(self, name, D_input, 
                  regular_hidden_layer_topology, regular_hidden_layer_activation_func_list, 
                  N_phaseLWR_kernels, D_output, 
-                 filepath="", is_using_phase_kernel_modulation=True, is_predicting_only=False):
+                 path="", is_using_phase_kernel_modulation=True, is_predicting_only=False):
         self.name = name
         
         self.neural_net_topology = [D_input] + regular_hidden_layer_topology + [N_phaseLWR_kernels, D_output]
@@ -51,12 +51,12 @@ class PMNN(FeedForwardNeuralNetwork):
         
         self.is_predicting_only = is_predicting_only
         if (self.is_predicting_only == False): # means both predicting and learning, i.e. this requires to be called from inside a TensorFlow session.
-            if (filepath == ""):
+            if (path == ""):
                 self.num_params = self.defineNeuralNetworkModel()
             else:
-                self.num_params = self.loadNeuralNetworkFromMATLABMatFile(filepath)
+                self.num_params = self.loadNeuralNetworkFromPath(path)
         else: # only doing predictions, do NOT need to be called from inside a TensorFlow session
-            self.num_params = self.loadNeuralNetworkFromMATLABMatFile(filepath)
+            self.num_params = self.loadNeuralNetworkFromPath(path)
         
         self.is_using_phase_kernel_modulation = is_using_phase_kernel_modulation
     
@@ -369,7 +369,7 @@ class PMNN(FeedForwardNeuralNetwork):
     # Load model from MATLAB format.
     def loadNeuralNetworkFromMATLABMatFile(self, filepath):
         """
-        Load a Neural Network model from a MATLAB *.m file. Functionally comparable to the defineNeuralNetworkModel() function.
+        Load a Neural Network model from a MATLAB *.mat file. Functionally comparable to the defineNeuralNetworkModel() function.
         :param filepath: (relative) path in the directory structure specifying the location of the file to be loaded.
         """
         num_params = 0
@@ -456,9 +456,13 @@ class PMNN(FeedForwardNeuralNetwork):
                     current_layer_dim_size = self.neural_net_topology[i]
                 else: # Output Layer
                     current_layer_dim_size = 1
-                self.model_params[self.name+'_'+layer_dim_ID+"_weights"] = np.loadtxt(dirpath + "/" + str(dim_out) + "/w" + str(i-1))
+                weights_temp = np.loadtxt(dirpath + "/" + str(dim_out) + "/w" + str(i-1))
+                if (len(weights_temp.shape) == 1):
+                    weights_temp = weights_temp.reshape(weights_temp.shape[0], 1)
+                self.model_params[self.name+'_'+layer_dim_ID+"_weights"] = weights_temp
                 if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
-                    self.model_params[self.name+'_'+layer_dim_ID+"_biases"] = np.loadtxt(dirpath + "/" + str(dim_out) + "/b" + str(i-1))
+                    biases_temp = np.loadtxt(dirpath + "/" + str(dim_out) + "/b" + str(i-1))
+                    self.model_params[self.name+'_'+layer_dim_ID+"_biases"] = biases_temp
                 if (self.is_predicting_only == False):
                     with tf.variable_scope(self.name+'_'+layer_dim_ID, reuse=False):
                         weights = tf.get_variable('weights', initializer=self.model_params[self.name+'_'+layer_dim_ID+"_weights"])
@@ -477,3 +481,9 @@ class PMNN(FeedForwardNeuralNetwork):
         num_params /= self.D_output
         print("Total # of Parameters = %d" % num_params)
         return num_params
+    
+    def loadNeuralNetworkFromPath(self, path):
+        if (os.path.isdir(path)):
+            return self.loadNeuralNetworkFromTextFiles(path)
+        else:
+            return self.loadNeuralNetworkFromMATLABMatFile(path)

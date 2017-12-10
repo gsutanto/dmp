@@ -23,6 +23,7 @@
 #include "amd_clmc_dmp/utility/utility.h"
 #include "amd_clmc_dmp/dmp_state/DMPState.h"
 #include "amd_clmc_dmp/dmp_discrete/CanonicalSystemDiscrete.h"
+#include "amd_clmc_dmp/dmp_discrete/FuncApproximatorDiscrete.h"
 #include "amd_clmc_dmp/cart_dmp/cart_coord_dmp/CartesianCoordDMP.h"
 #include "amd_clmc_dmp/cart_dmp/cart_coord_dmp/CartesianCoordTransformer.h"
 #include "amd_clmc_dmp/dmp_coupling/base/TransformCoupling.h"
@@ -58,6 +59,7 @@ private:
     Vector3*                            goal_cartesian_position_global;
     Vector3                             goal_cartesian_position_local;
     VectorTPtr                          point_obstacles_cartesian_distances_from_endeff;
+    FuncApproximatorDiscrete*           func_approx_discrete;
 
 public:
 
@@ -82,7 +84,8 @@ public:
                                    bool opt_is_constraining_Rp_yd_relationship=false,
                                    bool opt_is_logging_learning_data=false,
                                    const char* opt_data_directory_path="",
-                                   Vector3* goal_position_global=NULL);
+                                   Vector3* goal_position_global=NULL,
+                                   FuncApproximatorDiscrete* function_approximator_discrete=NULL);
 
     /**
      * Checks whether this transformation coupling term for obstacle avoidance by demonstration is valid or not.

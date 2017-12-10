@@ -132,13 +132,8 @@ bool FuncApproximatorDiscrete::getForcingTerm(VectorN& result_f, VectorM* basis_
         return false;
     }
 
-    // Update basis functions vector (psi) and its sum (sum_psi)
-    if (rt_assert(getBasisFunctionVector(canonical_sys->getCanonicalPosition(),
-                                         (*psi))) == false)
-    {
-        return false;
-    }
-    if (rt_assert(sum_psi != 0.0) == false)
+    VectorM normalized_basis_func_vector_multiplied_phase_multiplier    = ZeroVectorM(model_size);
+    if (rt_assert(getNormalizedBasisFunctionVectorMultipliedPhaseMultiplier(normalized_basis_func_vector_multiplied_phase_multiplier)) == false)
     {
         return false;
     }
@@ -154,12 +149,11 @@ bool FuncApproximatorDiscrete::getForcingTerm(VectorN& result_f, VectorM* basis_
 
     if (normalized_basis_func_vector_mult_phase_multiplier != NULL)
     {
-        (*normalized_basis_func_vector_mult_phase_multiplier) =
-                (*psi) * ((canonical_sys->getCanonicalMultiplier()) / sum_psi);
+        (*normalized_basis_func_vector_mult_phase_multiplier) = normalized_basis_func_vector_multiplied_phase_multiplier;
     }
 
-    VectorN f(dmp_num_dimensions);
-    f   = ((*weights) * (*psi) * ((canonical_sys->getCanonicalMultiplier()) / sum_psi));
+    VectorN f   = ZeroVectorN(dmp_num_dimensions);
+    f   = ((*weights) * normalized_basis_func_vector_multiplied_phase_multiplier);
 
     if (rt_assert(containsNaN(f) == false) == false)
     {
@@ -208,6 +202,35 @@ bool FuncApproximatorDiscrete::getFuncApproxLearningComponents(VectorM& current_
     current_psi     = (*psi);
     current_sum_psi = sum_psi;
     current_xi      = (canonical_sys->getCanonicalMultiplier());
+
+    return true;
+}
+
+bool FuncApproximatorDiscrete::getNormalizedBasisFunctionVectorMultipliedPhaseMultiplier(VectorM& normalized_basis_func_vector_mult_phase_multiplier)
+{
+    // pre-condition checking
+    if (rt_assert(FuncApproximatorDiscrete::isValid()) == false)
+    {
+        return false;
+    }
+    // input checking
+    if (rt_assert(normalized_basis_func_vector_mult_phase_multiplier.rows() == model_size) == false)
+    {
+        return false;
+    }
+
+    // Update basis functions vector (psi) and its sum (sum_psi)
+    if (rt_assert(getBasisFunctionVector(canonical_sys->getCanonicalPosition(),
+                                         (*psi))) == false)
+    {
+        return false;
+    }
+    if (rt_assert(sum_psi != 0.0) == false)
+    {
+        return false;
+    }
+
+    normalized_basis_func_vector_mult_phase_multiplier  = (*psi) * ((canonical_sys->getCanonicalMultiplier()) / sum_psi);
 
     return true;
 }

@@ -159,7 +159,7 @@ class FeedForwardNeuralNetwork(NeuralNetwork):
     # Load model.
     def loadNeuralNetworkFromMATLABMatFile(self, filepath):
         """
-        Load a Neural Network model from a MATLAB *.m file. Functionally comparable to the defineNeuralNetworkModel() function.
+        Load a Neural Network model from a MATLAB *.mat file. Functionally comparable to the defineNeuralNetworkModel() function.
         :param filepath: (relative) path in the directory structure specifying the location of the file to be loaded.
         """
         num_params = 0

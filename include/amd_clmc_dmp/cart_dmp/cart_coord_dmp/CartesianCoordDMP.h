@@ -430,6 +430,17 @@ public:
                     const char* file_name_ctraj_hmg_transform_global_to_local_matrix="ctraj_hmg_transform_global_to_local_matrix.txt",
                     const char* file_name_mean_tau="mean_tau.txt");
 
+    bool loadParams(const char* dir_path,
+                    const char* file_name_weights="f_weights_matrix.txt",
+                    const char* file_name_A_learn="f_A_learn_matrix.txt",
+                    const char* file_name_mean_start_position_local="mean_start_position_local.txt",
+                    const char* file_name_mean_goal_position_local="mean_goal_position_local.txt",
+                    const char* file_name_mean_start_position_global="mean_start_position_global.txt",
+                    const char* file_name_mean_goal_position_global="mean_goal_position_global.txt",
+                    const char* file_name_ctraj_hmg_transform_local_to_global_matrix="ctraj_hmg_transform_local_to_global_matrix.txt",
+                    const char* file_name_ctraj_hmg_transform_global_to_local_matrix="ctraj_hmg_transform_global_to_local_matrix.txt",
+                    const char* file_name_mean_tau="mean_tau.txt");
+
     ~CartesianCoordDMP();
 
 };

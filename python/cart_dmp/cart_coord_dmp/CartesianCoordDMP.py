@@ -258,3 +258,44 @@ class CartesianCoordDMP(DMPDiscrete, object):
         np.savetxt(dir_path + "/" + file_name_ctraj_hmg_transform_local_to_global_matrix, self.ctraj_hmg_transform_local_to_global_matrix)
         np.savetxt(dir_path + "/" + file_name_ctraj_hmg_transform_global_to_local_matrix, self.ctraj_hmg_transform_global_to_local_matrix)
         return None
+    
+    def loadParamsCartCoordDMP(self, dir_path, 
+                               file_name_weights="f_weights_matrix.txt",
+                               file_name_A_learn="f_A_learn_matrix.txt",
+                               file_name_mean_start_position_local="mean_start_position_local.txt",
+                               file_name_mean_goal_position_local="mean_goal_position_local.txt",
+                               file_name_mean_start_position_global="mean_start_position_global.txt",
+                               file_name_mean_goal_position_global="mean_goal_position_global.txt",
+                               file_name_ctraj_hmg_transform_local_to_global_matrix="ctraj_hmg_transform_local_to_global_matrix.txt",
+                               file_name_ctraj_hmg_transform_global_to_local_matrix="ctraj_hmg_transform_global_to_local_matrix.txt",
+                               file_name_mean_tau="mean_tau.txt"):
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this CartesianCoordDMP is invalid!"
+        super(CartesianCoordDMP, self).loadParams(dir_path,
+                                                  file_name_weights,
+                                                  file_name_A_learn,
+                                                  file_name_mean_start_position_global,
+                                                  file_name_mean_goal_position_global,
+                                                  file_name_mean_tau)
+        self.mean_start_local_position = np.loadtxt(dir_path + "/" + file_name_mean_start_position_local).reshape(3,1)
+        self.mean_goal_local_position = np.loadtxt(dir_path + "/" + file_name_mean_goal_position_local).reshape(3,1)
+        self.mean_start_global_position = np.loadtxt(dir_path + "/" + file_name_mean_start_position_global).reshape(3,1)
+        self.mean_goal_global_position = np.loadtxt(dir_path + "/" + file_name_mean_goal_position_global).reshape(3,1)
+        self.ctraj_hmg_transform_local_to_global_matrix = np.loadtxt(dir_path + "/" + file_name_ctraj_hmg_transform_local_to_global_matrix)
+        self.ctraj_hmg_transform_global_to_local_matrix = np.loadtxt(dir_path + "/" + file_name_ctraj_hmg_transform_global_to_local_matrix)
+        return None
+    
+    def getParamsCartCoordDMPasDict(self):
+        cart_coord_dmp_params = {}
+        cart_coord_dmp_params['model_size'] = self.func_approx_discrete.model_size
+        cart_coord_dmp_params['canonical_order'] = self.canonical_sys_discrete.order
+        cart_coord_dmp_params['W'], cart_coord_dmp_params['A_learn'] = self.getParams()
+        cart_coord_dmp_params['mean_tau'] = self.mean_tau
+        cart_coord_dmp_params['mean_start_global_position'] = copy.copy(self.mean_start_global_position)
+        cart_coord_dmp_params['mean_goal_global_position'] = copy.copy(self.mean_goal_global_position)
+        cart_coord_dmp_params['mean_start_local_position'] = copy.copy(self.mean_start_local_position)
+        cart_coord_dmp_params['mean_goal_local_position'] = copy.copy(self.mean_goal_local_position)
+        cart_coord_dmp_params['ctraj_local_coordinate_frame_selection'] = self.ctraj_local_coord_selection
+        cart_coord_dmp_params['T_local_to_global_H'] = copy.copy(self.ctraj_hmg_transform_local_to_global_matrix)
+        cart_coord_dmp_params['T_global_to_local_H'] = copy.copy(self.ctraj_hmg_transform_global_to_local_matrix)
+        
+        return cart_coord_dmp_params

@@ -99,6 +99,8 @@ public:
                                          double&  current_sum_psi,
                                          double&  current_xi);
 
+    bool getNormalizedBasisFunctionVectorMultipliedPhaseMultiplier(VectorM& normalized_basis_func_vector_mult_phase_multiplier);
+
     /**
      * Updates (and returns) the (unnormalized) vector of basis function evaluations at the given position (x).
      *

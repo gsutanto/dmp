@@ -60,14 +60,13 @@ def convertDemoToSupervisedObsAvoidFbDataset():
     
     ## Conversion of Demonstration Dataset into Supervised Obstacle Avoidance Feedback Model Dataset
     
-    endeff_cart_state_global = DMPState(np.zeros((3,1)))
     point_obstacles_cart_state_global = ObstacleStates(np.zeros((3,21)),
                                                        np.zeros((3,21)),
                                                        np.zeros((3,21)),
                                                        np.zeros((1,1)))
     loa_parameters = None
     tcloa = TransformCouplingLearnObsAvoid(loa_parameters, cart_coord_dmp.tau_sys, cart_coord_dmp,
-                                           endeff_cart_state_global, point_obstacles_cart_state_global)
+                                           point_obstacles_cart_state_global)
     
     N_settings = len(data_global_coord["obs_avoid"][0])
     

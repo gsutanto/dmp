@@ -311,6 +311,8 @@ public:
 
     virtual bool setTransformSystemCouplingTermUsagePerDimensions(const std::vector<bool>& is_using_transform_sys_coupling_term_at_dimension_init);
 
+    virtual FunctionApproximator* getFunctionApproximatorPointer();
+
     ~DMP();
 
 };

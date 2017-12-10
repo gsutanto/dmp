@@ -35,8 +35,11 @@ def unrollLearnedObsAvoidViconTraj(demo_obs_avoid_traj_global,
                                    point_obstacles_cart_position_global, 
                                    dt,
                                    cart_coord_dmp_baseline_params,
-                                   cart_coord_dmp):
+                                   cart_coord_dmp,
+                                   is_using_coupling_term=True):
     tcloa = cart_coord_dmp.transform_sys_discrete_cart_coord.transform_couplers_list[0]
+    if (is_using_coupling_term == False):
+        cart_coord_dmp.transform_sys_discrete_cart_coord.transform_couplers_list[0] = None # NOT using the learned obstacle avoidance coupling term, i.e. nominal/baseline unrolling
     
     unroll_traj_length = demo_obs_avoid_traj_global.getLength()
     start_time_global_obs_avoid_demo = demo_obs_avoid_traj_global.getDMPStateAtIndex(0).time[0,0]
@@ -58,9 +61,9 @@ def unrollLearnedObsAvoidViconTraj(demo_obs_avoid_traj_global,
     list_ctacc = [None] * unroll_traj_length
     list_pmnn_input_vector = [None] * unroll_traj_length
     
-    tcloa.setCartCoordDMP(cart_coord_dmp)
-    tcloa.setPointObstaclesCCStateGlobal(ObstacleStates(point_obstacles_cart_position_global.T))
-    tcloa.func_approx_basis_functions = cart_coord_dmp.func_approx_discrete.getBasisFunctionTensor(tcloa.canonical_sys_discrete.getCanonicalPosition()).T
+    if (is_using_coupling_term):
+        tcloa.setCartCoordDMP(cart_coord_dmp)
+        tcloa.setPointObstaclesCCStateGlobal(ObstacleStates(point_obstacles_cart_position_global.T))
     
     for i in range(unroll_traj_length):
 # =============================================================================
@@ -75,14 +78,18 @@ def unrollLearnedObsAvoidViconTraj(demo_obs_avoid_traj_global,
          _, 
          transform_sys_coupling_term_acc, 
          _, 
-         tcloa.func_approx_basis_functions] = cart_coord_dmp.getNextState(unroll_dt, True)
-        tcloa.func_approx_basis_functions = tcloa.func_approx_basis_functions.T
+         _] = cart_coord_dmp.getNextState(unroll_dt, True)
         
         list_ccdmpstate_loa_unroll_global[i] = current_state_global
         list_ctacc[i] = transform_sys_coupling_term_acc
-        list_pmnn_input_vector[i] = tcloa.pmnn_input_vector.T
+        if (is_using_coupling_term):
+            list_pmnn_input_vector[i] = tcloa.pmnn_input_vector.T
     
-    sub_X_unroll = np.hstack(list_pmnn_input_vector)
+    if (is_using_coupling_term):
+        sub_X_unroll = np.hstack(list_pmnn_input_vector)
+    else:
+        sub_X_unroll = []
+        cart_coord_dmp.transform_sys_discrete_cart_coord.transform_couplers_list[0] = tcloa # restore the learned obstacle avoidance coupling term attachment to the transformation system
     sub_Ct_unroll = np.hstack(list_ctacc)
     ccdmp_loa_unroll_global_traj = convertDMPStatesListIntoDMPTrajectory(list_ccdmpstate_loa_unroll_global)
     

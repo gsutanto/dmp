@@ -21,26 +21,26 @@ class TCLearnObsAvoidFeatureParameter:
     def __init__(self, model_dim_inputs,
                  model_dim_phase_mod_kernels=25, model_dim_outputs=3,
                  model_parent_dir_path='../tf/models/',
-                 model_file_path=None, 
+                 model_path=None, 
                  model=PMNN_MODEL, name=""):
         self.name = name
         self.model = model
         self.D_input = model_dim_inputs
-        if (model == PMNN_MODEL):
-            if (model_file_path is None):
+        if (self.model == PMNN_MODEL):
+            if (model_path is None):
                 reinit_selection_idx = list(np.loadtxt(model_parent_dir_path+'reinit_selection_idx.txt', dtype=np.int, ndmin=1))
                 TF_max_train_iters = np.loadtxt(model_parent_dir_path+'TF_max_train_iters.txt', dtype=np.int, ndmin=0)
                 prim_no = 1
-                self.pmnn_model_file_path = model_parent_dir_path + 'prim_' + str(prim_no) + '_params_reinit_' + str(reinit_selection_idx[prim_no-1]) + ('_step_%07d.mat' % TF_max_train_iters)
+                self.pmnn_model_path = model_parent_dir_path + 'prim_' + str(prim_no) + '_params_reinit_' + str(reinit_selection_idx[prim_no-1]) + ('_step_%07d.mat' % TF_max_train_iters)
             else:
-                self.pmnn_model_file_path = model_file_path
+                self.pmnn_model_path = model_path
             self.pmnn_regular_NN_hidden_layer_topology = list(np.loadtxt(model_parent_dir_path+'regular_NN_hidden_layer_topology.txt', dtype=np.int, ndmin=1))
             self.pmnn_regular_NN_hidden_layer_activation_func_list = list(np.loadtxt(model_parent_dir_path+'regular_NN_hidden_layer_activation_func_list.txt', dtype=np.str, ndmin=1))
             self.pmnn = PMNN(self.name, model_dim_inputs, 
                              self.pmnn_regular_NN_hidden_layer_topology, 
                              self.pmnn_regular_NN_hidden_layer_activation_func_list, 
                              model_dim_phase_mod_kernels, model_dim_outputs, 
-                             self.pmnn_model_file_path, True, True)
+                             self.pmnn_model_path, True, True)
     
     def isValid(self):
         return True

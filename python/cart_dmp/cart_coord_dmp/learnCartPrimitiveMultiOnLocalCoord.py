@@ -60,20 +60,8 @@ def learnCartPrimitiveMultiOnLocalCoord(cart_global_traj, train_data_dt,
     
     cart_coord_dmp.startWithUnrollParams(dmp_unroll_init_params)
     
-    cart_coord_dmp_params = {}
+    cart_coord_dmp_params = cart_coord_dmp.getParamsCartCoordDMPasDict()
     cart_coord_dmp_params['train_data_dt'] = train_data_dt
-    cart_coord_dmp_params['model_size'] = dmp_basis_funcs_size
-    cart_coord_dmp_params['canonical_order'] = canonical_order
-    cart_coord_dmp_params['W'] = W
-    cart_coord_dmp_params['A_learn'] = mean_A_learn
-    cart_coord_dmp_params['mean_tau'] = mean_tau
-    cart_coord_dmp_params['mean_start_global_position'] = copy.copy(cart_coord_dmp.mean_start_global_position)
-    cart_coord_dmp_params['mean_goal_global_position'] = copy.copy(cart_coord_dmp.mean_goal_global_position)
-    cart_coord_dmp_params['mean_start_local_position'] = copy.copy(cart_coord_dmp.mean_start_local_position)
-    cart_coord_dmp_params['mean_goal_local_position'] = copy.copy(cart_coord_dmp.mean_goal_local_position)
-    cart_coord_dmp_params['ctraj_local_coordinate_frame_selection'] = ctraj_local_coordinate_frame_selection
-    cart_coord_dmp_params['T_local_to_global_H'] = copy.copy(cart_coord_dmp.ctraj_hmg_transform_local_to_global_matrix)
-    cart_coord_dmp_params['T_global_to_local_H'] = copy.copy(cart_coord_dmp.ctraj_hmg_transform_global_to_local_matrix)
     cart_coord_dmp_params['unroll_dt'] = unroll_dt
     cart_coord_dmp_params['unroll_tau'] = unroll_tau
     

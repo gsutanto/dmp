@@ -32,7 +32,8 @@ class CanonicalSystem:
     def getCouplingTerm(self):
         accumulated_cc = 0.0
         for canonical_coupler_idx in range(len(self.canonical_couplers_list)):
-            cc = self.canonical_couplers_list[canonical_coupler_idx].getValue()
-            assert (np.isnan(cc) == False), 'cc['+str(canonical_coupler_idx)+'] is NaN!'
-            accumulated_cc = accumulated_cc + cc
+            if (self.canonical_couplers_list[canonical_coupler_idx] is not None):
+                cc = self.canonical_couplers_list[canonical_coupler_idx].getValue()
+                assert (np.isnan(cc) == False), 'cc['+str(canonical_coupler_idx)+'] is NaN!'
+                accumulated_cc = accumulated_cc + cc
         return accumulated_cc
