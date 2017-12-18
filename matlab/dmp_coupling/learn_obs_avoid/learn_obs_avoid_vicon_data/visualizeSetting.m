@@ -50,6 +50,8 @@ function [  ] = visualizeSetting( varargin )
         data_dirpath    = '../data/';
     elseif (exist('../../data', 'dir') == 7)
         data_dirpath    = '../../data/';
+    else
+        data_dirpath    = './';
     end
     data_filepath       = [data_dirpath, 'data_multi_demo_vicon_static_global_coord.mat'];
     
