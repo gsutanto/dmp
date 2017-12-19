@@ -26,6 +26,9 @@ def visualizeSetting(setting_no):
     
     D                               = 3
     
+    baseline_demo_line_color_code = 'c'
+    obs_avoid_demo_line_color_code = 'm'
+    
     ## Data Creation/Loading
     
     data_dirpath_candidates = ['./learn_obs_avoid_pmnn_vicon_data/']
@@ -56,8 +59,20 @@ def visualizeSetting(setting_no):
                         data_global_coord['obs_avoid'][0][setting_no-1][op,0], 
                         data_global_coord['obs_avoid'][0][setting_no-1][op,1], 
                         data_global_coord['obs_avoid'][0][setting_no-1][op,2], 'r')
+        
+        for i in range(len(data_global_coord['obs_avoid'][1][setting_no-1])):
+            if (i == 0):
+                obs_avoid_demo_label = 'obs avoid demos'
+            else:
+                obs_avoid_demo_label = ''
+            ax.plot(data_global_coord['obs_avoid'][1][setting_no-1][i].X[0,:], 
+                    data_global_coord['obs_avoid'][1][setting_no-1][i].X[1,:], 
+                    data_global_coord['obs_avoid'][1][setting_no-1][i].X[2,:], 
+                    color=obs_avoid_demo_line_color_code,
+                    label=obs_avoid_demo_label)
+    ax.legend()
     
     return None
 
 if __name__ == "__main__":
-    visualizeSetting(103)
+    visualizeSetting(194)
