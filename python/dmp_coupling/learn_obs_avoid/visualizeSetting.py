@@ -11,6 +11,7 @@ import os
 import sys
 import copy
 import time
+import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import glob
@@ -46,6 +47,8 @@ def visualizeSetting(setting_no):
         data_global_coord = loadObj(data_filepath)
     
     ## end of Data Creation/Loading
+    
+    # mpl.rcParams['legend.fontsize'] = 10
     
     fig = plt.figure()
     ax = fig.gca(projection='3d')
