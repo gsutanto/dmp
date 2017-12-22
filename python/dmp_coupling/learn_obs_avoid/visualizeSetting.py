@@ -22,6 +22,9 @@ from vicon_obs_avoid_utils import *
 from plot_sphere import *
 
 def visualizeSetting(setting_no):
+    # This code is a bit specific to obstacle avoidance 
+    # (with Vicon markers representing the obstacles).
+    
     vicon_marker_radius             = 15.0/2000.0   # in meter
     critical_position_marker_radius = 30/1000.0     # in meter
     
@@ -78,4 +81,5 @@ def visualizeSetting(setting_no):
     return None
 
 if __name__ == "__main__":
+    plt.close('all')
     visualizeSetting(194)

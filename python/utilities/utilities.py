@@ -14,6 +14,7 @@ import copy
 import glob
 import pickle
 import shutil
+from scipy.interpolate import interp1d
 
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""
@@ -97,3 +98,25 @@ def recreateDir(dir_path):
     if (os.path.isdir(dir_path)):
         shutil.rmtree(dir_path)
     os.makedirs(dir_path)
+
+def stretchTrajectory( input_trajectory, new_traj_length ):
+    if (len(input_trajectory.shape) == 1):
+        input_trajectory = input_trajectory.reshape(1, input_trajectory.shape[0])
+    
+    D = input_trajectory.shape[0]
+    traj_length = input_trajectory.shape[1]
+    
+    stretched_trajectory = np.zeros((D, new_traj_length))
+    
+    for d in range(D):
+        xi = np.linspace(1.0, traj_length * 1.0, num=traj_length)
+        vi = input_trajectory[d,:]
+        xq = np.linspace(1.0, traj_length * 1.0, num=new_traj_length)
+        vq = interp1d(xi,vi,kind='cubic')(xq)
+        
+        stretched_trajectory[d,:] = vq
+    
+    if (D == 1):
+        stretched_trajectory = stretched_trajectory.reshape(new_traj_length, )
+    
+    return stretched_trajectory
