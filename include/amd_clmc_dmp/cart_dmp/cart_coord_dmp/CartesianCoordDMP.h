@@ -410,36 +410,36 @@ public:
      * @param dir_path Directory path containing the files
      * @param file_name_weights Name of the file onto which the weights will be saved
      * @param file_name_A_learn Name of the file onto which the A_learn vector buffer will be saved
-     * @param file_name_mean_start_position_local Name of the file onto which the mean start position w.r.t. local coordinate system will be saved
-     * @param file_name_mean_goal_position_local Name of the file onto which the mean goal position w.r.t. local coordinate system will be saved
      * @param file_name_mean_start_position_global Name of the file onto which the mean start position w.r.t. global coordinate system will be saved
      * @param file_name_mean_goal_position_global Name of the file onto which the mean goal position w.r.t. global coordinate system will be saved
+     * @param file_name_mean_tau Name of the file onto which the mean tau will be saved
+     * @param file_name_mean_start_position_local Name of the file onto which the mean start position w.r.t. local coordinate system will be saved
+     * @param file_name_mean_goal_position_local Name of the file onto which the mean goal position w.r.t. local coordinate system will be saved
      * @param file_name_ctraj_hmg_transform_local_to_global_matrix Name of the file onto which the homogeneous coordinate transform matrix from local to global coordinate systems will be saved
      * @param file_name_ctraj_hmg_transform_global_to_local_matrix Name of the file onto which the homogeneous coordinate transform matrix from global to local coordinate systems will be saved
-     * @param file_name_mean_tau Name of the file onto which the mean tau will be saved
      * @return Success or failure
      */
     bool saveParams(const char* dir_path,
                     const char* file_name_weights="f_weights_matrix.txt",
                     const char* file_name_A_learn="f_A_learn_matrix.txt",
-                    const char* file_name_mean_start_position_local="mean_start_position_local.txt",
-                    const char* file_name_mean_goal_position_local="mean_goal_position_local.txt",
                     const char* file_name_mean_start_position_global="mean_start_position_global.txt",
                     const char* file_name_mean_goal_position_global="mean_goal_position_global.txt",
+                    const char* file_name_mean_tau="mean_tau.txt",
+                    const char* file_name_mean_start_position_local="mean_start_position_local.txt",
+                    const char* file_name_mean_goal_position_local="mean_goal_position_local.txt",
                     const char* file_name_ctraj_hmg_transform_local_to_global_matrix="ctraj_hmg_transform_local_to_global_matrix.txt",
-                    const char* file_name_ctraj_hmg_transform_global_to_local_matrix="ctraj_hmg_transform_global_to_local_matrix.txt",
-                    const char* file_name_mean_tau="mean_tau.txt");
+                    const char* file_name_ctraj_hmg_transform_global_to_local_matrix="ctraj_hmg_transform_global_to_local_matrix.txt");
 
-    bool loadParams(const char* dir_path,
-                    const char* file_name_weights="f_weights_matrix.txt",
-                    const char* file_name_A_learn="f_A_learn_matrix.txt",
-                    const char* file_name_mean_start_position_local="mean_start_position_local.txt",
-                    const char* file_name_mean_goal_position_local="mean_goal_position_local.txt",
-                    const char* file_name_mean_start_position_global="mean_start_position_global.txt",
-                    const char* file_name_mean_goal_position_global="mean_goal_position_global.txt",
-                    const char* file_name_ctraj_hmg_transform_local_to_global_matrix="ctraj_hmg_transform_local_to_global_matrix.txt",
-                    const char* file_name_ctraj_hmg_transform_global_to_local_matrix="ctraj_hmg_transform_global_to_local_matrix.txt",
-                    const char* file_name_mean_tau="mean_tau.txt");
+//    bool loadParams(const char* dir_path,
+//                    const char* file_name_weights="f_weights_matrix.txt",
+//                    const char* file_name_A_learn="f_A_learn_matrix.txt",
+//                    const char* file_name_mean_start_position_global="mean_start_position_global.txt",
+//                    const char* file_name_mean_goal_position_global="mean_goal_position_global.txt",
+//                    const char* file_name_mean_tau="mean_tau.txt",
+//                    const char* file_name_mean_start_position_local="mean_start_position_local.txt",
+//                    const char* file_name_mean_goal_position_local="mean_goal_position_local.txt",
+//                    const char* file_name_ctraj_hmg_transform_local_to_global_matrix="ctraj_hmg_transform_local_to_global_matrix.txt",
+//                    const char* file_name_ctraj_hmg_transform_global_to_local_matrix="ctraj_hmg_transform_global_to_local_matrix.txt");
 
     ~CartesianCoordDMP();
 

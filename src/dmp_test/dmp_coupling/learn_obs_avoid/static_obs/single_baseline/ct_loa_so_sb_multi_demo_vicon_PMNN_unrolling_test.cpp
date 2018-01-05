@@ -271,12 +271,8 @@ int main(int argc, char** argv)
     if (rt_assert_main(cart_dmp.loadParams(loa_data_prim_dir_path,
                                            "w",
                                            "A_learn",
-                                           "start_local",
-                                           "goal_local",
                                            "start_global",
                                            "goal_global",
-                                           "T_local_to_global_H",
-                                           "T_global_to_local_H",
                                            "tau")) == false)
     {
         return (-1);
