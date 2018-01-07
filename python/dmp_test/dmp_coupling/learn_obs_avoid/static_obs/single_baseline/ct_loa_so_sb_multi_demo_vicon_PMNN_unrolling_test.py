@@ -73,13 +73,13 @@ def ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test(amd_clmc_dmp_home_dir_path
     cart_coord_dmp.loadParamsCartCoordDMP(loa_data_prim_dir_path,
                                           "w",
                                           "A_learn",
-                                          "start_local",
-                                          "goal_local",
                                           "start_global",
                                           "goal_global",
+                                          "tau",
+                                          "start_local",
+                                          "goal_local",
                                           "T_local_to_global_H",
-                                          "T_global_to_local_H",
-                                          "tau")
+                                          "T_global_to_local_H")
     ccdmp_baseline_params = cart_coord_dmp.getParamsCartCoordDMPasDict()
     
     if (os.path.isfile(data_global_coord_filepath)):
