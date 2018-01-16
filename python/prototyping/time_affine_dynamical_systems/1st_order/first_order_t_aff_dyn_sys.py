@@ -37,15 +37,23 @@ if __name__ == "__main__":
     alpha = 25.0/3.0 # similar to (1st order) canonical system's alpha
     
     plt_color_code = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
-    stretched_traj_length = int(round(base_tau/dt * (len(plt_color_code) + 1)/2))
+    N_traj = len(plt_color_code)
+    stretched_traj_length = int(round(base_tau/dt * (N_traj + 1)/2))
+    
+    trajs = [None] * N_traj
+    data_output = [None] * N_traj
+    data_input = [None] * N_traj
     
     ax_plt = [None] * 2
     plt_label = [None] * 2
     fig, (ax_plt[0], ax_plt[1]) = plt.subplots(2, sharex=True, sharey=True)
     
-    for i in range(len(plt_color_code)):
+    for i in range(N_traj):
         tau = (i+1) * base_tau
         traj = generate1stOrderTimeAffineDynSys(1.0, dt, tau, alpha)
+        trajs[i] = traj
+        data_output[i] = traj[1:] - traj[:-1] # = C_{t} - C_{t-1}
+        data_input[i] = ((dt/tau) * traj[:-1]) # (dt/tau) * C_{t-1}
         plt_label[0] = 'traj ' + str(i+1) + ', tau=' + str(tau) + 's'
         plt_label[1] = 'traj ' + str(i+1)
         stretched_traj = stretchTrajectory(traj, stretched_traj_length)
@@ -55,7 +63,7 @@ if __name__ == "__main__":
         ax_plt[1].plot(stretched_traj, 
                        color=plt_color_code[i],
                        label=plt_label[1])
-    ax_plt[0].set_title('Un-stretched vs Stretched Trajectories of 1st Order Time-Affine Dynamical Systems, dt=(1/' + str(1.0/dt) + ')s')
+    ax_plt[0].set_title('Unstretched vs Stretched Trajectories of 1st Order Time-Affine Dynamical Systems, dt=(1/' + str(1.0/dt) + ')s')
     ax_plt[0].set_ylabel('Unstretched')
     ax_plt[1].set_ylabel('Stretched')
     ax_plt[1].set_xlabel('Time Index')
