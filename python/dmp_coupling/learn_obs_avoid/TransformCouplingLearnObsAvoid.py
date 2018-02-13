@@ -58,6 +58,11 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         assert (self.point_obstacles_ccstate_local is not None)
         if (self.loa_param is not None):
             assert (self.loa_param.isValid())
+            assert (self.pmnn_input_vector.shape == (1,self.loa_param.D_input))
+            if (self.loa_param.model == PMNN_MODEL):
+                assert (self.func_approx_discrete is not None)
+                assert (self.func_approx_discrete.isValid())
+                assert (self.func_approx_discrete.canonical_sys.tau_sys == self.tau_sys)
         assert (self.tau_sys.isValid())
         assert (self.canonical_sys_discrete.isValid())
         assert (self.ccdmp.isValid())
@@ -66,11 +71,6 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         assert (self.endeff_ccstate_local.isValid())
         assert (self.point_obstacles_ccstate_global.isValid())
         assert (self.point_obstacles_ccstate_local.isValid())
-        assert (self.pmnn_input_vector.shape == (1,self.loa_param.D_input))
-        if (self.loa_param.model == PMNN_MODEL):
-            assert (self.func_approx_discrete is not None)
-            assert (self.func_approx_discrete.isValid())
-            assert (self.func_approx_discrete.canonical_sys.tau_sys == self.tau_sys)
         return True
     
     def setCartCoordDMP(self, cart_coord_dmp):

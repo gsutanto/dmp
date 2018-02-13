@@ -50,6 +50,7 @@ out_data_dir = ''
                                     post_filename_stacked_data,
                                     out_data_dir)
 
+# Some comparison with the result of MATLAB's implementation of prepareData() function (for implementation verification):
 generalization_test_id_string = ''
 generalization_test_sub_path = ''
 prim_no = 1
