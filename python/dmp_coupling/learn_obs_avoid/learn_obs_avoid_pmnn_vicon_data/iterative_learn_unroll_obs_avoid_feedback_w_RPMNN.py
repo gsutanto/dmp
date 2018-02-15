@@ -101,7 +101,7 @@ unroll_dataset_Ct_obs_avoid["sub_Ct_target"] = [[None] * N_settings]
 model_parent_dir_path = '../tf/models/'
 reinit_selection_idx = list(np.loadtxt(model_parent_dir_path+'RPMNN_reinit_selection_idx.txt', dtype=np.int, ndmin=1))
 TF_max_train_iters = np.loadtxt(model_parent_dir_path+'RPMNN_TF_max_train_iters.txt', dtype=np.int, ndmin=0)
-init_model_param_filepath = model_parent_dir_path + 'prim_' + str(prim_no+1) + '_params_reinit_' + str(reinit_selection_idx[prim_no]) + ('_step_%07d.mat' % TF_max_train_iters)
+init_model_param_filepath = model_parent_dir_path + 'diff_Ct_dataset_prim_' + str(prim_no+1) + '_params_reinit_' + str(reinit_selection_idx[prim_no]) + ('_step_%07d.mat' % TF_max_train_iters)
 
 regular_NN_hidden_layer_topology = list(np.loadtxt(model_parent_dir_path+'regular_NN_hidden_layer_topology.txt', dtype=np.int, ndmin=1))
 regular_NN_hidden_layer_activation_func_list = list(np.loadtxt(model_parent_dir_path+'regular_NN_hidden_layer_activation_func_list.txt', dtype=np.str, ndmin=1))
@@ -145,27 +145,29 @@ with ff_nn_graph.as_default():
     # Input data. For the training data, we use a placeholder that will be fed
     # at run time with a training minibatch.
     tf_train_X_batch = tf.placeholder(tf.float32, shape=[batch_size, D_input], name="tf_train_X_batch_placeholder")
-    tf_train_nPSI_batch = tf.placeholder(tf.float32, shape=[batch_size, N_phaseLWR_kernels], name="tf_train_nPSI_batch_placeholder")
+    tf_train_nPSI_times_dt_per_tau_batch = tf.placeholder(tf.float32, shape=[batch_size, N_phaseLWR_kernels], name="tf_train_nPSI_times_dt_per_tau_batch_placeholder")
     tf_train_W_batch = tf.placeholder(tf.float32, shape=[batch_size, 1], name="tf_train_W_batch_placeholder")
-    tf_train_Ctt_batch = tf.placeholder(tf.float32, shape=[batch_size, D_output], name="tf_train_Ctt_batch_placeholder")
+    tf_train_Ct_t_minus_1_times_dt_per_tau_batch = tf.placeholder(tf.float32, shape=[batch_size, D_output], name="tf_train_Ct_t_minus_1_times_dt_per_tau_batch_placeholder")
+    tf_train_diff_Ctt_batch = tf.placeholder(tf.float32, shape=[batch_size, D_output], name="tf_train_diff_Ctt_batch_placeholder")
     
     # RPMNN is initialized with parameters specified in filepath:
     rpmnn = RPMNN(rpmnn_name, D_input, 
-                regular_NN_hidden_layer_topology, regular_NN_hidden_layer_activation_func_list, 
-                N_phaseLWR_kernels, D_output, init_model_param_filepath, is_using_phase_kernel_modulation, False)
+                  regular_NN_hidden_layer_topology, regular_NN_hidden_layer_activation_func_list, 
+                  N_phaseLWR_kernels, D_output, init_model_param_filepath, is_using_phase_kernel_modulation, False)
 
     # Build the Prediction Graph (that computes predictions from the inference model).
-    train_batch_prediction = rpmnn.performNeuralNetworkPrediction(tf_train_X_batch, tf_train_nPSI_batch, tf_train_dropout_keep_prob)
+    train_batch_prediction = rpmnn.performNeuralNetworkPrediction(tf_train_X_batch, tf_train_nPSI_times_dt_per_tau_batch, tf_train_Ct_t_minus_1_times_dt_per_tau_batch, 
+                                                                  tf_train_dropout_keep_prob)
     
     # Build the Training Graph (that calculate and apply gradients), per output dimension.
     if (is_performing_weighted_training):
-        train_op_dim0, loss_dim0 = rpmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 0, tf_train_W_batch)
-        train_op_dim1, loss_dim1 = rpmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 1, tf_train_W_batch)
-        train_op_dim2, loss_dim2 = rpmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2, tf_train_W_batch)
+        train_op_dim0, loss_dim0 = rpmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_diff_Ctt_batch, init_learning_rate, beta, 0, tf_train_W_batch)
+        train_op_dim1, loss_dim1 = rpmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_diff_Ctt_batch, init_learning_rate, beta, 1, tf_train_W_batch)
+        train_op_dim2, loss_dim2 = rpmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_diff_Ctt_batch, init_learning_rate, beta, 2, tf_train_W_batch)
     else:
-        train_op_dim0, loss_dim0 = rpmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 0)
-        train_op_dim1, loss_dim1 = rpmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 1)
-        train_op_dim2, loss_dim2 = rpmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2)
+        train_op_dim0, loss_dim0 = rpmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_diff_Ctt_batch, init_learning_rate, beta, 0)
+        train_op_dim1, loss_dim1 = rpmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_diff_Ctt_batch, init_learning_rate, beta, 1)
+        train_op_dim2, loss_dim2 = rpmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_diff_Ctt_batch, init_learning_rate, beta, 2)
     
     # Create a summary:
     #tf.summary.scalar("loss_dim_"+str(dim_out), loss_dim[dim_out])
@@ -213,50 +215,54 @@ with tf.Session(graph=ff_nn_graph) as session:
         feature_type = 'raw'
         
         [_,
-         Ct_target,
-         normalized_phase_kernels, 
-         data_point_priority] = stackDataset(dataset_Ct_obs_avoid, 
-                                             subset_settings_indices, 
-                                             mode_stack_dataset, 
-                                             subset_demos_indices, 
-                                             feature_type, 
-                                             prim_no)
+         diff_Ct_target,
+         normalized_phase_kernels_times_dt_per_tau, 
+         data_point_priority,
+         Ct_t_minus_1_times_dt_per_tau] = stackDiffCtDataset(dataset_Ct_obs_avoid, 
+                                                             subset_settings_indices, 
+                                                             mode_stack_dataset, 
+                                                             subset_demos_indices, 
+                                                             feature_type, 
+                                                             prim_no)
         
         [X,
-         Ct_unroll,
+         diff_Ct_unroll,
          _,
-         _] = stackDataset(unroll_dataset_Ct_obs_avoid, 
-                           subset_settings_indices, 
-                           mode_stack_dataset, 
-                           subset_demos_indices, 
-                           feature_type, 
-                           prim_no)
-        nmse_unroll = computeNMSE(Ct_unroll, Ct_target)
+         _,
+         _] = stackDiffCtDataset(unroll_dataset_Ct_obs_avoid, 
+                                 subset_settings_indices, 
+                                 mode_stack_dataset, 
+                                 subset_demos_indices, 
+                                 feature_type, 
+                                 prim_no)
+        nmse_unroll = computeNMSE(diff_Ct_unroll, diff_Ct_target)
 #        print ('nmse_unroll        = ' + str(nmse_unroll))
         
-#        print('X.shape                        =', X.shape)
-#        print('Ct_target.shape                =', Ct_target.shape)
-#        print('normalized_phase_kernels.shape =', normalized_phase_kernels.shape)
-#        print('data_point_priority.shape      =', data_point_priority.shape)
+#        print('X.shape                                         =', X.shape)
+#        print('diff_Ct_target.shape                            =', diff_Ct_target.shape)
+#        print('normalized_phase_kernels_times_dt_per_tau.shape =', normalized_phase_kernels_times_dt_per_tau.shape)
+#        print('data_point_priority.shape                       =', data_point_priority.shape)
         
         N_data = X.shape[0]
         permuted_idx_train_dataset = list(np.random.permutation(N_data))[0:batch_size]
         
         X_train = X[permuted_idx_train_dataset,:]
-        nPSI_train = normalized_phase_kernels[permuted_idx_train_dataset,:]
-        Ctt_train = Ct_target[permuted_idx_train_dataset,:]
+        nPSI_times_dt_per_tau_train = normalized_phase_kernels_times_dt_per_tau[permuted_idx_train_dataset,:]
+        diff_Ctt_train = diff_Ct_target[permuted_idx_train_dataset,:]
         W_train = data_point_priority[permuted_idx_train_dataset,:]
+        Ct_t_minus_1_times_dt_per_tau_train = Ct_t_minus_1_times_dt_per_tau[permuted_idx_train_dataset,:]
         
-#        print('X_train.shape                  =', X_train.shape)
+#        print('X_train.shape                                   =', X_train.shape)
 
         batch_X = X_train
-        batch_nPSI = nPSI_train
+        batch_nPSI_times_dt_per_tau = nPSI_times_dt_per_tau_train
         batch_W = W_train
-        batch_Ctt = Ctt_train
+        batch_Ct_t_minus_1_times_dt_per_tau = Ct_t_minus_1_times_dt_per_tau_train
+        batch_diff_Ctt = diff_Ctt_train
         # Prepare a dictionary telling the session where to feed the minibatch.
         # The key of the dictionary is the placeholder node of the graph to be fed,
         # and the value is the numpy array to feed to it.
-        feed_dict = {tf_train_X_batch : batch_X, tf_train_nPSI_batch : batch_nPSI, tf_train_W_batch : batch_W, tf_train_Ctt_batch : batch_Ctt}
+        feed_dict = {tf_train_X_batch : batch_X, tf_train_nPSI_times_dt_per_tau_batch : batch_nPSI_times_dt_per_tau, tf_train_W_batch : batch_W, tf_train_Ct_t_minus_1_times_dt_per_tau_batch : batch_Ct_t_minus_1_times_dt_per_tau, tf_train_diff_Ctt_batch : batch_diff_Ctt}
 
         # Run one step of the model.  The return values are the activations
         # from the `train_op` (which is discarded) and the `loss` Op.  To
@@ -272,31 +278,31 @@ with tf.Session(graph=ff_nn_graph) as session:
         NN_model_params = rpmnn.saveNeuralNetworkToMATLABMatFile()
         tcloa.loa_param.rpmnn.model_params = NN_model_params
         
-        batch_nmse_train = computeNMSE(tr_batch_prediction, batch_Ctt)
+        batch_nmse_train = computeNMSE(tr_batch_prediction, batch_diff_Ctt)
         print("Step %d: NMSE = " % step, batch_nmse_train)
         batch_nmse_train_log[step, :] = batch_nmse_train
         if ((step > 0) and (step % nmse_averaging_window == 0)):
             nmse = {}
             print("")
             if ((is_performing_weighted_training) and (step % 50 == 0) and (step > 0)):
-                wnmse_train = computeWNMSE(tr_batch_prediction, batch_Ctt, W_train)
+                wnmse_train = computeWNMSE(tr_batch_prediction, batch_diff_Ctt, W_train)
 #                 print("Training            WNMSE: ", wnmse_train)
                 nmse["wnmse_train"] = wnmse_train
-            nmse_train = computeNMSE(tr_batch_prediction, batch_Ctt)
-            var_ground_truth_Ctt_train = np.var(Ctt_train, axis=0)
+            nmse_train = computeNMSE(tr_batch_prediction, batch_diff_Ctt)
+            var_ground_truth_diff_Ctt_train = np.var(diff_Ctt_train, axis=0)
             #print("Training             NMSE: ", nmse_train)
-            #print("Training         Variance: ", var_ground_truth_Ctt_train)
+            #print("Training         Variance: ", var_ground_truth_diff_Ctt_train)
             print ("Average "+str(nmse_averaging_window)+"-last Batch Training NMSE = ", np.mean(batch_nmse_train_log[(step-nmse_averaging_window):step,:], axis=0))
             print("")
 #             if ((step > 0) and ((step == np.power(10,(np.floor(np.log10(step)))).astype(np.int32)) or (step == 5 * np.power(10,(np.floor(np.log10(step/5)))).astype(np.int32)))):
-            sio.savemat((model_output_dir_path+'prim_'+str(prim_no+1)+'_params_step_%07d'%step+'.mat'), NN_model_params)
+            sio.savemat((model_output_dir_path+'diff_Ct_dataset_prim_'+str(prim_no+1)+'_params_step_%07d'%step+'.mat'), NN_model_params)
             nmse["nmse_train"] = nmse_train
-            sio.savemat((model_output_dir_path+'prim_'+str(prim_no+1)+'_nmse_step_%07d'%step+'.mat'), nmse)
+            sio.savemat((model_output_dir_path+'diff_Ct_dataset_prim_'+str(prim_no+1)+'_nmse_step_%07d'%step+'.mat'), nmse)
             var_ground_truth = {}
-            var_ground_truth["var_ground_truth_Ctt_train"] = var_ground_truth_Ctt_train
-            sio.savemat((model_output_dir_path+'prim_'+str(prim_no+1)+'_var_ground_truth.mat'), var_ground_truth)
+            var_ground_truth["var_ground_truth_diff_Ctt_train"] = var_ground_truth_diff_Ctt_train
+            sio.savemat((model_output_dir_path+'diff_Ct_dataset_prim_'+str(prim_no+1)+'_var_ground_truth.mat'), var_ground_truth)
         if (step % 50 == 0):
-            np.savetxt((model_output_dir_path+'batch_nmse_train_log.txt'), batch_nmse_train_log[0:step,:])
+            np.savetxt((model_output_dir_path+'diff_Ct_dataset_batch_nmse_train_log.txt'), batch_nmse_train_log[0:step,:])
     print("")
 #     if (is_performing_weighted_training):
 #     print("Final Training            WNMSE: ", wnmse_train)
