@@ -17,7 +17,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../../cart_dmp/cart_
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_coupling/learn_obs_avoid/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_coupling/utilities/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../../neural_nets/feedforward/pmnn/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../neural_nets/feedforward/rpmnn/'))
 
 # Seed the random variables generator:
 random.seed(38)
@@ -36,7 +36,7 @@ from convertDemoToSupervisedObsAvoidFbDataset import *
 from unrollLearnedObsAvoidViconTraj import *
 from DataStacking import *
 from utilities import *
-from PMNN import *
+from RPMNN import *
 
 
 
@@ -58,9 +58,9 @@ D_input = 17
 D_output = 3
 print('D_input  =', D_input)
 print('D_output =', D_output)
-pmnn_model_parent_dir_path='../tf/models/'
-pmnn_model_file_path = None
-pmnn_name = 'my_PMNN_obs_avoid_fb'
+rpmnn_model_parent_dir_path='../tf/models/'
+rpmnn_model_file_path = None
+rpmnn_name = 'my_RPMNN_obs_avoid_fb'
 
 dmp_basis_funcs_size = 25
 canonical_order = 2
@@ -71,9 +71,9 @@ tau_sys = TauSystem(data_global_coord["dt"], MIN_TAU)
 canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
 loa_parameters = TCLearnObsAvoidFeatureParameter(D_input,
                                                  dmp_basis_funcs_size, D_output,
-                                                 pmnn_model_parent_dir_path, 
-                                                 pmnn_model_file_path,
-                                                 PMNN_MODEL, pmnn_name)
+                                                 rpmnn_model_parent_dir_path, 
+                                                 rpmnn_model_file_path,
+                                                 RPMNN_MODEL, rpmnn_name)
 tcloa = TransformCouplingLearnObsAvoid(loa_parameters, tau_sys)
 transform_couplers_list = [tcloa]
 cart_coord_dmp = CartesianCoordDMP(dmp_basis_funcs_size, canonical_sys_discr, 
@@ -99,8 +99,8 @@ unroll_dataset_Ct_obs_avoid["sub_Ct_target"] = [[None] * N_settings]
 
 # Create directories if not currently exist:
 model_parent_dir_path = '../tf/models/'
-reinit_selection_idx = list(np.loadtxt(model_parent_dir_path+'reinit_selection_idx.txt', dtype=np.int, ndmin=1))
-TF_max_train_iters = np.loadtxt(model_parent_dir_path+'TF_max_train_iters.txt', dtype=np.int, ndmin=0)
+reinit_selection_idx = list(np.loadtxt(model_parent_dir_path+'RPMNN_reinit_selection_idx.txt', dtype=np.int, ndmin=1))
+TF_max_train_iters = np.loadtxt(model_parent_dir_path+'RPMNN_TF_max_train_iters.txt', dtype=np.int, ndmin=0)
 init_model_param_filepath = model_parent_dir_path + 'prim_' + str(prim_no+1) + '_params_reinit_' + str(reinit_selection_idx[prim_no]) + ('_step_%07d.mat' % TF_max_train_iters)
 
 regular_NN_hidden_layer_topology = list(np.loadtxt(model_parent_dir_path+'regular_NN_hidden_layer_topology.txt', dtype=np.int, ndmin=1))
@@ -117,7 +117,7 @@ tf_train_dropout_keep_prob = 1.0
 # L2 Regularization Constant
 beta = 0.0
 
-logs_path = "/tmp/pmnn/"
+logs_path = "/tmp/rpmnn/"
 
 is_performing_weighted_training = 1
 
@@ -149,23 +149,23 @@ with ff_nn_graph.as_default():
     tf_train_W_batch = tf.placeholder(tf.float32, shape=[batch_size, 1], name="tf_train_W_batch_placeholder")
     tf_train_Ctt_batch = tf.placeholder(tf.float32, shape=[batch_size, D_output], name="tf_train_Ctt_batch_placeholder")
     
-    # PMNN is initialized with parameters specified in filepath:
-    pmnn = PMNN(pmnn_name, D_input, 
+    # RPMNN is initialized with parameters specified in filepath:
+    rpmnn = RPMNN(rpmnn_name, D_input, 
                 regular_NN_hidden_layer_topology, regular_NN_hidden_layer_activation_func_list, 
                 N_phaseLWR_kernels, D_output, init_model_param_filepath, is_using_phase_kernel_modulation, False)
 
     # Build the Prediction Graph (that computes predictions from the inference model).
-    train_batch_prediction = pmnn.performNeuralNetworkPrediction(tf_train_X_batch, tf_train_nPSI_batch, tf_train_dropout_keep_prob)
+    train_batch_prediction = rpmnn.performNeuralNetworkPrediction(tf_train_X_batch, tf_train_nPSI_batch, tf_train_dropout_keep_prob)
     
     # Build the Training Graph (that calculate and apply gradients), per output dimension.
     if (is_performing_weighted_training):
-        train_op_dim0, loss_dim0 = pmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 0, tf_train_W_batch)
-        train_op_dim1, loss_dim1 = pmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 1, tf_train_W_batch)
-        train_op_dim2, loss_dim2 = pmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2, tf_train_W_batch)
+        train_op_dim0, loss_dim0 = rpmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 0, tf_train_W_batch)
+        train_op_dim1, loss_dim1 = rpmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 1, tf_train_W_batch)
+        train_op_dim2, loss_dim2 = rpmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2, tf_train_W_batch)
     else:
-        train_op_dim0, loss_dim0 = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 0)
-        train_op_dim1, loss_dim1 = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 1)
-        train_op_dim2, loss_dim2 = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2)
+        train_op_dim0, loss_dim0 = rpmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 0)
+        train_op_dim1, loss_dim1 = rpmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 1)
+        train_op_dim2, loss_dim2 = rpmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2)
     
     # Create a summary:
     #tf.summary.scalar("loss_dim_"+str(dim_out), loss_dim[dim_out])
@@ -269,8 +269,8 @@ with tf.Session(graph=ff_nn_graph) as session:
         # write log
         #writer.add_summary(summary, step)
         
-        NN_model_params = pmnn.saveNeuralNetworkToMATLABMatFile()
-        tcloa.loa_param.pmnn.model_params = NN_model_params
+        NN_model_params = rpmnn.saveNeuralNetworkToMATLABMatFile()
+        tcloa.loa_param.rpmnn.model_params = NN_model_params
         
         batch_nmse_train = computeNMSE(tr_batch_prediction, batch_Ctt)
         print("Step %d: NMSE = " % step, batch_nmse_train)

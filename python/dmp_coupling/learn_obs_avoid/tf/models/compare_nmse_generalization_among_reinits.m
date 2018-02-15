@@ -6,11 +6,14 @@ N_prims             = 1;
 N_reinits           = 3;
 TF_max_train_iters  = dlmread('TF_max_train_iters.txt');
 
+dataset_mode        = 'diff_Ct_dataset_';
+% dataset_mode        = '';
+
 for np=1:N_prims
     clc;
     disp(['Primitive #', num2str(np)]);
     for nr=0:N_reinits-1
-        nmse_filename   = ['prim_',num2str(np),'_nmse_reinit_',num2str(nr),'_step_',num2str(TF_max_train_iters,'%07d'),'.mat'];
+        nmse_filename   = [dataset_mode, 'prim_',num2str(np),'_nmse_reinit_',num2str(nr),'_step_',num2str(TF_max_train_iters,'%07d'),'.mat'];
         load(nmse_filename);
         nmse_gen_indexing_cmd_string    = ['nmse_generalization_test_reinit_', num2str(nr), ' = nmse_generalization_test;'];
         eval(nmse_gen_indexing_cmd_string);

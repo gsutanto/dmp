@@ -29,6 +29,14 @@ class CanonicalSystem:
         assert (self.tau_sys.isValid()), "TauSystem tau_sys is invalid!"
         return True
     
+    def resetCouplingTerm(self):
+        for canonical_coupler_idx in range(len(self.canonical_couplers_list)):
+            if (self.canonical_couplers_list[canonical_coupler_idx] is not None):
+                ret = self.canonical_couplers_list[canonical_coupler_idx].reset()
+                if (ret == False):
+                    return False
+        return True
+    
     def getCouplingTerm(self):
         accumulated_cc = 0.0
         for canonical_coupler_idx in range(len(self.canonical_couplers_list)):

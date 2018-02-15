@@ -38,7 +38,7 @@ def learnCartPrimitiveMultiOnLocalCoord(cart_global_traj, train_data_dt,
     D = 3
     N_demo = len(cart_global_traj)
     
-    tau_sys = TauSystem(MIN_TAU)
+    tau_sys = TauSystem(unroll_dt, MIN_TAU)
     canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
     cart_coord_dmp = CartesianCoordDMP(dmp_basis_funcs_size, canonical_sys_discr, ctraj_local_coordinate_frame_selection)
     cart_coord_dmp.setScalingUsage(is_using_scaling)

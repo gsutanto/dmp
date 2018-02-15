@@ -57,7 +57,7 @@ def ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test(amd_clmc_dmp_home_dir_path
     max_num_trajs_per_setting = 2
     selected_obs_avoid_setting_numbers = [26, 118]
     
-    tau_sys = TauSystem(MIN_TAU)
+    tau_sys = TauSystem(dt, MIN_TAU)
     canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
     loa_parameters = TCLearnObsAvoidFeatureParameter(PMNN_input_size,
                                                      dmp_basis_funcs_size, PMNN_output_size,

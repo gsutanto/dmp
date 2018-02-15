@@ -36,7 +36,8 @@ def dmp_1D_test(amd_clmc_dmp_home_dir_path="../../../", canonical_order=2, time_
     assert (time_goal_change >= 0.0)
     assert (tau_reproduce >= 0.0)
     
-    tau_sys = TauSystem(MIN_TAU)
+    dt = 1.0/task_servo_rate
+    tau_sys = TauSystem(dt, MIN_TAU)
     can_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
     dmp_discrete_1D = DMPDiscrete1D(model_size, can_sys_discr)
     [critical_states_learn, 
@@ -53,7 +54,6 @@ def dmp_1D_test(amd_clmc_dmp_home_dir_path="../../../", canonical_order=2, time_
     tau = tau_reproduce
     dmp_unroll_init_parameters = DMPUnrollInitParams(critical_states_learn, tau)
     dmp_discrete_1D.startWithUnrollParams(dmp_unroll_init_parameters)
-    dt = 1.0/task_servo_rate
     
     unroll_traj_length = int(np.round(time_reproduce_max*task_servo_rate) + 1)
     unroll_traj = np.zeros((unroll_traj_length, 4))

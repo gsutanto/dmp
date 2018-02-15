@@ -90,7 +90,7 @@ class RPMNN(FeedForwardNeuralNetwork):
                 with tf.variable_scope(self.name+'_'+layer_dim_ID, reuse=False):
                     if (i == self.N_layers - 1):
                         # neg_low_pass_filt_const == -alpha_C = -low_pass_filter_constant
-                        neg_low_pass_filt_const = tf.get_variable('neg_low_pass_filt_const', [1,1], initializer=tf.random_normal_initializer(0.0, 1e-14, seed=38))
+                        neg_low_pass_filt_const = tf.get_variable('neg_low_pass_filt_const', [1,1], trainable=False, initializer=tf.random_normal_initializer((-0.5), 1e-14, seed=38))
                         neg_low_pass_filt_const_dim = neg_low_pass_filt_const.get_shape().as_list()
                         num_params += neg_low_pass_filt_const_dim[0] * neg_low_pass_filt_const_dim[1]
                     weights = tf.get_variable('weights', [self.neural_net_topology[i-1], current_layer_dim_size], initializer=tf.random_normal_initializer(0.0, 1e-14, seed=38))
@@ -123,7 +123,10 @@ class RPMNN(FeedForwardNeuralNetwork):
         output_dim = [None] * self.D_output
         Ct_t_minus_1_times_dt_per_tau_dim = [None] * self.D_output
         for dim_out in range(self.D_output):
-            Ct_t_minus_1_times_dt_per_tau_dim[dim_out] = tf.slice(Ct_t_minus_1_times_dt_per_tau, [0, dim_out], [-1, 1])
+            if (self.is_predicting_only == False):
+                Ct_t_minus_1_times_dt_per_tau_dim[dim_out] = tf.slice(Ct_t_minus_1_times_dt_per_tau, [0, dim_out], [-1, 1])
+            else:
+                Ct_t_minus_1_times_dt_per_tau_dim[dim_out] = Ct_t_minus_1_times_dt_per_tau[:,dim_out]
         
         for i in range(1, layer_num+1):
             layer_name = self.getLayerName(i)
@@ -196,7 +199,7 @@ class RPMNN(FeedForwardNeuralNetwork):
                             hidden_dim[dim_out] = np.tanh(np.matmul(hidden_drop_dim[dim_out], weights) + biases)
                         hidden_drop_dim[dim_out] = hidden_dim[dim_out]
                     else: # Output Layer
-                        output_current_dim = np.matmul(Ct_t_minus_1_times_dt_per_tau[:,dim_out].reshape(tf.shape(Ct_t_minus_1_times_dt_per_tau)[0], 1), neg_low_pass_filt_const) + np.matmul(hidden_drop_dim[dim_out], weights)
+                        output_current_dim = np.matmul(Ct_t_minus_1_times_dt_per_tau_dim[dim_out], neg_low_pass_filt_const) + np.matmul(hidden_drop_dim[dim_out], weights)
                         output_dim[dim_out] = output_current_dim
         if (layer_num == self.N_layers-1):
             if (self.is_predicting_only == False):
@@ -415,7 +418,7 @@ class RPMNN(FeedForwardNeuralNetwork):
                 if (self.is_predicting_only == False):
                     with tf.variable_scope(self.name+'_'+layer_dim_ID, reuse=False):
                         if (i == self.N_layers - 1):
-                            neg_low_pass_filt_const = tf.get_variable('neg_low_pass_filt_const', initializer=self.model_params[self.name+'_'+layer_dim_ID+"_neg_low_pass_filt_const"])
+                            neg_low_pass_filt_const = tf.get_variable('neg_low_pass_filt_const', trainable=False, initializer=self.model_params[self.name+'_'+layer_dim_ID+"_neg_low_pass_filt_const"])
                             neg_low_pass_filt_const_dim = neg_low_pass_filt_const.get_shape().as_list()
                             num_params += neg_low_pass_filt_const_dim[0] * neg_low_pass_filt_const_dim[1]
                         weights = tf.get_variable('weights', initializer=self.model_params[self.name+'_'+layer_dim_ID+"_weights"])
@@ -513,7 +516,7 @@ class RPMNN(FeedForwardNeuralNetwork):
                 if (self.is_predicting_only == False):
                     with tf.variable_scope(self.name+'_'+layer_dim_ID, reuse=False):
                         if (i == self.N_layers - 1):
-                            neg_low_pass_filt_const = tf.get_variable('neg_low_pass_filt_const', initializer=self.model_params[self.name+'_'+layer_dim_ID+"_neg_low_pass_filt_const"])
+                            neg_low_pass_filt_const = tf.get_variable('neg_low_pass_filt_const', trainable=False, initializer=self.model_params[self.name+'_'+layer_dim_ID+"_neg_low_pass_filt_const"])
                             neg_low_pass_filt_const_dim = neg_low_pass_filt_const.get_shape().as_list()
                             num_params += neg_low_pass_filt_const_dim[0] * neg_low_pass_filt_const_dim[1]
                         weights = tf.get_variable('weights', initializer=self.model_params[self.name+'_'+layer_dim_ID+"_weights"])

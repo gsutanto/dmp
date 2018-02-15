@@ -80,6 +80,14 @@ class TransformationSystem:
         assert (self.current_velocity_state.dmp_num_dimensions == self.dmp_num_dimensions), "self.current_velocity_state.dmp_num_dimensions=" + str(self.current_velocity_state.dmp_num_dimensions) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
         return True
     
+    def resetCouplingTerm(self):
+        for transform_coupler_idx in range(len(self.transform_couplers_list)):
+            if (self.transform_couplers_list[transform_coupler_idx] is not None):
+                ret = self.transform_couplers_list[transform_coupler_idx].reset()
+                if (ret == False):
+                    return False
+        return True
+    
     def getCouplingTerm(self):
         accumulated_ct_acc = np.zeros((self.dmp_num_dimensions,1))
         accumulated_ct_vel = np.zeros((self.dmp_num_dimensions,1))

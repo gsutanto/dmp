@@ -73,6 +73,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
             current_goal_state_init = goal_state_init
         
         self.goal_sys.start(current_goal_state_init, G_init)
+        self.resetCouplingTerm()
         self.is_started = True
         
         assert (self.isValid()), "Post-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"

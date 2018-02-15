@@ -49,23 +49,24 @@ dataset_Ct_obs_avoid = loadObj('dataset_Ct_obs_avoid.pkl')
 
 D_input = 17
 D_output = 3
-pmnn_model_parent_dir_path = '../tf/models/'
-# pmnn_model_file_path = None
-pmnn_model_file_path = '../tf/models/iterative_learn_unroll/prim_1_params_step_0044300.mat'
-pmnn_name = 'my_PMNN_obs_avoid_fb'
+rpmnn_model_parent_dir_path = '../tf/models/'
+# rpmnn_model_file_path = None
+#rpmnn_model_file_path = '../tf/models/iterative_learn_unroll/diff_Ct_dataset_prim_1_params_step_0044300.mat'
+rpmnn_model_file_path = '../tf/models/diff_Ct_dataset_prim_1_params_reinit_0_step_0500000.mat'
+rpmnn_name = 'my_RPMNN_obs_avoid_fb'
 
 dmp_basis_funcs_size = 25
 canonical_order = 2
 ctraj_local_coordinate_frame_selection = GSUTANTO_LOCAL_COORD_FRAME
 is_using_scaling = [False] * D_output # NOT using scaling on CartCoordDMP for now...
                                         
-tau_sys = TauSystem(data_global_coord["dt"], sMIN_TAU)
+tau_sys = TauSystem(data_global_coord["dt"], MIN_TAU)
 canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
 loa_parameters = TCLearnObsAvoidFeatureParameter(D_input,
                                                  dmp_basis_funcs_size, D_output,
-                                                 pmnn_model_parent_dir_path, 
-                                                 pmnn_model_file_path,
-                                                 PMNN_MODEL, pmnn_name)
+                                                 rpmnn_model_parent_dir_path, 
+                                                 rpmnn_model_file_path,
+                                                 RPMNN_MODEL, rpmnn_name)
 tcloa = TransformCouplingLearnObsAvoid(loa_parameters, tau_sys)
 transform_couplers_list = [tcloa]
 cart_coord_dmp = CartesianCoordDMP(dmp_basis_funcs_size, canonical_sys_discr, 
@@ -100,5 +101,5 @@ for ns in range(N_settings):
                                                                                ccdmp_baseline_params,
                                                                                cart_coord_dmp)
 
-saveObj(unroll_dataset_Ct_obs_avoid, 'unroll_dataset_Ct_obs_avoid.pkl')
-saveObj(global_traj_unroll, 'global_traj_unroll.pkl')
+saveObj(unroll_dataset_Ct_obs_avoid, 'unroll_dataset_Ct_obs_avoid_diff_Ct_dataset.pkl')
+saveObj(global_traj_unroll, 'global_traj_unroll_diff_Ct_dataset.pkl')

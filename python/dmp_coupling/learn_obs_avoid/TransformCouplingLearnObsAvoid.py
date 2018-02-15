@@ -258,9 +258,21 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         
         return sub_X_vector
     
+    def reset(self):
+        self.prev_ct_acc = np.zeros((self.dmp_num_dimensions, 1))
+        self.prev_ct_vel = np.zeros((self.dmp_num_dimensions, 1))
+        
+        self.curr_ct_acc = np.zeros((self.dmp_num_dimensions, 1))
+        self.curr_ct_vel = np.zeros((self.dmp_num_dimensions, 1))
+        
+        return True
+    
     def getValue(self):
-        assert (self.loa_param.model == PMNN_MODEL), "self.loa_param.model == " + str(self.loa_param.model)
+        assert (self.loa_param.model == PMNN_MODEL or self.loa_param.model == RPMNN_MODEL), "self.loa_param.model == " + str(self.loa_param.model)
         assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformCouplingLearnObsAvoid is invalid!"
+        
+        self.prev_ct_acc = self.curr_ct_acc
+        self.prev_ct_vel = self.curr_ct_vel
         
         if (self.endeff_ccstate_global is not None):
             self.endeff_ccstate_local = self.cart_coord_transformer.computeCTrajAtNewCoordSys(self.endeff_ccstate_global, 
@@ -269,14 +281,29 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         self.point_obstacles_ccstate_local = self.cart_coord_transformer.computeCTrajAtNewCoordSys(self.point_obstacles_ccstate_global, 
                                                                                                    self.ctraj_hmg_transform_global_to_local_matrix)
         
-        self.pmnn_input_vector = self.computeObsAvoidCtFeat(self.point_obstacles_ccstate_local,
-                                                            self.endeff_ccstate_local).T
-        assert (self.pmnn_input_vector.shape == (1,self.loa_param.D_input))
-        
         normalized_phase_kernels = self.func_approx_discrete.getNormalizedBasisFunctionVectorMultipliedPhaseMultiplier().T
         
-        ct_acc = self.loa_param.pmnn.performNeuralNetworkPrediction(self.pmnn_input_vector, normalized_phase_kernels).T
+        if (self.loa_param.model == PMNN_MODEL):
+            self.pmnn_input_vector = self.computeObsAvoidCtFeat(self.point_obstacles_ccstate_local,
+                                                                self.endeff_ccstate_local).T
+            assert (self.pmnn_input_vector.shape == (1,self.loa_param.D_input))
+            
+            ct_acc = self.loa_param.pmnn.performNeuralNetworkPrediction(self.pmnn_input_vector, normalized_phase_kernels).T
+        elif (self.loa_param.model == RPMNN_MODEL):
+            self.rpmnn_input_vector = self.computeObsAvoidCtFeat(self.point_obstacles_ccstate_local,
+                                                                 self.endeff_ccstate_local).T
+            assert (self.rpmnn_input_vector.shape == (1,self.loa_param.D_input))
+            
+            dt_per_tau_rel = self.tau_sys.getdtPerTauRelative()
+            
+            diff_ct_acc = self.loa_param.rpmnn.performNeuralNetworkPrediction(self.rpmnn_input_vector, 
+                                                                              (dt_per_tau_rel * normalized_phase_kernels),
+                                                                              (dt_per_tau_rel * self.prev_ct_acc.T)).T
+            ct_acc = self.prev_ct_acc + diff_ct_acc
         
         ct_vel = np.zeros((self.dmp_num_dimensions, 1))
+        
+        self.curr_ct_acc = ct_acc
+        self.curr_ct_vel = ct_vel
         
         return ct_acc, ct_vel

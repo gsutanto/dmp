@@ -56,6 +56,7 @@ class CanonicalSystemDiscrete(CanonicalSystem, object):
         self.xdd = 0.0
         self.v = 0.0
         self.vd = 0.0
+        self.resetCouplingTerm()
         self.is_started = True
         return None
     

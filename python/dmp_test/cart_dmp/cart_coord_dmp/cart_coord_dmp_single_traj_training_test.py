@@ -36,7 +36,7 @@ def cart_coord_dmp_single_traj_training_test(amd_clmc_dmp_home_dir_path="../../.
     assert (time_goal_change >= 0.0)
     assert (tau_reproduce >= 0.0)
     
-    tau_sys = TauSystem(MIN_TAU)
+    tau_sys = TauSystem(dt, MIN_TAU)
     canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
     cart_dmp = CartesianCoordDMP(model_size, canonical_sys_discr, GSUTANTO_LOCAL_COORD_FRAME)
     [critical_states_learn, 

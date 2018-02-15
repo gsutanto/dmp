@@ -38,7 +38,7 @@ def cart_coord_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_path="../../..
     if (time_reproduce_max <= 0.5):
         time_reproduce_max = 0.5
     
-    tau_sys = TauSystem(tau)
+    tau_sys = TauSystem(dt, tau)
     canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
     cart_dmp = CartesianCoordDMP(model_size, canonical_sys_discr, GSUTANTO_LOCAL_COORD_FRAME)
     tau = tau_reproduce
