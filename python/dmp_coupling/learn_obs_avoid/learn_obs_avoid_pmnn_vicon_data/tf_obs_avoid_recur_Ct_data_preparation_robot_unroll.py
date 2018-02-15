@@ -38,15 +38,16 @@ subset_settings_indices = range(N_settings)
 
 considered_subset_outlier_ranked_demo_indices = range(3)
 generalization_subset_outlier_ranked_demo_indices = [3]
-post_filename_stacked_data = '_diff_Ct_dataset'
+post_filename_stacked_data = '_recur_Ct_dataset'
 out_data_dir = '../tf/input_data/'
 
 [X, diff_Ct_target, 
  normalized_phase_PSI_mult_phase_V,
  data_point_priority,
- Ct_t_minus_1_times_dt_per_tau] = prepareDiffCtData(task_type, dataset_Ct_obs_avoid, 
-                                                    subset_settings_indices,
-                                                    considered_subset_outlier_ranked_demo_indices,
-                                                    generalization_subset_outlier_ranked_demo_indices,
-                                                    post_filename_stacked_data,
-                                                    out_data_dir)
+ Ct_t_minus_1_times_dt_per_tau,
+ Ct_t_minus_1] = prepareRecurCtData(task_type, dataset_Ct_obs_avoid, 
+                                    subset_settings_indices,
+                                    considered_subset_outlier_ranked_demo_indices,
+                                    generalization_subset_outlier_ranked_demo_indices,
+                                    post_filename_stacked_data,
+                                    out_data_dir)

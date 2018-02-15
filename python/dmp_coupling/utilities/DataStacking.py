@@ -131,7 +131,7 @@ def stackDataset(dataset,
     
     return X, Ct_target, normalized_phase_PSI_mult_phase_V, data_point_priority
 
-def prepareDiffCtData(  task_type, dataset_Ct, subset_settings_indices,
+def prepareRecurCtData( task_type, dataset_Ct, subset_settings_indices,
                         considered_subset_outlier_ranked_demo_indices,
                         generalization_subset_outlier_ranked_demo_indices,
                         post_filename_stacked_data,
@@ -150,53 +150,59 @@ def prepareDiffCtData(  task_type, dataset_Ct, subset_settings_indices,
     list_pre_filename_stacked_data = ['', 'test_unroll_']
     
     X = [[None] * N_primitive for j in range(2)]
-    diff_Ct_target = [[None] * N_primitive for j in range(2)]
+    Ct_target = [[None] * N_primitive for j in range(2)]
     normalized_phase_PSI_mult_phase_V_times_dt_per_tau = [[None] * N_primitive for j in range(2)]
     data_point_priority = [[None] * N_primitive for j in range(2)]
-    Ct_t_minus_1_times_dt_per_tau = [[None] * N_primitive for j in range(2)]    # ((dt/tau) * Ct[t-1])
+    Ct_t_minus_1_times_dt_per_tau = [[None] * N_primitive for j in range(2)]   # (Ct[t-1] * (dt/tau))
+    Ct_t_minus_1 = [[None] * N_primitive for j in range(2)]                    # (Ct[t-1])
     
     for ntype in range(len(list_pre_filename_stacked_data)):
         for np in range(N_primitive):
             [X[ntype][np],
-             diff_Ct_target[ntype][np],
+             Ct_target[ntype][np],
              normalized_phase_PSI_mult_phase_V_times_dt_per_tau[ntype][np],
              data_point_priority[ntype][np],
-             Ct_t_minus_1_times_dt_per_tau[ntype][np]] = stackDiffCtDataset(dataset_Ct,
-                                                                            subset_settings_indices,
-                                                                            mode_stack_dataset,
-                                                                            list_subset_outlier_ranked_demo_indices[ntype],
-                                                                            feature_type, np)
-            assert (X[ntype][np].shape[0] == diff_Ct_target[ntype][np].shape[0])
+             Ct_t_minus_1_times_dt_per_tau[ntype][np],
+             Ct_t_minus_1[ntype][np]] = stackRecurCtDataset(dataset_Ct,
+                                                            subset_settings_indices,
+                                                            mode_stack_dataset,
+                                                            list_subset_outlier_ranked_demo_indices[ntype],
+                                                            feature_type, np)
+            assert (X[ntype][np].shape[0] == Ct_target[ntype][np].shape[0])
             assert (X[ntype][np].shape[0] == normalized_phase_PSI_mult_phase_V_times_dt_per_tau[ntype][np].shape[0])
             assert (X[ntype][np].shape[0] == data_point_priority[ntype][np].shape[0])
             assert (X[ntype][np].shape[0] == Ct_t_minus_1_times_dt_per_tau[ntype][np].shape[0])
+            assert (X[ntype][np].shape[0] == Ct_t_minus_1[ntype][np].shape[0])
             
             if (os.path.isdir(out_data_dir)):
                 X_dict = {}
-                diff_Ct_target_dict = {}
+                Ct_target_dict = {}
                 normalized_phase_PSI_mult_phase_V_times_dt_per_tau_dict = {}
                 data_point_priority_dict = {}
                 Ct_t_minus_1_times_dt_per_tau_dict = {}
+                Ct_t_minus_1_dict = {}
                 
                 X_dict["X"] = X[ntype][np]
-                diff_Ct_target_dict["diff_Ct_target"] = diff_Ct_target[ntype][np]
+                Ct_target_dict["Ct_target"] = Ct_target[ntype][np]
                 normalized_phase_PSI_mult_phase_V_times_dt_per_tau_dict["normalized_phase_PSI_mult_phase_V_times_dt_per_tau"] = normalized_phase_PSI_mult_phase_V_times_dt_per_tau[ntype][np]
                 data_point_priority_dict["data_point_priority"] = data_point_priority[ntype][np]
                 Ct_t_minus_1_times_dt_per_tau_dict["Ct_t_minus_1_times_dt_per_tau"] = Ct_t_minus_1_times_dt_per_tau[ntype][np]
+                Ct_t_minus_1_dict["Ct_t_minus_1"] = Ct_t_minus_1[ntype][np]
                 
                 sio.savemat((out_data_dir+'/'+list_pre_filename_stacked_data[ntype]+'prim_'+str(np+1)+'_X_'+feature_type+'_'+task_type+post_filename_stacked_data+'.mat'), X_dict)
-                sio.savemat((out_data_dir+'/'+list_pre_filename_stacked_data[ntype]+'prim_'+str(np+1)+'_diff_Ct_target_'+task_type+post_filename_stacked_data+'.mat'), diff_Ct_target_dict)
+                sio.savemat((out_data_dir+'/'+list_pre_filename_stacked_data[ntype]+'prim_'+str(np+1)+'_Ct_target_'+task_type+post_filename_stacked_data+'.mat'), Ct_target_dict)
                 sio.savemat((out_data_dir+'/'+list_pre_filename_stacked_data[ntype]+'prim_'+str(np+1)+'_normalized_phase_PSI_mult_phase_V_times_dt_per_tau_'+task_type+post_filename_stacked_data+'.mat'), normalized_phase_PSI_mult_phase_V_times_dt_per_tau_dict)
                 sio.savemat((out_data_dir+'/'+list_pre_filename_stacked_data[ntype]+'prim_'+str(np+1)+'_data_point_priority_'+task_type+post_filename_stacked_data+'.mat'), data_point_priority_dict)
                 sio.savemat((out_data_dir+'/'+list_pre_filename_stacked_data[ntype]+'prim_'+str(np+1)+'_Ct_t_minus_1_times_dt_per_tau_'+task_type+post_filename_stacked_data+'.mat'), Ct_t_minus_1_times_dt_per_tau_dict)
+                sio.savemat((out_data_dir+'/'+list_pre_filename_stacked_data[ntype]+'prim_'+str(np+1)+'_Ct_t_minus_1_'+task_type+post_filename_stacked_data+'.mat'), Ct_t_minus_1_dict)
             
             if (ntype == 0):
                 print ('Total # of Data Points for Training            Primitive '+str(np+1)+': '+str(X[ntype][np].shape[0]))
             elif (ntype == 1):
                 print ('Total # of Data Points for Generalization Test Primitive '+str(np+1)+': '+str(X[ntype][np].shape[0]))
-    return X, diff_Ct_target, normalized_phase_PSI_mult_phase_V_times_dt_per_tau, data_point_priority, Ct_t_minus_1_times_dt_per_tau
+    return X, Ct_target, normalized_phase_PSI_mult_phase_V_times_dt_per_tau, data_point_priority, Ct_t_minus_1_times_dt_per_tau, Ct_t_minus_1
 
-def stackDiffCtDataset( dataset, 
+def stackRecurCtDataset(dataset, 
                         subset_settings_indices, 
                         mode, 
                         mode_arg, 
@@ -222,10 +228,11 @@ def stackDiffCtDataset( dataset,
     
     N_settings_to_extract = len(subset_settings_indices)
     list_X_setting = [None] * N_settings_to_extract
-    list_diff_Ct_target_setting = [None] * N_settings_to_extract
+    list_Ct_target_setting = [None] * N_settings_to_extract
     list_normalized_phase_PSI_mult_phase_V_times_dt_per_tau_setting = [None] * N_settings_to_extract
     list_data_point_priority_setting = [None] * N_settings_to_extract
     list_Ct_t_minus_1_times_dt_per_tau = [None] * N_settings_to_extract
+    list_Ct_t_minus_1 = [None] * N_settings_to_extract
     
     for ns_idx in range(N_settings_to_extract):
         setting_no = subset_settings_indices[ns_idx]
@@ -236,18 +243,20 @@ def stackDiffCtDataset( dataset,
         if (feature_type == 'raw'):
             list_X_setting[ns_idx] = np.hstack([dataset["sub_X"][primitive_no][setting_no][nd][:,1:] for nd in subset_demos_indices])
         
-        list_diff_Ct_target_setting[ns_idx] = np.hstack([(dataset["sub_Ct_target"][primitive_no][setting_no][nd][:,1:] - dataset["sub_Ct_target"][primitive_no][setting_no][nd][:,:-1]) for nd in subset_demos_indices])
+        list_Ct_target_setting[ns_idx] = np.hstack([(dataset["sub_Ct_target"][primitive_no][setting_no][nd][:,1:]) for nd in subset_demos_indices])
         
         # dt/tau = 1/(traj_length-1) = (1.0/(dataset["sub_Ct_target"][primitive_no][setting_no][nd].shape[1]-1)) = (1.0/(dataset["sub_normalized_phase_PSI_mult_phase_V"][primitive_no][setting_no][nd].shape[1]-1))
         list_Ct_t_minus_1_times_dt_per_tau[ns_idx] = np.hstack([((1.0/(dataset["sub_Ct_target"][primitive_no][setting_no][nd].shape[1]-1)) * dataset["sub_Ct_target"][primitive_no][setting_no][nd][:,:-1]) for nd in subset_demos_indices])
+        list_Ct_t_minus_1[ns_idx] = np.hstack([(dataset["sub_Ct_target"][primitive_no][setting_no][nd][:,:-1]) for nd in subset_demos_indices])
         if "sub_normalized_phase_PSI_mult_phase_V" in dataset:
             list_normalized_phase_PSI_mult_phase_V_times_dt_per_tau_setting[ns_idx] = np.hstack([((1.0/(dataset["sub_normalized_phase_PSI_mult_phase_V"][primitive_no][setting_no][nd].shape[1]-1)) * dataset["sub_normalized_phase_PSI_mult_phase_V"][primitive_no][setting_no][nd][:,1:]) for nd in subset_demos_indices])
         if "sub_data_point_priority" in dataset:
             list_data_point_priority_setting[ns_idx] = np.hstack([dataset["sub_data_point_priority"][primitive_no][setting_no][nd][1:] for nd in subset_demos_indices])
     
     X = np.hstack(list_X_setting).T
-    diff_Ct_target = np.hstack(list_diff_Ct_target_setting).T
+    Ct_target = np.hstack(list_Ct_target_setting).T
     Ct_t_minus_1_times_dt_per_tau = np.hstack(list_Ct_t_minus_1_times_dt_per_tau).T
+    Ct_t_minus_1 = np.hstack(list_Ct_t_minus_1).T
     if "sub_normalized_phase_PSI_mult_phase_V" in dataset:
         normalized_phase_PSI_mult_phase_V_times_dt_per_tau = np.hstack(list_normalized_phase_PSI_mult_phase_V_times_dt_per_tau_setting).T
     else:
@@ -258,4 +267,4 @@ def stackDiffCtDataset( dataset,
     else:
         data_point_priority = None
     
-    return X, diff_Ct_target, normalized_phase_PSI_mult_phase_V_times_dt_per_tau, data_point_priority, Ct_t_minus_1_times_dt_per_tau
+    return X, Ct_target, normalized_phase_PSI_mult_phase_V_times_dt_per_tau, data_point_priority, Ct_t_minus_1_times_dt_per_tau, Ct_t_minus_1

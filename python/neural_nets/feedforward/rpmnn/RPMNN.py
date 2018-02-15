@@ -104,16 +104,18 @@ class RPMNN(FeedForwardNeuralNetwork):
         print("Total # of Parameters = %d" % num_params)
         return num_params
     
-    def performNeuralNetworkPrediction(self, dataset, normalized_phase_kernels_times_dt_per_tau, Ct_t_minus_1_times_dt_per_tau,
+    def performNeuralNetworkPrediction(self, dataset, normalized_phase_kernels_times_dt_per_tau, 
+                                       Ct_t_minus_1_times_dt_per_tau, Ct_t_minus_1,
                                        dropout_keep_prob=1.0, layer_num=-1):
         """
         Perform Neural Network Prediction on a given dataset.
         :param dataset: dataset on which prediction will be performed
         :param normalized_phase_kernels_times_dt_per_tau: (dt/tau) * normalized phase-based Gaussian kernels activation associated with the dataset
         :param dropout_keep_prob: probability of keeping a node (instead of dropping it; 1.0 means no drop-out)
-        :param Ct_t_minus_1_times_dt_per_tau: (dt/tau) * Ct_t_minus_1
+        :param Ct_t_minus_1_times_dt_per_tau: (Ct[t-1] * (dt/tau))
+        :param Ct_t_minus_1:                  (Ct[t-1])
         :param layer_num: layer number, at which the prediction would like to be made (default is at output (self.N_layers-1))
-        :return: output tensor (in output layer; in this case is diff_Ct == Ct_t - Ct_t_minus_1)
+        :return: output tensor (in output layer; in this case is Ct[t])
         """
         if (layer_num == -1):
             layer_num = self.N_layers-1 # Output Layer (default)
@@ -122,11 +124,14 @@ class RPMNN(FeedForwardNeuralNetwork):
         hidden_drop_dim = [dataset] * self.D_output
         output_dim = [None] * self.D_output
         Ct_t_minus_1_times_dt_per_tau_dim = [None] * self.D_output
+        Ct_t_minus_1_dim = [None] * self.D_output
         for dim_out in range(self.D_output):
             if (self.is_predicting_only == False):
                 Ct_t_minus_1_times_dt_per_tau_dim[dim_out] = tf.slice(Ct_t_minus_1_times_dt_per_tau, [0, dim_out], [-1, 1])
+                Ct_t_minus_1_dim[dim_out] = tf.slice(Ct_t_minus_1, [0, dim_out], [-1, 1])
             else:
                 Ct_t_minus_1_times_dt_per_tau_dim[dim_out] = Ct_t_minus_1_times_dt_per_tau[:,dim_out]
+                Ct_t_minus_1_dim[dim_out] = Ct_t_minus_1[:,dim_out]
         
         for i in range(1, layer_num+1):
             layer_name = self.getLayerName(i)
@@ -169,7 +174,7 @@ class RPMNN(FeedForwardNeuralNetwork):
                                 hidden_dim[dim_out] = tf.nn.tanh(tf.matmul(hidden_drop_dim[dim_out], weights) + biases)
                                 hidden_drop_dim[dim_out] = tf.nn.dropout(hidden_dim[dim_out], dropout_keep_prob)
                         else: # Output Layer
-                            output_current_dim = tf.matmul(Ct_t_minus_1_times_dt_per_tau_dim[dim_out], neg_low_pass_filt_const) + tf.matmul(hidden_drop_dim[dim_out], weights)
+                            output_current_dim = Ct_t_minus_1_dim[dim_out] + tf.matmul(Ct_t_minus_1_times_dt_per_tau_dim[dim_out], neg_low_pass_filt_const) + tf.matmul(hidden_drop_dim[dim_out], weights)
                             output_dim[dim_out] = output_current_dim
                 else:
                     if (i == self.N_layers - 1):
@@ -199,7 +204,7 @@ class RPMNN(FeedForwardNeuralNetwork):
                             hidden_dim[dim_out] = np.tanh(np.matmul(hidden_drop_dim[dim_out], weights) + biases)
                         hidden_drop_dim[dim_out] = hidden_dim[dim_out]
                     else: # Output Layer
-                        output_current_dim = np.matmul(Ct_t_minus_1_times_dt_per_tau_dim[dim_out], neg_low_pass_filt_const) + np.matmul(hidden_drop_dim[dim_out], weights)
+                        output_current_dim = Ct_t_minus_1_dim[dim_out] + np.matmul(Ct_t_minus_1_times_dt_per_tau_dim[dim_out], neg_low_pass_filt_const) + np.matmul(hidden_drop_dim[dim_out], weights)
                         output_dim[dim_out] = output_current_dim
         if (layer_num == self.N_layers-1):
             if (self.is_predicting_only == False):
