@@ -51,8 +51,8 @@ D_input = 17
 D_output = 3
 rpmnn_model_parent_dir_path = '../tf/models/'
 # rpmnn_model_file_path = None
-#rpmnn_model_file_path = '../tf/models/iterative_learn_unroll/diff_Ct_dataset_prim_1_params_step_0044300.mat'
-rpmnn_model_file_path = '../tf/models/diff_Ct_dataset_prim_1_params_reinit_0_step_0500000.mat'
+rpmnn_model_file_path = '../tf/models/iterative_learn_unroll/recur_Ct_dataset_prim_1_params_step_0000440.mat'
+#rpmnn_model_file_path = '../tf/models/recur_Ct_dataset_prim_1_params_reinit_2_step_0500000.mat'
 rpmnn_name = 'my_RPMNN_obs_avoid_fb'
 
 dmp_basis_funcs_size = 25
@@ -101,5 +101,5 @@ for ns in range(N_settings):
                                                                                ccdmp_baseline_params,
                                                                                cart_coord_dmp)
 
-saveObj(unroll_dataset_Ct_obs_avoid, 'unroll_dataset_Ct_obs_avoid_diff_Ct_dataset.pkl')
-saveObj(global_traj_unroll, 'global_traj_unroll_diff_Ct_dataset.pkl')
+saveObj(unroll_dataset_Ct_obs_avoid, 'unroll_dataset_Ct_obs_avoid_recur_Ct_dataset.pkl')
+saveObj(global_traj_unroll, 'global_traj_unroll_recur_Ct_dataset.pkl')

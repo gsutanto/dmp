@@ -90,7 +90,7 @@ prim_no = 0 # There is only one (1) primitive here.
 N_settings_per_batch = 10
 N_demos_per_setting = 1
 
-batch_size = N_settings_per_batch * 200
+batch_size = N_settings_per_batch * N_demos_per_setting * 200
 
 unroll_dataset_Ct_obs_avoid = {}
 unroll_dataset_Ct_obs_avoid["sub_X"] = [[None] * N_settings]
@@ -218,27 +218,27 @@ with tf.Session(graph=ff_nn_graph) as session:
         
         [_,
          Ct_target,
-         normalized_phase_kernels_times_dt_per_tau, 
-         data_point_priority,
-         Ct_t_minus_1_times_dt_per_tau,
-         Ct_t_minus_1] = stackRecurCtDataset(dataset_Ct_obs_avoid, 
-                                             subset_settings_indices, 
-                                             mode_stack_dataset, 
-                                             subset_demos_indices, 
-                                             feature_type, 
-                                             prim_no)
-        
-        [X,
-         Ct_unroll,
          _,
          _,
          _,
-         _] = stackRecurCtDataset(unroll_dataset_Ct_obs_avoid, 
+         _] = stackRecurCtDataset(dataset_Ct_obs_avoid, 
                                   subset_settings_indices, 
                                   mode_stack_dataset, 
                                   subset_demos_indices, 
                                   feature_type, 
                                   prim_no)
+        
+        [X,
+         Ct_unroll,
+         normalized_phase_kernels_times_dt_per_tau, 
+         data_point_priority,
+         Ct_t_minus_1_times_dt_per_tau,
+         Ct_t_minus_1] = stackRecurCtDataset(unroll_dataset_Ct_obs_avoid, 
+                                             subset_settings_indices, 
+                                             mode_stack_dataset, 
+                                             subset_demos_indices, 
+                                             feature_type, 
+                                             prim_no)
         nmse_unroll = computeNMSE(Ct_unroll, Ct_target)
 #        print ('nmse_unroll        = ' + str(nmse_unroll))
         

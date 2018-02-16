@@ -296,10 +296,10 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
             
             dt_per_tau_rel = self.tau_sys.getdtPerTauRelative()
             
-            diff_ct_acc = self.loa_param.rpmnn.performNeuralNetworkPrediction(self.rpmnn_input_vector, 
-                                                                              (dt_per_tau_rel * normalized_phase_kernels),
-                                                                              (dt_per_tau_rel * self.prev_ct_acc.T)).T
-            ct_acc = self.prev_ct_acc + diff_ct_acc
+            ct_acc = self.loa_param.rpmnn.performNeuralNetworkPrediction(self.rpmnn_input_vector, 
+                                                                         (dt_per_tau_rel * normalized_phase_kernels),
+                                                                         (dt_per_tau_rel * self.prev_ct_acc.T),
+                                                                         (self.prev_ct_acc.T)).T
         
         ct_vel = np.zeros((self.dmp_num_dimensions, 1))
         

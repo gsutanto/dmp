@@ -4,9 +4,9 @@ clc;
 
 N_prims             = 1;
 N_reinits           = 3;
-TF_max_train_iters  = dlmread('TF_max_train_iters.txt');
+TF_max_train_iters  = dlmread('RPMNN_TF_max_train_iters.txt');
 
-dataset_mode        = 'diff_Ct_dataset_';
+dataset_mode        = 'recur_Ct_dataset_';
 % dataset_mode        = '';
 
 for np=1:N_prims
