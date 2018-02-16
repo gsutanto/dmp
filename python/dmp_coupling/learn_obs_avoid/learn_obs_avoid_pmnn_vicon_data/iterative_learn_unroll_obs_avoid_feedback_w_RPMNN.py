@@ -218,8 +218,8 @@ with tf.Session(graph=ff_nn_graph) as session:
         
         [_,
          Ct_target,
-         _,
-         _,
+         normalized_phase_kernels_times_dt_per_tau,
+         data_point_priority,
          _,
          _] = stackRecurCtDataset(dataset_Ct_obs_avoid, 
                                   subset_settings_indices, 
@@ -230,8 +230,8 @@ with tf.Session(graph=ff_nn_graph) as session:
         
         [X,
          Ct_unroll,
-         normalized_phase_kernels_times_dt_per_tau, 
-         data_point_priority,
+         _, 
+         _,
          Ct_t_minus_1_times_dt_per_tau,
          Ct_t_minus_1] = stackRecurCtDataset(unroll_dataset_Ct_obs_avoid, 
                                              subset_settings_indices, 
