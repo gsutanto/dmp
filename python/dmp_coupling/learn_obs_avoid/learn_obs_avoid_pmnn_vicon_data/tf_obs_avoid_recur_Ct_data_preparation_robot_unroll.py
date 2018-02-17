@@ -17,7 +17,7 @@ from convertDemoToSupervisedObsAvoidFbDataset import *
 from DataStacking import *
 from utilities import *
 
-is_converting_demo_to_supervised_obs_avoid_fb_dataset = False
+is_converting_demo_to_supervised_obs_avoid_fb_dataset = True
 task_type = 'obs_avoid'
 
 if (is_converting_demo_to_supervised_obs_avoid_fb_dataset):
@@ -39,7 +39,7 @@ if not os.path.isfile(selected_settings_indices_file_path):
     selected_settings_indices = range(N_settings)
 else:
     is_comparing_w_MATLAB_implementation = False
-    selected_settings_indices = list(np.loadtxt(selected_settings_indices_file_path, dtype=np.int, ndmin=1))
+    selected_settings_indices = [(i-1) for i in list(np.loadtxt(selected_settings_indices_file_path, dtype=np.int, ndmin=1))] # file is saved following MATLAB's convention (1~222)
     N_settings = len(selected_settings_indices)
 
 print('N_settings = ' + str(N_settings))

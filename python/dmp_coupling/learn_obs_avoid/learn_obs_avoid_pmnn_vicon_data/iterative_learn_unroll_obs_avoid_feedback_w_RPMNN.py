@@ -89,7 +89,7 @@ if not os.path.isfile(selected_settings_indices_file_path):
     N_settings = len(data_global_coord["obs_avoid"][0])
     selected_settings_indices = range(N_settings)
 else:
-    selected_settings_indices = list(np.loadtxt(selected_settings_indices_file_path, dtype=np.int, ndmin=1))
+    selected_settings_indices = [(i-1) for i in list(np.loadtxt(selected_settings_indices_file_path, dtype=np.int, ndmin=1))] # file is saved following MATLAB's convention (1~222)
     N_settings = len(selected_settings_indices)
 
 print('N_settings = ' + str(N_settings))

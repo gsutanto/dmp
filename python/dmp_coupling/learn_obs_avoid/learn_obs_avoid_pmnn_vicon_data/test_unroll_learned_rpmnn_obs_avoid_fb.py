@@ -51,8 +51,8 @@ D_input = 17
 D_output = 3
 rpmnn_model_parent_dir_path = '../tf/models/'
 # rpmnn_model_file_path = None
-rpmnn_model_file_path = '../tf/models/iterative_learn_unroll/recur_Ct_dataset_prim_1_params_step_0000440.mat'
-#rpmnn_model_file_path = '../tf/models/recur_Ct_dataset_prim_1_params_reinit_2_step_0500000.mat'
+rpmnn_model_file_path = rpmnn_model_parent_dir_path + 'iterative_learn_unroll/recur_Ct_dataset_prim_1_params_step_0000440.mat'
+#rpmnn_model_file_path = rpmnn_model_parent_dir_path + 'recur_Ct_dataset_prim_1_params_reinit_2_step_0500000.mat'
 rpmnn_name = 'my_RPMNN_obs_avoid_fb'
 
 dmp_basis_funcs_size = 25
@@ -75,15 +75,24 @@ cart_coord_dmp = CartesianCoordDMP(dmp_basis_funcs_size, canonical_sys_discr,
 cart_coord_dmp.setScalingUsage(is_using_scaling)
 cart_coord_dmp.setParams(ccdmp_baseline_params['W'], ccdmp_baseline_params['A_learn'])
 
-N_settings = len(data_global_coord["obs_avoid"][0])
+selected_settings_indices_file_path = rpmnn_model_parent_dir_path + 'selected_settings_indices.txt'
+if not os.path.isfile(selected_settings_indices_file_path):
+    N_settings = len(data_global_coord["obs_avoid"][0])
+    selected_settings_indices = range(N_settings)
+else:
+    selected_settings_indices = [(i-1) for i in list(np.loadtxt(selected_settings_indices_file_path, dtype=np.int, ndmin=1))] # file is saved following MATLAB's convention (1~222)
+    N_settings = len(selected_settings_indices)
+
+print('N_settings = ' + str(N_settings))
 prim_no = 0 # There is only one (1) primitive here.
 
+N_all_settings = len(data_global_coord["obs_avoid"][0])
 unroll_dataset_Ct_obs_avoid = {}
-unroll_dataset_Ct_obs_avoid["sub_X"] = [[None] * N_settings]
-unroll_dataset_Ct_obs_avoid["sub_Ct_target"] = [[None] * N_settings]
-global_traj_unroll = [[None] * N_settings]
+unroll_dataset_Ct_obs_avoid["sub_X"] = [[None] * N_all_settings]
+unroll_dataset_Ct_obs_avoid["sub_Ct_target"] = [[None] * N_all_settings]
+global_traj_unroll = [[None] * N_all_settings]
 
-for ns in range(N_settings):
+for ns in selected_settings_indices:
     N_demos = len(data_global_coord["obs_avoid"][1][ns])
     
     # the index 0 before ns seems unnecessary, but this is just for the sake of generality, if we have multiple primitives
@@ -92,7 +101,7 @@ for ns in range(N_settings):
     global_traj_unroll[prim_no][ns] = [None] * N_demos
     
     for nd in range(N_demos):
-        print ('Setting #' + str(ns+1) + '/' + str(N_settings) + ', Demo #' + str(nd+1) + '/' + str(N_demos))
+        print ('Setting #' + str(ns+1) + '/' + str(N_all_settings) + ', Demo #' + str(nd+1) + '/' + str(N_demos))
         [unroll_dataset_Ct_obs_avoid["sub_X"][prim_no][ns][nd],
          unroll_dataset_Ct_obs_avoid["sub_Ct_target"][prim_no][ns][nd],
          global_traj_unroll[prim_no][ns][nd]] = unrollLearnedObsAvoidViconTraj(data_global_coord["obs_avoid"][1][ns][nd],

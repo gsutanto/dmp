@@ -20,12 +20,22 @@ from utilities import *
 
 data_global_coord = loadObj('data_multi_demo_vicon_static_global_coord.pkl')
 dataset_Ct_obs_avoid = loadObj('dataset_Ct_obs_avoid.pkl')
-#unroll_dataset_Ct_obs_avoid = loadObj('unroll_dataset_Ct_obs_avoid.pkl')
-unroll_dataset_Ct_obs_avoid = loadObj('unroll_dataset_Ct_obs_avoid_recur_Ct_dataset.pkl')
+unroll_dataset_Ct_obs_avoid = loadObj('unroll_dataset_Ct_obs_avoid.pkl')
+#unroll_dataset_Ct_obs_avoid = loadObj('unroll_dataset_Ct_obs_avoid_recur_Ct_dataset.pkl')
 
-N_settings = len(data_global_coord["obs_avoid"][0])
+model_parent_dir_path = '../tf/models/'
 
-subset_settings_indices = range(N_settings)
+selected_settings_indices_file_path = model_parent_dir_path + 'selected_settings_indices.txt'
+if not os.path.isfile(selected_settings_indices_file_path):
+    N_settings = len(data_global_coord["obs_avoid"][0])
+    selected_settings_indices = range(N_settings)
+else:
+    selected_settings_indices = [(i-1) for i in list(np.loadtxt(selected_settings_indices_file_path, dtype=np.int, ndmin=1))] # file is saved following MATLAB's convention (1~222)
+    N_settings = len(selected_settings_indices)
+
+print('N_settings = ' + str(N_settings))
+
+subset_settings_indices = selected_settings_indices
 subset_demos_indices = range(1)
 mode_stack_dataset = 2
 feature_type = 'raw'

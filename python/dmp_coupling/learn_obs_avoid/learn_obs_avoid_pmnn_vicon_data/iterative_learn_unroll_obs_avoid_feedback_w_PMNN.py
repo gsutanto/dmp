@@ -89,7 +89,7 @@ if not os.path.isfile(selected_settings_indices_file_path):
     N_settings = len(data_global_coord["obs_avoid"][0])
     selected_settings_indices = range(N_settings)
 else:
-    selected_settings_indices = list(np.loadtxt(selected_settings_indices_file_path, dtype=np.int, ndmin=1))
+    selected_settings_indices = [(i-1) for i in list(np.loadtxt(selected_settings_indices_file_path, dtype=np.int, ndmin=1))] # file is saved following MATLAB's convention (1~222)
     N_settings = len(selected_settings_indices)
 
 print('N_settings = ' + str(N_settings))
@@ -112,6 +112,12 @@ unroll_dataset_Ct_obs_avoid["sub_Ct_target"] = [[None] * N_all_settings]
 reinit_selection_idx = list(np.loadtxt(model_parent_dir_path+'reinit_selection_idx.txt', dtype=np.int, ndmin=1))
 TF_max_train_iters = np.loadtxt(model_parent_dir_path+'TF_max_train_iters.txt', dtype=np.int, ndmin=0)
 init_model_param_filepath = model_parent_dir_path + 'prim_' + str(prim_no+1) + '_params_reinit_' + str(reinit_selection_idx[prim_no]) + ('_step_%07d.mat' % TF_max_train_iters)
+
+print ('')
+print ('reinit_selection_idx      = ', reinit_selection_idx)
+print ('TF_max_train_iters        = ', TF_max_train_iters)
+print ('init_model_param_filepath = ', init_model_param_filepath)
+print ('')
 
 regular_NN_hidden_layer_topology = list(np.loadtxt(model_parent_dir_path+'regular_NN_hidden_layer_topology.txt', dtype=np.int, ndmin=1))
 regular_NN_hidden_layer_activation_func_list = list(np.loadtxt(model_parent_dir_path+'regular_NN_hidden_layer_activation_func_list.txt', dtype=np.str, ndmin=1))

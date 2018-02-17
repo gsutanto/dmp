@@ -51,7 +51,8 @@ D_input = 17
 D_output = 3
 pmnn_model_parent_dir_path = '../tf/models/'
 # pmnn_model_file_path = None
-pmnn_model_file_path = '../tf/models/iterative_learn_unroll/prim_1_params_step_0044300.mat'
+#pmnn_model_file_path = pmnn_model_parent_dir_path + 'iterative_learn_unroll/prim_1_params_step_0044300.mat'
+pmnn_model_file_path = pmnn_model_parent_dir_path + 'iterative_learn_unroll/prim_1_params_step_0005500.mat'
 pmnn_name = 'my_PMNN_obs_avoid_fb'
 
 dmp_basis_funcs_size = 25
@@ -59,7 +60,7 @@ canonical_order = 2
 ctraj_local_coordinate_frame_selection = GSUTANTO_LOCAL_COORD_FRAME
 is_using_scaling = [False] * D_output # NOT using scaling on CartCoordDMP for now...
                                         
-tau_sys = TauSystem(data_global_coord["dt"], sMIN_TAU)
+tau_sys = TauSystem(data_global_coord["dt"], MIN_TAU)
 canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
 loa_parameters = TCLearnObsAvoidFeatureParameter(D_input,
                                                  dmp_basis_funcs_size, D_output,
@@ -74,15 +75,24 @@ cart_coord_dmp = CartesianCoordDMP(dmp_basis_funcs_size, canonical_sys_discr,
 cart_coord_dmp.setScalingUsage(is_using_scaling)
 cart_coord_dmp.setParams(ccdmp_baseline_params['W'], ccdmp_baseline_params['A_learn'])
 
-N_settings = len(data_global_coord["obs_avoid"][0])
+selected_settings_indices_file_path = pmnn_model_parent_dir_path + 'selected_settings_indices.txt'
+if not os.path.isfile(selected_settings_indices_file_path):
+    N_settings = len(data_global_coord["obs_avoid"][0])
+    selected_settings_indices = range(N_settings)
+else:
+    selected_settings_indices = [(i-1) for i in list(np.loadtxt(selected_settings_indices_file_path, dtype=np.int, ndmin=1))] # file is saved following MATLAB's convention (1~222)
+    N_settings = len(selected_settings_indices)
+
+print('N_settings = ' + str(N_settings))
 prim_no = 0 # There is only one (1) primitive here.
 
+N_all_settings = len(data_global_coord["obs_avoid"][0])
 unroll_dataset_Ct_obs_avoid = {}
-unroll_dataset_Ct_obs_avoid["sub_X"] = [[None] * N_settings]
-unroll_dataset_Ct_obs_avoid["sub_Ct_target"] = [[None] * N_settings]
-global_traj_unroll = [[None] * N_settings]
+unroll_dataset_Ct_obs_avoid["sub_X"] = [[None] * N_all_settings]
+unroll_dataset_Ct_obs_avoid["sub_Ct_target"] = [[None] * N_all_settings]
+global_traj_unroll = [[None] * N_all_settings]
 
-for ns in range(N_settings):
+for ns in selected_settings_indices:
     N_demos = len(data_global_coord["obs_avoid"][1][ns])
     
     # the index 0 before ns seems unnecessary, but this is just for the sake of generality, if we have multiple primitives
@@ -91,7 +101,7 @@ for ns in range(N_settings):
     global_traj_unroll[prim_no][ns] = [None] * N_demos
     
     for nd in range(N_demos):
-        print ('Setting #' + str(ns+1) + '/' + str(N_settings) + ', Demo #' + str(nd+1) + '/' + str(N_demos))
+        print ('Setting #' + str(ns+1) + '/' + str(N_all_settings) + ', Demo #' + str(nd+1) + '/' + str(N_demos))
         [unroll_dataset_Ct_obs_avoid["sub_X"][prim_no][ns][nd],
          unroll_dataset_Ct_obs_avoid["sub_Ct_target"][prim_no][ns][nd],
          global_traj_unroll[prim_no][ns][nd]] = unrollLearnedObsAvoidViconTraj(data_global_coord["obs_avoid"][1][ns][nd],
