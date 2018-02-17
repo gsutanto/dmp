@@ -84,13 +84,13 @@ cart_coord_dmp.setParams(ccdmp_baseline_params['W'], ccdmp_baseline_params['A_le
 
 model_parent_dir_path = '../tf/models/'
 
-all_settings_indices_file_path = model_parent_dir_path + 'all_settings_indices.txt'
-if not os.path.isfile(all_settings_indices_file_path):
+selected_settings_indices_file_path = model_parent_dir_path + 'selected_settings_indices.txt'
+if not os.path.isfile(selected_settings_indices_file_path):
     N_settings = len(data_global_coord["obs_avoid"][0])
-    all_settings_indices = range(N_settings)
+    selected_settings_indices = range(N_settings)
 else:
-    all_settings_indices = list(np.loadtxt(all_settings_indices_file_path, dtype=np.int, ndmin=1))
-    N_settings = len(all_settings_indices)
+    selected_settings_indices = list(np.loadtxt(selected_settings_indices_file_path, dtype=np.int, ndmin=1))
+    N_settings = len(selected_settings_indices)
 
 print('N_settings = ' + str(N_settings))
 prim_no = 0 # There is only one (1) primitive here.
@@ -100,11 +100,12 @@ prim_no = 0 # There is only one (1) primitive here.
 N_settings_per_batch = 10
 N_demos_per_setting = 1
 
-batch_size = N_settings_per_batch * 200
+batch_size = N_settings_per_batch * N_demos_per_setting * 200
 
+N_all_settings = len(data_global_coord["obs_avoid"][0])
 unroll_dataset_Ct_obs_avoid = {}
-unroll_dataset_Ct_obs_avoid["sub_X"] = [[None] * N_settings]
-unroll_dataset_Ct_obs_avoid["sub_Ct_target"] = [[None] * N_settings]
+unroll_dataset_Ct_obs_avoid["sub_X"] = [[None] * N_all_settings]
+unroll_dataset_Ct_obs_avoid["sub_Ct_target"] = [[None] * N_all_settings]
 
 
 # Create directories if not currently exist:
@@ -196,7 +197,7 @@ with tf.Session(graph=ff_nn_graph) as session:
 
     # Start the training loop.
     for step in range(TF_max_train_iters):
-        list_batch_settings = [ all_settings_indices[i] for i in list(np.random.permutation(N_settings))[0:N_settings_per_batch] ]
+        list_batch_settings = [ selected_settings_indices[i] for i in list(np.random.permutation(N_settings))[0:N_settings_per_batch] ]
         list_batch_setting_demos = list(np.random.permutation(3))[0:N_demos_per_setting]
         
         for ns in list_batch_settings:

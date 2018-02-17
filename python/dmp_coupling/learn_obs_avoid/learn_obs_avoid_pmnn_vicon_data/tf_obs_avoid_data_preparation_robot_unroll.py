@@ -33,15 +33,15 @@ else:
     ccdmp_baseline_unroll_global_traj = loadObj('ccdmp_baseline_unroll_global_traj.pkl')
     dataset_Ct_obs_avoid = loadObj('dataset_Ct_' + task_type + '.pkl')
 
-all_settings_indices_file_path = '../tf/models/all_settings_indices.txt'
-if not os.path.isfile(all_settings_indices_file_path):
+selected_settings_indices_file_path = '../tf/models/selected_settings_indices.txt'
+if not os.path.isfile(selected_settings_indices_file_path):
     is_comparing_w_MATLAB_implementation = True
     N_settings = len(data_global_coord["obs_avoid"][0])
-    all_settings_indices = range(N_settings)
+    selected_settings_indices = range(N_settings)
 else:
     is_comparing_w_MATLAB_implementation = False
-    all_settings_indices = list(np.loadtxt(all_settings_indices_file_path, dtype=np.int, ndmin=1))
-    N_settings = len(all_settings_indices)
+    selected_settings_indices = list(np.loadtxt(selected_settings_indices_file_path, dtype=np.int, ndmin=1))
+    N_settings = len(selected_settings_indices)
 
 print('N_settings = ' + str(N_settings))
 
@@ -53,7 +53,7 @@ out_data_dir = ''
 [X, Ct_target, 
  normalized_phase_PSI_mult_phase_V,
  data_point_priority] = prepareData(task_type, dataset_Ct_obs_avoid, 
-                                    all_settings_indices,
+                                    selected_settings_indices,
                                     considered_subset_outlier_ranked_demo_indices,
                                     generalization_subset_outlier_ranked_demo_indices,
                                     post_filename_stacked_data,
