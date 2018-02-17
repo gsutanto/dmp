@@ -82,7 +82,17 @@ cart_coord_dmp = CartesianCoordDMP(dmp_basis_funcs_size, canonical_sys_discr,
 cart_coord_dmp.setScalingUsage(is_using_scaling)
 cart_coord_dmp.setParams(ccdmp_baseline_params['W'], ccdmp_baseline_params['A_learn'])
 
-N_settings = len(data_global_coord["obs_avoid"][0])
+model_parent_dir_path = '../tf/models/'
+
+all_settings_indices_file_path = model_parent_dir_path + 'all_settings_indices.txt'
+if not os.path.isfile(all_settings_indices_file_path):
+    N_settings = len(data_global_coord["obs_avoid"][0])
+    all_settings_indices = range(N_settings)
+else:
+    all_settings_indices = list(np.loadtxt(all_settings_indices_file_path, dtype=np.int, ndmin=1))
+    N_settings = len(all_settings_indices)
+
+print('N_settings = ' + str(N_settings))
 prim_no = 0 # There is only one (1) primitive here.
 
 
@@ -98,7 +108,6 @@ unroll_dataset_Ct_obs_avoid["sub_Ct_target"] = [[None] * N_settings]
 
 
 # Create directories if not currently exist:
-model_parent_dir_path = '../tf/models/'
 reinit_selection_idx = list(np.loadtxt(model_parent_dir_path+'reinit_selection_idx.txt', dtype=np.int, ndmin=1))
 TF_max_train_iters = np.loadtxt(model_parent_dir_path+'TF_max_train_iters.txt', dtype=np.int, ndmin=0)
 init_model_param_filepath = model_parent_dir_path + 'prim_' + str(prim_no+1) + '_params_reinit_' + str(reinit_selection_idx[prim_no]) + ('_step_%07d.mat' % TF_max_train_iters)
@@ -187,7 +196,7 @@ with tf.Session(graph=ff_nn_graph) as session:
 
     # Start the training loop.
     for step in range(TF_max_train_iters):
-        list_batch_settings = list(np.random.permutation(N_settings))[0:N_settings_per_batch]
+        list_batch_settings = [ all_settings_indices[i] for i in list(np.random.permutation(N_settings))[0:N_settings_per_batch] ]
         list_batch_setting_demos = list(np.random.permutation(3))[0:N_demos_per_setting]
         
         for ns in list_batch_settings:
