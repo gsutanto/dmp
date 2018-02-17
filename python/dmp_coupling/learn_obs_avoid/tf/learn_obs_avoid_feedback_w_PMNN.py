@@ -28,6 +28,8 @@ N_NN_reinit_trials = 3
 batch_size = 64
 TF_max_train_iters = np.loadtxt(model_parent_dir_path+'TF_max_train_iters.txt', dtype=np.int, ndmin=0) + 1
 
+print ('TF_max_train_iters = ', TF_max_train_iters)
+
 # Dropouts:
 tf_train_dropout_keep_prob = 0.5
 
