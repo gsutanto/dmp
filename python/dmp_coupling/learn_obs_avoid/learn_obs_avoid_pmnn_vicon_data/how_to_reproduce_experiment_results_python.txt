@@ -1,0 +1,23 @@
+Execution Order for Reproducing Experimental Results in Python:
+**---------------- Learning Feedback/Coupling Term Model on TensorFlow and Its Verification ----------------**
+ [1] Prepare the Training and Generalization Testing Dataset, by running the following scripts in amd_clmc_dmp/python/dmp_coupling/learn_obs_avoid/learn_obs_avoid_pmnn_vicon_data/ in Python:
+     >> on Spyder: convertDemoToSupervisedObsAvoidFbDataset.py 
+                   => tf_obs_avoid_data_preparation_robot_unroll.py
+ [2] Perform Initial Feedback Model Training in TensorFlow in Python:
+     >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_obs_avoid/tf/learn_obs_avoid_feedback_w_PMNN.py
+     (ensuring (is_performing_generalization_test == 0) on line 49 is selected...)
+ [3] Using helper MATLAB script amd_clmc_dmp/python/dmp_coupling/learn_obs_avoid/tf/models/compare_nmse_generalization_among_reinits.m ,
+     inspect and compare among the prim_1_nmse_reinit_<y>_step_<TF_max_train_iters>.mat files for y in [0,1,2], 
+     and manually select y which has the best (lowest) nmse_generalization_test.
+     Suppose y_{best}=2;
+     then write/update the file amd_clmc_dmp/python/dmp_coupling/learn_obs_avoid/tf/models/reinit_selection_idx.txt with content:
+     "2" (without the double quotes when writing in the file of course...).
+ [4] Test the trained Feedback Model performing prediction on unseen demonstration/trial in TensorFlow in Python:
+     >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_obs_avoid/tf/test_learned_obs_avoid_feedback_w_PMNN.py
+**---------------- Unrolling Test of the Learned Feedback/Coupling Term Model: with Dynamics vs. without Dynamics ----------------**
+ [6] Execute the unrolling test of the learned feedback/coupling term model, between with dynamics versus without dynamics, 
+     by running the following scripts in amd_clmc_dmp/matlab/dmp_coupling/learn_obs_avoid/learn_obs_avoid_pmnn_vicon_data/:
+     >> on MATLAB: test_unroll_learned_pmnn_obs_avoid_fb.m
+ [7] Compare the NMSE between with-dynamics unrolling versus without-dynamics unrolling, 
+     by running the following scripts in amd_clmc_dmp/matlab/dmp_coupling/learn_obs_avoid/learn_obs_avoid_pmnn_vicon_data/:
+     >> on MATLAB: evaluate_NMSE_unroll.m

@@ -18,7 +18,8 @@ from convertDemoToSupervisedObsAvoidFbDataset import *
 from DataStacking import *
 from utilities import *
 
-is_converting_demo_to_supervised_obs_avoid_fb_dataset = True
+is_converting_demo_to_supervised_obs_avoid_fb_dataset = False
+is_comparing_w_MATLAB_implementation = True
 task_type = 'obs_avoid'
 
 if (is_converting_demo_to_supervised_obs_avoid_fb_dataset):
@@ -33,13 +34,12 @@ else:
     ccdmp_baseline_unroll_global_traj = loadObj('ccdmp_baseline_unroll_global_traj.pkl')
     dataset_Ct_obs_avoid = loadObj('dataset_Ct_' + task_type + '.pkl')
 
-selected_settings_indices_file_path = '../tf/models/selected_settings_indices.txt'
-if not os.path.isfile(selected_settings_indices_file_path):
-    is_comparing_w_MATLAB_implementation = True
+if (is_comparing_w_MATLAB_implementation):
     N_settings = len(data_global_coord["obs_avoid"][0])
     selected_settings_indices = range(N_settings)
 else:
-    is_comparing_w_MATLAB_implementation = False
+    selected_settings_indices_file_path = '../tf/models/selected_settings_indices.txt'
+    assert (os.path.isfile(selected_settings_indices_file_path)), selected_settings_indices_file_path + ' file does NOT exist!'
     selected_settings_indices = [(i-1) for i in list(np.loadtxt(selected_settings_indices_file_path, dtype=np.int, ndmin=1))] # file is saved following MATLAB's convention (1~222)
     N_settings = len(selected_settings_indices)
 
@@ -75,6 +75,7 @@ if is_comparing_w_MATLAB_implementation:
     mnPSI_generalization_test = sio.loadmat('../tf/input_data/'+generalization_test_sub_path+'test_unroll_prim_'+str(prim_no)+'_normalized_phase_PSI_mult_phase_V_obs_avoid'+generalization_test_id_string+'.mat', struct_as_record=True)['normalized_phase_PSI_mult_phase_V'].astype(np.float32)
     mW_generalization_test = sio.loadmat('../tf/input_data/'+generalization_test_sub_path+'test_unroll_prim_'+str(prim_no)+'_data_point_priority_obs_avoid'+generalization_test_id_string+'.mat', struct_as_record=True)['data_point_priority'].astype(np.float32)
     
+    print ('Comparing between Python and MATLAB Implementation Results: (no message will be printed out if similar...)')
     compareTwoMatrices(X[0][0], mX, 1.02e-4)
     compareTwoMatrices(Ct_target[0][0], mCt_target, 4.5e-3)
     compareTwoMatrices(normalized_phase_PSI_mult_phase_V[0][0], mnormalized_phase_kernels)
