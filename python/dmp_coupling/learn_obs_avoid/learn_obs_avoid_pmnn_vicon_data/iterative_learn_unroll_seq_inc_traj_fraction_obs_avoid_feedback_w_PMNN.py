@@ -1,9 +1,14 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-Created on Mon Oct 30 19:00:00 2017
+Created on Wed Mar 21 17:00:00 2018
 
 @author: gsutanto
+@remarks: a variant of Iterative-Learning-and-Unrolling
+          as implemented in iterative_learn_unroll_obs_avoid_feedback_w_PMNN.py,
+          but learning-and-unrolling is done iteratively on
+          the 1st 5%, 10%, 15%, ..., 100% (increasing percentage over batch)
+          of each trajectory segment.
 """
 
 from __future__ import print_function

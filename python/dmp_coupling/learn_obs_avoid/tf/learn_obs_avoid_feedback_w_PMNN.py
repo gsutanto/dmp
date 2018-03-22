@@ -24,7 +24,7 @@ model_parent_dir_path = './models/'
 if not os.path.isdir(model_parent_dir_path):
     os.makedirs(model_parent_dir_path)
 
-N_NN_reinit_trials = 3
+N_NN_reinit_trials = 1 #3
 batch_size = 64
 TF_max_train_iters = np.loadtxt(model_parent_dir_path+'TF_max_train_iters.txt', dtype=np.int, ndmin=0) + 1
 
@@ -182,8 +182,8 @@ for input_selector in input_selector_list:
             print('N_test_dataset  =', N_test_dataset)
             
             # Build the complete graph for feeding inputs, training, and saving checkpoints.
-            ff_nn_graph = tf.Graph()
-            with ff_nn_graph.as_default():
+            pmnn_graph = tf.Graph()
+            with pmnn_graph.as_default():
                 # Input data. For the training data, we use a placeholder that will be fed
                 # at run time with a training minibatch.
                 tf_train_X_batch = tf.placeholder(tf.float32, shape=[batch_size, D_input], name="tf_train_X_batch_placeholder")
@@ -221,7 +221,9 @@ for input_selector in input_selector_list:
                     train_op_dim2, loss_dim2 = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2)
                 
                 # Create a summary:
-                #tf.summary.scalar("loss_dim_"+str(dim_out), loss_dim[dim_out])
+                tf.summary.scalar("loss_dim0", loss_dim0)
+                tf.summary.scalar("loss_dim1", loss_dim1)
+                tf.summary.scalar("loss_dim2", loss_dim2)
             
                 # merge all summaries into a single "operation" which we can execute in a session
                 summary_op = tf.summary.merge_all()
@@ -236,7 +238,7 @@ for input_selector in input_selector_list:
             #expected_rv_output_biases  = np.array([ -1.65803023e-14, -3.75096513e-15, 5.12945704e-15, -1.96647209e-16, -8.87342059e-15, 2.00303844e-14 ])
             
             # Run training for TF_max_train_iters and save checkpoint at the end.
-            with tf.Session(graph=ff_nn_graph) as session:
+            with tf.Session(graph=pmnn_graph) as session:
                 for n_NN_reinit_trial in range(N_NN_reinit_trials):
                     print ("n_NN_reinit_trial = ", n_NN_reinit_trial)
                     
@@ -276,10 +278,10 @@ for input_selector in input_selector_list:
                         # in the list passed to sess.run() and the value tensors will be
                         # returned in the tuple from the call.
             #            _, loss_value, tr_batch_prediction, summary = session.run([train_op, loss, train_batch_prediction, summary_op], feed_dict=feed_dict)
-                        _, loss_value_0, _, loss_value_1, _, loss_value_2, tr_batch_prediction = session.run([train_op_dim0, loss_dim0, train_op_dim1, loss_dim1, train_op_dim2, loss_dim2, train_batch_prediction], feed_dict=feed_dict)
+                        tr_batch_prediction, _, loss_value_0, _, loss_value_1, _, loss_value_2, summary = session.run([train_batch_prediction, train_op_dim0, loss_dim0, train_op_dim1, loss_dim1, train_op_dim2, loss_dim2, summary_op], feed_dict=feed_dict)
                         
                         # write log
-                        #writer.add_summary(summary, step)
+                        writer.add_summary(summary, step)
                         
                         if (is_performing_generalization_test == 0):
                             if (step % 1000 == 0):
