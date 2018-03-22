@@ -164,8 +164,8 @@ nmse_averaging_window = 20
 
 
 # Build the complete graph for feeding inputs, training, and saving checkpoints.
-ff_nn_graph = tf.Graph()
-with ff_nn_graph.as_default():
+pmnn_graph = tf.Graph()
+with pmnn_graph.as_default():
     # Input data. For the training data, we use a placeholder that will be fed
     # at run time with a training minibatch.
     tf_train_X_batch = tf.placeholder(tf.float32, shape=[batch_size, D_input], name="tf_train_X_batch_placeholder")
@@ -192,13 +192,15 @@ with ff_nn_graph.as_default():
         train_op_dim2, loss_dim2 = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2)
     
     # Create a summary:
-    #tf.summary.scalar("loss_dim_"+str(dim_out), loss_dim[dim_out])
+    tf.summary.scalar("loss_dim0", loss_dim0)
+    tf.summary.scalar("loss_dim1", loss_dim1)
+    tf.summary.scalar("loss_dim2", loss_dim2)
 
     # merge all summaries into a single "operation" which we can execute in a session
     summary_op = tf.summary.merge_all()
 
 # Run training for TF_max_train_iters and save checkpoint at the end.
-with tf.Session(graph=ff_nn_graph) as session:
+with tf.Session(graph=pmnn_graph) as session:
     # Run the Op to initialize the variables.
     tf.global_variables_initializer().run()
     print("Initialized")
@@ -284,11 +286,11 @@ with tf.Session(graph=ff_nn_graph) as session:
         # inspect the values of your Ops or variables, you may include them
         # in the list passed to sess.run() and the value tensors will be
         # returned in the tuple from the call.
-#         _, loss_value, tr_batch_prediction, summary = session.run([train_op, loss, train_batch_prediction, summary_op], feed_dict=feed_dict)
-        _, loss_value_0, _, loss_value_1, _, loss_value_2, tr_batch_prediction = session.run([train_op_dim0, loss_dim0, train_op_dim1, loss_dim1, train_op_dim2, loss_dim2, train_batch_prediction], feed_dict=feed_dict)
+#         tr_batch_prediction, _, loss_value, summary = session.run([train_batch_prediction, train_op, loss, summary_op], feed_dict=feed_dict)
+        tr_batch_prediction, _, loss_value_0, _, loss_value_1, _, loss_value_2, summary = session.run([train_batch_prediction, train_op_dim0, loss_dim0, train_op_dim1, loss_dim1, train_op_dim2, loss_dim2, summary_op], feed_dict=feed_dict)
         
         # write log
-        #writer.add_summary(summary, step)
+        writer.add_summary(summary, step)
         
         NN_model_params = pmnn.saveNeuralNetworkToMATLABMatFile()
         tcloa.loa_param.pmnn.model_params = NN_model_params
