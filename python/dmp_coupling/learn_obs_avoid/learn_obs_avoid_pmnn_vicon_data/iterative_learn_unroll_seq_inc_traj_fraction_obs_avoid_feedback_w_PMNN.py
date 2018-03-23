@@ -53,8 +53,10 @@ from PMNN import *
 
 
 
-frac_max_ave_batch_nmse = 0.30
+frac_max_ave_batch_nmse = 0.50
 final_max_ave_batch_nmse = 0.25
+
+is_using_offline_pretrained_model = True
 
 # Dropouts:
 tf_train_dropout_keep_prob = 1.0
@@ -145,7 +147,10 @@ unroll_dataset_Ct_obs_avoid["sub_Ct_target"] = [[None] * N_all_settings]
 # Create directories if not currently exist:
 reinit_selection_idx = list(np.loadtxt(model_parent_dir_path+'reinit_selection_idx.txt', dtype=np.int, ndmin=1))
 TF_max_train_iters = np.loadtxt(model_parent_dir_path+'TF_max_train_iters.txt', dtype=np.int, ndmin=0)
-init_model_param_filepath = model_parent_dir_path + 'prim_' + str(prim_no+1) + '_params_reinit_' + str(reinit_selection_idx[prim_no]) + ('_step_%07d.mat' % TF_max_train_iters)
+if (is_using_offline_pretrained_model == True):
+    init_model_param_filepath = model_parent_dir_path + 'prim_' + str(prim_no+1) + '_params_reinit_' + str(reinit_selection_idx[prim_no]) + ('_step_%07d.mat' % TF_max_train_iters)
+else:
+    init_model_param_filepath = ""
 
 print ('')
 print ('reinit_selection_idx      = ', reinit_selection_idx)
@@ -190,13 +195,13 @@ with pmnn_graph.as_default():
     
     # Build the Training Graph (that calculate and apply gradients), per output dimension.
     if (is_performing_weighted_training):
-        train_op_dim0, loss_dim0 = pmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 0, tf_train_W_batch)
-        train_op_dim1, loss_dim1 = pmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 1, tf_train_W_batch)
-        train_op_dim2, loss_dim2 = pmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2, tf_train_W_batch)
+        [train_op_dim0, loss_dim0] = pmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 0, tf_train_W_batch)
+        [train_op_dim1, loss_dim1] = pmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 1, tf_train_W_batch)
+        [train_op_dim2, loss_dim2] = pmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2, tf_train_W_batch)
     else:
-        train_op_dim0, loss_dim0 = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 0)
-        train_op_dim1, loss_dim1 = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 1)
-        train_op_dim2, loss_dim2 = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2)
+        [train_op_dim0, loss_dim0] = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 0)
+        [train_op_dim1, loss_dim1] = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 1)
+        [train_op_dim2, loss_dim2] = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2)
     
     # Create a summary:
     tf.summary.scalar("loss_dim0", loss_dim0)
@@ -213,6 +218,7 @@ with tf.Session(graph=pmnn_graph) as session:
     print("Initialized")
     
     # create log writer object
+    recreateDir(logs_path)
     writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
     
     init_fraction_data_pts_included_per_demo = 0.05
@@ -327,8 +333,16 @@ with tf.Session(graph=pmnn_graph) as session:
         # inspect the values of your Ops or variables, you may include them
         # in the list passed to sess.run() and the value tensors will be
         # returned in the tuple from the call.
-#         tr_batch_prediction, _, loss_value, summary = session.run([train_batch_prediction, train_op, loss, summary_op], feed_dict=feed_dict)
-        tr_batch_prediction, _, loss_value_0, _, loss_value_1, _, loss_value_2, summary = session.run([train_batch_prediction, train_op_dim0, loss_dim0, train_op_dim1, loss_dim1, train_op_dim2, loss_dim2, summary_op], feed_dict=feed_dict)
+        
+        [tr_batch_prediction,
+         _, _, 
+         _, _, 
+         _, _, 
+         summary] = session.run([train_batch_prediction, 
+                                 train_op_dim0, loss_dim0, 
+                                 train_op_dim1, loss_dim1, 
+                                 train_op_dim2, loss_dim2, 
+                                 summary_op], feed_dict=feed_dict)
         
         # write log
         writer.add_summary(summary, step)

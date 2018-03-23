@@ -236,7 +236,7 @@ class PMNN(FeedForwardNeuralNetwork):
         # train_op = tf.train.AdamOptimizer().minimize(loss, global_step=global_step)
         # train_op = tf.train.AdagradOptimizer(initial_learning_rate).minimize(loss, global_step=global_step)
         # train_op = tf.train.AdadeltaOptimizer().minimize(loss, global_step=global_step)
-        train_op_dim = tf.train.RMSPropOptimizer(initial_learning_rate).minimize(loss, global_step=global_step)
+        train_op = tf.train.RMSPropOptimizer(initial_learning_rate).minimize(loss, global_step=global_step)
         
         # return train_op, loss, learning_rate
         return train_op, loss
@@ -275,18 +275,19 @@ class PMNN(FeedForwardNeuralNetwork):
             loss_dim = tf.reduce_mean(pred_l2_loss_dim) + (beta * reg_l2_loss_dim)
         
         # Create a variable to track the global step.
-        global_step = tf.Variable(0, name='global_step', trainable=False)
+        global_step_dim = tf.Variable(0, name='global_step', trainable=False)
         # Exponentially-decaying learning rate:
         # learning_rate = tf.train.exponential_decay(initial_learning_rate, global_step, N_steps, 0.1)
         # Create the gradient descent optimizer with the given learning rate.
         # Use the optimizer to apply the gradients that minimize the loss
         # (and also increment the global step counter) as a single training step.
-        # train_op = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss, global_step=global_step)
-        # train_op = tf.train.MomentumOptimizer(learning_rate, momentum=learning_rate/4.0, use_nesterov=True).minimize(loss, global_step=global_step)
-        # train_op = tf.train.AdamOptimizer().minimize(loss, global_step=global_step)
-        # train_op_dim = tf.train.AdagradOptimizer(initial_learning_rate).minimize(loss_dim, global_step=global_step)
-        # train_op_dim = tf.train.AdadeltaOptimizer().minimize(loss_dim, global_step=global_step)
-        train_op_dim = tf.train.RMSPropOptimizer(initial_learning_rate).minimize(loss_dim, global_step=global_step)
+        # opt_dim = tf.train.GradientDescentOptimizer(learning_rate)
+        # opt_dim = tf.train.MomentumOptimizer(learning_rate, momentum=learning_rate/4.0, use_nesterov=True)
+        # opt_dim = tf.train.AdamOptimizer()
+        # opt_dim = tf.train.AdagradOptimizer(initial_learning_rate)
+        # opt_dim = tf.train.AdadeltaOptimizer()
+        opt_dim = tf.train.RMSPropOptimizer(learning_rate=initial_learning_rate)
+        train_op_dim = opt_dim.minimize(loss_dim, global_step=global_step_dim)
         
         return train_op_dim, loss_dim
     
@@ -325,18 +326,19 @@ class PMNN(FeedForwardNeuralNetwork):
             loss_dim = pred_l2_loss_dim + (beta * reg_l2_loss_dim)
         
         # Create a variable to track the global step.
-        global_step = tf.Variable(0, name='global_step', trainable=False)
+        global_step_dim = tf.Variable(0, name='global_step', trainable=False)
         # Exponentially-decaying learning rate:
         # learning_rate = tf.train.exponential_decay(initial_learning_rate, global_step, N_steps, 0.1)
         # Create the gradient descent optimizer with the given learning rate.
         # Use the optimizer to apply the gradients that minimize the loss
         # (and also increment the global step counter) as a single training step.
-        # train_op = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss, global_step=global_step)
-        # train_op = tf.train.MomentumOptimizer(learning_rate, momentum=learning_rate/4.0, use_nesterov=True).minimize(loss, global_step=global_step)
-        # train_op = tf.train.AdamOptimizer().minimize(loss, global_step=global_step)
-        # train_op_dim = tf.train.AdagradOptimizer(initial_learning_rate).minimize(loss_dim, global_step=global_step)
-        # train_op_dim = tf.train.AdadeltaOptimizer().minimize(loss_dim, global_step=global_step)
-        train_op_dim = tf.train.RMSPropOptimizer(initial_learning_rate).minimize(loss_dim, global_step=global_step)
+        # opt_dim = tf.train.GradientDescentOptimizer(learning_rate)
+        # opt_dim = tf.train.MomentumOptimizer(learning_rate, momentum=learning_rate/4.0, use_nesterov=True)
+        # opt_dim = tf.train.AdamOptimizer()
+        # opt_dim = tf.train.AdagradOptimizer(initial_learning_rate)
+        # opt_dim = tf.train.AdadeltaOptimizer()
+        opt_dim = tf.train.RMSPropOptimizer(learning_rate=initial_learning_rate)
+        train_op_dim = opt_dim.minimize(loss_dim, global_step=global_step_dim)
         
         return train_op_dim, loss_dim
 
