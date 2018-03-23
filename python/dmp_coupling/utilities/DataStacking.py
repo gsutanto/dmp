@@ -77,7 +77,8 @@ def stackDataset(dataset,
                  mode, 
                  mode_arg, 
                  feature_type, 
-                 primitive_no):
+                 primitive_no,
+                 fraction_data_points_included_per_demo_traj=1.0):
     assert ((mode == 1) or (mode == 2))
     
     if (mode == 1):
@@ -109,13 +110,13 @@ def stackDataset(dataset,
             subset_demos_indices = [dataset['trial_idx_ranked_by_outlier_metric_w_exclusion'][primitive_no][setting_no][ssidx] for ssidx in existed_subset_outlier_ranked_demo_indices]
         
         if (feature_type == 'raw'):
-            list_X_setting[ns_idx] = np.hstack([dataset["sub_X"][primitive_no][setting_no][nd] for nd in subset_demos_indices])
+            list_X_setting[ns_idx] = np.hstack([dataset["sub_X"][primitive_no][setting_no][nd][:,:int(round(fraction_data_points_included_per_demo_traj * dataset["sub_X"][primitive_no][setting_no][nd].shape[1]))] for nd in subset_demos_indices])
         
-        list_Ct_target_setting[ns_idx] = np.hstack([dataset["sub_Ct_target"][primitive_no][setting_no][nd] for nd in subset_demos_indices])
+        list_Ct_target_setting[ns_idx] = np.hstack([dataset["sub_Ct_target"][primitive_no][setting_no][nd][:,:int(round(fraction_data_points_included_per_demo_traj * dataset["sub_X"][primitive_no][setting_no][nd].shape[1]))] for nd in subset_demos_indices])
         if "sub_normalized_phase_PSI_mult_phase_V" in dataset:
-            list_normalized_phase_PSI_mult_phase_V_setting[ns_idx] = np.hstack([dataset["sub_normalized_phase_PSI_mult_phase_V"][primitive_no][setting_no][nd] for nd in subset_demos_indices])
+            list_normalized_phase_PSI_mult_phase_V_setting[ns_idx] = np.hstack([dataset["sub_normalized_phase_PSI_mult_phase_V"][primitive_no][setting_no][nd][:,:int(round(fraction_data_points_included_per_demo_traj * dataset["sub_X"][primitive_no][setting_no][nd].shape[1]))] for nd in subset_demos_indices])
         if "sub_data_point_priority" in dataset:
-            list_data_point_priority_setting[ns_idx] = np.hstack([dataset["sub_data_point_priority"][primitive_no][setting_no][nd] for nd in subset_demos_indices])
+            list_data_point_priority_setting[ns_idx] = np.hstack([dataset["sub_data_point_priority"][primitive_no][setting_no][nd][:int(round(fraction_data_points_included_per_demo_traj * dataset["sub_X"][primitive_no][setting_no][nd].shape[1]))] for nd in subset_demos_indices])
     
     X = np.hstack(list_X_setting).T
     Ct_target = np.hstack(list_Ct_target_setting).T

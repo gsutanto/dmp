@@ -36,18 +36,21 @@ def unrollLearnedObsAvoidViconTraj(demo_obs_avoid_traj_global,
                                    dt,
                                    cart_coord_dmp_baseline_params,
                                    cart_coord_dmp,
-                                   is_using_coupling_term=True):
+                                   is_using_coupling_term=True,
+                                   fraction_data_points_included_per_demo_traj=1.0):
     tcloa = cart_coord_dmp.transform_sys_discrete_cart_coord.transform_couplers_list[0]
     if (is_using_coupling_term == False):
         cart_coord_dmp.transform_sys_discrete_cart_coord.transform_couplers_list[0] = None # NOT using the learned obstacle avoidance coupling term, i.e. nominal/baseline unrolling
     
-    unroll_traj_length = demo_obs_avoid_traj_global.getLength()
+    traj_length = demo_obs_avoid_traj_global.getLength()
+    assert (fraction_data_points_included_per_demo_traj <= 1.0)
+    unroll_traj_length = int(round(fraction_data_points_included_per_demo_traj * traj_length))
     start_time_global_obs_avoid_demo = demo_obs_avoid_traj_global.getDMPStateAtIndex(0).time[0,0]
-    end_time_global_obs_avoid_demo = demo_obs_avoid_traj_global.getDMPStateAtIndex(unroll_traj_length-1).time[0,0]
-    unroll_dt = (end_time_global_obs_avoid_demo - start_time_global_obs_avoid_demo)/(unroll_traj_length - 1.0)
+    end_time_global_obs_avoid_demo = demo_obs_avoid_traj_global.getDMPStateAtIndex(traj_length-1).time[0,0]
+    unroll_dt = (end_time_global_obs_avoid_demo - start_time_global_obs_avoid_demo)/(traj_length - 1.0)
     if (unroll_dt <= 0.0):
         unroll_dt = dt
-    unroll_tau = 1.0 * unroll_dt * (unroll_traj_length - 1)
+    unroll_tau = 1.0 * unroll_dt * (traj_length - 1)
     unroll_critical_states_list = [None] * 2
     unroll_critical_states_list[0] = DMPState(cart_coord_dmp_baseline_params['mean_start_global_position'])
     unroll_critical_states_list[-1] = DMPState(cart_coord_dmp_baseline_params['mean_goal_global_position'])

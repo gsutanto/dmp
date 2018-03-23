@@ -53,6 +53,26 @@ from PMNN import *
 
 
 
+frac_max_ave_batch_nmse = 0.30
+final_max_ave_batch_nmse = 0.25
+
+# Dropouts:
+tf_train_dropout_keep_prob = 1.0
+
+# L2 Regularization Constant
+beta = 0.0
+
+logs_path = "/tmp/pmnn/iter_learn_unroll/frac/"
+
+is_performing_weighted_training = 1
+
+# Initial Learning Rate
+init_learning_rate = 0.001
+
+# Phase Modulation Usage Flag
+is_using_phase_kernel_modulation = True
+
+
 ## Demo Dataset Loading
 data_global_coord = loadObj('data_multi_demo_vicon_static_global_coord.pkl')
 # end of Demo Dataset Loading
@@ -141,22 +161,6 @@ N_phaseLWR_kernels = dmp_basis_funcs_size
 NN_topology = [D_input] + regular_NN_hidden_layer_topology + [N_phaseLWR_kernels, D_output]
 
 
-# Dropouts:
-tf_train_dropout_keep_prob = 1.0
-
-# L2 Regularization Constant
-beta = 0.0
-
-logs_path = "/tmp/pmnn/iter_learn_unroll/frac/"
-
-is_performing_weighted_training = 1
-
-# Initial Learning Rate
-init_learning_rate = 0.001
-
-# Phase Modulation Usage Flag
-is_using_phase_kernel_modulation = True
-
 input_X_descriptor_string = 'raw_reg_hidden_layer_100relu_75tanh'
 print ("input_X_descriptor_string = ", input_X_descriptor_string)
 
@@ -164,9 +168,6 @@ model_output_dir_path = '../tf/models/iterative_learn_unroll/'
 if not os.path.isdir(model_output_dir_path):
     os.makedirs(model_output_dir_path)
 
-
-batch_nmse_train_log = np.zeros((TF_max_train_iters, D_output))
-nmse_averaging_window = 20
 
 
 # Build the complete graph for feeding inputs, training, and saving checkpoints.
@@ -215,12 +216,38 @@ with tf.Session(graph=pmnn_graph) as session:
     writer = tf.summary.FileWriter(logs_path, graph=tf.get_default_graph())
     
     init_fraction_data_pts_included_per_demo = 0.05
-    fraction_data_pts_included_per_demo = init_fraction_data_pts_included_per_demo
+    fraction_data_pts_increments_included_per_demo = 0.05
+    
+    batch_var_ground_truth_log = np.zeros((TF_max_train_iters, D_output))
+    batch_nmse_train_log = np.zeros((TF_max_train_iters, D_output))
+    average_batch_nmse_train_log = np.zeros((TF_max_train_iters, D_output))
+    if (is_performing_weighted_training):
+        batch_wnmse_train_log = np.zeros((TF_max_train_iters, D_output))
+        average_batch_wnmse_train_log = np.zeros((TF_max_train_iters, D_output))
+    fraction_increment_log = np.zeros((int(round(1.0/fraction_data_pts_increments_included_per_demo)), 3)) # 1st column is the fraction, 2nd column is the starting step of this fraction, 3rd column is how many steps learning on this fraction until reaching convergence.
+    
+    fraction_data_pts_included_per_demo = 0.0
 
     # Start the training loop.
     for step in range(TF_max_train_iters):
-        N_settings_per_batch = int(round(min_N_settings_per_batch / fraction_data_pts_included_per_demo))
-        N_data_pts_included_per_demo = int(round(max_N_data_pts_included_per_demo * fraction_data_pts_included_per_demo))
+        if ((step == 0) or (np.max(average_batch_nmse_train_log[step-1, :]) < frac_max_ave_batch_nmse)):
+            start_step_frac = step
+            fraction_data_pts_included_per_demo = fraction_data_pts_included_per_demo + fraction_data_pts_increments_included_per_demo
+            assert ((fraction_data_pts_included_per_demo > 0.0) and (fraction_data_pts_included_per_demo <= 1.0))
+            
+            N_settings_per_batch = int(round(min_N_settings_per_batch / fraction_data_pts_included_per_demo))
+            # In average, each demonstrated trajectory will contribute this many data points:
+            # N_data_pts_included_per_demo = int(round(max_N_data_pts_included_per_demo * fraction_data_pts_included_per_demo))
+            nmse_averaging_window = int(np.ceil(N_all_settings * 1.0 / N_settings_per_batch))
+            
+            fraction_increment_log[(int(round(fraction_data_pts_included_per_demo/fraction_data_pts_increments_included_per_demo))-1),0] = fraction_data_pts_included_per_demo
+            fraction_increment_log[(int(round(fraction_data_pts_included_per_demo/fraction_data_pts_increments_included_per_demo))-1),1] = start_step_frac
+            if (step > 0):
+                fraction_increment_log[(int(round(fraction_data_pts_included_per_demo/fraction_data_pts_increments_included_per_demo))-2),2] = step - fraction_increment_log[(int(round(fraction_data_pts_included_per_demo/fraction_data_pts_increments_included_per_demo))-2),1]
+                assert (fraction_increment_log[(int(round(fraction_data_pts_included_per_demo/fraction_data_pts_increments_included_per_demo))-2),2] > 0)
+        
+        actual_nmse_averaging_window = min(((step - start_step_frac) + 1), nmse_averaging_window)
+        assert (actual_nmse_averaging_window > 0)
         
         list_batch_settings = [ selected_settings_indices[i] for i in list(np.random.permutation(N_settings))[0:N_settings_per_batch] ]
         list_batch_setting_demos = list(np.random.permutation(3))[0:N_demos_per_setting]
@@ -240,7 +267,9 @@ with tf.Session(graph=pmnn_graph) as session:
                                                      data_global_coord["obs_avoid"][0][ns],
                                                      data_global_coord["dt"],
                                                      ccdmp_baseline_params,
-                                                     cart_coord_dmp)
+                                                     cart_coord_dmp,
+                                                     True,
+                                                     fraction_data_pts_included_per_demo)
         
         subset_settings_indices = list_batch_settings
         subset_demos_indices = list_batch_setting_demos
@@ -255,7 +284,8 @@ with tf.Session(graph=pmnn_graph) as session:
                                              mode_stack_dataset, 
                                              subset_demos_indices, 
                                              feature_type, 
-                                             prim_no)
+                                             prim_no,
+                                             fraction_data_pts_included_per_demo)
         
         [X,
          Ct_unroll,
@@ -270,6 +300,7 @@ with tf.Session(graph=pmnn_graph) as session:
 #        print ('nmse_unroll        = ' + str(nmse_unroll))
         
 #        print('X.shape                        =', X.shape)
+#        print('Ct_unroll.shape                =', Ct_unroll.shape)
 #        print('Ct_target.shape                =', Ct_target.shape)
 #        print('normalized_phase_kernels.shape =', normalized_phase_kernels.shape)
 #        print('data_point_priority.shape      =', data_point_priority.shape)
@@ -281,8 +312,6 @@ with tf.Session(graph=pmnn_graph) as session:
         nPSI_train = normalized_phase_kernels[permuted_idx_train_dataset,:]
         Ctt_train = Ct_target[permuted_idx_train_dataset,:]
         W_train = data_point_priority[permuted_idx_train_dataset,:]
-        
-#        print('X_train.shape                  =', X_train.shape)
 
         batch_X = X_train
         batch_nPSI = nPSI_train
@@ -307,33 +336,38 @@ with tf.Session(graph=pmnn_graph) as session:
         NN_model_params = pmnn.saveNeuralNetworkToMATLABMatFile()
         tcloa.loa_param.pmnn.model_params = NN_model_params
         
-        batch_nmse_train = computeNMSE(tr_batch_prediction, batch_Ctt)
-        print("Step %d: NMSE = " % step, batch_nmse_train)
-        batch_nmse_train_log[step, :] = batch_nmse_train
+        batch_var_ground_truth_log[step, :] = np.var(Ctt_train, axis=0)
+        batch_nmse_train_log[step, :] = computeNMSE(tr_batch_prediction, batch_Ctt)
+        average_batch_nmse_train_log[step, :] = np.mean(batch_nmse_train_log[(step-(actual_nmse_averaging_window-1)):(step+1),:], axis=0)
+        if (is_performing_weighted_training):
+            batch_wnmse_train_log[step, :] = computeWNMSE(tr_batch_prediction, batch_Ctt, W_train)
+            average_batch_wnmse_train_log[step, :] = np.mean(batch_wnmse_train_log[(step-(actual_nmse_averaging_window-1)):(step+1),:], axis=0)
         if ((step > 0) and (step % nmse_averaging_window == 0)):
-            nmse = {}
-            print("")
-            if ((is_performing_weighted_training) and (step % 50 == 0) and (step > 0)):
-                wnmse_train = computeWNMSE(tr_batch_prediction, batch_Ctt, W_train)
-#                 print("Training            WNMSE: ", wnmse_train)
-                nmse["wnmse_train"] = wnmse_train
-            nmse_train = computeNMSE(tr_batch_prediction, batch_Ctt)
-            var_ground_truth_Ctt_train = np.var(Ctt_train, axis=0)
-            #print("Training             NMSE: ", nmse_train)
-            #print("Training         Variance: ", var_ground_truth_Ctt_train)
-            print ("Average "+str(nmse_averaging_window)+"-last Batch Training NMSE = ", np.mean(batch_nmse_train_log[(step-nmse_averaging_window):step,:], axis=0))
-            print("")
-#             if ((step > 0) and ((step == np.power(10,(np.floor(np.log10(step)))).astype(np.int32)) or (step == 5 * np.power(10,(np.floor(np.log10(step/5)))).astype(np.int32)))):
             sio.savemat((model_output_dir_path+'prim_'+str(prim_no+1)+'_params_step_%07d'%step+'.mat'), NN_model_params)
-            nmse["nmse_train"] = nmse_train
-            sio.savemat((model_output_dir_path+'prim_'+str(prim_no+1)+'_nmse_step_%07d'%step+'.mat'), nmse)
-            var_ground_truth = {}
-            var_ground_truth["var_ground_truth_Ctt_train"] = var_ground_truth_Ctt_train
-            sio.savemat((model_output_dir_path+'prim_'+str(prim_no+1)+'_var_ground_truth.mat'), var_ground_truth)
+            print ("Fraction %f, Step %d: Average " % (fraction_data_pts_included_per_demo, step) +str(actual_nmse_averaging_window)+"-last Batch Training NMSE = ", average_batch_nmse_train_log[step, :])
         if (step % 50 == 0):
-            np.savetxt((model_output_dir_path+'batch_nmse_train_log.txt'), batch_nmse_train_log[0:step,:])
+            np.savetxt((model_output_dir_path+'prim_'+str(prim_no+1)+'_batch_var_ground_truth_log.txt'), batch_var_ground_truth_log[0:(step+1),:])
+            np.savetxt((model_output_dir_path+'prim_'+str(prim_no+1)+'_batch_nmse_train_log.txt'), batch_nmse_train_log[0:(step+1),:])
+            np.savetxt((model_output_dir_path+'prim_'+str(prim_no+1)+'_average_batch_nmse_train_log.txt'), average_batch_nmse_train_log[0:(step+1),:])
+            if (is_performing_weighted_training):
+                np.savetxt((model_output_dir_path+'prim_'+str(prim_no+1)+'_batch_wnmse_train_log.txt'), batch_wnmse_train_log[0:(step+1),:])
+                np.savetxt((model_output_dir_path+'prim_'+str(prim_no+1)+'_average_batch_wnmse_train_log.txt'), average_batch_wnmse_train_log[0:(step+1),:])
+            np.savetxt((model_output_dir_path+'prim_'+str(prim_no+1)+'_fraction_increment_log.txt'), fraction_increment_log)
+        if ((int(fraction_data_pts_included_per_demo) == 1) and (np.max(average_batch_nmse_train_log[step, :]) < final_max_ave_batch_nmse)):
+            break
+    
+    fraction_increment_log[(int(round(fraction_data_pts_included_per_demo/fraction_data_pts_increments_included_per_demo))-1),2] = step - fraction_increment_log[(int(round(fraction_data_pts_included_per_demo/fraction_data_pts_increments_included_per_demo))-1),1]
+    assert (fraction_increment_log[(int(round(fraction_data_pts_included_per_demo/fraction_data_pts_increments_included_per_demo))-1),2] > 0)
+    sio.savemat((model_output_dir_path+'prim_'+str(prim_no+1)+'_params_step_%07d'%step+'.mat'), NN_model_params)
+    np.savetxt((model_output_dir_path+'prim_'+str(prim_no+1)+'_batch_var_ground_truth_log.txt'), batch_var_ground_truth_log[0:(step+1),:])
+    np.savetxt((model_output_dir_path+'prim_'+str(prim_no+1)+'_batch_nmse_train_log.txt'), batch_nmse_train_log[0:(step+1),:])
+    np.savetxt((model_output_dir_path+'prim_'+str(prim_no+1)+'_average_batch_nmse_train_log.txt'), average_batch_nmse_train_log[0:(step+1),:])
+    if (is_performing_weighted_training):
+        np.savetxt((model_output_dir_path+'prim_'+str(prim_no+1)+'_batch_wnmse_train_log.txt'), batch_wnmse_train_log[0:(step+1),:])
+        np.savetxt((model_output_dir_path+'prim_'+str(prim_no+1)+'_average_batch_wnmse_train_log.txt'), average_batch_wnmse_train_log[0:(step+1),:])
+    np.savetxt((model_output_dir_path+'prim_'+str(prim_no+1)+'_fraction_increment_log.txt'), fraction_increment_log)
     print("")
-#     if (is_performing_weighted_training):
-#     print("Final Training            WNMSE: ", wnmse_train)
-    print("Final Training             NMSE: ", nmse_train)
+    print("Final Average Batch Training NMSE at Step %d: " % step, batch_nmse_train_log[step, :])
+    if (is_performing_weighted_training):
+        print("Final Average Batch Training WNMSE at Step %d: " % step, batch_wnmse_train_log[step, :])
     print("")
