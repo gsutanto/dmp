@@ -64,19 +64,19 @@ if (is_performing_iterative_traj_fraction_inclusion):
     if (is_continuing_from_a_specific_iter):
         # user-specified values here:
         init_step = 2196
-        init_fraction_data_pts_included_per_demo = 0.75
+        init_n_fraction_data_pts_included_per_demo = 15
     else:
         init_step = 0
-        init_fraction_data_pts_included_per_demo = 0.0
-    fraction_data_pts_increments_included_per_demo = 0.05
+        init_n_fraction_data_pts_included_per_demo = 0
+    N_fraction_data_pts_included_per_demo = 20
 else:
     if (is_continuing_from_a_specific_iter):
         # user-specified values here:
         init_step = 2196
     else:
         init_step = 0
-    init_fraction_data_pts_included_per_demo = 0.0
-    fraction_data_pts_increments_included_per_demo = 1.0
+    init_n_fraction_data_pts_included_per_demo = 0
+    N_fraction_data_pts_included_per_demo = 1
 
 # Dropouts:
 tf_train_dropout_keep_prob = 1.0
@@ -250,7 +250,7 @@ with tf.Session(graph=pmnn_graph) as session:
     if (is_performing_weighted_training):
         batch_wnmse_train_log = np.zeros((TF_max_train_iters, D_output))
         average_batch_wnmse_train_log = np.zeros((TF_max_train_iters, D_output))
-    fraction_increment_log = np.zeros((int(round(1.0/fraction_data_pts_increments_included_per_demo)), 3)) # 1st column is the fraction, 2nd column is the starting step of this fraction, 3rd column is how many steps learning on this fraction until reaching convergence.
+    fraction_increment_log = np.zeros((N_fraction_data_pts_included_per_demo, 3)) # 1st column is the fraction, 2nd column is the starting step of this fraction, 3rd column is how many learning steps it take on this fraction until reaching convergence.
     
     if (is_continuing_from_a_specific_iter):
         batch_var_ground_truth_log[0:init_step,:] = np.loadtxt(model_output_dir_path+'prim_'+str(prim_no+1)+'_batch_var_ground_truth_log.txt')[0:init_step,:]
@@ -261,23 +261,21 @@ with tf.Session(graph=pmnn_graph) as session:
             average_batch_wnmse_train_log[0:init_step,:] = np.loadtxt(model_output_dir_path+'prim_'+str(prim_no+1)+'_average_batch_wnmse_train_log.txt')[0:init_step,:]
         fraction_increment_log = np.loadtxt(model_output_dir_path+'prim_'+str(prim_no+1)+'_fraction_increment_log.txt')
     
-    fraction_data_pts_included_per_demo = init_fraction_data_pts_included_per_demo
+    n_fraction_data_pts_included_per_demo = init_n_fraction_data_pts_included_per_demo
     
-    if (fraction_data_pts_included_per_demo < 1.0):
-        acceptable_ave_batch_nmse = frac_max_ave_batch_nmse
-    else:
-        acceptable_ave_batch_nmse = final_max_ave_batch_nmse
+    acceptable_ave_batch_nmse = final_max_ave_batch_nmse
 
     # Start the training loop.
     for step in range(init_step, TF_max_train_iters):
         if ((step == init_step) or (np.max(average_batch_nmse_train_log[step-1, :]) < acceptable_ave_batch_nmse)):
             start_step_frac = step
             
-            if (fraction_data_pts_included_per_demo < 1.0):
-                fraction_data_pts_included_per_demo = fraction_data_pts_included_per_demo + fraction_data_pts_increments_included_per_demo
-            assert ((fraction_data_pts_included_per_demo > 0.0) and (fraction_data_pts_included_per_demo <= 1.0))
+            if (n_fraction_data_pts_included_per_demo < N_fraction_data_pts_included_per_demo):
+                n_fraction_data_pts_included_per_demo = n_fraction_data_pts_included_per_demo + 1
+            assert ((n_fraction_data_pts_included_per_demo > 0) and (n_fraction_data_pts_included_per_demo <= N_fraction_data_pts_included_per_demo))
+            fraction_data_pts_included_per_demo = (1.0 * n_fraction_data_pts_included_per_demo) / N_fraction_data_pts_included_per_demo
             
-            if (fraction_data_pts_included_per_demo < 1.0):
+            if (n_fraction_data_pts_included_per_demo < N_fraction_data_pts_included_per_demo):
                 acceptable_ave_batch_nmse = frac_max_ave_batch_nmse
             else:
                 acceptable_ave_batch_nmse = final_max_ave_batch_nmse
@@ -285,13 +283,13 @@ with tf.Session(graph=pmnn_graph) as session:
             N_settings_per_batch = int(round(min_N_settings_per_batch / fraction_data_pts_included_per_demo))
             # In average, each demonstrated trajectory will contribute this many data points:
             # N_data_pts_included_per_demo = int(round(max_N_data_pts_included_per_demo * fraction_data_pts_included_per_demo))
-            nmse_averaging_window = int(np.ceil(N_all_settings * 1.0 / N_settings_per_batch))
+            nmse_averaging_window = 2 * int(np.ceil(N_all_settings * 1.0 / N_settings_per_batch))
             
-            fraction_increment_log[(int(round(fraction_data_pts_included_per_demo/fraction_data_pts_increments_included_per_demo))-1),0] = fraction_data_pts_included_per_demo
-            fraction_increment_log[(int(round(fraction_data_pts_included_per_demo/fraction_data_pts_increments_included_per_demo))-1),1] = start_step_frac
+            fraction_increment_log[(n_fraction_data_pts_included_per_demo-1),0] = fraction_data_pts_included_per_demo
+            fraction_increment_log[(n_fraction_data_pts_included_per_demo-1),1] = start_step_frac
             if ((step > 0) and (fraction_increment_log.shape[0] > 1)):
-                fraction_increment_log[(int(round(fraction_data_pts_included_per_demo/fraction_data_pts_increments_included_per_demo))-2),2] = step - fraction_increment_log[(int(round(fraction_data_pts_included_per_demo/fraction_data_pts_increments_included_per_demo))-2),1]
-                assert (fraction_increment_log[(int(round(fraction_data_pts_included_per_demo/fraction_data_pts_increments_included_per_demo))-2),2] > 0)
+                fraction_increment_log[(n_fraction_data_pts_included_per_demo-2),2] = step - fraction_increment_log[(n_fraction_data_pts_included_per_demo-2),1]
+                assert (fraction_increment_log[(n_fraction_data_pts_included_per_demo-2),2] > 0.0)
         
         actual_nmse_averaging_window = min(((step - start_step_frac) + 1), nmse_averaging_window)
         assert (actual_nmse_averaging_window > 0)
@@ -408,11 +406,11 @@ with tf.Session(graph=pmnn_graph) as session:
                 np.savetxt((model_output_dir_path+'prim_'+str(prim_no+1)+'_batch_wnmse_train_log.txt'), batch_wnmse_train_log[0:(step+1),:])
                 np.savetxt((model_output_dir_path+'prim_'+str(prim_no+1)+'_average_batch_wnmse_train_log.txt'), average_batch_wnmse_train_log[0:(step+1),:])
             np.savetxt((model_output_dir_path+'prim_'+str(prim_no+1)+'_fraction_increment_log.txt'), fraction_increment_log)
-        if ((int(fraction_data_pts_included_per_demo) == 1) and (np.max(average_batch_nmse_train_log[step, :]) < acceptable_ave_batch_nmse)):
+        if ((n_fraction_data_pts_included_per_demo == N_fraction_data_pts_included_per_demo) and (np.max(average_batch_nmse_train_log[step, :]) < acceptable_ave_batch_nmse)):
             break
     
-    fraction_increment_log[(int(round(fraction_data_pts_included_per_demo/fraction_data_pts_increments_included_per_demo))-1),2] = step - fraction_increment_log[(int(round(fraction_data_pts_included_per_demo/fraction_data_pts_increments_included_per_demo))-1),1]
-    assert (fraction_increment_log[(int(round(fraction_data_pts_included_per_demo/fraction_data_pts_increments_included_per_demo))-1),2] > 0)
+    fraction_increment_log[(n_fraction_data_pts_included_per_demo-1),2] = step - fraction_increment_log[(n_fraction_data_pts_included_per_demo-1),1]
+    assert (fraction_increment_log[(n_fraction_data_pts_included_per_demo-1),2] > 0)
     sio.savemat((model_output_dir_path+'prim_'+str(prim_no+1)+'_params_step_%07d'%step+'.mat'), NN_model_params)
     np.savetxt((model_output_dir_path+'prim_'+str(prim_no+1)+'_batch_var_ground_truth_log.txt'), batch_var_ground_truth_log[0:(step+1),:])
     np.savetxt((model_output_dir_path+'prim_'+str(prim_no+1)+'_batch_nmse_train_log.txt'), batch_nmse_train_log[0:(step+1),:])
