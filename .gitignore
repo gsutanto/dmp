@@ -23,7 +23,7 @@ matlab/dmp_coupling/learn_tactile_feedback/neural_nets/unroll/*.mat
 matlab/dmp_coupling/learn_tactile_feedback/*.mat
 python/dmp_coupling/learn_obs_avoid/**/*.mat
 python/dmp_coupling/learn_obs_avoid/**/*.pkl
-python/dmp_coupling/learn_obs_avoid/tf/models/iterative_learn_unroll/prim_*_log.txt
+python/dmp_coupling/learn_obs_avoid/tf/models/iterative_learn_unroll/*_log.txt
 python/dmp_coupling/learn_tactile_feedback/**/*.mat
 pictures/*
 plot/dmp_1D/*.txt

@@ -57,14 +57,14 @@ frac_max_ave_batch_nmse = 0.50
 final_max_ave_batch_nmse = 0.25
 
 is_performing_iterative_traj_fraction_inclusion = True
-is_continuing_from_a_specific_iter = True
+is_continuing_from_a_specific_iter = False
 is_using_offline_pretrained_model = True
 
 if (is_performing_iterative_traj_fraction_inclusion):
     if (is_continuing_from_a_specific_iter):
         # user-specified values here:
-        init_step = 2326
-        init_fraction_data_pts_included_per_demo = 0.90
+        init_step = 2196
+        init_fraction_data_pts_included_per_demo = 0.75
     else:
         init_step = 0
         init_fraction_data_pts_included_per_demo = 0.0
@@ -72,7 +72,7 @@ if (is_performing_iterative_traj_fraction_inclusion):
 else:
     if (is_continuing_from_a_specific_iter):
         # user-specified values here:
-        init_step = 2326
+        init_step = 2196
     else:
         init_step = 0
     init_fraction_data_pts_included_per_demo = 0.0
@@ -275,10 +275,12 @@ with tf.Session(graph=pmnn_graph) as session:
             
             if (fraction_data_pts_included_per_demo < 1.0):
                 fraction_data_pts_included_per_demo = fraction_data_pts_included_per_demo + fraction_data_pts_increments_included_per_demo
+            assert ((fraction_data_pts_included_per_demo > 0.0) and (fraction_data_pts_included_per_demo <= 1.0))
+            
+            if (fraction_data_pts_included_per_demo < 1.0):
                 acceptable_ave_batch_nmse = frac_max_ave_batch_nmse
             else:
                 acceptable_ave_batch_nmse = final_max_ave_batch_nmse
-            assert ((fraction_data_pts_included_per_demo > 0.0) and (fraction_data_pts_included_per_demo <= 1.0))
         
             N_settings_per_batch = int(round(min_N_settings_per_batch / fraction_data_pts_included_per_demo))
             # In average, each demonstrated trajectory will contribute this many data points:
