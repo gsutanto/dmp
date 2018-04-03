@@ -76,7 +76,8 @@ for input_selector in input_selector_list:
     is_using_phase_kernel_modulation = True
     
     if (input_selector == 1):
-        input_X_descriptor_string = 'raw_reg_hidden_layer_100relu_75tanh'
+#        input_X_descriptor_string = 'raw_reg_hidden_layer_100relu_75tanh'
+        input_X_descriptor_string = 'raw_reg_hidden_layer_20tanh'
         model_output_dir_path = './models/'+generalization_test_sub_path
     print ("input_X_descriptor_string = ", input_X_descriptor_string)
     

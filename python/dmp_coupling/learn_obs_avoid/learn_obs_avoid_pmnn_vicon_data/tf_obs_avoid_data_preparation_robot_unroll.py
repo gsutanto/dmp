@@ -19,7 +19,7 @@ from DataStacking import *
 from utilities import *
 
 is_converting_demo_to_supervised_obs_avoid_fb_dataset = False
-is_comparing_w_MATLAB_implementation = True
+is_comparing_w_MATLAB_implementation = False
 task_type = 'obs_avoid'
 
 if (is_converting_demo_to_supervised_obs_avoid_fb_dataset):
@@ -48,7 +48,7 @@ print('N_settings = ' + str(N_settings))
 considered_subset_outlier_ranked_demo_indices = range(3)
 generalization_subset_outlier_ranked_demo_indices = [3]
 post_filename_stacked_data = ''
-out_data_dir = ''
+out_data_dir = '../tf/input_data/'
 
 [X, Ct_target, 
  normalized_phase_PSI_mult_phase_V,

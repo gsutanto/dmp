@@ -56,7 +56,7 @@ from PMNN import *
 frac_max_ave_batch_nmse = 0.50
 final_max_ave_batch_nmse = 0.25
 
-is_performing_iterative_traj_fraction_inclusion = True
+is_performing_iterative_traj_fraction_inclusion = False
 is_continuing_from_a_specific_iter = False
 is_using_offline_pretrained_model = True
 

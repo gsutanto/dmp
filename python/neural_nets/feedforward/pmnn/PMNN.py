@@ -183,7 +183,7 @@ class PMNN(FeedForwardNeuralNetwork):
                         output_dim[dim_out] = output_current_dim
         if (layer_num == self.N_layers-1):
             if (self.is_predicting_only == False):
-                output = tf.concat(1, output_dim)
+                output = tf.concat(output_dim, 1)
             else:
                 output = np.hstack(output_dim)
             return output
@@ -286,8 +286,9 @@ class PMNN(FeedForwardNeuralNetwork):
         # opt_dim = tf.train.AdamOptimizer()
         # opt_dim = tf.train.AdagradOptimizer(initial_learning_rate)
         # opt_dim = tf.train.AdadeltaOptimizer()
-        opt_dim = tf.train.RMSPropOptimizer(learning_rate=initial_learning_rate)
-        train_op_dim = opt_dim.minimize(loss_dim, global_step=global_step_dim)
+        with tf.variable_scope('PMNNdim'+str(dim_out)):
+            opt_dim = tf.train.RMSPropOptimizer(learning_rate=initial_learning_rate)
+            train_op_dim = opt_dim.minimize(loss_dim, global_step=global_step_dim)
         
         return train_op_dim, loss_dim
     
@@ -322,7 +323,7 @@ class PMNN(FeedForwardNeuralNetwork):
                 if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
                     biases = tf.get_variable('biases', [current_layer_dim_size])
                     reg_l2_loss_dim = reg_l2_loss_dim + tf.nn.l2_loss(biases)
-    
+            
             loss_dim = pred_l2_loss_dim + (beta * reg_l2_loss_dim)
         
         # Create a variable to track the global step.
@@ -337,8 +338,9 @@ class PMNN(FeedForwardNeuralNetwork):
         # opt_dim = tf.train.AdamOptimizer()
         # opt_dim = tf.train.AdagradOptimizer(initial_learning_rate)
         # opt_dim = tf.train.AdadeltaOptimizer()
-        opt_dim = tf.train.RMSPropOptimizer(learning_rate=initial_learning_rate)
-        train_op_dim = opt_dim.minimize(loss_dim, global_step=global_step_dim)
+        with tf.variable_scope('PMNNdim'+str(dim_out)):
+            opt_dim = tf.train.RMSPropOptimizer(learning_rate=initial_learning_rate)
+            train_op_dim = opt_dim.minimize(loss_dim, global_step=global_step_dim)
         
         return train_op_dim, loss_dim
 
