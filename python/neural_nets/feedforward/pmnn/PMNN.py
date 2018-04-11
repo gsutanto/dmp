@@ -401,7 +401,7 @@ class PMNN(FeedForwardNeuralNetwork):
                     num_params += weights_dim[0] * weights_dim[1]
                     if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
                         biases = self.model_params[self.name+'_'+layer_dim_ID+"_biases"]
-                        num_params += list(biases.shape)[0]
+                        num_params += list(biases.shape)[1]
         num_params /= self.D_output
         print("Total # of Parameters = %d" % num_params)
         return num_params
@@ -481,7 +481,7 @@ class PMNN(FeedForwardNeuralNetwork):
                     num_params += weights_dim[0] * weights_dim[1]
                     if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
                         biases = self.model_params[self.name+'_'+layer_dim_ID+"_biases"]
-                        num_params += list(biases.shape)[0]
+                        num_params += list(biases.shape)[1]
         num_params /= self.D_output
         print("Total # of Parameters = %d" % num_params)
         return num_params
