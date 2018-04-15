@@ -58,7 +58,7 @@ final_max_ave_batch_nmse = 0.25
 
 is_performing_iterative_traj_fraction_inclusion = False
 is_continuing_from_a_specific_iter = False
-is_using_offline_pretrained_model = True
+is_using_offline_pretrained_model = False
 
 if (is_performing_iterative_traj_fraction_inclusion):
     if (is_continuing_from_a_specific_iter):
@@ -264,6 +264,9 @@ with tf.Session(graph=pmnn_graph) as session:
     n_fraction_data_pts_included_per_demo = init_n_fraction_data_pts_included_per_demo
     
     acceptable_ave_batch_nmse = final_max_ave_batch_nmse
+        
+    NN_model_params = pmnn.saveNeuralNetworkToMATLABMatFile()
+    tcloa.loa_param.pmnn.model_params = NN_model_params
 
     # Start the training loop.
     for step in range(init_step, TF_max_train_iters):
