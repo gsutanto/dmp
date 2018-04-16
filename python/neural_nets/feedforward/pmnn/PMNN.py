@@ -190,15 +190,7 @@ class PMNN(FeedForwardNeuralNetwork):
         else:
             return hidden_dim
     
-    # def performNeuralNetworkTraining(self, prediction, ground_truth, initial_learning_rate, beta, N_steps):
-    def performNeuralNetworkTraining(self, prediction, ground_truth, initial_learning_rate, beta):
-        """
-        Perform Neural Network Training (joint, across all output dimensions).
-        :param prediction: prediction made by current model on a dataset
-        :param ground_truth: the ground truth of the corresponding dataset
-        :param initial_learning_rate: initial learning rate
-        :param beta: L2 regularization constant
-        """
+    def computeLoss(self, prediction, ground_truth, beta):
         assert (self.is_predicting_only == False), 'Needs to be inside a TensorFlow session, therefore self.is_predicting_only must be False!'
         
         # Create an operation that calculates L2 prediction loss.
@@ -223,6 +215,19 @@ class PMNN(FeedForwardNeuralNetwork):
                         reg_l2_loss = reg_l2_loss + tf.nn.l2_loss(biases)
     
         loss = tf.reduce_mean(pred_l2_loss, name='my_pred_L2_loss_mean') + (beta * reg_l2_loss)
+        
+        return loss
+    
+    # def performNeuralNetworkTraining(self, prediction, ground_truth, initial_learning_rate, beta, N_steps):
+    def performNeuralNetworkTraining(self, prediction, ground_truth, initial_learning_rate, beta):
+        """
+        Perform Neural Network Training (joint, across all output dimensions).
+        :param prediction: prediction made by current model on a dataset
+        :param ground_truth: the ground truth of the corresponding dataset
+        :param initial_learning_rate: initial learning rate
+        :param beta: L2 regularization constant
+        """
+        loss = self.computeLoss(prediction, ground_truth, beta)
     
         # Create a variable to track the global step.
         global_step = tf.Variable(0, name='global_step', trainable=False)
@@ -241,16 +246,7 @@ class PMNN(FeedForwardNeuralNetwork):
         # return train_op, loss, learning_rate
         return train_op, loss
     
-    # def performNeuralNetworkTraining(self, prediction, ground_truth, initial_learning_rate, beta, N_steps):
-    def performNeuralNetworkTrainingPerDimOut(self, prediction, ground_truth, initial_learning_rate, beta, dim_out):
-        """
-        Perform Neural Network Training (per output dimension).
-        :param prediction: prediction made by current model on a dataset
-        :param ground_truth: the ground truth of the corresponding dataset
-        :param initial_learning_rate: initial learning rate
-        :param beta: L2 regularization constant
-        :param dim_out: output dimension being considered
-        """
+    def computeLossPerDimOut(self, prediction, ground_truth, beta, dim_out):
         assert (self.is_predicting_only == False), 'Needs to be inside a TensorFlow session, therefore self.is_predicting_only must be False!'
         
         # Create an operation that calculates L2 prediction loss.
@@ -272,7 +268,21 @@ class PMNN(FeedForwardNeuralNetwork):
                     biases = tf.get_variable('biases', [current_layer_dim_size])
                     reg_l2_loss_dim = reg_l2_loss_dim + tf.nn.l2_loss(biases)
     
-            loss_dim = tf.reduce_mean(pred_l2_loss_dim) + (beta * reg_l2_loss_dim)
+        loss_dim = tf.reduce_mean(pred_l2_loss_dim) + (beta * reg_l2_loss_dim)
+        
+        return loss_dim
+    
+    # def performNeuralNetworkTraining(self, prediction, ground_truth, initial_learning_rate, beta, N_steps):
+    def performNeuralNetworkTrainingPerDimOut(self, prediction, ground_truth, initial_learning_rate, beta, dim_out):
+        """
+        Perform Neural Network Training (per output dimension).
+        :param prediction: prediction made by current model on a dataset
+        :param ground_truth: the ground truth of the corresponding dataset
+        :param initial_learning_rate: initial learning rate
+        :param beta: L2 regularization constant
+        :param dim_out: output dimension being considered
+        """
+        loss_dim = self.computeLossPerDimOut(prediction, ground_truth, beta, dim_out)
         
         # Create a variable to track the global step.
         global_step_dim = tf.Variable(0, name='global_step', trainable=False)
@@ -292,17 +302,7 @@ class PMNN(FeedForwardNeuralNetwork):
         
         return train_op_dim, loss_dim
     
-    # def performNeuralNetworkTraining(self, prediction, ground_truth, initial_learning_rate, beta, N_steps):
-    def performNeuralNetworkWeightedTrainingPerDimOut(self, prediction, ground_truth, initial_learning_rate, beta, dim_out, weight):
-        """
-        Perform Neural Network Training (per output dimension).
-        :param prediction: prediction made by current model on a dataset
-        :param ground_truth: the ground truth of the corresponding dataset
-        :param initial_learning_rate: initial learning rate
-        :param beta: L2 regularization constant
-        :param dim_out: output dimension being considered
-        :param weight: weight vector corresponding to the prediction/dataset
-        """
+    def computeWeightedLossPerDimOut(self, prediction, ground_truth, beta, dim_out, weight):
         assert (self.is_predicting_only == False), 'Needs to be inside a TensorFlow session, therefore self.is_predicting_only must be False!'
         
         # Create an operation that calculates L2 prediction loss.
@@ -324,7 +324,22 @@ class PMNN(FeedForwardNeuralNetwork):
                     biases = tf.get_variable('biases', [current_layer_dim_size])
                     reg_l2_loss_dim = reg_l2_loss_dim + tf.nn.l2_loss(biases)
             
-            loss_dim = pred_l2_loss_dim + (beta * reg_l2_loss_dim)
+        loss_dim = pred_l2_loss_dim + (beta * reg_l2_loss_dim)
+        
+        return loss_dim
+        
+    # def performNeuralNetworkTraining(self, prediction, ground_truth, initial_learning_rate, beta, N_steps):
+    def performNeuralNetworkWeightedTrainingPerDimOut(self, prediction, ground_truth, initial_learning_rate, beta, dim_out, weight):
+        """
+        Perform Neural Network Training (per output dimension).
+        :param prediction: prediction made by current model on a dataset
+        :param ground_truth: the ground truth of the corresponding dataset
+        :param initial_learning_rate: initial learning rate
+        :param beta: L2 regularization constant
+        :param dim_out: output dimension being considered
+        :param weight: weight vector corresponding to the prediction/dataset
+        """
+        loss_dim = self.computeWeightedLossPerDimOut(prediction, ground_truth, beta, dim_out, weight)
         
         # Create a variable to track the global step.
         global_step_dim = tf.Variable(0, name='global_step', trainable=False)

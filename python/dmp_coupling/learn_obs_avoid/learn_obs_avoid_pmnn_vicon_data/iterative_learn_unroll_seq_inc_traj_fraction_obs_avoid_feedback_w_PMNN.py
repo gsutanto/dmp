@@ -237,7 +237,8 @@ with pmnn_graph.as_default():
 # Run training for TF_max_train_iters and save checkpoint at the end.
 with tf.Session(graph=pmnn_graph) as session:
     # Run the Op to initialize the variables.
-    tf.global_variables_initializer().run()
+    # tf.global_variables_initializer().run()
+    session.run(tf.global_variables_initializer())
     print("Initialized")
     
     # create log writer object
