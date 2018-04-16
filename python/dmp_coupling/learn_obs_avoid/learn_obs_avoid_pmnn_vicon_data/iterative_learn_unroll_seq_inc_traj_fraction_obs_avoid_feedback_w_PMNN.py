@@ -59,6 +59,8 @@ final_max_ave_batch_nmse = 0.25
 is_performing_iterative_traj_fraction_inclusion = False
 is_continuing_from_a_specific_iter = False
 is_using_offline_pretrained_model = False
+is_using_L_BFGS_B = True
+max_iter_lbfgsb = 4
 
 if (is_performing_iterative_traj_fraction_inclusion):
     if (is_continuing_from_a_specific_iter):
@@ -216,15 +218,29 @@ with pmnn_graph.as_default():
     # Build the Prediction Graph (that computes predictions from the inference model).
     train_batch_prediction = pmnn.performNeuralNetworkPrediction(tf_train_X_batch, tf_train_nPSI_batch, tf_train_dropout_keep_prob)
     
-    # Build the Training Graph (that calculate and apply gradients), per output dimension.
-    if (is_performing_weighted_training):
-        [train_op_dim0, loss_dim0] = pmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 0, tf_train_W_batch)
-        [train_op_dim1, loss_dim1] = pmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 1, tf_train_W_batch)
-        [train_op_dim2, loss_dim2] = pmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2, tf_train_W_batch)
-    else:
-        [train_op_dim0, loss_dim0] = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 0)
-        [train_op_dim1, loss_dim1] = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 1)
-        [train_op_dim2, loss_dim2] = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2)
+    if (is_using_L_BFGS_B == False):
+        # Build the Training Graph (that calculate and apply gradients), per output dimension.
+        if (is_performing_weighted_training):
+            [train_op_dim0, loss_dim0] = pmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 0, tf_train_W_batch)
+            [train_op_dim1, loss_dim1] = pmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 1, tf_train_W_batch)
+            [train_op_dim2, loss_dim2] = pmnn.performNeuralNetworkWeightedTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2, tf_train_W_batch)
+        else:
+            [train_op_dim0, loss_dim0] = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 0)
+            [train_op_dim1, loss_dim1] = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 1)
+            [train_op_dim2, loss_dim2] = pmnn.performNeuralNetworkTrainingPerDimOut(train_batch_prediction, tf_train_Ctt_batch, init_learning_rate, beta, 2)
+    else: # if (is_using_L_BFGS_B == True)
+        if (is_performing_weighted_training):
+            loss_dim0 = pmnn.computeWeightedLossPerDimOut(train_batch_prediction, tf_train_Ctt_batch, beta, 0, tf_train_W_batch)
+            loss_dim1 = pmnn.computeWeightedLossPerDimOut(train_batch_prediction, tf_train_Ctt_batch, beta, 1, tf_train_W_batch)
+            loss_dim2 = pmnn.computeWeightedLossPerDimOut(train_batch_prediction, tf_train_Ctt_batch, beta, 2, tf_train_W_batch)
+        else:
+            loss_dim0 = pmnn.computeLossPerDimOut(train_batch_prediction, tf_train_Ctt_batch, beta, 0)
+            loss_dim1 = pmnn.computeLossPerDimOut(train_batch_prediction, tf_train_Ctt_batch, beta, 1)
+            loss_dim2 = pmnn.computeLossPerDimOut(train_batch_prediction, tf_train_Ctt_batch, beta, 2)
+        
+        scipy_optimizer_dim0 = tf.contrib.opt.ScipyOptimizerInterface(loss_dim0, options={'maxiter': max_iter_lbfgsb})
+        scipy_optimizer_dim1 = tf.contrib.opt.ScipyOptimizerInterface(loss_dim1, options={'maxiter': max_iter_lbfgsb})
+        scipy_optimizer_dim2 = tf.contrib.opt.ScipyOptimizerInterface(loss_dim2, options={'maxiter': max_iter_lbfgsb})
     
     # Create a summary:
     tf.summary.scalar("loss_dim0", loss_dim0)
@@ -376,16 +392,30 @@ with tf.Session(graph=pmnn_graph) as session:
         # inspect the values of your Ops or variables, you may include them
         # in the list passed to sess.run() and the value tensors will be
         # returned in the tuple from the call.
-        
-        [tr_batch_prediction,
-         _, _, 
-         _, _, 
-         _, _, 
-         summary] = session.run([train_batch_prediction, 
-                                 train_op_dim0, loss_dim0, 
-                                 train_op_dim1, loss_dim1, 
-                                 train_op_dim2, loss_dim2, 
-                                 summary_op], feed_dict=feed_dict)
+        if (is_using_L_BFGS_B == False):
+            [tr_batch_prediction,
+             _, _, 
+             _, _, 
+             _, _, 
+             summary] = session.run([train_batch_prediction, 
+                                     train_op_dim0, loss_dim0, 
+                                     train_op_dim1, loss_dim1, 
+                                     train_op_dim2, loss_dim2, 
+                                     summary_op], feed_dict=feed_dict)
+        else: # if (is_using_L_BFGS_B == True)
+            [tr_batch_prediction,
+             loss_d0, 
+             loss_d1, 
+             loss_d2, 
+             summary] = session.run([train_batch_prediction, 
+                                     loss_dim0, 
+                                     loss_dim1, 
+                                     loss_dim2, 
+                                     summary_op], feed_dict=feed_dict)
+            
+            scipy_optimizer_dim0.minimize(session, feed_dict=feed_dict)
+            scipy_optimizer_dim1.minimize(session, feed_dict=feed_dict)
+            scipy_optimizer_dim2.minimize(session, feed_dict=feed_dict)
         
         # write log
         writer.add_summary(summary, step)
@@ -401,6 +431,7 @@ with tf.Session(graph=pmnn_graph) as session:
             average_batch_wnmse_train_log[step, :] = np.mean(batch_wnmse_train_log[(step-(actual_nmse_averaging_window-1)):(step+1),:], axis=0)
         if ((step > 0) and (step % nmse_averaging_window == 0)):
             sio.savemat((model_output_dir_path+'prim_'+str(prim_no+1)+'_params_step_%07d'%step+'.mat'), NN_model_params)
+        if (step > 0):
             print ("Fraction %f, Step %d: Average " % (fraction_data_pts_included_per_demo, step) +str(actual_nmse_averaging_window)+"-last Batch Training NMSE = ", average_batch_nmse_train_log[step, :])
         if (step % 50 == 0):
             np.savetxt((model_output_dir_path+'prim_'+str(prim_no+1)+'_batch_var_ground_truth_log.txt'), batch_var_ground_truth_log[0:(step+1),:])
