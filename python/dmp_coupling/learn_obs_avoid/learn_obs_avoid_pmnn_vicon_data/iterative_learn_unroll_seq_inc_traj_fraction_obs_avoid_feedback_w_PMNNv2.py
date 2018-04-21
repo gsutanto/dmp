@@ -53,7 +53,7 @@ from PMNNv2 import *
 
 
 
-frac_max_ave_batch_nmse = 0.35
+frac_max_ave_batch_nmse = 0.50
 final_max_ave_batch_nmse = 0.25
 
 is_performing_iterative_traj_fraction_inclusion = True
@@ -191,7 +191,7 @@ N_phaseLWR_kernels = dmp_basis_funcs_size
 NN_topology = [D_input] + regular_NN_hidden_layer_topology + [N_phaseLWR_kernels, D_output]
 
 
-input_X_descriptor_string = 'raw_reg_hidden_layer_20relu_10tanh'
+input_X_descriptor_string = 'raw_reg_hidden_layer_20tanh'
 print ("input_X_descriptor_string = ", input_X_descriptor_string)
 
 model_output_dir_path = '../tf/models/iterative_learn_unroll/'
@@ -291,7 +291,9 @@ with tf.Session(graph=pmnnv2_graph) as session:
 
     # Start the training loop.
     for step in range(init_step, TF_max_train_iters):
-        if ((step == init_step) or (np.max(average_batch_nmse_train_log[step-1, :]) < acceptable_ave_batch_nmse)):
+        if ((step == init_step) or 
+            ((n_fraction_data_pts_included_per_demo < N_fraction_data_pts_included_per_demo) and (np.min(average_batch_nmse_train_log[step-1, :]) < acceptable_ave_batch_nmse)) or
+            ((n_fraction_data_pts_included_per_demo == N_fraction_data_pts_included_per_demo) and (np.max(average_batch_nmse_train_log[step-1, :]) < acceptable_ave_batch_nmse))):
             start_step_frac = step
             
             if (n_fraction_data_pts_included_per_demo < N_fraction_data_pts_included_per_demo):
