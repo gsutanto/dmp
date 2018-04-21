@@ -60,7 +60,7 @@ is_performing_iterative_traj_fraction_inclusion = False
 is_continuing_from_a_specific_iter = False
 is_using_offline_pretrained_model = False
 is_using_L_BFGS_B = True
-max_iter_lbfgsb = 4
+max_iter_lbfgsb = 1
 
 if (is_performing_iterative_traj_fraction_inclusion):
     if (is_continuing_from_a_specific_iter):
@@ -241,6 +241,10 @@ with pmnn_graph.as_default():
         scipy_optimizer_dim0 = tf.contrib.opt.ScipyOptimizerInterface(loss_dim0, options={'maxiter': max_iter_lbfgsb})
         scipy_optimizer_dim1 = tf.contrib.opt.ScipyOptimizerInterface(loss_dim1, options={'maxiter': max_iter_lbfgsb})
         scipy_optimizer_dim2 = tf.contrib.opt.ScipyOptimizerInterface(loss_dim2, options={'maxiter': max_iter_lbfgsb})
+        
+#        scipy_optimizer_dim0 = tf.contrib.opt.ScipyOptimizerInterface(loss_dim0, method='SLSQP')
+#        scipy_optimizer_dim1 = tf.contrib.opt.ScipyOptimizerInterface(loss_dim1, method='SLSQP')
+#        scipy_optimizer_dim2 = tf.contrib.opt.ScipyOptimizerInterface(loss_dim2, method='SLSQP')
     
     # Create a summary:
     tf.summary.scalar("loss_dim0", loss_dim0)
