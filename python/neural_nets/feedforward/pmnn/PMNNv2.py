@@ -16,7 +16,7 @@ from PMNN import *
 from utilities import *
 from copy import deepcopy
 
-class PMNNv2(PMNN):
+class PMNNv2(PMNN, object):
     """
     Same as the original PMNN, except that 
     """
@@ -25,11 +25,11 @@ class PMNNv2(PMNN):
                  regular_hidden_layer_topology, regular_hidden_layer_activation_func_list, 
                  N_phaseLWR_kernels, D_output, 
                  path="", is_using_phase_kernel_modulation=True, is_predicting_only=False):
+        self.N_phases = N_phaseLWR_kernels
         super(PMNNv2, self).__init__(name, D_input, 
                                      regular_hidden_layer_topology, regular_hidden_layer_activation_func_list, 
                                      N_phaseLWR_kernels, D_output, 
                                      path, is_using_phase_kernel_modulation, is_predicting_only)
-        self.N_phases = N_phaseLWR_kernels
         print "This is PMNNv2."
     
     def defineNeuralNetworkModel(self):
@@ -118,7 +118,7 @@ class PMNNv2(PMNN):
                                     hidden_drop_dim[dim_out][phase_num] = tf.nn.dropout(hidden_dim[dim_out][phase_num], dropout_keep_prob)
                                 elif (i == self.N_layers - 2): # Final Hidden Layer with Phase Gating/Modulation
                                     if (self.is_using_phase_kernel_modulation):
-                                        hidden_dim[dim_out][phase_num] = normalized_phase_kernels[:,phase_num] * (tf.matmul(hidden_drop_dim[dim_out][phase_num], weights) + biases)
+                                        hidden_dim[dim_out][phase_num] = tf.reshape(normalized_phase_kernels[:,phase_num], [normalized_phase_kernels.get_shape().as_list()[0],1]) * (tf.matmul(hidden_drop_dim[dim_out][phase_num], weights) + biases)
                                         hidden_drop_dim[dim_out][phase_num] = hidden_dim[dim_out][phase_num] # no dropout
                                     else:   # if NOT using phase kernel modulation:
                                         hidden_dim[dim_out][phase_num] = tf.nn.tanh(tf.matmul(hidden_drop_dim[dim_out][phase_num], weights) + biases)
@@ -141,7 +141,7 @@ class PMNNv2(PMNN):
                                 hidden_drop_dim[dim_out][phase_num] = hidden_dim[dim_out][phase_num]
                             elif (i == self.N_layers - 2): # Final Hidden Layer with Phase Gating/Modulation
                                 if (self.is_using_phase_kernel_modulation):
-                                    hidden_dim[dim_out][phase_num] = normalized_phase_kernels[:,phase_num] * (np.matmul(hidden_drop_dim[dim_out][phase_num], weights) + biases)
+                                    hidden_dim[dim_out][phase_num] = normalized_phase_kernels[:,phase_num].reshape(normalized_phase_kernels.shape[0],1) * (np.matmul(hidden_drop_dim[dim_out][phase_num], weights) + biases)
                                 else:   # if NOT using phase kernel modulation:
                                     hidden_dim[dim_out][phase_num] = np.tanh(np.matmul(hidden_drop_dim[dim_out][phase_num], weights) + biases)
                                 hidden_drop_dim[dim_out][phase_num] = hidden_dim[dim_out][phase_num]

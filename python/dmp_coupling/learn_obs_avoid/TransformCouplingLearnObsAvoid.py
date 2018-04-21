@@ -268,7 +268,7 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         return True
     
     def getValue(self):
-        assert (self.loa_param.model == PMNN_MODEL or self.loa_param.model == RPMNN_MODEL), "self.loa_param.model == " + str(self.loa_param.model)
+        assert (self.loa_param.model == PMNN_MODEL or self.loa_param.model == RPMNN_MODEL or self.loa_param.model == PMNNV2_MODEL), "self.loa_param.model == " + str(self.loa_param.model)
         assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformCouplingLearnObsAvoid is invalid!"
         
         self.prev_ct_acc = self.curr_ct_acc
@@ -283,7 +283,7 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         
         normalized_phase_kernels = self.func_approx_discrete.getNormalizedBasisFunctionVectorMultipliedPhaseMultiplier().T
         
-        if (self.loa_param.model == PMNN_MODEL):
+        if (self.loa_param.model == PMNN_MODEL or self.loa_param.model == PMNNV2_MODEL):
             self.pmnn_input_vector = self.computeObsAvoidCtFeat(self.point_obstacles_ccstate_local,
                                                                 self.endeff_ccstate_local).T
             assert (self.pmnn_input_vector.shape == (1,self.loa_param.D_input))
