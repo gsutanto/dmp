@@ -33,10 +33,10 @@ function [  ] = visualizeX_and_Ct( varargin )
         figure;
         title(['All Demonstrations: X\_train vs X\_unroll (Stretched to be of Equal Length), Feature #' num2str(f)]);
         hold on;
-            stretched_X_unroll_f    = stretchTrajectory( sub_X_unroll_setting_cell{1,1}{1,1}(:,f), new_traj_length );
+            stretched_X_unroll_f    = stretchTrajectory( sub_X_unroll_setting_cell{1,1}{1,1}(:,f)', new_traj_length );
             pu      = plot(stretched_X_unroll_f, 'b');
             for i=1:N_demo_each_setting
-                stretched_X_train_f = stretchTrajectory( sub_X_train_setting_cell{1,1}{i,1}(:,f), new_traj_length );
+                stretched_X_train_f = stretchTrajectory( sub_X_train_setting_cell{1,1}{i,1}(:,f)', new_traj_length );
                 
                 pt  = plot(stretched_X_train_f, 'g');
             end
@@ -57,12 +57,12 @@ function [  ] = visualizeX_and_Ct( varargin )
         end
         hold on;
             for i=1:N_demo_each_setting
-                stretched_Ct_target_d   = stretchTrajectory( sub_Ct_target_3D_setting_cell{1,1}{i,1}(:,d), new_traj_length );
-                stretched_Ct_fit_d      = stretchTrajectory( sub_Ct_fit_3D_setting_cell{1,1}{i,1}(:,d), new_traj_length );
+                stretched_Ct_target_d   = stretchTrajectory( sub_Ct_target_3D_setting_cell{1,1}{i,1}(:,d)', new_traj_length );
+                stretched_Ct_fit_d      = stretchTrajectory( sub_Ct_fit_3D_setting_cell{1,1}{i,1}(:,d)', new_traj_length );
                 if (unrolling_param.is_unrolling_only_1st_demo_each_trained_settings == 1)
-                    stretched_Ct_unroll_d   = stretchTrajectory( sub_Ct_unroll_setting_cell_cell{1,1}{1,1}(:,d), new_traj_length );
+                    stretched_Ct_unroll_d   = stretchTrajectory( sub_Ct_unroll_setting_cell_cell{1,1}{1,1}(:,d)', new_traj_length );
                 else
-                    stretched_Ct_unroll_d   = stretchTrajectory( sub_Ct_unroll_setting_cell_cell{1,1}{i,1}(:,d), new_traj_length );
+                    stretched_Ct_unroll_d   = stretchTrajectory( sub_Ct_unroll_setting_cell_cell{1,1}{i,1}(:,d)', new_traj_length );
                 end
                 
                 pt  = plot(stretched_Ct_target_d, 'g');
