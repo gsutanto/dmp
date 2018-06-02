@@ -78,4 +78,43 @@ def dmp_1D_test(amd_clmc_dmp_home_dir_path="../../../", canonical_order=2, time_
     return unroll_traj, W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI
 
 if __name__ == "__main__":
+    import pylab as pl
+    
     unroll_traj, W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI = dmp_1D_test()
+    
+    task_servo_rate = 1000.0
+    dt = 1.0/task_servo_rate
+    tau = (cX.shape[1]-1) * dt
+    time = np.arange(0.0, tau+dt, dt).reshape(1,cX.shape[1])
+    
+    pl.close('all')
+    
+    pl.figure()
+    pl.plot(time.T, cX.T, 'r')
+    pl.xlabel('time')
+    pl.ylabel('p')
+    pl.title('Phase Variable p versus Time')
+    
+    pl.figure()
+    pl.plot(time.T, cV.T, 'b')
+    pl.xlabel('time')
+    pl.ylabel('u')
+    pl.title('Phase Velocity u versus Time')
+    
+    pl.figure()
+    for i in range(0,PSI.shape[0],2):
+        pl.plot(cX.T, PSI[i,:].T, label='psi_'+str(i))
+    pl.xlabel('p')
+    pl.ylabel('psi')
+    pl.legend()
+    pl.title('Phase RBF psi versus Phase Variable p')
+    
+    pl.figure()
+    for i in range(0,PSI.shape[0],2):
+        pl.plot(time.T, PSI[i,:].T, label='psi_'+str(i))
+    pl.xlabel('time')
+    pl.ylabel('psi')
+    pl.legend()
+    pl.title('Phase RBF psi versus Time')
+    
+    pl.show()
