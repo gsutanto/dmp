@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-Created on Wed Apr 10 15:00:00 2017
+Created on Wed Apr 10 15:00:00 2018
 
 @author: gsutanto
 """
@@ -18,7 +18,8 @@ from copy import deepcopy
 
 class PMNNv2(PMNN, object):
     """
-    Same as the original PMNN, except that 
+    Same as the original PMNN, except that each output dimension has a separate
+    network.
     """
     
     def __init__(self, name, D_input, 
