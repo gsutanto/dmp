@@ -283,12 +283,20 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         
         normalized_phase_kernels = self.func_approx_discrete.getNormalizedBasisFunctionVectorMultipliedPhaseMultiplier().T
         
-        if (self.loa_param.model == PMNN_MODEL or self.loa_param.model == PMNNV2_MODEL):
+        if (self.loa_param.model == PMNN_MODEL or 
+            self.loa_param.model == PMNNV2_MODEL or
+            self.loa_param.model == PMNNV3_MODEL):
             self.pmnn_input_vector = self.computeObsAvoidCtFeat(self.point_obstacles_ccstate_local,
                                                                 self.endeff_ccstate_local).T
             assert (self.pmnn_input_vector.shape == (1,self.loa_param.D_input))
             
-            ct_acc = self.loa_param.pmnn.performNeuralNetworkPrediction(self.pmnn_input_vector, normalized_phase_kernels).T
+            if (self.loa_param.model == PMNNV3_MODEL):
+                [ct_acc_prediction_transpose
+                 ] = self.loa_param.tf_session.run([prediction], feed_dict={tf_X_ph : self.pmnn_input_vector, 
+                                                                            tf_nPSI_ph : normalized_phase_kernels})
+                ct_acc = ct_acc_prediction_transpose.T
+            else: # if (self.loa_param.model == PMNN_MODEL or self.loa_param.model == PMNNV2_MODEL):
+                ct_acc = self.loa_param.pmnn.performNeuralNetworkPrediction(self.pmnn_input_vector, normalized_phase_kernels).T
         elif (self.loa_param.model == RPMNN_MODEL):
             self.rpmnn_input_vector = self.computeObsAvoidCtFeat(self.point_obstacles_ccstate_local,
                                                                  self.endeff_ccstate_local).T

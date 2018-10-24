@@ -15,10 +15,12 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../neural_nets/feedf
 from PMNN import *
 from RPMNN import *
 from PMNNv2 import *
+from PMNNv3 import *
 
 PMNN_MODEL = 0
 RPMNN_MODEL = 1
 PMNNV2_MODEL = 2
+PMNNV3_MODEL = 3
 
 class TCLearnObsAvoidFeatureParameter:
     'Class for a group/bundle of states of obstacles.'
@@ -76,6 +78,8 @@ class TCLearnObsAvoidFeatureParameter:
                                self.rpmnn_regular_NN_hidden_layer_activation_func_list, 
                                model_dim_phase_mod_kernels, model_dim_outputs, 
                                self.rpmnn_model_path, True, True)
+        elif (self.model == PMNNV3_MODEL):
+            self.tf_session = tf.get_default_session()
         else:
             assert (False), 'self.model==' + str(self.model) + ' is undefined!!!'
     
