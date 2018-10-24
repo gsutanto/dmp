@@ -268,7 +268,10 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         return True
     
     def getValue(self):
-        assert (self.loa_param.model == PMNN_MODEL or self.loa_param.model == RPMNN_MODEL or self.loa_param.model == PMNNV2_MODEL), "self.loa_param.model == " + str(self.loa_param.model)
+        assert (self.loa_param.model == PMNN_MODEL or 
+                self.loa_param.model == RPMNN_MODEL or 
+                self.loa_param.model == PMNNV2_MODEL or 
+                self.loa_param.model == PMNNV3_MODEL), "self.loa_param.model == " + str(self.loa_param.model)
         assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformCouplingLearnObsAvoid is invalid!"
         
         self.prev_ct_acc = self.curr_ct_acc
@@ -291,6 +294,13 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
             assert (self.pmnn_input_vector.shape == (1,self.loa_param.D_input))
             
             if (self.loa_param.model == PMNNV3_MODEL):
+                self.loa_param.tf_session = tf.get_default_session()
+                self.loa_param.tf_graph = self.loa_param.tf_session.graph
+                
+                tf_X_ph = self.loa_param.tf_graph.get_tensor_by_name("tf_X_placeholder:0")
+                tf_nPSI_ph = self.loa_param.tf_graph.get_tensor_by_name("tf_nPSI_placeholder:0")
+                prediction = self.loa_param.tf_graph.get_tensor_by_name("tf_prediction_placeholder:0")
+                
                 [ct_acc_prediction_transpose
                  ] = self.loa_param.tf_session.run([prediction], feed_dict={tf_X_ph : self.pmnn_input_vector, 
                                                                             tf_nPSI_ph : normalized_phase_kernels})

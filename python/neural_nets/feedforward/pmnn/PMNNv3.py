@@ -12,7 +12,7 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/'))
-from PMNN import *
+from PMNNv2 import *
 from utilities import *
 from copy import deepcopy
 
@@ -47,12 +47,12 @@ class PMNNv3(PMNNv2, object):
         print "Neural Network Activation Function List:"
         print self.neural_net_activation_func_list
         
+        self.N_phases = N_phaseLWR_kernels
+        
         self.is_predicting_only = is_predicting_only
         self.num_params = self.countNeuralNetworkModelNumParams()
         
         self.is_using_phase_kernel_modulation = is_using_phase_kernel_modulation
-        
-        self.N_phases = N_phaseLWR_kernels
         
         self.is_using_batch_normalization = is_using_batch_normalization
         
@@ -152,7 +152,7 @@ class PMNNv3(PMNNv2, object):
                                     activation_func_input = affine_intermediate_result
                                 
                                 if (self.is_using_phase_kernel_modulation):
-                                    hidden_dim[dim_out][phase_num] = tf.reshape(normalized_phase_kernels[:,phase_num], [normalized_phase_kernels.get_shape().as_list()[0],1]) * activation_func_input
+                                    hidden_dim[dim_out][phase_num] = tf.reshape(normalized_phase_kernels[:,phase_num], [tf.shape(normalized_phase_kernels)[0],1]) * activation_func_input
                                     hidden_drop_dim[dim_out][phase_num] = hidden_dim[dim_out][phase_num] # no dropout
                                 else:   # if NOT using phase kernel modulation:
                                     hidden_dim[dim_out][phase_num] = tf.nn.tanh(activation_func_input)
@@ -213,3 +213,23 @@ class PMNNv3(PMNNv2, object):
         loss_dim = pred_l2_loss_dim + total_reg_l2_loss_dim
         
         return loss_dim
+    
+    def performNeuralNetworkWeightedTrainingPerDimOut(self, prediction, ground_truth, initial_learning_rate, dim_out, weight):
+        """
+        Perform Neural Network Training (per output dimension).
+        :param prediction: prediction made by current model on a dataset
+        :param ground_truth: the ground truth of the corresponding dataset
+        :param initial_learning_rate: initial learning rate
+        :param beta: L2 regularization constant
+        :param dim_out: output dimension being considered
+        :param weight: weight vector corresponding to the prediction/dataset
+        """
+        loss_dim = self.computeWeightedLossPerDimOut(prediction, ground_truth, dim_out, weight)
+        
+        # Create a variable to track the global step.
+        global_step_dim = tf.Variable(0, name='global_step', trainable=False)
+        with tf.variable_scope('PMNNv3dim'+str(dim_out)):
+            opt_dim = tf.train.AdamOptimizer(learning_rate=initial_learning_rate)
+            train_op_dim = opt_dim.minimize(loss_dim, global_step=global_step_dim)
+        
+        return train_op_dim, loss_dim

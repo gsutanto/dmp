@@ -94,9 +94,6 @@ is_performing_weighted_training = 1
 # Initial Learning Rate
 init_learning_rate = 0.001
 
-# Phase Modulation Usage Flag
-is_using_phase_kernel_modulation = True
-
 
 ## Demo Dataset Loading
 data_global_coord = loadObj('data_multi_demo_vicon_static_global_coord.pkl')
@@ -216,7 +213,7 @@ with pmnnv3_graph.as_default():
     pmnnv3 = PMNNv3(pmnnv3_name, D_input, 
                     regular_NN_hidden_layer_topology, regular_NN_hidden_layer_activation_func_list, 
                     N_phaseLWR_kernels, D_output, regularization_const=beta, 
-                    init_model_param_filepath, is_using_phase_kernel_modulation, is_predicting_only=False, 
+                    path=init_model_param_filepath, is_using_phase_kernel_modulation=True, is_predicting_only=False, 
                     is_using_batch_normalization=True)
 
     # Build the Prediction Graph (that computes predictions from the inference model).
@@ -225,25 +222,27 @@ with pmnnv3_graph.as_default():
                                                        dropout_keep_prob=tf_dropout_keep_prob_ph,
                                                        is_training=tf_is_training_ph)
     
+    tf_prediction_ph = tf.identity(prediction, "tf_prediction_placeholder")
+    
     if (is_using_L_BFGS_B == False):
         # Build the Training Graph (that calculate and apply gradients), per output dimension.
         if (is_performing_weighted_training):
-            [train_op_dim0, loss_dim0] = pmnnv3.performNeuralNetworkWeightedTrainingPerDimOut(prediction, tf_Ctt_ph, init_learning_rate, beta, 0, tf_W_ph)
-            [train_op_dim1, loss_dim1] = pmnnv3.performNeuralNetworkWeightedTrainingPerDimOut(prediction, tf_Ctt_ph, init_learning_rate, beta, 1, tf_W_ph)
-            [train_op_dim2, loss_dim2] = pmnnv3.performNeuralNetworkWeightedTrainingPerDimOut(prediction, tf_Ctt_ph, init_learning_rate, beta, 2, tf_W_ph)
+            [train_op_dim0, loss_dim0] = pmnnv3.performNeuralNetworkWeightedTrainingPerDimOut(prediction, tf_Ctt_ph, init_learning_rate, 0, tf_W_ph)
+            [train_op_dim1, loss_dim1] = pmnnv3.performNeuralNetworkWeightedTrainingPerDimOut(prediction, tf_Ctt_ph, init_learning_rate, 1, tf_W_ph)
+            [train_op_dim2, loss_dim2] = pmnnv3.performNeuralNetworkWeightedTrainingPerDimOut(prediction, tf_Ctt_ph, init_learning_rate, 2, tf_W_ph)
         else:
-            [train_op_dim0, loss_dim0] = pmnnv3.performNeuralNetworkTrainingPerDimOut(prediction, tf_Ctt_ph, init_learning_rate, beta, 0)
-            [train_op_dim1, loss_dim1] = pmnnv3.performNeuralNetworkTrainingPerDimOut(prediction, tf_Ctt_ph, init_learning_rate, beta, 1)
-            [train_op_dim2, loss_dim2] = pmnnv3.performNeuralNetworkTrainingPerDimOut(prediction, tf_Ctt_ph, init_learning_rate, beta, 2)
+            [train_op_dim0, loss_dim0] = pmnnv3.performNeuralNetworkTrainingPerDimOut(prediction, tf_Ctt_ph, init_learning_rate, 0)
+            [train_op_dim1, loss_dim1] = pmnnv3.performNeuralNetworkTrainingPerDimOut(prediction, tf_Ctt_ph, init_learning_rate, 1)
+            [train_op_dim2, loss_dim2] = pmnnv3.performNeuralNetworkTrainingPerDimOut(prediction, tf_Ctt_ph, init_learning_rate, 2)
     else: # if (is_using_L_BFGS_B == True)
         if (is_performing_weighted_training):
-            loss_dim0 = pmnnv3.computeWeightedLossPerDimOut(prediction, tf_Ctt_ph, beta, 0, tf_W_ph)
-            loss_dim1 = pmnnv3.computeWeightedLossPerDimOut(prediction, tf_Ctt_ph, beta, 1, tf_W_ph)
-            loss_dim2 = pmnnv3.computeWeightedLossPerDimOut(prediction, tf_Ctt_ph, beta, 2, tf_W_ph)
+            loss_dim0 = pmnnv3.computeWeightedLossPerDimOut(prediction, tf_Ctt_ph, 0, tf_W_ph)
+            loss_dim1 = pmnnv3.computeWeightedLossPerDimOut(prediction, tf_Ctt_ph, 1, tf_W_ph)
+            loss_dim2 = pmnnv3.computeWeightedLossPerDimOut(prediction, tf_Ctt_ph, 2, tf_W_ph)
         else:
-            loss_dim0 = pmnnv3.computeLossPerDimOut(prediction, tf_Ctt_ph, beta, 0)
-            loss_dim1 = pmnnv3.computeLossPerDimOut(prediction, tf_Ctt_ph, beta, 1)
-            loss_dim2 = pmnnv3.computeLossPerDimOut(prediction, tf_Ctt_ph, beta, 2)
+            loss_dim0 = pmnnv3.computeLossPerDimOut(prediction, tf_Ctt_ph, 0)
+            loss_dim1 = pmnnv3.computeLossPerDimOut(prediction, tf_Ctt_ph, 1)
+            loss_dim2 = pmnnv3.computeLossPerDimOut(prediction, tf_Ctt_ph, 2)
         
         scipy_optimizer_dim0 = tf.contrib.opt.ScipyOptimizerInterface(loss_dim0, options={'maxiter': max_iter_lbfgsb})
         scipy_optimizer_dim1 = tf.contrib.opt.ScipyOptimizerInterface(loss_dim1, options={'maxiter': max_iter_lbfgsb})
