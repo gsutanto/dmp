@@ -23,7 +23,9 @@ class AutoEncoderV2(FeedForwardNeuralNetworkV2):
     
     def __init__(self, name, D_input, 
                  encoder_hidden_layer_topology, encoder_hidden_layer_activation_func_list, 
-                 D_latent, is_using_batch_normalization=True):
+                 D_latent, 
+                 regularization_const=0.0, 
+                 is_using_batch_normalization=True):
         self.name = name
         
         self.neural_net_topology = [D_input] + encoder_hidden_layer_topology + [D_latent] + list(reversed(encoder_hidden_layer_topology)) + [D_input]
@@ -45,6 +47,8 @@ class AutoEncoderV2(FeedForwardNeuralNetworkV2):
         
         self.num_params = self.countNeuralNetworkModelNumParams()
         
+        self.regularization_const = regularization_const
+        
         self.is_using_batch_normalization = is_using_batch_normalization
     
     def encode(self, input_dataset, dropout_keep_prob=1.0, is_training=False):
@@ -57,7 +61,9 @@ class AutoEncoderV2(FeedForwardNeuralNetworkV2):
         with tf.variable_scope(self.name, reuse=tf.AUTO_REUSE):
             hidden_drop = input_dataset
             for i in range(1, ((self.N_layers - 1) / 2) + 1):
-                affine_intermediate_result = tf.layers.dense(hidden_drop, self.neural_net_topology[i], name="ae_dense_"+str(i))
+                affine_intermediate_result = tf.layers.dense(hidden_drop, self.neural_net_topology[i], 
+                                                             kernel_regularizer=tf.contrib.layers.l2_regularizer(self.regularization_const), 
+                                                             name="ae_dense_"+str(i))
                 
                 if (self.is_using_batch_normalization):
                     activation_func_input = tf.layers.batch_normalization(affine_intermediate_result, training=is_training, name="ae_bn_"+str(i))
@@ -92,7 +98,9 @@ class AutoEncoderV2(FeedForwardNeuralNetworkV2):
         with tf.variable_scope(self.name, reuse=tf.AUTO_REUSE):
             hidden_drop = latent_dataset
             for i in range(((self.N_layers - 1) / 2) + 1, self.N_layers):
-                affine_intermediate_result = tf.layers.dense(hidden_drop, self.neural_net_topology[i], name="ae_dense_"+str(i))
+                affine_intermediate_result = tf.layers.dense(hidden_drop, self.neural_net_topology[i], 
+                                                             kernel_regularizer=tf.contrib.layers.l2_regularizer(self.regularization_const), 
+                                                             name="ae_dense_"+str(i))
                 
                 if (self.is_using_batch_normalization):
                     activation_func_input = tf.layers.batch_normalization(affine_intermediate_result, training=is_training, name="ae_bn_"+str(i))

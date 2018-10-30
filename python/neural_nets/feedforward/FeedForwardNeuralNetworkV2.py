@@ -16,7 +16,9 @@ from NeuralNetwork import *
 class FeedForwardNeuralNetworkV2(NeuralNetwork):
     'Class for feed-forward neural network (version 2).'
     
-    def __init__(self, name, neural_net_topology, nn_hidden_layer_activation_func_list=[], is_using_batch_normalization=True):
+    def __init__(self, name, neural_net_topology, nn_hidden_layer_activation_func_list=[], 
+                 regularization_const=0.0, 
+                 is_using_batch_normalization=True):
         self.name = name
         
         self.neural_net_topology = neural_net_topology
@@ -36,6 +38,8 @@ class FeedForwardNeuralNetworkV2(NeuralNetwork):
         print self.neural_net_activation_func_list
         
         self.num_params = self.countNeuralNetworkModelNumParams()
+        
+        self.regularization_const = regularization_const
         
         self.is_using_batch_normalization = is_using_batch_normalization
     
@@ -60,7 +64,9 @@ class FeedForwardNeuralNetworkV2(NeuralNetwork):
         with tf.variable_scope(self.name, reuse=tf.AUTO_REUSE):
             hidden_drop = dataset
             for i in range(1, self.N_layers):
-                affine_intermediate_result = tf.layers.dense(hidden_drop, self.neural_net_topology[i], name="ffnn_dense_"+str(i))
+                affine_intermediate_result = tf.layers.dense(hidden_drop, self.neural_net_topology[i], 
+                                                             kernel_regularizer=tf.contrib.layers.l2_regularizer(self.regularization_const), 
+                                                             name="ffnn_dense_"+str(i))
                 
                 if (self.is_using_batch_normalization):
                     activation_func_input = tf.layers.batch_normalization(affine_intermediate_result, training=is_training, name="ffnn_bn_"+str(i))

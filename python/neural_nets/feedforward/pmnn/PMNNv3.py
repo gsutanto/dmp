@@ -23,7 +23,7 @@ class PMNNv3(PMNNv2, object):
     
     def __init__(self, name, D_input, 
                  regular_hidden_layer_topology, regular_hidden_layer_activation_func_list, 
-                 N_phaseLWR_kernels, D_output, regularization_const, 
+                 N_phaseLWR_kernels, D_output, regularization_const=0.0, 
                  path="", is_using_phase_kernel_modulation=True, is_predicting_only=False, 
                  is_using_batch_normalization=True):
         assert (is_predicting_only == False), 'PMNNv3 only supports is_predicting_only == False, i.e. execution inside a TensorFlow session.'
