@@ -26,6 +26,13 @@ class CartesianCoordDMPTensorflow(CartesianCoordDMP, object):
     """
     Class for discrete Cartesian Coordinate (x-y-z) DMPs, implemented with TensorFlow.
     Only valid for 2nd-order canonical system.
+    Terminology:
+    x = state_position_vector             (size 3X1)
+    v = state_velocity_vector             (size 3X1)
+    g = goal_state_position_vector        (size 3X1)
+    p = phase_variable_vector             (size 1X1)
+    u = phase_velocity_vector             (size 1X1)
+    G = steady_state_goal_position_vector (size 3X1)
     """
     
     def TFExtractStateComponents(self, 

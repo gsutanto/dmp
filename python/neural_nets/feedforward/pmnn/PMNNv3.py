@@ -229,7 +229,7 @@ class PMNNv3(PMNNv2, object):
         # Create a variable to track the global step.
         global_step_dim = tf.Variable(0, name='global_step', trainable=False)
         with tf.variable_scope('PMNNv3dim'+str(dim_out)):
-            opt_dim = tf.train.AdamOptimizer(learning_rate=initial_learning_rate)
+            opt_dim = tf.train.RMSPropOptimizer(learning_rate=initial_learning_rate)
             train_op_dim = opt_dim.minimize(loss_dim, global_step=global_step_dim)
         
         return train_op_dim, loss_dim
