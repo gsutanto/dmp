@@ -19,7 +19,7 @@ class FeedForwardNeuralNetwork(NeuralNetwork):
         self.name = name
         
         self.neural_net_topology = neural_net_topology
-        print "Neural Network Topology:"
+        print self.name + " Neural Network Topology:"
         print self.neural_net_topology
         
         self.N_layers = len(self.neural_net_topology)
@@ -98,6 +98,19 @@ class FeedForwardNeuralNetwork(NeuralNetwork):
                     output = activation_func_output
         return output
     
+    def computeRegularizationL2Loss(self):
+        # Create an operation that calculates L2 regularization loss.
+        reg_l2_loss = 0
+        for i in range(1, self.N_layers):
+            layer_name = self.getLayerName(i)
+    
+            with tf.variable_scope(self.name+'_'+layer_name, reuse=True):
+                weights = tf.get_variable('weights', [self.neural_net_topology[i - 1], self.neural_net_topology[i]])
+                biases = tf.get_variable('biases', [self.neural_net_topology[i]])
+                reg_l2_loss = reg_l2_loss + tf.nn.l2_loss(weights) + tf.nn.l2_loss(biases)
+        
+        return reg_l2_loss
+    
     # def performNeuralNetworkTraining(self, prediction, ground_truth, initial_learning_rate, beta, N_steps):
     def performNeuralNetworkTraining(self, prediction, ground_truth, initial_learning_rate, beta):
         """
@@ -108,22 +121,13 @@ class FeedForwardNeuralNetwork(NeuralNetwork):
         :param beta: L2 regularization constant
         """
         # Create an operation that calculates L2 prediction loss.
-        pred_l2_loss = tf.nn.l2_loss(prediction - ground_truth, name='my_pred_L2_loss')
+        pred_l2_loss = tf.nn.l2_loss(prediction - ground_truth, name=self.name+'_'+'my_pred_L2_loss')
+        reg_l2_loss = self.computeRegularizationL2Loss()
     
-        # Create an operation that calculates L2 regularization loss.
-        reg_l2_loss = 0
-        for i in range(1, self.N_layers):
-            layer_name = self.getLayerName(i)
-    
-            with tf.variable_scope(self.name+'_'+layer_name, reuse=True):
-                weights = tf.get_variable('weights', [self.neural_net_topology[i - 1], self.neural_net_topology[i]])
-                biases = tf.get_variable('biases', [self.neural_net_topology[i]])
-                reg_l2_loss = reg_l2_loss + tf.nn.l2_loss(weights) + tf.nn.l2_loss(biases)
-    
-        loss = tf.reduce_mean(pred_l2_loss, name='my_pred_L2_loss_mean') + (beta * reg_l2_loss)
+        loss = tf.reduce_mean(pred_l2_loss, name=self.name+'_'+'my_pred_L2_loss_mean') + (beta * reg_l2_loss)
     
         # Create a variable to track the global step.
-        global_step = tf.Variable(0, name='global_step', trainable=False)
+        global_step = tf.Variable(0, name=self.name+'_'+'global_step', trainable=False)
         # Exponentially-decaying learning rate:
         # learning_rate = tf.train.exponential_decay(initial_learning_rate, global_step, N_steps, 0.1)
         # Create the gradient descent optimizer with the given learning rate.

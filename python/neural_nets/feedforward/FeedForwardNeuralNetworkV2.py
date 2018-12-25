@@ -69,7 +69,11 @@ class FeedForwardNeuralNetworkV2(NeuralNetwork):
                                                              name="ffnn_dense_"+str(i))
                 
                 if (self.is_using_batch_normalization):
-                    activation_func_input = tf.layers.batch_normalization(affine_intermediate_result, training=is_training, name="ffnn_bn_"+str(i))
+                    activation_func_input = tf.layers.batch_normalization(affine_intermediate_result, 
+                                                                          training=is_training, 
+                                                                          beta_regularizer=tf.contrib.layers.l2_regularizer(self.regularization_const), 
+                                                                          gamma_regularizer=tf.contrib.layers.l2_regularizer(self.regularization_const), 
+                                                                          name="ffnn_bn_"+str(i))
                 else:
                     activation_func_input = affine_intermediate_result
                 

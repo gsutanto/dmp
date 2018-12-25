@@ -16,9 +16,8 @@ from copy import deepcopy
 class AutoEncoderV2(FeedForwardNeuralNetworkV2):
     """
     Class for special feed-forward neural network, the AutoEncoder.
-    Decoder's topology is the mirror/reverse copy of the encoder's topology.
-    Also, the last two layers (final hidden layer and output layer) 
-    are dimension-specific (version 2).
+    Decoder's topology is the mirror/reverse copy of the encoder's topology 
+    (version 2).
     """
     
     def __init__(self, name, D_input, 
@@ -66,7 +65,11 @@ class AutoEncoderV2(FeedForwardNeuralNetworkV2):
                                                              name="ae_dense_"+str(i))
                 
                 if (self.is_using_batch_normalization):
-                    activation_func_input = tf.layers.batch_normalization(affine_intermediate_result, training=is_training, name="ae_bn_"+str(i))
+                    activation_func_input = tf.layers.batch_normalization(affine_intermediate_result, 
+                                                                          training=is_training, 
+                                                                          beta_regularizer=tf.contrib.layers.l2_regularizer(self.regularization_const), 
+                                                                          gamma_regularizer=tf.contrib.layers.l2_regularizer(self.regularization_const), 
+                                                                          name="ae_bn_"+str(i))
                 else:
                     activation_func_input = affine_intermediate_result
                 
@@ -103,7 +106,11 @@ class AutoEncoderV2(FeedForwardNeuralNetworkV2):
                                                              name="ae_dense_"+str(i))
                 
                 if (self.is_using_batch_normalization):
-                    activation_func_input = tf.layers.batch_normalization(affine_intermediate_result, training=is_training, name="ae_bn_"+str(i))
+                    activation_func_input = tf.layers.batch_normalization(affine_intermediate_result, 
+                                                                          training=is_training, 
+                                                                          beta_regularizer=tf.contrib.layers.l2_regularizer(self.regularization_const), 
+                                                                          gamma_regularizer=tf.contrib.layers.l2_regularizer(self.regularization_const), 
+                                                                          name="ae_bn_"+str(i))
                 else:
                     activation_func_input = affine_intermediate_result
                 

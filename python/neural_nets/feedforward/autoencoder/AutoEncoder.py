@@ -16,7 +16,6 @@ class AutoEncoder(FeedForwardNeuralNetwork):
     """
     Class for special feed-forward neural network, the AutoEncoder.
     Decoder's topology is the mirror/reverse copy of the encoder's topology.
-    Also, the last two layers (final hidden layer and output layer) are dimension-specific.
     """
     
     def __init__(self, name, D_input, 
@@ -25,7 +24,7 @@ class AutoEncoder(FeedForwardNeuralNetwork):
         self.name = name
         
         self.neural_net_topology = [D_input] + encoder_hidden_layer_topology + [D_latent] + list(reversed(encoder_hidden_layer_topology)) + [D_input]
-        print "AutoEncoder Topology:"
+        print self.name + " AutoEncoder Topology:"
         print self.neural_net_topology
         
         self.D_output = D_input
