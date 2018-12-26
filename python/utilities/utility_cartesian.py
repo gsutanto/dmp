@@ -24,7 +24,7 @@ import utility_quaternion as util_quat
 
 
 assert_epsilon = 1.0e-14
-denominator_epsilon = 1.0e-30
+division_epsilon = 1.0e-100
 symmetricity_epsilon = 1.0e-14
 
 def getTensorDiag(tensor_input):
@@ -108,7 +108,7 @@ def computeWrenchFromKseehat(kseehat, symm_epsilon=symmetricity_epsilon):
         wrench = wrench[0,:]
     return wrench
 
-def computeRotationMatrixLogMap(R, denom_epsilon=denominator_epsilon): # Conversion from SO(3) (R) to so(3) (omegahat)
+def computeRotationMatrixLogMap(R, div_epsilon=division_epsilon): # Conversion from SO(3) (R) to so(3) (omegahat)
     if (len(R.shape) == 2):
         R = R.reshape(1,3,3)
     assert (R.shape[1] == 3)
@@ -126,13 +126,13 @@ def computeRotationMatrixLogMap(R, denom_epsilon=denominator_epsilon): # Convers
         half_traceR_minus_one[half_traceR_minus_one_greater_than_one_idx] = 1.0
     
     theta = np.arccos(half_traceR_minus_one).reshape(tensor_length, 1, 1)
-    omegahat = (R - R.transpose((0,2,1))) / np.tile(((2.0 * np.sin(theta)) + denom_epsilon), (1, 3, 3))
+    omegahat = (R - R.transpose((0,2,1))) / np.tile(((2.0 * np.sin(theta)) + div_epsilon), (1, 3, 3))
     log_R_output = np.tile(theta, (1, 3, 3)) * omegahat
     if (tensor_length == 1):
         log_R_output = log_R_output[0,:,:]
     return log_R_output
 
-def computeRotationMatrixExpMap(omegahat, symm_epsilon=symmetricity_epsilon, denom_epsilon=denominator_epsilon): # Conversion from so(3) (omegahat) to SO(3) (R)
+def computeRotationMatrixExpMap(omegahat, symm_epsilon=symmetricity_epsilon, div_epsilon=division_epsilon): # Conversion from so(3) (omegahat) to SO(3) (R)
     if (len(omegahat.shape) == 2):
         omegahat = omegahat.reshape(1,3,3)
     assert (omegahat.shape[1] == 3)
@@ -142,14 +142,14 @@ def computeRotationMatrixExpMap(omegahat, symm_epsilon=symmetricity_epsilon, den
     
     norm_omega = npla.norm(omega, ord=2, axis=1).reshape(tensor_length, 1, 1)
     exp_omegahat = (getTensorEye(tensor_length, 3) + 
-                    (np.tile((np.sin(norm_omega)/(norm_omega + denom_epsilon)), (1, 3, 3)) * omegahat) + 
-                    (np.tile(((1.0-np.cos(norm_omega))/(np.square(norm_omega + denom_epsilon))), (1, 3, 3)) * np.matmul(omegahat, omegahat))
+                    (np.tile(((np.sin(norm_omega) + div_epsilon)/(norm_omega + div_epsilon)), (1, 3, 3)) * omegahat) + 
+                    (np.tile(((1.0-np.cos(norm_omega))/(np.square(norm_omega + div_epsilon))), (1, 3, 3)) * np.matmul(omegahat, omegahat))
                     )
     if (tensor_length == 1):
         exp_omegahat = exp_omegahat[0,:,:]
     return exp_omegahat
 
-def computeHomogeneousTransformationMatrixLogMap(T, symm_epsilon=symmetricity_epsilon, denom_epsilon=denominator_epsilon): # Conversion from SE(3) (T) to se(3) (kseehat)
+def computeHomogeneousTransformationMatrixLogMap(T, symm_epsilon=symmetricity_epsilon, div_epsilon=division_epsilon): # Conversion from SE(3) (T) to se(3) (kseehat)
     if (len(T.shape) == 2):
         T = T.reshape(1,4,4)
     assert (T.shape[1] == 4)
@@ -158,14 +158,14 @@ def computeHomogeneousTransformationMatrixLogMap(T, symm_epsilon=symmetricity_ep
     assert (np.fabs(T[:,3,3] - 1.0) < assert_epsilon).all()
     tensor_length = T.shape[0]
     R = T[:,:3,:3]
-    omegahat = computeRotationMatrixLogMap(R, denom_epsilon).reshape(tensor_length, 3, 3)
+    omegahat = computeRotationMatrixLogMap(R, div_epsilon).reshape(tensor_length, 3, 3)
     omega = computeVec3FromSkewSymmMat(omegahat, symm_epsilon).reshape(tensor_length, 3)
     norm_omega = npla.norm(omega, ord=2, axis=1).reshape(tensor_length, 1, 1)
     
     Ainv = (getTensorEye(tensor_length, 3) 
             - (0.5*omegahat) 
-            + (np.tile((((2.0*np.sin(norm_omega))-(norm_omega*(1.0+np.cos(norm_omega))))
-                        /((2*np.square(norm_omega)*np.sin(norm_omega))+denom_epsilon)), (1, 3, 3)) 
+            + (np.tile((((2.0*(np.sin(norm_omega) + div_epsilon))-((norm_omega + div_epsilon) * (1.0+np.cos(norm_omega))))
+                        /(2*np.square(norm_omega + div_epsilon)*(np.sin(norm_omega) + div_epsilon))), (1, 3, 3)) 
                * np.matmul(omegahat, omegahat)))
     p = T[:,:3,3].reshape(tensor_length,3,1)
     kseehat = np.zeros((tensor_length,4,4))
@@ -175,7 +175,7 @@ def computeHomogeneousTransformationMatrixLogMap(T, symm_epsilon=symmetricity_ep
         kseehat = kseehat[0,:,:]
     return kseehat
 
-def computeHomogeneousTransformationMatrixExpMap(kseehat, symm_epsilon=symmetricity_epsilon, denom_epsilon=denominator_epsilon): # Conversion from se(3) (kseehat) to SE(3) (T)
+def computeHomogeneousTransformationMatrixExpMap(kseehat, symm_epsilon=symmetricity_epsilon, div_epsilon=division_epsilon): # Conversion from se(3) (kseehat) to SE(3) (T)
     if (len(kseehat.shape) == 2):
         kseehat = kseehat.reshape(1,4,4)
     assert (kseehat.shape[1] == 4)
@@ -183,13 +183,14 @@ def computeHomogeneousTransformationMatrixExpMap(kseehat, symm_epsilon=symmetric
     assert (npla.norm(kseehat[:,3,:], ord=2, axis=1) < assert_epsilon).all()
     tensor_length = kseehat.shape[0]
     omegahat = kseehat[:,:3,:3]
-    exp_omegahat = computeRotationMatrixExpMap(omegahat, denom_epsilon).reshape(tensor_length, 3, 3)
+    exp_omegahat = computeRotationMatrixExpMap(omegahat, div_epsilon).reshape(tensor_length, 3, 3)
     omega = computeVec3FromSkewSymmMat(omegahat, symm_epsilon).reshape(tensor_length, 3)
     norm_omega = npla.norm(omega, ord=2, axis=1).reshape(tensor_length, 1, 1)
     
     A = (getTensorEye(tensor_length, 3)
-         + (np.tile(((1.0-np.cos(norm_omega))/np.square(norm_omega+denom_epsilon)), (1, 3, 3)) * omegahat)
-         + (np.tile(((norm_omega-np.sin(norm_omega))/(np.square(norm_omega+denom_epsilon)*(norm_omega+denom_epsilon))), (1, 3, 3)) 
+         + (np.tile(((1.0-np.cos(norm_omega))/np.square(norm_omega+div_epsilon)), (1, 3, 3)) * omegahat)
+         + (np.tile((((norm_omega + div_epsilon) - (np.sin(norm_omega) + div_epsilon))/
+                     (np.square(norm_omega+div_epsilon)*(norm_omega+div_epsilon))), (1, 3, 3)) 
             * np.matmul(omegahat, omegahat))
          )
     v = kseehat[:,:3,3].reshape(tensor_length,3,1)
@@ -236,11 +237,32 @@ def computeInverseHomogeneousTransformMatrix(T):
         Tinv = Tinv[0,:,:]
     return Tinv
 
+def computeStackedNumpyLogM(M):
+    npLogM_list = list()
+    for M_idx in range(M.shape[0]):
+        npLogM_list.append(scla.logm(M[M_idx,:,:]))
+    npLogM = np.stack(npLogM_list)
+    return npLogM
+
+def computeStackedNumpyExpM(M):
+    npExpM_list = list()
+    for M_idx in range(M.shape[0]):
+        npExpM_list.append(scla.expm(M[M_idx,:,:]))
+    npExpM = np.stack(npExpM_list)
+    return npExpM
+
+def computeStackedNumpyInvM(M):
+    npInvM_list = list()
+    for M_idx in range(M.shape[0]):
+        npInvM_list.append(npla.inv(M[M_idx,:,:]))
+    npInvM = np.stack(npInvM_list)
+    return npInvM
+
 
 if __name__=='__main__':
     np.set_printoptions(suppress=True)
     np.set_printoptions(precision=2)
-    diff_epsilon = 1.0e-9
+    diff_epsilon = 1.0e-10
     
     print ""
     print "SO(3) Log Mapping Test:"
@@ -257,7 +279,7 @@ if __name__=='__main__':
     end = time.time()
     print "Computation Time: ", (end - start)
     diff = npla.norm(npLogR1 - LogR1)
-    assert diff < diff_epsilon, "diff = %f" % diff
+    assert diff < diff_epsilon, "diff = %e" % diff
     
     theta2 = np.pi/2.0
     R2 = np.array([[1.0, 0.0, 0.0],
@@ -275,7 +297,7 @@ if __name__=='__main__':
     end = time.time()
     print "Computation Time: ", (end - start)
     diff = npla.norm(npLogR2 - LogR2)
-    assert diff < diff_epsilon, "diff = %f" % diff
+    assert diff < diff_epsilon, "diff = %e" % diff
     
     theta3 = np.random.rand(1)[0]
     R3 = np.array([[np.cos(theta3), 0.0, np.sin(theta3)],
@@ -293,7 +315,34 @@ if __name__=='__main__':
     end = time.time()
     print "Computation Time: ", (end - start)
     diff = npla.norm(npLogR3 - LogR3)
-    assert diff < diff_epsilon, "diff = %f" % diff
+    assert diff < diff_epsilon, "diff = %e" % diff
+    
+    theta = np.random.rand(3)
+    R4 = np.array([[[1.0, 0.0, 0.0],
+                    [0.0, np.cos(theta[0]), -np.sin(theta[0])],
+                    [0.0, np.sin(theta[0]), np.cos(theta[0])]],
+                   [[np.cos(theta[1]), 0.0, np.sin(theta[1])],
+                    [0.0, 1.0, 0.0],
+                    [-np.sin(theta[1]), 0.0, np.cos(theta[1])]],
+                   [[np.cos(theta[2]), -np.sin(theta[2]), 0.0],
+                    [np.sin(theta[2]), np.cos(theta[2]), 0.0],
+                    [0.0, 0.0, 1.0]],
+                   [[1.0, 0.0, 0.0],
+                    [0.0, 1.0, 0.0],
+                    [0.0, 0.0, 1.0]]])
+    print "R4 = \n", R4
+    start = time.time()
+    npLogR4 = computeStackedNumpyLogM(R4)
+    print "npLogR4 = \n", npLogR4
+    end = time.time()
+    print "Computation Time: ", (end - start)
+    start = time.time()
+    LogR4 = computeRotationMatrixLogMap(R4)
+    print "AnalyticalLogR4 = \n", LogR4
+    end = time.time()
+    print "Computation Time: ", (end - start)
+    diff = npla.norm(npLogR4 - LogR4)
+    assert diff < diff_epsilon, "diff = %e" % diff
     
     print ""
     print "so(3) Exp Mapping Test:"
@@ -312,7 +361,7 @@ if __name__=='__main__':
     end = time.time()
     print "Computation Time: ", (end - start)
     diff = npla.norm(npExpomegahat1 - Expomegahat1)
-    assert diff < diff_epsilon, "diff = %f" % diff
+    assert diff < diff_epsilon, "diff = %e" % diff
     
     omega2 = np.random.rand(3)
     omegahat2 = computeSkewSymmMatFromVec3(omega2)
@@ -329,7 +378,24 @@ if __name__=='__main__':
     end = time.time()
     print "Computation Time: ", (end - start)
     diff = npla.norm(npExpomegahat2 - Expomegahat2)
-    assert diff < diff_epsilon, "diff = %f" % diff
+    assert diff < diff_epsilon, "diff = %e" % diff
+    
+    omega3 = np.random.rand(7,3)
+    omegahat3 = computeSkewSymmMatFromVec3(omega3)
+    print "omega3 = \n", omega3
+    print "omegahat3 = \n", omegahat3
+    start = time.time()
+    npExpomegahat3 = computeStackedNumpyExpM(omegahat3)
+    print "npExpomegahat3 = \n", npExpomegahat3
+    end = time.time()
+    print "Computation Time: ", (end - start)
+    start = time.time()
+    Expomegahat3 = computeRotationMatrixExpMap(omegahat3)
+    print "AnalyticalExpomegahat3 = \n", Expomegahat3
+    end = time.time()
+    print "Computation Time: ", (end - start)
+    diff = npla.norm(npExpomegahat3 - Expomegahat3)
+    assert diff < diff_epsilon, "diff = %e" % diff
     
     print ""
     print "SE(3) Log Mapping Test:"
@@ -348,7 +414,7 @@ if __name__=='__main__':
     end = time.time()
     print "Computation Time: ", (end - start)
     diff = npla.norm(npLogT1 - LogT1)
-    assert diff < diff_epsilon, "diff = %f" % diff
+    assert diff < diff_epsilon, "diff = %e" % diff
     
     T2 = np.eye(4)
     T2[:3,:3] = R2
@@ -365,7 +431,24 @@ if __name__=='__main__':
     end = time.time()
     print "Computation Time: ", (end - start)
     diff = npla.norm(npLogT2 - LogT2)
-    assert diff < diff_epsilon, "diff = %f" % diff
+    assert diff < diff_epsilon, "diff = %e" % diff
+    
+    T3 = getTensorEye(R4.shape[0],4)
+    T3[:,:3,:3] = R4
+    T3[:,:3,3] = np.random.rand(R4.shape[0],3)
+    print "T3 = \n", T3
+    start = time.time()
+    npLogT3 = computeStackedNumpyLogM(T3)
+    print "npLogT3 = \n", npLogT3
+    end = time.time()
+    print "Computation Time: ", (end - start)
+    start = time.time()
+    LogT3 = computeHomogeneousTransformationMatrixLogMap(T3)
+    print "AnalyticalLogT3 = \n", LogT3
+    end = time.time()
+    print "Computation Time: ", (end - start)
+    diff = npla.norm(npLogT3 - LogT3)
+    assert diff < diff_epsilon, "diff = %e" % diff
     
     print ""
     print "se(3) Exp Mapping Test:"
@@ -384,7 +467,7 @@ if __name__=='__main__':
     end = time.time()
     print "Computation Time: ", (end - start)
     diff = npla.norm(npExpkseehat1 - Expkseehat1)
-    assert diff < diff_epsilon, "diff = %f" % diff
+    assert diff < diff_epsilon, "diff = %e" % diff
     
     kseehat2 = np.zeros((4,4))
     kseehat2[:3,:3] = omegahat2
@@ -401,7 +484,24 @@ if __name__=='__main__':
     end = time.time()
     print "Computation Time: ", (end - start)
     diff = npla.norm(npExpkseehat2 - Expkseehat2)
-    assert diff < diff_epsilon, "diff = %f" % diff
+    assert diff < diff_epsilon, "diff = %e" % diff
+    
+    kseehat3 = np.zeros((omegahat3.shape[0],4,4))
+    kseehat3[:,:3,:3] = omegahat3
+    kseehat3[:,:3,3] = np.random.rand(omegahat3.shape[0],3)
+    print "kseehat3 = \n", kseehat3
+    start = time.time()
+    npExpkseehat3 = computeStackedNumpyExpM(kseehat3)
+    print "npExpkseehat3 = \n", npExpkseehat3
+    end = time.time()
+    print "Computation Time: ", (end - start)
+    start = time.time()
+    Expkseehat3 = computeHomogeneousTransformationMatrixExpMap(kseehat3)
+    print "AnalyticalExpkseehat3 = \n", Expkseehat3
+    end = time.time()
+    print "Computation Time: ", (end - start)
+    diff = npla.norm(npExpkseehat3 - Expkseehat3)
+    assert diff < diff_epsilon, "diff = %e" % diff
     
     print ""
     print "Inverse Homogeneous Transformation Matrix Test:"
@@ -417,7 +517,7 @@ if __name__=='__main__':
     end = time.time()
     print "Computation Time: ", (end - start)
     diff = npla.norm(npInvT1 - InvT1)
-    assert diff < diff_epsilon, "diff = %f" % diff
+    assert diff < diff_epsilon, "diff = %e" % diff
     
     print "T2 = \n", T2
     start = time.time()
@@ -431,7 +531,21 @@ if __name__=='__main__':
     end = time.time()
     print "Computation Time: ", (end - start)
     diff = npla.norm(npInvT2 - InvT2)
-    assert diff < diff_epsilon, "diff = %f" % diff
+    assert diff < diff_epsilon, "diff = %e" % diff
+    
+    print "T3 = \n", T3
+    start = time.time()
+    npInvT3 = computeStackedNumpyInvM(T3)
+    print "npInvT3 = \n", npInvT3
+    end = time.time()
+    print "Computation Time: ", (end - start)
+    start = time.time()
+    InvT3 = computeInverseHomogeneousTransformMatrix(T3)
+    print "AnalyticalInvT3 = \n", InvT3
+    end = time.time()
+    print "Computation Time: ", (end - start)
+    diff = npla.norm(npInvT3 - InvT3)
+    assert diff < diff_epsilon, "diff = %e" % diff
     
     print ""
     print "SO(3) Cubed/Composition Test:"
@@ -447,7 +561,21 @@ if __name__=='__main__':
     end = time.time()
     print "Computation Time: ", (end - start)
     diff = npla.norm(R3cubed - exp_3Xlog_R3)
-    assert diff < diff_epsilon, "diff = %f" % diff
+    assert diff < diff_epsilon, "diff = %e" % diff
+    
+    print "R4 = \n", R4
+    start = time.time()
+    R4cubed = np.matmul(R4, np.matmul(R4, R4))
+    print "R4cubed = \n", R4cubed
+    end = time.time()
+    print "Computation Time: ", (end - start)
+    start = time.time()
+    exp_3Xlog_R4 = computeRotationMatrixExpMap(3 * LogR4)
+    print "exp_3Xlog_R4 = \n", exp_3Xlog_R4
+    end = time.time()
+    print "Computation Time: ", (end - start)
+    diff = npla.norm(R4cubed - exp_3Xlog_R4)
+    assert diff < diff_epsilon, "diff = %e" % diff
     
     print ""
     print "SE(3) Cubed/Composition Test:"
@@ -463,7 +591,21 @@ if __name__=='__main__':
     end = time.time()
     print "Computation Time: ", (end - start)
     diff = npla.norm(T2cubed - exp_3Xlog_T2)
-    assert diff < diff_epsilon, "diff = %f" % diff
+    assert diff < diff_epsilon, "diff = %e" % diff
+    
+    print "T3 = \n", T3
+    start = time.time()
+    T3cubed = np.matmul(T3, np.matmul(T3, T3))
+    print "T3cubed = \n", T3cubed
+    end = time.time()
+    print "Computation Time: ", (end - start)
+    start = time.time()
+    exp_3Xlog_T3 = computeHomogeneousTransformationMatrixExpMap(3 * LogT3)
+    print "exp_3Xlog_T3 = \n", exp_3Xlog_T3
+    end = time.time()
+    print "Computation Time: ", (end - start)
+    diff = npla.norm(T3cubed - exp_3Xlog_T3)
+    assert diff < diff_epsilon, "diff = %e" % diff
     
     ## The following is NOT the same (incorrect algebra; NOT commutative)
 #    print ""
@@ -481,7 +623,7 @@ if __name__=='__main__':
 #    end = time.time()
 #    print "Computation Time: ", (end - start)
 #    diff = npla.norm(R2composeR3 - exp_logR2_plus_logR3)
-#    assert diff < diff_epsilon, "diff = %f" % diff
+#    assert diff < diff_epsilon, "diff = %e" % diff
     
     ## The following is NOT the same (incorrect algebra; NOT commutative)
 #    print ""
@@ -499,10 +641,9 @@ if __name__=='__main__':
 #    end = time.time()
 #    print "Computation Time: ", (end - start)
 #    diff = npla.norm(T1composeT2 - exp_logT1_plus_logT2)
-#    assert diff < diff_epsilon, "diff = %f" % diff
+#    assert diff < diff_epsilon, "diff = %e" % diff
 
     t = np.array([[1,2,3.0],[4,5,6],[7,8,9],[101,103,105],[201,53,405]])
     Q = np.array([[1.0,0,0,0],[0,1.0,0,0],[0,0,1.0,0],[0,0,0,1.0],[0.7073883, 0, 0.4998009, 0.4998009]])
     T = computeHomogeneousTransformMatrix(t, Q)
-    np.set_printoptions(precision=3,suppress=True)
     print "T = \n", T

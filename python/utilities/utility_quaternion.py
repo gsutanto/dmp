@@ -15,6 +15,8 @@ import os
 import sys
 import copy
 
+division_epsilon = 1.0e-100
+
 
 def normalizeQuaternion(Q_input, warning_threshold = 0.98):
     assert (Q_input.shape[1] == 4), "Each row of Q_input has to be 4-dimensional!!!"
@@ -41,7 +43,7 @@ def standardizeNormalizeQuaternion(Q_input):
     Q_output = normalizeQuaternion(Q_output)
     return Q_output
 
-def computeQuaternionLogMap(Q_input, epsilon=1.0e-100):
+def computeQuaternionLogMap(Q_input, div_epsilon=division_epsilon):
     assert (Q_input.shape[1] == 4), "Each row of Q_input has to be 4-dimensional!!!"
     
     tensor_length = Q_input.shape[0]
@@ -55,12 +57,12 @@ def computeQuaternionLogMap(Q_input, epsilon=1.0e-100):
     arccos_u = np.arccos(u)
     sin_arccos_u = np.sin(arccos_u)
     
-    arccos_u_div_sin_arccos_u = (arccos_u + epsilon)/(sin_arccos_u + epsilon)
+    arccos_u_div_sin_arccos_u = (arccos_u + div_epsilon)/(sin_arccos_u + div_epsilon)
     
     log_Q_output = npma.repmat(arccos_u_div_sin_arccos_u, 1, 3) * q
     return log_Q_output
 
-def computeQuaternionExpMap(log_Q_input, epsilon=1.0e-100):
+def computeQuaternionExpMap(log_Q_input, div_epsilon=division_epsilon):
     assert (log_Q_input.shape[1] == 3), "Each row of log_Q_input has to be 3-dimensional!!!"
     
     tensor_length = log_Q_input.shape[0]
@@ -69,7 +71,7 @@ def computeQuaternionExpMap(log_Q_input, epsilon=1.0e-100):
     norm_r = npla.norm(r, ord=2, axis=1).reshape(tensor_length, 1)
     cos_norm_r = np.cos(norm_r)
     sin_norm_r = np.sin(norm_r)
-    sin_norm_r_div_norm_r = (sin_norm_r + epsilon)/(norm_r + epsilon)
+    sin_norm_r_div_norm_r = (sin_norm_r + div_epsilon)/(norm_r + div_epsilon)
     
     Q_output = np.hstack([cos_norm_r, (npma.repmat(sin_norm_r_div_norm_r, 1, 3) * r)])
     
