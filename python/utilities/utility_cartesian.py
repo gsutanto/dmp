@@ -33,7 +33,7 @@ division_epsilon = 1.0e-100
 symmetricity_epsilon = 1.0e-14
 
 def getTensorDiag(tensor_input):
-    assert (len(tensor_input.shape) == 3), "tensor_input has invalid number of dimensions."
+    assert (len(tensor_input.shape) == 3), "tensor_input has invalid number of dimensions!"
     assert (tensor_input.shape[1] == tensor_input.shape[2]), "tensor_input has to be square!!!"
     tensor_length = tensor_input.shape[0]
     tensor_input_dim = tensor_input.shape[1]
@@ -54,7 +54,7 @@ def getTensorEye(tensor_length, tensor_dim):
         return np.eye(tensor_dim)
 
 def computeSkewSymmMatFromVec3(omega):
-    assert ((len(omega.shape) >= 1) and (len(omega.shape) <= 2)), "omega has invalid number of dimensions."
+    assert ((len(omega.shape) >= 1) and (len(omega.shape) <= 2)), "omega has invalid number of dimensions!"
     if (len(omega.shape) == 1):
         omega = omega.reshape(1,3)
     assert (omega.shape[1] == 3)
@@ -71,7 +71,7 @@ def computeSkewSymmMatFromVec3(omega):
     return omegahat
 
 def computeVec3FromSkewSymmMat(omegahat, symm_epsilon=symmetricity_epsilon):
-    assert ((len(omegahat.shape) >= 2) and (len(omegahat.shape) <= 3)), "omegahat has invalid number of dimensions."
+    assert ((len(omegahat.shape) >= 2) and (len(omegahat.shape) <= 3)), "omegahat has invalid number of dimensions!"
     if (len(omegahat.shape) == 2):
         omegahat = omegahat.reshape(1,3,3)
     assert (omegahat.shape[1] == 3)
@@ -93,7 +93,7 @@ def computeVec3FromSkewSymmMat(omegahat, symm_epsilon=symmetricity_epsilon):
     return omega
 
 def computeKseehatFromWrench(wrench):
-    assert ((len(wrench.shape) >= 1) and (len(wrench.shape) <= 2)), "wrench has invalid number of dimensions."
+    assert ((len(wrench.shape) >= 1) and (len(wrench.shape) <= 2)), "wrench has invalid number of dimensions!"
     if (len(wrench.shape) == 1):
         wrench = wrench.reshape(1,6)
     assert (wrench.shape[1] == 6)
@@ -109,7 +109,7 @@ def computeKseehatFromWrench(wrench):
     return kseehat
 
 def computeWrenchFromKseehat(kseehat, symm_epsilon=symmetricity_epsilon):
-    assert ((len(kseehat.shape) >= 2) and (len(kseehat.shape) <= 3)), "kseehat has invalid number of dimensions."
+    assert ((len(kseehat.shape) >= 2) and (len(kseehat.shape) <= 3)), "kseehat has invalid number of dimensions!"
     if (len(kseehat.shape) == 2):
         kseehat = kseehat.reshape(1,4,4)
     assert (npla.norm(kseehat[:,3,:], ord=2, axis=1) < assert_epsilon).all(), ("kseehat = \n" + str(kseehat))
@@ -124,7 +124,7 @@ def computeWrenchFromKseehat(kseehat, symm_epsilon=symmetricity_epsilon):
     return wrench
 
 def computeRotationMatrixLogMap(R, div_epsilon=division_epsilon): # Conversion from SO(3) (R) to so(3) (omegahat)
-    assert ((len(R.shape) >= 2) and (len(R.shape) <= 3)), "R has invalid number of dimensions."
+    assert ((len(R.shape) >= 2) and (len(R.shape) <= 3)), "R has invalid number of dimensions!"
     if (len(R.shape) == 2):
         R = R.reshape(1,3,3)
     assert (R.shape[1] == 3)
@@ -149,7 +149,7 @@ def computeRotationMatrixLogMap(R, div_epsilon=division_epsilon): # Conversion f
     return log_R_output
 
 def computeRotationMatrixExpMap(omegahat, symm_epsilon=symmetricity_epsilon, div_epsilon=division_epsilon): # Conversion from so(3) (omegahat) to SO(3) (R)
-    assert ((len(omegahat.shape) >= 2) and (len(omegahat.shape) <= 3)), "omegahat has invalid number of dimensions."
+    assert ((len(omegahat.shape) >= 2) and (len(omegahat.shape) <= 3)), "omegahat has invalid number of dimensions!"
     if (len(omegahat.shape) == 2):
         omegahat = omegahat.reshape(1,3,3)
     assert (omegahat.shape[1] == 3)
@@ -167,7 +167,7 @@ def computeRotationMatrixExpMap(omegahat, symm_epsilon=symmetricity_epsilon, div
     return exp_omegahat
 
 def computeHomogeneousTransformationMatrixLogMap(T, symm_epsilon=symmetricity_epsilon, div_epsilon=division_epsilon): # Conversion from SE(3) (T) to se(3) (kseehat)
-    assert ((len(T.shape) >= 2) and (len(T.shape) <= 3)), "T has invalid number of dimensions."
+    assert ((len(T.shape) >= 2) and (len(T.shape) <= 3)), "T has invalid number of dimensions!"
     if (len(T.shape) == 2):
         T = T.reshape(1,4,4)
     assert (T.shape[1] == 4)
@@ -194,7 +194,7 @@ def computeHomogeneousTransformationMatrixLogMap(T, symm_epsilon=symmetricity_ep
     return kseehat
 
 def computeHomogeneousTransformationMatrixExpMap(kseehat, symm_epsilon=symmetricity_epsilon, div_epsilon=division_epsilon): # Conversion from se(3) (kseehat) to SE(3) (T)
-    assert ((len(kseehat.shape) >= 2) and (len(kseehat.shape) <= 3)), "kseehat has invalid number of dimensions."
+    assert ((len(kseehat.shape) >= 2) and (len(kseehat.shape) <= 3)), "kseehat has invalid number of dimensions!"
     if (len(kseehat.shape) == 2):
         kseehat = kseehat.reshape(1,4,4)
     assert (kseehat.shape[1] == 4)
@@ -221,8 +221,8 @@ def computeHomogeneousTransformationMatrixExpMap(kseehat, symm_epsilon=symmetric
     return exp_kseehat
 
 def computeHomogeneousTransformMatrix(t, Q):
-    assert ((len(t.shape) >= 1) and (len(t.shape) <= 2)), "t has invalid number of dimensions."
-    assert ((len(Q.shape) >= 1) and (len(Q.shape) <= 2)), "Q has invalid number of dimensions."
+    assert ((len(t.shape) >= 1) and (len(t.shape) <= 2)), "t has invalid number of dimensions!"
+    assert ((len(Q.shape) >= 1) and (len(Q.shape) <= 2)), "Q has invalid number of dimensions!"
     if ((len(t.shape) == 1) or ((t.shape[0] == 3) and (t.shape[1] == 1))):
         t = t.reshape(1,3)
     if ((len(Q.shape) == 1) or ((Q.shape[0] == 3) and (Q.shape[1] == 1))):
@@ -241,7 +241,7 @@ def computeHomogeneousTransformMatrix(t, Q):
     return T
 
 def computeInverseHomogeneousTransformMatrix(T):
-    assert ((len(T.shape) >= 2) and (len(T.shape) <= 3)), "T has invalid number of dimensions."
+    assert ((len(T.shape) >= 2) and (len(T.shape) <= 3)), "T has invalid number of dimensions!"
     if (len(T.shape) == 2):
         T = T.reshape(1,4,4)
     assert (npla.norm(T[:,3,:3], ord=2, axis=1) < assert_epsilon).all()
@@ -260,7 +260,7 @@ def computeInverseHomogeneousTransformMatrix(T):
     return Tinv
 
 def computeStackedNumpyLogM(M):
-    assert (len(M.shape) == 3), "M has invalid number of dimensions."
+    assert (len(M.shape) == 3), "M has invalid number of dimensions!"
     npLogM_list = list()
     for M_idx in range(M.shape[0]):
         npLogM_list.append(scla.logm(M[M_idx,:,:]))
@@ -268,7 +268,7 @@ def computeStackedNumpyLogM(M):
     return npLogM
 
 def computeStackedNumpyExpM(M):
-    assert (len(M.shape) == 3), "M has invalid number of dimensions."
+    assert (len(M.shape) == 3), "M has invalid number of dimensions!"
     npExpM_list = list()
     for M_idx in range(M.shape[0]):
         npExpM_list.append(scla.expm(M[M_idx,:,:]))
@@ -276,7 +276,7 @@ def computeStackedNumpyExpM(M):
     return npExpM
 
 def computeStackedNumpyInvM(M):
-    assert (len(M.shape) == 3), "M has invalid number of dimensions."
+    assert (len(M.shape) == 3), "M has invalid number of dimensions!"
     npInvM_list = list()
     for M_idx in range(M.shape[0]):
         npInvM_list.append(npla.inv(M[M_idx,:,:]))
