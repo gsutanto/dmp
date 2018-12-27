@@ -19,6 +19,9 @@ division_epsilon = 1.0e-100
 
 
 def normalizeQuaternion(Q_input, warning_threshold = 0.98):
+    assert ((len(Q_input.shape) >= 1) and (len(Q_input.shape) <= 2)), "Q_input has invalid number of dimensions."
+    if (len(Q_input.shape) == 1):
+        Q_input = Q_input.reshape(1, 4)
     assert (Q_input.shape[1] == 4), "Each row of Q_input has to be 4-dimensional!!!"
     tensor_length = Q_input.shape[0]
     Q_input_norm = npla.norm(Q_input, ord=2, axis=1).reshape(tensor_length, 1)
@@ -26,9 +29,14 @@ def normalizeQuaternion(Q_input, warning_threshold = 0.98):
         wa.warn("(Q_input_norm < %f).any() == True ; Q_input_norm=\n"%warning_threshold + str(Q_input_norm))
     # Normalize (make sure that norm(Quaternion) == 1)
     Q_output = Q_input / npma.repmat(Q_input_norm, 1, 4)
+    if (tensor_length == 1):
+        Q_output = Q_output[0,:]
     return Q_output
 
 def standardizeNormalizeQuaternion(Q_input):
+    assert ((len(Q_input.shape) >= 1) and (len(Q_input.shape) <= 2)), "Q_input has invalid number of dimensions."
+    if (len(Q_input.shape) == 1):
+        Q_input = Q_input.reshape(1, 4)
     assert (Q_input.shape[1] == 4), "Each row of Q_input has to be 4-dimensional!!!"
     
     Q_output = copy.deepcopy(Q_input)
@@ -44,14 +52,17 @@ def standardizeNormalizeQuaternion(Q_input):
     return Q_output
 
 def computeQuaternionLogMap(Q_input, div_epsilon=division_epsilon):
+    assert ((len(Q_input.shape) >= 1) and (len(Q_input.shape) <= 2)), "Q_input has invalid number of dimensions."
+    if (len(Q_input.shape) == 1):
+        Q_input = Q_input.reshape(1, 4)
     assert (Q_input.shape[1] == 4), "Each row of Q_input has to be 4-dimensional!!!"
     
     tensor_length = Q_input.shape[0]
     
     # normalize the input Quaternion first:
-    Q_prep = normalizeQuaternion(Q_input)
+    Q_prep = normalizeQuaternion(Q_input).reshape(tensor_length, 4)
     
-    u = Q_prep[:,0].reshape(tensor_length,1)
+    u = Q_prep[:,0].reshape(tensor_length, 1)
     q = Q_prep[:,1:4]
     
     arccos_u = np.arccos(u)
@@ -60,9 +71,14 @@ def computeQuaternionLogMap(Q_input, div_epsilon=division_epsilon):
     arccos_u_div_sin_arccos_u = (arccos_u + div_epsilon)/(sin_arccos_u + div_epsilon)
     
     log_Q_output = npma.repmat(arccos_u_div_sin_arccos_u, 1, 3) * q
+    if (tensor_length == 1):
+        log_Q_output = log_Q_output[0,:]
     return log_Q_output
 
 def computeQuaternionExpMap(log_Q_input, div_epsilon=division_epsilon):
+    assert ((len(log_Q_input.shape) >= 1) and (len(log_Q_input.shape) <= 2)), "log_Q_input has invalid number of dimensions."
+    if (len(log_Q_input.shape) == 1):
+        log_Q_input = log_Q_input.reshape(1, 3)
     assert (log_Q_input.shape[1] == 3), "Each row of log_Q_input has to be 3-dimensional!!!"
     
     tensor_length = log_Q_input.shape[0]
@@ -76,5 +92,18 @@ def computeQuaternionExpMap(log_Q_input, div_epsilon=division_epsilon):
     Q_output = np.hstack([cos_norm_r, (npma.repmat(sin_norm_r_div_norm_r, 1, 3) * r)])
     
     # don't forget to normalize the resulting Quaternion:
-    Q_output = normalizeQuaternion(Q_output);
+    Q_output = normalizeQuaternion(Q_output)
+    return Q_output
+
+def computeQuaternionConjugate(Q_input):
+    assert ((len(Q_input.shape) >= 1) and (len(Q_input.shape) <= 2)), "Q_input has invalid number of dimensions."
+    if (len(Q_input.shape) == 1):
+        Q_input = Q_input.reshape(1, 4)
+    assert (Q_input.shape[1] == 4), "Each row of Q_input has to be 4-dimensional!!!"
+    
+    Q_output = copy.deepcopy(Q_input)
+    Q_output[:,1:4] = -Q_output[:,1:4]
+    
+    # don't forget to normalize the resulting Quaternion:
+    Q_output = normalizeQuaternion(Q_output)
     return Q_output
