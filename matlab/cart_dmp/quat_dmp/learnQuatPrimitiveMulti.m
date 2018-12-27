@@ -39,12 +39,12 @@ function [ varargout ] = learnQuatPrimitiveMulti( Quat_traj, ...
     end
     mean_tau        = mean(taus);
     
-    if (isQuatWithNegativeRealParts(Q0s))
+    if (isQuatArrayHasMajorityNegativeRealParts(Q0s))
         mean_Q0 = -standardizeNormalizeQuaternion(computeAverageQuaternions(Q0s));
     else
         mean_Q0 = standardizeNormalizeQuaternion(computeAverageQuaternions(Q0s));
     end
-    if (isQuatWithNegativeRealParts(QGs))
+    if (isQuatArrayHasMajorityNegativeRealParts(QGs))
         mean_QG = -standardizeNormalizeQuaternion(computeAverageQuaternions(QGs));
     else
         mean_QG = standardizeNormalizeQuaternion(computeAverageQuaternions(QGs));

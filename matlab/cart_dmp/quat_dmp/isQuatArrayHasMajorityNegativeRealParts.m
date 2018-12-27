@@ -1,4 +1,4 @@
-function [ result ] = isQuatWithNegativeRealParts( Qs )
+function [ result ] = isQuatArrayHasMajorityNegativeRealParts( Qs )
     N_Quat  = size(Qs, 2);
     count_Quat_w_negative_real_parts    = 0;
     

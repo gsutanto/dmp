@@ -208,3 +208,49 @@ def computeOmegaTrajectory( QT, dt ):
     omegaT = (1.0/dt) * computeTwiceLogQuatDifference(Qt_plus_1T, QtT)
     
     return omegaT
+
+def computeQDotAndQDoubleDotTrajectory( QT, omegaT, omegadT ):
+    """Extracting/converting Qd and Qdd (trajectories) 
+       from trajectories of Q, omega, and omegad."""
+    QdT  = 0.5 *  computeQuatProduct(np.hstack([np.zeros((QT.shape[0],1)),  omegaT]),  QT)
+    QddT = 0.5 * (computeQuatProduct(np.hstack([np.zeros((QT.shape[0],1)),  omegadT]), QT) + 
+                  computeQuatProduct(np.hstack([np.zeros((QdT.shape[0],1)), omegaT]),  QdT))
+    return QdT, QddT
+
+def integrateQuat( Qt, omega_t, dt, tau=1.0 ):
+    assert (dt > 0.0), "dt (sampling time) is invalid!"
+    assert (tau > 0.0), "tau (time constant) is invalid!"
+    
+    theta_v = 0.5 * omega_t * (dt/tau)
+    Q_incr = computeQuaternionExpMap(theta_v)
+    Qt_plus_1 = normalizeQuaternion(computeQuatProduct(Q_incr, normalizeQuaternion(Qt)))
+    return Qt_plus_1
+
+def inverseIntegrateQuat( Qt_plus_1, omega_t, dt, tau=1.0 ):
+    assert (dt > 0.0), "dt (sampling time) is invalid!"
+    
+    theta_v = 0.5 * omega_t * (dt/tau)
+    Q_incr = computeQuaternionExpMap(theta_v)
+    Q_decr = computeQuatConjugate( Q_incr )
+    Qt = normalizeQuaternion(computeQuatProduct(Q_decr, normalizeQuaternion(Qt_plus_1)))
+    return Qt
+
+def isQuatArrayHasMajorityNegativeRealParts( Qs ):
+    assert (Qs.shape[1] == 4), "Qs is NOT a valid array of Quaternions!"
+    tensor_length = Qs.shape[0]
+    
+    count_Quat_w_negative_real_parts = (Qs[:,0] < 0.0).sum()
+    result = (count_Quat_w_negative_real_parts > (tensor_length/2.0))
+    return result
+
+def computeAverageQuaternions( Qs ):
+    Qs  = normalizeQuaternion(Qs)
+    
+    QsTQs = np.matmul(Qs.transpose((1,0)), Qs)
+    [d, V] = npla.eig(QsTQs)
+    max_eig_val_idx = np.argmax(d)
+    if (isQuatArrayHasMajorityNegativeRealParts(Qs)):
+        mean_Q = -standardizeNormalizeQuaternion(V[:,max_eig_val_idx])
+    else:
+        mean_Q = standardizeNormalizeQuaternion(V[:,max_eig_val_idx])
+    return mean_Q

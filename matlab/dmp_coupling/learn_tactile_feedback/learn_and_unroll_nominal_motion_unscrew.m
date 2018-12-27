@@ -131,12 +131,12 @@ for np=1:N_primitive
     clearvars       QT omegaT omegadT Q0 QG;
     
     assert(var(dts) < 1e-10, 'Sampling Time (dt) is inconsistent across demonstrated trajectories.');
-    if (isQuatWithNegativeRealParts(Q0s))
+    if (isQuatArrayHasMajorityNegativeRealParts(Q0s))
         mean_Q0 = -computeAverageQuaternions(Q0s);
     else
         mean_Q0 = computeAverageQuaternions(Q0s);
     end
-    if (isQuatWithNegativeRealParts(QGs))
+    if (isQuatArrayHasMajorityNegativeRealParts(QGs))
         mean_QG = -computeAverageQuaternions(QGs);
     else
         mean_QG = computeAverageQuaternions(QGs);
