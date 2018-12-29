@@ -209,12 +209,20 @@ def computeOmegaTrajectory( QT, dt ):
     
     return omegaT
 
+def computeQDotTrajectory( QT, omegaT ):
+    QdT  = 0.5 *  computeQuatProduct(np.hstack([np.zeros((QT.shape[0],1)),  omegaT]),  QT)
+    return QdT
+
+def computeQDoubleDotTrajectory( QT, QdT, omegaT, omegadT ):
+    QddT = 0.5 * (computeQuatProduct(np.hstack([np.zeros((QT.shape[0],1)),  omegadT]), QT) + 
+                  computeQuatProduct(np.hstack([np.zeros((QdT.shape[0],1)), omegaT]),  QdT))
+    return QddT
+
 def computeQDotAndQDoubleDotTrajectory( QT, omegaT, omegadT ):
     """Extracting/converting Qd and Qdd (trajectories) 
        from trajectories of Q, omega, and omegad."""
-    QdT  = 0.5 *  computeQuatProduct(np.hstack([np.zeros((QT.shape[0],1)),  omegaT]),  QT)
-    QddT = 0.5 * (computeQuatProduct(np.hstack([np.zeros((QT.shape[0],1)),  omegadT]), QT) + 
-                  computeQuatProduct(np.hstack([np.zeros((QdT.shape[0],1)), omegaT]),  QdT))
+    QdT  = computeQDotTrajectory( QT, omegaT )
+    QddT = computeQDoubleDotTrajectory( QT, QdT, omegaT, omegadT )
     return QdT, QddT
 
 def integrateQuat( Qt, omega_t, dt, tau=1.0 ):
