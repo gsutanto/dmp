@@ -120,6 +120,9 @@ namespace dmp
             // which over time evolves toward a steady-state goal position (state).
             // The main purpose is to avoid discontinuous initial acceleration (see the math formula
             // of Schaal's DMP Model for more details).
+            // Please also refer the initialization described in paper:
+            // B. Nemec and A. Ude, “Action sequencing using dynamic movement
+            // primitives,” Robotica, vol. 30, no. 05, pp. 837–846, 2012.
             Vector4 Q0      = start_state_init.getQ();
             Vector3 omega0  = start_state_init.getOmega();
             Vector3 omegad0 = start_state_init.getOmegad();

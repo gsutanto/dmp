@@ -246,6 +246,9 @@ bool TransformSystemDiscrete::start(const DMPState& start_state_init, const DMPS
         // which over time evolves toward a steady-state goal position (state).
         // The main purpose is to avoid discontinuous initial acceleration (see the math formula
         // of Schaal's DMP Model for more details).
+        // Please also refer the initialization described in paper:
+        // B. Nemec and A. Ude, “Action sequencing using dynamic movement
+        // primitives,” Robotica, vol. 30, no. 05, pp. 837–846, 2012.
         VectorN x0      = start_state_init.getX();
         VectorN xd0     = start_state_init.getXd();
         VectorN xdd0    = start_state_init.getXdd();
