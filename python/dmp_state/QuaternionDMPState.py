@@ -157,13 +157,15 @@ class QuaternionDMPState(DMPState, object):
         return self.setQdd(new_Xdd)
     
     def normalizeQuaternion(self):
-        self.X = np.transpose(util_quat.normalizeQuaternion(self.X.T))
+        traj_length = self.getLength()
+        self.X = util_quat.normalizeQuaternion(self.X.T).reshape(traj_length, 4).T
     
     def computeQdAndQdd(self):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this QuaternionDMPState is invalid!"
+        traj_length = self.getLength()
         self.normalizeQuaternion()
         [new_QdT, new_QddT] = util_quat.computeQDotAndQDoubleDotTrajectory( self.X.T, self.omega.T, self.omegad.T )
-        self.Xd = new_QdT.T
-        self.Xdd = new_QddT.T
+        self.Xd = new_QdT.reshape(traj_length, 4).T
+        self.Xdd = new_QddT.reshape(traj_length, 4).T
         assert (self.isValid()), "Post-condition(s) checking is failed: this QuaternionDMPState became invalid!"
         return None
