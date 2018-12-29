@@ -40,6 +40,7 @@ class GoalSystem:
         assert (self.current_goal_state.isValid()), "DMPState current_goal_state is invalid!"
         assert (self.current_goal_state.dmp_num_dimensions == self.dmp_num_dimensions), "self.current_goal_state.dmp_num_dimensions=" + str(self.current_goal_state.dmp_num_dimensions) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
         assert (self.G.shape[0] == self.current_goal_state.X.shape[0])
+        assert (self.G.shape[0] == self.goal_num_dimensions)
         assert (self.tau_sys != None), "self.tau_sys cannot be None!"
         assert (self.tau_sys.isValid()), "TauSystem tau_sys is invalid!"
         assert (self.alpha > 0.0), "self.alpha=" + str(self.alpha) + " <= 0 (invalid!)"
