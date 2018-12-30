@@ -25,6 +25,7 @@ from CanonicalSystemDiscrete import *
 from QuaternionGoalSystem import *
 from DMPState import *
 from QuaternionDMPState import *
+from QuaternionDMPTrajectory import *
 import utility_quaternion as util_quat
 
 class TransformSystemQuaternion(TransformSystemDiscrete, object):
@@ -161,4 +162,98 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
         
         return next_state, forcing_term, ct_acc, ct_vel, basis_function_vector
     
+    def getGoalTrajAndCanonicalTrajAndTauAndALearnFromDemo(self, quatdmptrajectory_demo_local, robot_task_servo_rate, steady_state_quat_goal_position_local=None):
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformSystemQuaternion is invalid!"
+        assert (quatdmptrajectory_demo_local.isValid())
+        assert (quatdmptrajectory_demo_local.dmp_num_dimensions == self.dmp_num_dimensions)
+        assert (robot_task_servo_rate > 0.0)
+        
+        traj_length = quatdmptrajectory_demo_local.getLength()
+        start_quatdmpstate_demo_local = quatdmptrajectory_demo_local.getQuaternionDMPStateAtIndex(0)
+        if (steady_state_quat_goal_position_local is None):
+            goal_steady_quatdmpstate_demo_local = quatdmptrajectory_demo_local.getQuaternionDMPStateAtIndex(traj_length-1)
+        else:
+            goal_steady_quatdmpstate_demo_local = QuaternionDMPState(steady_state_quat_goal_position_local)
+        QG_learn = goal_steady_quatdmpstate_demo_local.X
+        Q0_learn = start_quatdmpstate_demo_local.X
+        A_learn = util_quat.computeTwiceLogQuatDifference( QG_learn.T, Q0_learn.T ).reshape(1, self.dmp_num_dimensions).T
+        dt = (goal_steady_quatdmpstate_demo_local.time[0,0] - start_quatdmpstate_demo_local.time[0,0])/(traj_length - 1.0)
+        if (dt <= 0.0):
+            dt = 1.0/robot_task_servo_rate
+        tau = goal_steady_quatdmpstate_demo_local.time[0,0] - start_quatdmpstate_demo_local.time[0,0]
+        if (tau < MIN_TAU):
+            tau = (1.0 * (traj_length - 1))/robot_task_servo_rate
+        self.tau_sys.setTauBase(tau)
+        self.canonical_sys.start()
+        self.start(start_quatdmpstate_demo_local, goal_steady_quatdmpstate_demo_local)
+        tau_relative = self.tau_sys.getTauRelative()
+        X_list = [None] * traj_length
+        V_list = [None] * traj_length
+        Qg_list = [None] * traj_length
+        for i in range(traj_length):
+            x = self.canonical_sys.getCanonicalPosition()
+            v = self.canonical_sys.getCanonicalVelocity()
+            Qg = self.goal_sys.getCurrentGoalState().getQ()
+            X_list[i] = x
+            V_list[i] = v
+            Qg_list[i] = Qg
+            
+            self.canonical_sys.updateCanonicalState(dt)
+            self.updateCurrentGoalState(dt)
+        X = np.hstack(X_list).reshape((1,traj_length))
+        V = np.hstack(V_list).reshape((1,traj_length))
+        QgT = np.hstack(Qg_list)
+        self.is_started = False
+        self.canonical_sys.is_started = False
+        self.goal_sys.is_started = False
+        
+        quat_goal_position_trajectory = QgT
+        canonical_position_trajectory = X # might be used later during learning
+        canonical_velocity_trajectory = V # might be used later during learning
+        return quat_goal_position_trajectory, canonical_position_trajectory, canonical_velocity_trajectory, tau, tau_relative, A_learn
     
+    def getTargetForcingTermTraj(self, quatdmptrajectory_demo_local, robot_task_servo_rate, 
+                                 is_omega_and_omegad_computed=False):
+        QgT, cX, cV, tau, tau_relative, A_learn = self.getGoalTrajAndCanonicalTrajAndTauAndALearnFromDemo(quatdmptrajectory_demo_local, 
+                                                                                                          robot_task_servo_rate)
+        
+        traj_length = quatdmptrajectory_demo_local.getLength()
+        QT = quatdmptrajectory_demo_local.getQ()
+        if (is_omega_and_omegad_computed):
+            omegaT = quatdmptrajectory_demo_local.getOmega()
+            omegadT = quatdmptrajectory_demo_local.getOmegad()
+        else:
+            QdT = quatdmptrajectory_demo_local.getQd()
+            QddT = quatdmptrajectory_demo_local.getQdd()
+            [omegaT_T, omegadT_T] = util_quat.computeOmegaAndOmegaDotTrajectory( QT.T, QdT.T, QddT.T )
+            omegaT = omegaT_T.reshape(traj_length, self.dmp_num_dimensions).T
+            omegadT = omegadT_T.reshape(traj_length, self.dmp_num_dimensions).T
+        twice_log_quat_diff_Qg_demo_and_Q_demo = util_quat.computeTwiceLogQuatDifference( QgT.T, QT.T ).reshape(traj_length, self.dmp_num_dimensions).T
+        F_target = ((np.square(tau_relative) * omegadT) - (self.alpha * ((self.beta * twice_log_quat_diff_Qg_demo_and_Q_demo) - 
+                                                                         (tau_relative * omegaT))))
+        
+        return F_target, cX, cV, tau, tau_relative, A_learn, QgT
+    
+    def getTargetCouplingTermTraj(self, quatdmptrajectory_demo_local, robot_task_servo_rate, steady_state_quat_goal_position_local, 
+                                  is_omega_and_omegad_computed=False):
+        QgT, cX, cV, tau, tau_relative, A_learn = self.getGoalTrajAndCanonicalTrajAndTauAndALearnFromDemo(quatdmptrajectory_demo_local, 
+                                                                                                          robot_task_servo_rate, 
+                                                                                                          steady_state_quat_goal_position_local)
+        
+        traj_length = quatdmptrajectory_demo_local.getLength()
+        QT = quatdmptrajectory_demo_local.getQ()
+        if (is_omega_and_omegad_computed):
+            omegaT = quatdmptrajectory_demo_local.getOmega()
+            omegadT = quatdmptrajectory_demo_local.getOmegad()
+        else:
+            QdT = quatdmptrajectory_demo_local.getQd()
+            QddT = quatdmptrajectory_demo_local.getQdd()
+            [omegaT_T, omegadT_T] = util_quat.computeOmegaAndOmegaDotTrajectory( QT.T, QdT.T, QddT.T )
+            omegaT = omegaT_T.reshape(traj_length, self.dmp_num_dimensions).T
+            omegadT = omegadT_T.reshape(traj_length, self.dmp_num_dimensions).T
+        F, PSI = self.func_approx.getForcingTermTraj(cX, cV)
+        twice_log_quat_diff_Qg_demo_and_Q_demo = util_quat.computeTwiceLogQuatDifference( QgT.T, QT.T ).reshape(traj_length, self.dmp_num_dimensions).T
+        C_target = ((np.square(tau_relative) * omegadT) - F - (self.alpha * ((self.beta * twice_log_quat_diff_Qg_demo_and_Q_demo) - 
+                                                                             (tau_relative * omegaT))))
+        
+        return C_target, F, PSI, cX, cV, tau, tau_relative, QgT

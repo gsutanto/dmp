@@ -10,11 +10,13 @@ import numpy as np
 import os
 import sys
 import copy
-sys.path.append(os.path.join(os.path.dirname(__file__), '../dmp_param/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../dmp_base/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../dmp_param/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../dmp_state/'))
 from TransformationSystem import *
 from FuncApproximatorDiscrete import *
 from CanonicalSystemDiscrete import *
+from DMPTrajectory import *
 
 class TransformSystemDiscrete(TransformationSystem, object):
     'Class for transformation systems of discrete DMPs.'
