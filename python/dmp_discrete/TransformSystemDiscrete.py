@@ -136,7 +136,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
         self.current_velocity_state.X = v
         self.current_velocity_state.Xd = vd
         self.current_velocity_state.time = time
-        next_state = self.current_state
+        next_state = copy.copy(self.current_state)
         
         return next_state, forcing_term, ct_acc, ct_vel, basis_function_vector
     

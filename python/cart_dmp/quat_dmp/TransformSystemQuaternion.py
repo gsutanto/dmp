@@ -73,7 +73,6 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
         self.setCurrentState(start_quat_state_init)
         
         QG_init = goal_quat_state_init.getQ()
-        current_goal_quat_state_init = QuaternionDMPState()
         if (self.canonical_sys.order == 2):
             # Best option for Schaal's DMP Model using 2nd order canonical system:
             # Using goal evolution system initialized with the start position (state) as goal position (state),
@@ -83,19 +82,83 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
             # Please also refer the initialization described in paper:
             # B. Nemec and A. Ude, “Action sequencing using dynamic movement
             # primitives,” Robotica, vol. 30, no. 05, pp. 837–846, 2012.
-            x0 = start_state_init.getX()
-            xd0 = start_state_init.getXd()
-            xdd0 = start_state_init.getXdd()
+            Q0 = start_quat_state_init.getQ()
+            omega0 = start_quat_state_init.getOmega()
+            omegad0 = start_quat_state_init.getOmegad()
             
             tau = self.tau_sys.getTauRelative()
-            g0 = ((((tau*tau*xdd0) * 1.0 / self.alpha) + (tau*xd0)) * 1.0 / self.beta) + x0
-            current_goal_state_init = DMPState(g0)
+            log_quat_diff_Qg_and_Q = ((((tau*tau*omegad0) * 1.0 / self.alpha) + (tau*omega0))/(2.0 * self.beta))
+            quat_diff_Qg_and_Q = util_quat.computeQuaternionExpMap(log_quat_diff_Qg_and_Q.T).reshape(1, 4).T
+            Qg0 = util_quat.computeQuatProduct(quat_diff_Qg_and_Q.T, Q0.T).reshape(1, 4).T
+            current_goal_quat_state_init = QuaternionDMPState(Q_init=Qg0)
+            current_goal_quat_state_init.computeQdAndQdd()
         elif (self.canonical_sys.order == 1):
-            current_goal_state_init = goal_state_init
+            # Best option for Schaal's DMP Model using 1st order canonical system:
+            # goal position is static, no evolution
+            current_goal_quat_state_init = goal_quat_state_init
         
-        self.goal_sys.start(current_goal_state_init, G_init)
+        self.quat_goal_sys.start(current_goal_quat_state_init, QG_init)
         self.resetCouplingTerm()
         self.is_started = True
         
-        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
+        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformSystemQuaternion is invalid!"
         return None
+    
+    def getNextState(self, dt):
+        assert (self.is_started)
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformSystemQuaternion is invalid!"
+        assert (dt > 0.0)
+        
+        tau = self.tau_sys.getTauRelative()
+        forcing_term, basis_function_vector = self.func_approx.getForcingTerm()
+        ct_acc, ct_vel = self.getCouplingTerm()
+        for d in range(self.dmp_num_dimensions):
+            if (self.is_using_coupling_term_at_dimension[d] == False):
+                ct_acc[d,0] = 0.0
+                ct_vel[d,0] = 0.0
+        
+        time = self.current_quat_state.time
+        Q0 = self.start_quat_state.getQ()
+        Q = self.current_quat_state.getQ()
+        omega = self.current_quat_state.getOmega()
+        omegad = self.current_quat_state.getOmegad()
+        
+        etha = self.current_angular_velocity_state.getX()
+        ethad = self.current_angular_velocity_state.getXd()
+        
+        QG = self.quat_goal_sys.getSteadyStateGoalPosition()
+        Qg = self.quat_goal_sys.getCurrentGoalState().getQ()
+        
+        Q = util_quat.integrateQuat( Q.T, omega.T, dt ).reshape(1, 4).T
+        omega = omega + (omegad * dt)
+        etha = tau * omega
+        
+        A = util_quat.computeTwiceLogQuatDifference( QG.T, Q0.T ).reshape(1, self.dmp_num_dimensions).T
+        
+        for d in range(self.dmp_num_dimensions):
+            if (self.is_using_scaling[d]):
+                if (np.fabs(self.A_learn[d,0]) < MIN_FABS_AMPLITUDE):
+                    A[d,0] = 1.0
+                else:
+                    A[d,0] = A[d,0] * 1.0 / self.A_learn[d,0]
+            else:
+                A[d,0] = 1.0
+        
+        twice_log_quat_diff_Qg_and_Q = util_quat.computeTwiceLogQuaternionDifference( Qg.T, Q.T ).reshape(1, self.dmp_num_dimensions).T
+        ethad = ((self.alpha * ((self.beta * twice_log_quat_diff_Qg_and_Q) - etha)) + (forcing_term * A) + ct_acc) * 1.0 / tau
+        assert (np.isnan(ethad).any() == False), "ethad contains NaN!"
+        
+        omegad = ethad * 1.0 / tau
+        
+        time = time + dt
+        
+        self.current_quat_state = QuaternionDMPState(Q_init=Q, Qd_init=None, Qdd_init=None, 
+                                                     omega_init=omega, omegad_init=omegad, 
+                                                     time_init=time)
+        self.current_quat_state.computeQdAndQdd()
+        self.current_angular_velocity_state = DMPState(X_init=etha, Xd_init=ethad, Xdd_init=None, time_init=time)
+        next_state = copy.copy(self.current_quat_state)
+        
+        return next_state, forcing_term, ct_acc, ct_vel, basis_function_vector
+    
+    
