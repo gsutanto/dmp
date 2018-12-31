@@ -10,6 +10,7 @@ import numpy as np
 import os
 import sys
 import copy
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../dmp_discrete/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../dmp_param/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../dmp_state/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../utilities/'))
@@ -25,13 +26,23 @@ class CartesianCoordDMP(DMPDiscrete, object):
     
     def __init__(self, model_size_init, canonical_system_discrete, ctraj_local_coordinate_frame_selection,
                  transform_couplers_list=[], name=""):
-        self.transform_sys_discrete_cart_coord = TransformSystemDiscrete(3, canonical_system_discrete, 
-                                                                         None, 
-                                                                         [True] * 3, 25.0, 25.0/4.0,
-                                                                         None, None, None, None,
-                                                                         transform_couplers_list)
-        super(CartesianCoordDMP, self).__init__(3, model_size_init, canonical_system_discrete, 
-                                                self.transform_sys_discrete_cart_coord, name)
+        self.transform_sys_discrete_cart_coord = TransformSystemDiscrete(dmp_num_dimensions_init=3, 
+                                                                         canonical_system_discrete=canonical_system_discrete, 
+                                                                         func_approximator_discrete=None, # this will be initialized during the initialization of DMPDiscrete
+                                                                         is_using_scaling_init=[True] * 3, 
+                                                                         ts_alpha=25.0, 
+                                                                         ts_beta=25.0/4.0,
+                                                                         start_dmpstate_discrete=None, 
+                                                                         current_dmpstate_discrete=None, 
+                                                                         current_velocity_dmpstate_discrete=None, 
+                                                                         goal_system_discrete=None,
+                                                                         transform_couplers_list=transform_couplers_list, 
+                                                                         name="")
+        super(CartesianCoordDMP, self).__init__(dmp_num_dimensions_init=3, 
+                                                model_size_init=model_size_init, 
+                                                canonical_system_discrete=canonical_system_discrete, 
+                                                transform_system_discrete=self.transform_sys_discrete_cart_coord, 
+                                                name=name)
         self.cart_coord_transformer = CartesianCoordTransformer()
         self.ctraj_local_coord_selection = ctraj_local_coordinate_frame_selection
         is_using_scaling_init = [True] * 3
@@ -95,7 +106,7 @@ class CartesianCoordDMP(DMPDiscrete, object):
         assert (((self.ctraj_local_coord_selection == KROEMER_LOCAL_COORD_FRAME) and 
                  (critical_states_length < 3)) == False)
         assert (critical_states.isValid())
-        assert (critical_states.dmp_num_dimensions == 3)
+        assert (critical_states.dmp_num_dimensions == self.dmp_num_dimensions)
         start_state_global_init = critical_states.getDMPStateAtIndex(0)
         approaching_ss_goal_state_global_init = critical_states.getDMPStateAtIndex(critical_states_length-2)
         ss_goal_state_global_init = critical_states.getDMPStateAtIndex(critical_states_length-1)
