@@ -213,7 +213,7 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
         return quat_goal_position_trajectory, canonical_position_trajectory, canonical_velocity_trajectory, tau, tau_relative, A_learn
     
     def getTargetForcingTermTraj(self, quatdmptrajectory_demo_local, robot_task_servo_rate, 
-                                 is_omega_and_omegad_computed=False):
+                                 is_omega_and_omegad_computed=True):
         QgT, cX, cV, tau, tau_relative, A_learn = self.getGoalTrajAndCanonicalTrajAndTauAndALearnFromDemo(quatdmptrajectory_demo_local, 
                                                                                                           robot_task_servo_rate)
         
@@ -235,7 +235,7 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
         return F_target, cX, cV, tau, tau_relative, A_learn, QgT
     
     def getTargetCouplingTermTraj(self, quatdmptrajectory_demo_local, robot_task_servo_rate, steady_state_quat_goal_position_local, 
-                                  is_omega_and_omegad_computed=False):
+                                  is_omega_and_omegad_computed=True):
         QgT, cX, cV, tau, tau_relative, A_learn = self.getGoalTrajAndCanonicalTrajAndTauAndALearnFromDemo(quatdmptrajectory_demo_local, 
                                                                                                           robot_task_servo_rate, 
                                                                                                           steady_state_quat_goal_position_local)

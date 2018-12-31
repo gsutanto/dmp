@@ -93,13 +93,6 @@ class DMP:
         assert (dmp_unroll_init_parameters.isValid())
         return (self.start(dmp_unroll_init_parameters.critical_states, dmp_unroll_init_parameters.tau))
     
-    def getTargetCouplingTermAndUpdateStates(self, current_state_demo_local, dt):
-        assert (self.is_started)
-        ct_acc_target = self.transform_sys.getTargetCouplingTerm(current_state_demo_local)
-        self.canonical_sys.updateCanonicalState(dt)
-        self.transform_sys.updateCurrentGoalState(dt)
-        return ct_acc_target
-    
     def getMeanStartPosition(self):
         return copy.copy(self.mean_start_position)
     

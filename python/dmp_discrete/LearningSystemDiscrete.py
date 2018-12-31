@@ -19,7 +19,12 @@ from FuncApproximatorDiscrete import *
 from utilities import *
 
 class LearningSystemDiscrete(LearningSystem, object):
-    'Class for learning systems of discrete DMPs.'
+    """Class for learning systems of discrete DMPs.
+       Implemented free of (or abstracted away from) 
+       the type of state (DMPState/QuaternionDMPState/etc.).
+       The function getTargetForcingTermTraj() of transform_sys is the one 
+       who shall take care of the particular state type being used 
+       in its implementation underneath."""
     
     def __init__(self, transformation_system_discrete, name=""):
         super(LearningSystemDiscrete, self).__init__(transformation_system_discrete, name)

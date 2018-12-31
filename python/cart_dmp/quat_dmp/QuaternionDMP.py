@@ -48,6 +48,10 @@ class QuaternionDMP(DMPDiscrete, object):
         assert (self.dmp_num_dimensions == 3)
         return True
     
+    def preprocess(self, list_quat_dmp_trajectory):
+        assert (False), "NOT IMPLEMENTED YET!"
+        return None
+    
     def start(self, critical_states, tau_init):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this QuaternionDMP is invalid!"
         
@@ -69,3 +73,13 @@ class QuaternionDMP(DMPDiscrete, object):
         
         assert (self.isValid()), "Post-condition(s) checking is failed: this QuaternionDMP became invalid!"
         return None
+    
+    def extractSetTrajectories(self, training_data_dir_or_file_path):
+        assert (False), "NOT IMPLEMENTED YET!"
+        return None
+    
+    def learnGetDefaultUnrollParams(self, set_traj_input, robot_task_servo_rate):
+        assert (False), "NOT IMPLEMENTED YET!"
+        return None
+    
+    "TO DO: Implement QuaternionDMPUnrollInitParams"
