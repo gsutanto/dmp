@@ -242,8 +242,8 @@ class CartesianCoordDMP(DMPDiscrete, object):
         return self.cart_coord_transformer.convertCTrajAtOldToNewCoordSys(dmp_state_global,
                                                                           self.ctraj_hmg_transform_global_to_local_matrix)
     
-    def extractSetTrajectories(self, training_data_dir_or_file_path):
-        return extractSetNDTrajectories(training_data_dir_or_file_path, 3)
+    def extractSetTrajectories(self, training_data_dir_or_file_path, start_column_idx=1, time_column_idx=0):
+        return extractSetCartCoordTrajectories(training_data_dir_or_file_path, start_column_idx, time_column_idx)
     
     def saveParamsCartCoordDMP(self, dir_path, 
                                file_name_weights="f_weights_matrix.txt",

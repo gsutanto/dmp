@@ -221,8 +221,10 @@ def computeQDoubleDotTrajectory( QT, QdT, omegaT, omegadT ):
 def computeQDotAndQDoubleDotTrajectory( QT, omegaT, omegadT ):
     """Extracting/converting Qd and Qdd (trajectories) 
        from trajectories of Q, omega, and omegad."""
+    tensor_length = QT.shape[0]
+    
     QdT  = computeQDotTrajectory( QT, omegaT )
-    QddT = computeQDoubleDotTrajectory( QT, QdT, omegaT, omegadT )
+    QddT = computeQDoubleDotTrajectory( QT, QdT.reshape(tensor_length, 4), omegaT, omegadT )
     return QdT, QddT
 
 def integrateQuat( Qt, omega_t, dt, tau=1.0 ):
@@ -252,9 +254,10 @@ def isQuatArrayHasMajorityNegativeRealParts( Qs ):
     return result
 
 def computeAverageQuaternions( Qs ):
-    Qs  = normalizeQuaternion(Qs)
+    tensor_length = Qs.shape[0]
+    Qs  = normalizeQuaternion(Qs).reshape(tensor_length, 4)
     
-    QsTQs = np.matmul(Qs.transpose((1,0)), Qs)
+    QsTQs = np.matmul(Qs.T, Qs)
     [d, V] = npla.eig(QsTQs)
     max_eig_val_idx = np.argmax(d)
     if (isQuatArrayHasMajorityNegativeRealParts(Qs)):

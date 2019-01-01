@@ -37,5 +37,5 @@ class DMPDiscrete1D(DMPDiscrete, object):
         assert (self.dmp_num_dimensions == 1)
         return True
     
-    def extractSetTrajectories(self, training_data_dir_or_file_path):
-        return extractSetNDTrajectories(training_data_dir_or_file_path, 1)
+    def extractSetTrajectories(self, training_data_dir_or_file_path, start_column_idx=1, time_column_idx=0):
+        return extractSetNDTrajectories(training_data_dir_or_file_path, 1, start_column_idx, time_column_idx)

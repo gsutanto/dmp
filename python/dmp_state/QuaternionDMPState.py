@@ -27,7 +27,7 @@ class QuaternionDMPState(DMPState, object):
         self.time = time_init
         self.dmp_num_dimensions = 3
         if ((Q_init is None) and (Qd_init is None) and (Qdd_init is None) and 
-            (omega_init is None) and (omegad_init in None)):
+            (omega_init is None) and (omegad_init is None)):
             self.X = np.empty((4,0))
             self.Xd = np.empty((4,0))
             self.Xdd = np.empty((4,0))
@@ -39,38 +39,43 @@ class QuaternionDMPState(DMPState, object):
                 self.X = Q_init
             else:
                 assert (False), 'Q_init CANNOT be empty!'
+            if (len(self.X.shape) == 1):
+                self.X = self.X.reshape(4, 1)
+            
             if (Qd_init is not None):
                 assert (Qd_init.shape[0] == 4), "Dimension Qd_init.shape[0]=" + str(Qd_init.shape[0]) + " is NOT 4!"
                 self.Xd = Qd_init
             else:
                 self.Xd = np.zeros((4,self.X.shape[1]))
+            if (len(self.Xd.shape) == 1):
+                self.Xd = self.Xd.reshape(4, 1)
+            
             if (Qdd_init is not None):
                 assert (Qdd_init.shape[0] == 4), "Dimension Qdd_init.shape[0]=" + str(Qdd_init.shape[0]) + " is NOT 4!"
                 self.Xdd = Qdd_init
             else:
                 self.Xdd = np.zeros((4,self.X.shape[1]))
+            if (len(self.Xdd.shape) == 1):
+                self.Xdd = self.Xdd.reshape(4, 1)
+            
             if (omega_init is not None):
                 assert (omega_init.shape[0] == self.dmp_num_dimensions), "Dimension omega_init.shape[0]=" + str(omega_init.shape[0]) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
                 self.omega = omega_init
             else:
                 self.omega = np.zeros((self.dmp_num_dimensions,self.X.shape[1]))
+            if (len(self.omega.shape) == 1):
+                self.omega = self.omega.reshape(self.dmp_num_dimensions, 1)
+            
             if (omegad_init is not None):
                 assert (omegad_init.shape[0] == self.dmp_num_dimensions), "Dimension omegad_init.shape[0]=" + str(omegad_init.shape[0]) + " is mis-matched with self.dmp_num_dimensions=" + str(self.dmp_num_dimensions) + "!"
                 self.omegad = omegad_init
             else:
                 self.omegad = np.zeros((self.dmp_num_dimensions,self.X.shape[1]))
-            if (len(self.X.shape) == 1):
-                self.X.reshape((4, 1))
-            if (len(self.Xd.shape) == 1):
-                self.Xd.reshape((4, 1))
-            if (len(self.Xdd.shape) == 1):
-                self.Xdd.reshape((4, 1))
-            if (len(self.omega.shape) == 1):
-                self.omega.reshape((self.dmp_num_dimensions, 1))
             if (len(self.omegad.shape) == 1):
-                self.omegad.reshape((self.dmp_num_dimensions, 1))
+                self.omegad = self.omegad.reshape(self.dmp_num_dimensions, 1)
+            
             if (len(self.time.shape) == 1):
-                self.time.reshape((1, 1))
+                self.time = self.time.reshape((1, 1))
             assert (self.isValid())
     
     def isValid(self):

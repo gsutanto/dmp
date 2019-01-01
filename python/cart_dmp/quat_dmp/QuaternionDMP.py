@@ -49,8 +49,19 @@ class QuaternionDMP(DMPDiscrete, object):
         return True
     
     def preprocess(self, list_quat_dmp_trajectory):
-        assert (False), "NOT IMPLEMENTED YET!"
-        return None
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this QuaternionDMP is invalid!"
+        N_traj = len(list_quat_dmp_trajectory)
+        
+        Q0s = np.zeros((N_traj, 4))
+        QGs = np.zeros((N_traj, 4))
+        for i in range(N_traj):
+            Q0s[i,:] = list_quat_dmp_trajectory[i].X[:,0]
+            QGs[i,:] = list_quat_dmp_trajectory[i].X[:,-1]
+        self.mean_start_position = util_quat.computeAverageQuaternions(Q0s)
+        self.mean_goal_position = util_quat.computeAverageQuaternions(QGs)
+        preprocessed_list_quat_dmp_trajectory = list_quat_dmp_trajectory
+        assert (self.isValid()), "Post-condition(s) checking is failed: this QuaternionDMP became invalid!"
+        return preprocessed_list_quat_dmp_trajectory
     
     def start(self, critical_states, tau_init):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this QuaternionDMP is invalid!"
@@ -74,12 +85,13 @@ class QuaternionDMP(DMPDiscrete, object):
         assert (self.isValid()), "Post-condition(s) checking is failed: this QuaternionDMP became invalid!"
         return None
     
-    def extractSetTrajectories(self, training_data_dir_or_file_path):
-        assert (False), "NOT IMPLEMENTED YET!"
-        return None
+    def extractSetTrajectories(self, training_data_dir_or_file_path, start_column_idx=1, time_column_idx=0, is_omega_and_omegad_provided=True):
+        return extractSetQuaternionTrajectories(training_data_dir_or_file_path, start_column_idx, time_column_idx, is_omega_and_omegad_provided)
     
     def learnGetDefaultUnrollParams(self, set_traj_input, robot_task_servo_rate):
-        assert (False), "NOT IMPLEMENTED YET!"
-        return None
-    
-    "TO DO: Implement QuaternionDMPUnrollInitParams"
+        W, mean_A_learn, mean_tau, Ft, Fp, QgT, cX, cV, PSI = self.learn(set_traj_input, robot_task_servo_rate)
+        critical_states_list_learn = [None] * 2
+        critical_states_list_learn[0] = QuaternionDMPState(self.mean_start_position)
+        critical_states_list_learn[-1] = QuaternionDMPState(self.mean_goal_position)
+        critical_states_learn = convertQuaternionDMPStatesListIntoQuaternionDMPTrajectory(critical_states_list_learn)
+        return critical_states_learn, W, mean_A_learn, self.mean_tau, Ft, Fp, QgT, cX, cV, PSI

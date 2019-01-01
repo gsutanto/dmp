@@ -77,8 +77,8 @@ class DMP:
         assert (self.isValid()), "Post-condition(s) checking is failed: this DMP became invalid!"
         return preprocessed_list_dmp_trajectory
     
-    def learnFromPath(self, training_data_dir_or_file_path, robot_task_servo_rate):
-        set_traj_input = self.extractSetTrajectories(training_data_dir_or_file_path)
+    def learnFromPath(self, training_data_dir_or_file_path, robot_task_servo_rate, start_column_idx=1, time_column_idx=0):
+        set_traj_input = self.extractSetTrajectories(training_data_dir_or_file_path, start_column_idx, time_column_idx)
         return self.learnGetDefaultUnrollParams(set_traj_input, robot_task_servo_rate)
     
     def learnGetDefaultUnrollParams(self, set_traj_input, robot_task_servo_rate):

@@ -34,33 +34,22 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
     def __init__(self, canonical_system_discrete, func_approximator_discrete, 
                  is_using_scaling_init, transform_couplers_list=[], 
                  ts_alpha=25.0, ts_beta=25.0/4.0, name=""):
-        self.start_quat_state = QuaternionDMPState()
-        self.current_quat_state = QuaternionDMPState()
-        self.current_angular_velocity_state = DMPState(X_init=np.zeros((3,1)))
-        self.quat_goal_sys = QuaternionGoalSystem(canonical_system_discrete.tau_sys)
         super(TransformSystemQuaternion, self).__init__(dmp_num_dimensions_init=3, 
                                                         canonical_system_discrete=canonical_system_discrete, 
                                                         func_approximator_discrete=func_approximator_discrete, 
                                                         is_using_scaling_init=is_using_scaling_init, 
                                                         ts_alpha=ts_alpha, 
                                                         ts_beta=ts_beta,
-                                                        start_dmpstate_discrete=self.start_quat_state, 
-                                                        current_dmpstate_discrete=self.current_quat_state, 
-                                                        current_velocity_dmpstate_discrete=self.current_angular_velocity_state, 
-                                                        goal_system_discrete=self.quat_goal_sys,
-                                                        transform_couplers_list=[], name)
+                                                        start_dmpstate_discrete=QuaternionDMPState(), 
+                                                        current_dmpstate_discrete=QuaternionDMPState(), 
+                                                        current_velocity_dmpstate_discrete=DMPState(X_init=np.zeros((3,1))), 
+                                                        goal_system_discrete=QuaternionGoalSystem(canonical_system_discrete.tau_sys),
+                                                        transform_couplers_list=[], 
+                                                        name=name)
     
     def isValid(self):
         assert (super(TransformSystemQuaternion, self).isValid())
         assert (self.dmp_num_dimensions == 3)
-        assert (self.start_quat_state.isValid())
-        assert (self.current_quat_state.isValid())
-        assert (self.current_angular_velocity_state.isValid())
-        assert (self.quat_goal_sys.isValid())
-        assert (self.start_state == self.start_quat_state)
-        assert (self.current_state == self.current_quat_state)
-        assert (self.current_velocity_state == self.current_angular_velocity_state)
-        assert (self.goal_sys == self.quat_goal_sys)
         return True
     
     def start(self, start_quat_state_init, goal_quat_state_init):
@@ -70,7 +59,7 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
         assert (start_quat_state_init.dmp_num_dimensions == self.dmp_num_dimensions)
         assert (goal_quat_state_init.dmp_num_dimensions == self.dmp_num_dimensions)
         
-        self.start_quat_state = start_quat_state_init
+        self.start_state = start_quat_state_init
         self.setCurrentState(start_quat_state_init)
         
         QG_init = goal_quat_state_init.getQ()
@@ -98,11 +87,11 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
             # goal position is static, no evolution
             current_goal_quat_state_init = goal_quat_state_init
         
-        self.quat_goal_sys.start(current_goal_quat_state_init, QG_init)
+        self.goal_sys.start(current_goal_quat_state_init, QG_init)
         self.resetCouplingTerm()
         self.is_started = True
         
-        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformSystemQuaternion is invalid!"
+        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformSystemQuaternion became invalid!"
         return None
     
     def getNextState(self, dt):
@@ -118,17 +107,17 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
                 ct_acc[d,0] = 0.0
                 ct_vel[d,0] = 0.0
         
-        time = self.current_quat_state.time
-        Q0 = self.start_quat_state.getQ()
-        Q = self.current_quat_state.getQ()
-        omega = self.current_quat_state.getOmega()
-        omegad = self.current_quat_state.getOmegad()
+        time = self.current_state.time
+        Q0 = self.start_state.getQ()
+        Q = self.current_state.getQ()
+        omega = self.current_state.getOmega()
+        omegad = self.current_state.getOmegad()
         
-        etha = self.current_angular_velocity_state.getX()
-        ethad = self.current_angular_velocity_state.getXd()
+        etha = self.current_velocity_state.getX()
+        ethad = self.current_velocity_state.getXd()
         
-        QG = self.quat_goal_sys.getSteadyStateGoalPosition()
-        Qg = self.quat_goal_sys.getCurrentGoalState().getQ()
+        QG = self.goal_sys.getSteadyStateGoalPosition()
+        Qg = self.goal_sys.getCurrentGoalState().getQ()
         
         Q = util_quat.integrateQuat( Q.T, omega.T, dt ).reshape(1, 4).T
         omega = omega + (omegad * dt)
@@ -145,7 +134,7 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
             else:
                 A[d,0] = 1.0
         
-        twice_log_quat_diff_Qg_and_Q = util_quat.computeTwiceLogQuaternionDifference( Qg.T, Q.T ).reshape(1, self.dmp_num_dimensions).T
+        twice_log_quat_diff_Qg_and_Q = util_quat.computeTwiceLogQuatDifference( Qg.T, Q.T ).reshape(1, self.dmp_num_dimensions).T
         ethad = ((self.alpha * ((self.beta * twice_log_quat_diff_Qg_and_Q) - etha)) + (forcing_term * A) + ct_acc) * 1.0 / tau
         assert (np.isnan(ethad).any() == False), "ethad contains NaN!"
         
@@ -153,13 +142,14 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
         
         time = time + dt
         
-        self.current_quat_state = QuaternionDMPState(Q_init=Q, Qd_init=None, Qdd_init=None, 
-                                                     omega_init=omega, omegad_init=omegad, 
-                                                     time_init=time)
-        self.current_quat_state.computeQdAndQdd()
-        self.current_angular_velocity_state = DMPState(X_init=etha, Xd_init=ethad, Xdd_init=None, time_init=time)
-        next_state = copy.copy(self.current_quat_state)
+        self.current_state = QuaternionDMPState(Q_init=Q, Qd_init=None, Qdd_init=None, 
+                                                omega_init=omega, omegad_init=omegad, 
+                                                time_init=time)
+        self.current_state.computeQdAndQdd()
+        self.current_velocity_state = DMPState(X_init=etha, Xd_init=ethad, Xdd_init=None, time_init=time)
+        next_state = copy.copy(self.current_state)
         
+        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformSystemQuaternion became invalid!"
         return next_state, forcing_term, ct_acc, ct_vel, basis_function_vector
     
     def getGoalTrajAndCanonicalTrajAndTauAndALearnFromDemo(self, quatdmptrajectory_demo_local, robot_task_servo_rate, steady_state_quat_goal_position_local=None):
@@ -210,16 +200,17 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
         quat_goal_position_trajectory = QgT
         canonical_position_trajectory = X # might be used later during learning
         canonical_velocity_trajectory = V # might be used later during learning
+        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformSystemQuaternion became invalid!"
         return quat_goal_position_trajectory, canonical_position_trajectory, canonical_velocity_trajectory, tau, tau_relative, A_learn
     
     def getTargetForcingTermTraj(self, quatdmptrajectory_demo_local, robot_task_servo_rate, 
-                                 is_omega_and_omegad_computed=True):
+                                 is_omega_and_omegad_provided=True):
         QgT, cX, cV, tau, tau_relative, A_learn = self.getGoalTrajAndCanonicalTrajAndTauAndALearnFromDemo(quatdmptrajectory_demo_local, 
                                                                                                           robot_task_servo_rate)
         
         traj_length = quatdmptrajectory_demo_local.getLength()
         QT = quatdmptrajectory_demo_local.getQ()
-        if (is_omega_and_omegad_computed):
+        if (is_omega_and_omegad_provided):
             omegaT = quatdmptrajectory_demo_local.getOmega()
             omegadT = quatdmptrajectory_demo_local.getOmegad()
         else:
@@ -235,14 +226,14 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
         return F_target, cX, cV, tau, tau_relative, A_learn, QgT
     
     def getTargetCouplingTermTraj(self, quatdmptrajectory_demo_local, robot_task_servo_rate, steady_state_quat_goal_position_local, 
-                                  is_omega_and_omegad_computed=True):
+                                  is_omega_and_omegad_provided=True):
         QgT, cX, cV, tau, tau_relative, A_learn = self.getGoalTrajAndCanonicalTrajAndTauAndALearnFromDemo(quatdmptrajectory_demo_local, 
                                                                                                           robot_task_servo_rate, 
                                                                                                           steady_state_quat_goal_position_local)
         
         traj_length = quatdmptrajectory_demo_local.getLength()
         QT = quatdmptrajectory_demo_local.getQ()
-        if (is_omega_and_omegad_computed):
+        if (is_omega_and_omegad_provided):
             omegaT = quatdmptrajectory_demo_local.getOmega()
             omegadT = quatdmptrajectory_demo_local.getOmegad()
         else:
@@ -257,3 +248,17 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
                                                                              (tau_relative * omegaT))))
         
         return C_target, F, PSI, cX, cV, tau, tau_relative, QgT
+    
+    def updateCurrentVelocityStateFromCurrentState(self):
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformationSystem is invalid!"
+        
+        tau = self.tau_sys.getTauRelative()
+        omega = self.current_state.getOmega()
+        omegad = self.current_state.getOmegad()
+        etha = tau * omega
+        ethad = tau * omegad
+        self.current_velocity_state.setX(etha)
+        self.current_velocity_state.setXd(ethad)
+        
+        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformationSystem became invalid!"
+        return None

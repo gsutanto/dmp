@@ -78,7 +78,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
         self.resetCouplingTerm()
         self.is_started = True
         
-        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
+        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformSystemDiscrete became invalid!"
         return None
     
     def getNextState(self, dt):
@@ -140,6 +140,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
         self.current_velocity_state.time = time
         next_state = copy.copy(self.current_state)
         
+        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformSystemDiscrete became invalid!"
         return next_state, forcing_term, ct_acc, ct_vel, basis_function_vector
     
     def getGoalTrajAndCanonicalTrajAndTauAndALearnFromDemo(self, dmptrajectory_demo_local, robot_task_servo_rate, steady_state_goal_position_local=None):
@@ -188,6 +189,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
         goal_position_trajectory = G
         canonical_position_trajectory = X # might be used later during learning
         canonical_velocity_trajectory = V # might be used later during learning
+        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformSystemDiscrete became invalid!"
         return goal_position_trajectory, canonical_position_trajectory, canonical_velocity_trajectory, tau, tau_relative, A_learn
     
     def getTargetForcingTermTraj(self, dmptrajectory_demo_local, robot_task_servo_rate):
@@ -215,7 +217,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
         assert (len(is_using_scaling_init) == self.dmp_num_dimensions)
         self.is_using_scaling = is_using_scaling_init
-        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
+        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformSystemDiscrete became invalid!"
         return None
     
     def getLearningAmplitude(self):
@@ -225,5 +227,5 @@ class TransformSystemDiscrete(TransformationSystem, object):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
         assert (new_A_learn.shape[0] == self.dmp_num_dimensions)
         self.A_learn = new_A_learn
-        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformSystemDiscrete is invalid!"
+        assert (self.isValid()), "Post-condition(s) checking is failed: this TransformSystemDiscrete became invalid!"
         return None

@@ -24,19 +24,12 @@ class QuaternionGoalSystem(GoalSystem, object):
     'Class for Quaternion goal evolution systems of QuaternionDMPs.'
     
     def __init__(self, tau_system, alpha_init=25.0/2.0, name=""):
-        self.current_quaternion_goal_state = QuaternionDMPState(name=name+"_current_quaternion_goal_state")
         super(QuaternionGoalSystem, self).__init__(dmp_num_dimensions_init=3, 
                                                    tau_system=tau_system, 
                                                    goal_num_dimensions_init=4, 
-                                                   current_goal_state=self.current_quaternion_goal_state, 
+                                                   current_goal_state=QuaternionDMPState(name=name+"_current_quaternion_goal_state"), 
                                                    alpha_init=alpha_init, 
                                                    name=name)
-    
-    def isValid(self):
-        assert (self.current_quaternion_goal_state.isValid())
-        assert (super(QuaternionGoalSystem, self).isValid())
-        assert (self.current_goal_state == self.current_quaternion_goal_state)
-        return True
     
     def updateCurrentGoalState(self, dt):
         assert (self.is_started), "QuaternionGoalSystem is NOT yet started!"
@@ -45,18 +38,18 @@ class QuaternionGoalSystem(GoalSystem, object):
         
         tau = self.tau_sys.getTauRelative()
         QG = self.G
-        Qg = self.current_quaternion_goal_state.getQ()
-        omegag = self.current_quaternion_goal_state.getOmega()
+        Qg = self.current_goal_state.getQ()
+        omegag = self.current_goal_state.getOmega()
         
         twice_log_quat_diff_g = util_quat.computeTwiceLogQuatDifference( QG.T, Qg.T ).reshape(1, self.dmp_num_dimensions).T
         next_omegag = (self.alpha * 1.0 / tau) * twice_log_quat_diff_g
         next_Qg = util_quat.integrateQuat( Qg.T, next_omegag.T, dt ).reshape(1, 4).T
         next_omegagd = (next_omegag - omegag)/dt
-        self.current_quaternion_goal_state.setQ(next_Qg)
-        self.current_quaternion_goal_state.setOmega(next_omegag)
-        self.current_quaternion_goal_state.setOmegad(next_omegagd)
-        self.current_quaternion_goal_state.computeQdAndQdd()
-        self.current_quaternion_goal_state.setTime(self.current_quaternion_goal_state.getTime() + dt)
+        self.current_goal_state.setQ(next_Qg)
+        self.current_goal_state.setOmega(next_omegag)
+        self.current_goal_state.setOmegad(next_omegagd)
+        self.current_goal_state.computeQdAndQdd()
+        self.current_goal_state.setTime(self.current_goal_state.getTime() + dt)
         
         assert (self.isValid()), "Post-condition(s) checking is failed: this QuaternionGoalSystem became invalid!"
         return None
