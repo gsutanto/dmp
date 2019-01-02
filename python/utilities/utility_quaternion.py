@@ -45,7 +45,7 @@ def standardizeNormalizeQuaternion(Q_input):
     # unique orientation)
     Q_idx_tobe_std = np.where(Q_output[:,0] < 0.0)[0]
     if (len(Q_idx_tobe_std) > 0):
-        print('Standardizing some Quaternions for uniqueness ...');
+#        print('Standardizing some Quaternions for uniqueness ...');
         Q_output[Q_idx_tobe_std,:] = -Q_output[Q_idx_tobe_std,:]
     
     Q_output = normalizeQuaternion(Q_output)

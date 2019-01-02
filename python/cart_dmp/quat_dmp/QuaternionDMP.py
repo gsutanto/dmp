@@ -40,6 +40,7 @@ class QuaternionDMP(DMPDiscrete, object):
                                             name=name)
         self.mean_start_position = np.zeros((4,1))
         self.mean_goal_position = np.zeros((4,1))
+        print("QuaternionDMP is created.")
     
     def isValid(self):
         assert (self.transform_sys_discrete_quat.isValid())

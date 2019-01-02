@@ -21,19 +21,19 @@ def chunks(l, n):
     for i in xrange(0, len(l), n):
         yield l[i:i + n]
 
-def computeNMSE(predictions, ground_truth):
-    mse = np.mean(np.square(predictions - ground_truth), axis=0)    # Mean-Squared Error (MSE)
-    var_ground_truth = np.var(ground_truth, axis=0)                 # Variance of the Ground-Truth
+def computeNMSE(predictions, ground_truth, axis=0):
+    mse = np.mean(np.square(predictions - ground_truth), axis=axis) # Mean-Squared Error (MSE)
+    var_ground_truth = np.var(ground_truth, axis=axis)              # Variance of the Ground-Truth
     nmse = np.divide(mse, var_ground_truth)                         # Normalized Mean-Squared Error (NMSE)
     return nmse
 
-def computeWNMSE(predictions, ground_truth, weight):
+def computeWNMSE(predictions, ground_truth, weight, axis=0):
     N_data = ground_truth.shape[0]
     N_dims = ground_truth.shape[1]
-    wmse = np.mean(np.multiply(np.tile(weight, (1, N_dims)), np.square(predictions - ground_truth)), axis=0)        # Weighted Mean-Squared Error (WMSE)
-    mean_gt = np.mean(ground_truth, axis=0)
+    wmse = np.mean(np.multiply(np.tile(weight, (1, N_dims)), np.square(predictions - ground_truth)), axis=axis)        # Weighted Mean-Squared Error (WMSE)
+    mean_gt = np.mean(ground_truth, axis=axis)
     zero_mean_gt = ground_truth - np.tile(mean_gt, (N_data, 1))
-    wvar_gt = (1.0/(N_data-1)) * np.sum(np.multiply(np.tile(weight, (1, N_dims)), np.square(zero_mean_gt)), axis=0)    # Weighted Variance of the Ground-Truth
+    wvar_gt = (1.0/(N_data-1)) * np.sum(np.multiply(np.tile(weight, (1, N_dims)), np.square(zero_mean_gt)), axis=axis) # Weighted Variance of the Ground-Truth
     wnmse = np.divide(wmse, wvar_gt)    # Normalized Weighted Mean-Squared Error (NWMSE)
     return wnmse
 

@@ -7,6 +7,7 @@ Created on Mon Oct 30 19:00:00 2017
 """
 
 import numpy as np
+from scipy import signal
 import os
 import sys
 import copy
@@ -81,5 +82,14 @@ class LearningSystemDiscrete(LearningSystem, object):
         self.transform_sys.func_approx.weights = W
         self.transform_sys.A_learn = mean_A_learn
         Fp = np.matmul(W, PSI) * np.matmul(np.ones((self.transform_sys.dmp_num_dimensions,1)), (MULT * 1.0 / np.sum(PSI, axis=0).reshape((1,PSI.shape[1])))) # predicted forcing term
+        
+        N_filter_order = 2 # Butterworth filter order
+        fc = 10.0 # cutoff frequency (in Hz)
+        fs = robot_task_servo_rate # sampling frequency (in Hz)
+        Wn = fc/(fs/2)
+        [b, a] = signal.butter(N_filter_order, Wn)
+        Ft_filtered = signal.filtfilt(b, a, Ft, axis=1)
+        nmse_fit = computeNMSE(Fp.T, Ft_filtered.T)
+        print("NMSE of forcing term fitting = " + str(nmse_fit))
         
         return W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI

@@ -29,6 +29,7 @@ class DMPDiscrete1D(DMPDiscrete, object):
                                                                  None, None, None, None,
                                                                  transform_couplers_list)
         super(DMPDiscrete1D, self).__init__(1, model_size_init, canonical_system_discrete, self.transform_sys_discrete_1D, name)
+        print("DMPDiscrete1D is created.")
     
     def isValid(self):
         assert (self.transform_sys_discrete_1D.isValid())

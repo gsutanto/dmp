@@ -8,9 +8,9 @@ function [ exp_mapped_quat ] = computeExpMapQuat( log_mapped_quat_input )
     norm_r          = sqrt(sum((log_mapped_quat_input .^ 2), 1));
     
     zero_norm_r_idx = find(norm_r == 0);
-    if (~isempty(zero_norm_r_idx))
-        fprintf('There will be some resulting Quaternion==[1,0,0,0]^T\n');
-    end
+%     if (~isempty(zero_norm_r_idx))
+%         fprintf('There will be some resulting Quaternion==[1,0,0,0]^T\n');
+%     end
     non_zero_norm_r_idx = setdiff([1:len_quat], zero_norm_r_idx);
     
     % for (norm(r) == 0) case:

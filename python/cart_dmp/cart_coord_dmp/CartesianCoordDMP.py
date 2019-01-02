@@ -57,6 +57,7 @@ class CartesianCoordDMP(DMPDiscrete, object):
         self.ctraj_hmg_transform_global_to_local_matrix = np.zeros((4,4))
         self.ctraj_critical_states_global_coord = DMPTrajectory(np.zeros((3,5)),np.zeros((3,5)),np.zeros((3,5)),np.zeros((1,5)))
         self.ctraj_critical_states_local_coord = DMPTrajectory(np.zeros((3,5)),np.zeros((3,5)),np.zeros((3,5)),np.zeros((1,5)))
+        print("CartesianCoordDMP is created.")
     
     def isValid(self):
         assert (self.transform_sys_discrete_cart_coord.isValid())

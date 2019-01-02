@@ -14,9 +14,9 @@ function [ log_mapped_quat ] = computeLogMapQuat( quat_input )
     arccos_u        = acos(u);
     sin_arccos_u    = sin(arccos_u);
     origin_quat_idx = find(sin_arccos_u == 0);
-    if (~isempty(origin_quat_idx))
-        fprintf('There are some Quaternion==[1,0,0,0]^T\n');
-    end
+%     if (~isempty(origin_quat_idx))
+%         fprintf('There are some Quaternion==[1,0,0,0]^T\n');
+%     end
     non_origin_quat_idx = setdiff([1:len_quat], origin_quat_idx);
     log_non_origin_quat_multiplier  = log(arccos_u(1,non_origin_quat_idx)) - ...
                                       log(sin_arccos_u(1,non_origin_quat_idx));

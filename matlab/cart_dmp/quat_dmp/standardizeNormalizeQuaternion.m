@@ -8,7 +8,7 @@ function [ quat_output ] = standardizeNormalizeQuaternion( quat_input )
     % unique orientation)
     quat_idx_tobe_std   = find(quat_output(1,:) < 0);
     if (~isempty(quat_idx_tobe_std))
-        fprintf('Standardizing some Quaternions for uniqueness ...\n');
+%         fprintf('Standardizing some Quaternions for uniqueness ...\n');
         quat_output(:,quat_idx_tobe_std)= -quat_output(:,quat_idx_tobe_std);
     end
     
