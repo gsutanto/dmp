@@ -68,9 +68,45 @@ def computeQuaternionLogMap(Q_input, div_epsilon=division_epsilon):
     arccos_u = np.arccos(u)
     sin_arccos_u = np.sin(arccos_u)
     
-    arccos_u_div_sin_arccos_u = (arccos_u + div_epsilon)/(sin_arccos_u + div_epsilon)
+#    arccos_u_div_sin_arccos_u = (arccos_u + div_epsilon)/(sin_arccos_u + div_epsilon)
+#    
+#    log_Q_output = npma.repmat(arccos_u_div_sin_arccos_u, 1, 3) * q
     
-    log_Q_output = npma.repmat(arccos_u_div_sin_arccos_u, 1, 3) * q
+    multiplier_sign = np.ones((tensor_length,1))
+    log_multiplier = np.log(np.zeros((tensor_length,1)) + division_epsilon)
+    
+    Q_idx_w_positive_sin_arccos_u = np.where(sin_arccos_u[:,0] > 0)[0]
+    Q_idx_w_negative_sin_arccos_u = np.where(sin_arccos_u[:,0] < 0)[0]
+    Q_idx_w_nonzero_sin_arccos_u = np.union1d(Q_idx_w_positive_sin_arccos_u, Q_idx_w_negative_sin_arccos_u)
+    
+    log_Q_output = copy.deepcopy(q)
+    if (Q_idx_w_nonzero_sin_arccos_u.size > 0):
+        log_Q_output[Q_idx_w_nonzero_sin_arccos_u, :] = np.zeros((len(Q_idx_w_nonzero_sin_arccos_u), 3))
+        log_multiplier[Q_idx_w_nonzero_sin_arccos_u, 0] = np.log(arccos_u[Q_idx_w_nonzero_sin_arccos_u, 0])
+    
+    if (Q_idx_w_positive_sin_arccos_u.size > 0):
+        log_multiplier[Q_idx_w_positive_sin_arccos_u, 0] = log_multiplier[Q_idx_w_positive_sin_arccos_u, 0] - np.log(sin_arccos_u[Q_idx_w_positive_sin_arccos_u, 0])
+    
+    if (Q_idx_w_negative_sin_arccos_u.size > 0):
+        multiplier_sign[Q_idx_w_negative_sin_arccos_u, 0] = -multiplier_sign[Q_idx_w_negative_sin_arccos_u, 0]
+        log_multiplier[Q_idx_w_negative_sin_arccos_u, 0] = log_multiplier[Q_idx_w_negative_sin_arccos_u, 0] - np.log(-sin_arccos_u[Q_idx_w_negative_sin_arccos_u, 0])
+    
+    for i in range(3):
+        q_ith_col_idx_gt_zero = np.where(q[:,i] > 0)[0]
+        q_ith_col_idx_gt_zero_intersect_Q_idx_w_nonzero_sin_arccos_u = np.intersect1d(q_ith_col_idx_gt_zero, Q_idx_w_nonzero_sin_arccos_u)
+        if (q_ith_col_idx_gt_zero_intersect_Q_idx_w_nonzero_sin_arccos_u.size > 0):
+            log_Q_output[q_ith_col_idx_gt_zero_intersect_Q_idx_w_nonzero_sin_arccos_u,i] = (multiplier_sign[q_ith_col_idx_gt_zero_intersect_Q_idx_w_nonzero_sin_arccos_u,0] * 
+                                                                                            np.exp(log_multiplier[q_ith_col_idx_gt_zero_intersect_Q_idx_w_nonzero_sin_arccos_u,0] + 
+                                                                                                   np.log(q[q_ith_col_idx_gt_zero_intersect_Q_idx_w_nonzero_sin_arccos_u,i])))
+        
+        q_ith_col_idx_lt_zero = np.where(q[:,i] < 0)[0]
+        q_ith_col_idx_lt_zero_intersect_Q_idx_w_nonzero_sin_arccos_u = np.intersect1d(q_ith_col_idx_lt_zero, Q_idx_w_nonzero_sin_arccos_u)
+        if (q_ith_col_idx_lt_zero_intersect_Q_idx_w_nonzero_sin_arccos_u.size > 0):
+            log_Q_output[q_ith_col_idx_lt_zero_intersect_Q_idx_w_nonzero_sin_arccos_u,i] = (-multiplier_sign[q_ith_col_idx_lt_zero_intersect_Q_idx_w_nonzero_sin_arccos_u,0] * 
+                                                                                            np.exp(log_multiplier[q_ith_col_idx_lt_zero_intersect_Q_idx_w_nonzero_sin_arccos_u,0] + 
+                                                                                                   np.log(-q[q_ith_col_idx_lt_zero_intersect_Q_idx_w_nonzero_sin_arccos_u,i])))
+    
+    assert (np.isnan(log_Q_output).any() == False), "log_Q_output contains NaN!"
     if (tensor_length == 1):
         log_Q_output = log_Q_output[0,:]
     return log_Q_output
@@ -87,10 +123,33 @@ def computeQuaternionExpMap(log_Q_input, div_epsilon=division_epsilon):
     norm_r = npla.norm(r, ord=2, axis=1).reshape(tensor_length, 1)
     cos_norm_r = np.cos(norm_r)
     sin_norm_r = np.sin(norm_r)
-    sin_norm_r_div_norm_r = (sin_norm_r + div_epsilon)/(norm_r + div_epsilon)
     
-    Q_output = np.hstack([cos_norm_r, (npma.repmat(sin_norm_r_div_norm_r, 1, 3) * r)])
+#    sin_norm_r_div_norm_r = (sin_norm_r + div_epsilon)/(norm_r + div_epsilon)
+#    
+#    Q_output = np.hstack([cos_norm_r, (npma.repmat(sin_norm_r_div_norm_r, 1, 3) * r)])
     
+    Q_output = np.zeros((tensor_length, 4))
+    Q_output[:,0] = np.ones(tensor_length)
+    
+    log_Q_input_idx_nonzero_norm_r = np.where(norm_r[:,0] != 0)[0]
+    
+    log_Q_input_idx_sin_norm_r_gt_zero = np.where(sin_norm_r[:,0] > 0)[0]
+    log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r = np.intersect1d(log_Q_input_idx_sin_norm_r_gt_zero, log_Q_input_idx_nonzero_norm_r)
+    if (log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r.size > 0):
+        Q_output[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0] = cos_norm_r[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0]
+        Q_output[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 1:4] = (npma.repmat(np.exp(np.log(sin_norm_r[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0]) - 
+                                                                                                                  np.log(norm_r[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0])), 1, 3) * 
+                                                                                                      r[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, :])
+    
+    log_Q_input_idx_sin_norm_r_lt_zero = np.where(sin_norm_r[:,0] < 0)[0]
+    log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r = np.intersect1d(log_Q_input_idx_sin_norm_r_lt_zero, log_Q_input_idx_nonzero_norm_r)
+    if (log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r.size > 0):
+        Q_output[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0] = cos_norm_r[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0]
+        Q_output[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 1:4] = (npma.repmat(np.exp(np.log(-sin_norm_r[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0]) - 
+                                                                                                                  np.log(norm_r[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0])), 1, 3) * 
+                                                                                                      (-r[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, :]))
+    
+    assert (np.isnan(Q_output).any() == False), "Q_output contains NaN!"
     # don't forget to normalize the resulting Quaternion:
     Q_output = normalizeQuaternion(Q_output)
     return Q_output

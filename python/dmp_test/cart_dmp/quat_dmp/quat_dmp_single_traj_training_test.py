@@ -34,7 +34,7 @@ def quat_dmp_single_traj_training_test(amd_clmc_dmp_home_dir_path="../../../../"
     assert (time_reproduce_max >= 0.0)
     assert (tau_reproduce >= 0.0)
     
-    tau_sys = TauSystem(dt, MIN_TAU)
+    tau_sys = TauSystem(dt, tau)
     canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
     quat_dmp = QuaternionDMP(model_size, canonical_sys_discr)
     [critical_states_learn, 
@@ -72,15 +72,11 @@ def quat_dmp_single_traj_training_test(amd_clmc_dmp_home_dir_path="../../../../"
         unroll_ctraj[i,4] = current_Q[3,0]
     
     if (os.path.isdir(unroll_ctraj_save_dir_path)):
-        np.savetxt(unroll_ctraj_save_dir_path + "/" + unroll_ctraj_save_filename, unroll_ctraj, fmt='%.5f')
+        np.savetxt(unroll_ctraj_save_dir_path + "/" + unroll_ctraj_save_filename, unroll_ctraj
+#                   , fmt='%.5f'
+                   )
     
     return unroll_ctraj, W, mean_A_learn, mean_tau, Ft, Fp, QgT, cX, cV, PSI
 
 if __name__ == "__main__":
-#    unroll_ctraj, W, mean_A_learn, mean_tau, Ft, Fp, QgT, cX, cV, PSI = quat_dmp_single_traj_training_test()
-    unroll_ctraj, W, mean_A_learn, mean_tau, Ft, Fp, QgT, cX, cV, PSI = quat_dmp_single_traj_training_test(canonical_order=1, 
-                                                                                                           unroll_ctraj_save_dir_path='/home/amdgsutanto/Desktop/', 
-                                                                                                           unroll_ctraj_save_filename='test_python_quat_dmp_single_traj_training_test_0_1.txt')
-    unroll_ctraj, W, mean_A_learn, mean_tau, Ft, Fp, QgT, cX, cV, PSI = quat_dmp_single_traj_training_test(canonical_order=2, 
-                                                                                                           unroll_ctraj_save_dir_path='/home/amdgsutanto/Desktop/', 
-                                                                                                           unroll_ctraj_save_filename='test_python_quat_dmp_single_traj_training_test_0_2.txt')
+    unroll_ctraj, W, mean_A_learn, mean_tau, Ft, Fp, QgT, cX, cV, PSI = quat_dmp_single_traj_training_test()

@@ -42,7 +42,9 @@ def cart_coord_dmp_single_traj_training_test(amd_clmc_dmp_home_dir_path="../../.
     [critical_states_learn, 
      W, mean_A_learn, mean_tau, 
      Ft, Fp, G, cX, cV, 
-     PSI] = cart_dmp.learnFromPath(amd_clmc_dmp_home_dir_path + "/data/cart_dmp/cart_coord_dmp/single_traj_training/sample_traj_3D_1.txt", task_servo_rate)
+     PSI] = cart_dmp.learnFromPath(amd_clmc_dmp_home_dir_path + "/data/cart_dmp/cart_coord_dmp/single_traj_training/sample_traj_3D_1.txt", 
+                                   task_servo_rate, 
+                                   start_column_idx=1, time_column_idx=0)
     
     ## Reproduce
     if (time_reproduce_max <= 0.0):

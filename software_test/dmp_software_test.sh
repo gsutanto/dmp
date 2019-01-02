@@ -36,8 +36,6 @@
 
 ../software_test/execute_cpp_test.sh "./amd_clmc_dmp_ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_demo" test_cpp_ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test.txt
 
-python ../software_test/execute_python_tests_and_compare_w_cpp_tests.py
-
 ../software_test/execute_cpp_test.sh "./amd_clmc_dmp_quat_dmp_unroll_demo" test_cpp_quat_dmp_unroll_test.txt
 
 ../software_test/execute_cpp_test.sh "./amd_clmc_dmp_pmnn_demo" test_cpp_pmnn_test.txt
@@ -45,6 +43,8 @@ python ../software_test/execute_python_tests_and_compare_w_cpp_tests.py
 ../software_test/execute_cpp_test.sh "./amd_clmc_dmp_cart_dmp_pmnn_fitted_ct_unroll_demo -o ../software_test/" test_cpp_cart_dmp_pmnn_fitted_ct_unroll_test.txt
 
 ../software_test/execute_matlab_tests_and_compare_w_cpp_tests.sh
+
+python ../software_test/execute_python_tests_and_compare_w_cpp_and_matlab_tests.py
 
 #../software_test/compare_execution_result.sh "./amd_clmc_dmp_dc_loa_so_sb_single_demo_demo -f 0 -c 1 -o ../plot/dmp_coupling/learn_obs_avoid/feature_trajectory/static_obs/single_baseline/single_demo/param_settings/param_set_1/Schaal_1st_order_CanonicalSys/" result_dc_loa_so_sb_single_demo_test_0_1.txt
 #temp#../software_test/compare_execution_result.sh "./amd_clmc_dmp_dc_loa_so_sb_single_demo_demo -f 0 -c 2 -o ../plot/dmp_coupling/learn_obs_avoid/feature_trajectory/static_obs/single_baseline/single_demo/param_settings/param_set_1/Schaal_2nd_order_CanonicalSys/" result_dc_loa_so_sb_single_demo_test_0_2.txt

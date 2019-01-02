@@ -19,11 +19,14 @@ assert (os.path.isdir(amd_clmc_dmp_software_test_dir_abs_path + '/../python/dmp_
 assert (os.path.isdir(amd_clmc_dmp_software_test_dir_abs_path + '/../python/dmp_test/dmp_coupling/learn_obs_avoid/static_obs/single_baseline/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), amd_clmc_dmp_software_test_dir_abs_path + '/../python/dmp_test/dmp_1D/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), amd_clmc_dmp_software_test_dir_abs_path + '/../python/dmp_test/cart_dmp/cart_coord_dmp/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), amd_clmc_dmp_software_test_dir_abs_path + '/../python/dmp_test/cart_dmp/quat_dmp/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), amd_clmc_dmp_software_test_dir_abs_path + '/../python/dmp_test/dmp_coupling/learn_obs_avoid/static_obs/single_baseline/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), amd_clmc_dmp_software_test_dir_abs_path + '/../python/utilities/'))
 from dmp_1D_test import *
 from cart_coord_dmp_single_traj_training_test import *
 from cart_coord_dmp_multi_traj_training_test import *
+from quat_dmp_single_traj_training_test import *
+from quat_dmp_multi_traj_training_test import *
 from ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test import *
 from utilities import *
 
@@ -54,9 +57,20 @@ cart_coord_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_abs_path, 2, 0.5, 
 compareTwoNumericFiles(devel_software_test_dir_abs_path+'/test_cpp_cart_coord_dmp_multi_traj_training_test_0_2.txt', 
                        devel_software_test_dir_abs_path+'/test_python_cart_coord_dmp_multi_traj_training_test_0_2.txt')
 
+quat_dmp_single_traj_training_test(amd_clmc_dmp_home_dir_abs_path, 1, 1.9976, 1.9976, devel_software_test_dir_abs_path, 'test_python_quat_dmp_single_traj_training_test_0_1.txt')
+quat_dmp_single_traj_training_test(amd_clmc_dmp_home_dir_abs_path, 2, 1.9976, 1.9976, devel_software_test_dir_abs_path, 'test_python_quat_dmp_single_traj_training_test_0_2.txt')
+compareTwoNumericFiles(devel_software_test_dir_abs_path+'/test_matlab_quat_dmp_single_traj_training_test_0_1.txt', 
+                       devel_software_test_dir_abs_path+'/test_python_quat_dmp_single_traj_training_test_0_1.txt')
+compareTwoNumericFiles(devel_software_test_dir_abs_path+'/test_matlab_quat_dmp_single_traj_training_test_0_2.txt', 
+                       devel_software_test_dir_abs_path+'/test_python_quat_dmp_single_traj_training_test_0_2.txt')
+
+quat_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_abs_path, 2, 1.9976, 1.9976, devel_software_test_dir_abs_path, 'test_python_quat_dmp_multi_traj_training_test_0_2.txt')
+compareTwoNumericFiles(devel_software_test_dir_abs_path+'/test_matlab_quat_dmp_multi_traj_training_test_0_2.txt', 
+                       devel_software_test_dir_abs_path+'/test_python_quat_dmp_multi_traj_training_test_0_2.txt')
+
 ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test(amd_clmc_dmp_home_dir_abs_path, 2, devel_software_test_dir_abs_path, "test_python_ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test.txt")
 compareTwoNumericFiles(devel_software_test_dir_abs_path+'/test_cpp_ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test.txt', 
                        devel_software_test_dir_abs_path+'/test_python_ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test.txt',
                        1.56e-5)
 
-print "execute_python_tests_and_compare_w_cpp_tests.py script execution done!"
+print "execute_python_tests_and_compare_w_cpp_and_matlab_tests.py script execution done!"

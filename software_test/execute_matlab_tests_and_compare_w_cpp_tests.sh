@@ -10,6 +10,7 @@ cd('$amd_clmc_dmp_software_test_dir_abs_path/../matlab/cart_dmp/cart_coord_dmp/'
 testCartCoordDMPFitAndUnroll('$devel_software_test_dir_abs_path/'); \
 cd('$amd_clmc_dmp_software_test_dir_abs_path/../matlab/cart_dmp/quat_dmp/'); \
 testQuaternionDMPUnroll('$devel_software_test_dir_abs_path/'); \
+testQuaternionDMPFitAndUnroll('$devel_software_test_dir_abs_path/'); \
 cd('$amd_clmc_dmp_software_test_dir_abs_path/../data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/python_models/'); \
 load('prim_1_Ctt_test_prediction.mat'); \
 dlmwrite('$devel_software_test_dir_abs_path/test_matlab_pmnn_test.txt', Ctt_test_prediction, 'delimiter', ' ', 'precision', '%.5f'); \

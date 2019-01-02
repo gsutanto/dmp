@@ -29,7 +29,7 @@ function [ varargout ] = extractSetQuaternionTrajectories( varargin )
                 assert(rel_abs_diff_dt <= 1e-3, ['dt deviation between Quaternion Trajectories=', num2str(rel_abs_diff_dt), ' is beyond threshold!']);
             end
             i           = i+1;
-            file_path   = [input_path, num2str(i), '.txt'];
+            file_path   = [input_path, num2str(i, '%02d'), '.txt'];
         end
     elseif (exist(input_path, 'file') == 2)  % input_path is a file
         [ data, dt ]    = extractQuaternionTrajectory( input_path, start_column_idx, time_column_idx );
