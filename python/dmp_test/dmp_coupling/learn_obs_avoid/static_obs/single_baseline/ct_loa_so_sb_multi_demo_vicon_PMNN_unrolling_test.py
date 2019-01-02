@@ -43,9 +43,9 @@ def ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test(amd_clmc_dmp_home_dir_path
     dmp_basis_funcs_size = 25
     PMNN_input_size = 17
     PMNN_output_size = 3
-    pmnn_model_parent_dir_path = amd_clmc_dmp_home_dir_path + "python/dmp_coupling/learn_obs_avoid/tf/models/"
     loa_data_dir_path = amd_clmc_dmp_home_dir_path + "data/dmp_coupling/learn_obs_avoid/"
     loa_data_prim_dir_path = loa_data_dir_path + "static_obs/learned_prims_params/position/prim1/"
+    pmnn_model_parent_dir_path = loa_data_dir_path + "static_obs/neural_nets/pmnn/cpp_models/"
     pmnn_model_path = loa_data_dir_path + "static_obs/neural_nets/pmnn/cpp_models/prim1/"
     data_global_coord_filepath = amd_clmc_dmp_home_dir_path + "python/dmp_coupling/learn_obs_avoid/learn_obs_avoid_pmnn_vicon_data/data_multi_demo_vicon_static_global_coord.pkl"
     pmnn_name = 'my_PMNN_obs_avoid_fb'

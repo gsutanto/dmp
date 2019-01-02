@@ -95,9 +95,6 @@ class CartesianCoordDMP(DMPDiscrete, object):
         
         return list_ctraj_local
     
-    def learnFromPath(self, training_data_dir_or_file_path, robot_task_servo_rate):
-        return super(CartesianCoordDMP, self).learnFromPath(training_data_dir_or_file_path, robot_task_servo_rate)
-    
     def start(self, critical_states, tau_init):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this CartesianCoordDMP is invalid!"
         

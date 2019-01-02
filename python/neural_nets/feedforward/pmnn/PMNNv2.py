@@ -347,7 +347,7 @@ class PMNNv2(PMNN, object):
                             weights_dim = list(weights.shape)
                             num_params += weights_dim[0] * weights_dim[1]
                             biases = self.model_params[self.name+'_'+layer_dim_ID+"_biases"]
-                            num_params += list(biases.shape)[1]
+                            num_params += list(biases.shape)[0]
                 else: # Output Layer
                     layer_dim_ID = layer_name + '_' + dim_out_ID
                     current_layer_dim_size = 1
@@ -455,7 +455,7 @@ class PMNNv2(PMNN, object):
                             weights_dim = list(weights.shape)
                             num_params += weights_dim[0] * weights_dim[1]
                             biases = self.model_params[self.name+'_'+layer_dim_ID+"_biases"]
-                            num_params += list(biases.shape)[1]
+                            num_params += list(biases.shape)[0]
                 else: # Output Layer
                     layer_dim_ID = layer_name + '_' + dim_out_ID
                     current_layer_dim_size = 1

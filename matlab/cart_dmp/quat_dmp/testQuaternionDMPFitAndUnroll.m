@@ -61,16 +61,16 @@ function [] = testQuaternionDMPFitAndUnroll(output_dir_path)
     if (exist(output_dir_path, 'dir') == 7)
         % The following applies for QuaternionDMP with 1st order canonical system:
         quatdmp_single_traj_training_test_0_1_unroll_Q      = [quatdmp_single_traj_training_test_0_1_unroll_traj{6,1}-quatdmp_single_traj_training_test_0_1_unroll_traj{6,1}(1,1), quatdmp_single_traj_training_test_0_1_unroll_traj{1,1}];
-        dlmwrite([output_dir_path, '/test_matlab_quat_dmp_single_traj_training_test_0_1.txt'], quatdmp_single_traj_training_test_0_1_unroll_Q, 'delimiter', ' ', 'precision', '%.5f');
+        dlmwrite([output_dir_path, '/test_matlab_quat_dmp_single_traj_training_test_0_1.txt'], quatdmp_single_traj_training_test_0_1_unroll_Q, 'delimiter', ' ', 'precision', '%.10f');
         
         % The following applies for QuaternionDMP with 2nd order canonical system:
         quatdmp_single_traj_training_test_0_2_unroll_Q      = [quatdmp_single_traj_training_test_0_2_unroll_traj{6,1}-quatdmp_single_traj_training_test_0_2_unroll_traj{6,1}(1,1), quatdmp_single_traj_training_test_0_2_unroll_traj{1,1}];
-        dlmwrite([output_dir_path, '/test_matlab_quat_dmp_single_traj_training_test_0_2.txt'], quatdmp_single_traj_training_test_0_2_unroll_Q, 'delimiter', ' ', 'precision', '%.5f');
+        dlmwrite([output_dir_path, '/test_matlab_quat_dmp_single_traj_training_test_0_2.txt'], quatdmp_single_traj_training_test_0_2_unroll_Q, 'delimiter', ' ', 'precision', '%.10f');
         
         quatdmp_multi_trajs_training_test_0_2_t1_unroll_Q   = [quatdmp_multi_trajs_training_test_0_2_t1_unroll_traj{6,1}-quatdmp_multi_trajs_training_test_0_2_t1_unroll_traj{6,1}(1,1), quatdmp_multi_trajs_training_test_0_2_t1_unroll_traj{1,1}];
         quatdmp_multi_trajs_training_test_0_2_t2_unroll_Q   = [quatdmp_multi_trajs_training_test_0_2_t2_unroll_traj{6,1}-quatdmp_multi_trajs_training_test_0_2_t2_unroll_traj{6,1}(1,1), quatdmp_multi_trajs_training_test_0_2_t2_unroll_traj{1,1}];
         quatdmp_multi_trajs_training_test_0_2_unroll_Q      = [quatdmp_multi_trajs_training_test_0_2_t1_unroll_Q; quatdmp_multi_trajs_training_test_0_2_t2_unroll_Q];
-        dlmwrite([output_dir_path, '/test_matlab_quat_dmp_multi_traj_training_test_0_2.txt'], quatdmp_multi_trajs_training_test_0_2_unroll_Q, 'delimiter', ' ', 'precision', '%.5f');
+        dlmwrite([output_dir_path, '/test_matlab_quat_dmp_multi_traj_training_test_0_2.txt'], quatdmp_multi_trajs_training_test_0_2_unroll_Q, 'delimiter', ' ', 'precision', '%.10f');
     else
         error('Output directory does NOT exist!');
     end

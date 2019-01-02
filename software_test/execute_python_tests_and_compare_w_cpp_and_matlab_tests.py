@@ -71,6 +71,6 @@ compareTwoNumericFiles(devel_software_test_dir_abs_path+'/test_matlab_quat_dmp_m
 ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test(amd_clmc_dmp_home_dir_abs_path, 2, devel_software_test_dir_abs_path, "test_python_ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test.txt")
 compareTwoNumericFiles(devel_software_test_dir_abs_path+'/test_cpp_ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test.txt', 
                        devel_software_test_dir_abs_path+'/test_python_ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test.txt',
-                       1.56e-5)
+                       scalar_max_abs_diff_threshold=1.6e-5)
 
 print "execute_python_tests_and_compare_w_cpp_and_matlab_tests.py script execution done!"

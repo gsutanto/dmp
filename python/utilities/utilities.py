@@ -67,7 +67,7 @@ def compareTwoMatrices(matrix1, matrix2,
         print ('and')
         print (name2)
         assert (False), ('Two files are NOT similar: scalar_max_abs_diff=' + str(scalar_max_abs_diff) + 
-                         ' is beyond threshold at [row,col]=[' + str(scalar_max_abs_diff_row) + ',' + str(scalar_max_abs_diff_col) + '], i.e. ' + 
+                         ' is beyond threshold=' + str(scalar_max_abs_diff_threshold) + ' at [row,col]=[' + str(scalar_max_abs_diff_row) + ',' + str(scalar_max_abs_diff_col) + '], i.e. ' + 
                          str(matrix1[scalar_max_abs_diff_row, scalar_max_abs_diff_col]) + ' vs ' + 
                          str(matrix2[scalar_max_abs_diff_row, scalar_max_abs_diff_col]) + ' !')
     return None

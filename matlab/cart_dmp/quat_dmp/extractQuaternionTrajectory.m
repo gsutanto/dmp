@@ -25,6 +25,7 @@ function [ varargout ] = extractQuaternionTrajectory( varargin )
     tau             = time(1,end) - time(1,1);
     traj_length     = size(time,2);
     dt              = tau/(traj_length-1);
+    dt              = 1.0/round(1.0/dt);
     
     varargout(1)    = {data};
     varargout(2)    = {dt};
