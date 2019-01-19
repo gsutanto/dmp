@@ -138,7 +138,7 @@ def computeQuaternionExpMap(log_Q_input, div_epsilon=division_epsilon):
     if (log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r.size > 0):
         Q_output[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0] = cos_norm_r[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0]
         Q_output[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 1:4] = (npma.repmat(np.exp(np.log(sin_norm_r[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0]) - 
-                                                                                                                  np.log(norm_r[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0])), 1, 3) * 
+                                                                                                                         np.log(norm_r[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0])).reshape(tensor_length, 1), 1, 3) * 
                                                                                                       r[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, :])
     
     log_Q_input_idx_sin_norm_r_lt_zero = np.where(sin_norm_r[:,0] < 0)[0]
@@ -146,7 +146,7 @@ def computeQuaternionExpMap(log_Q_input, div_epsilon=division_epsilon):
     if (log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r.size > 0):
         Q_output[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0] = cos_norm_r[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0]
         Q_output[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 1:4] = (npma.repmat(np.exp(np.log(-sin_norm_r[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0]) - 
-                                                                                                                  np.log(norm_r[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0])), 1, 3) * 
+                                                                                                                         np.log(norm_r[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0])).reshape(tensor_length, 1), 1, 3) * 
                                                                                                       (-r[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, :]))
     
     assert (np.isnan(Q_output).any() == False), "Q_output contains NaN!"
