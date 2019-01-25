@@ -20,6 +20,7 @@ from TransformationSystem import *
 from DMPState import *
 from DMPTrajectory import *
 from DataIO import *
+from utility_states_trajectories import smoothStartEndNDTrajectoryBasedOnPosition
 
 class DMP:
     'Base class for DMPs.'
@@ -77,9 +78,34 @@ class DMP:
         assert (self.isValid()), "Post-condition(s) checking is failed: this DMP became invalid!"
         return preprocessed_list_dmp_trajectory
     
-    def learnFromPath(self, training_data_dir_or_file_path, robot_task_servo_rate, start_column_idx=1, time_column_idx=0):
+    def smoothStartEndTrajectoryBasedOnPosition(self, traj, percentage_padding, percentage_smoothing_points, mode, dt, smoothing_cutoff_frequency):
+        if (dt is None):
+            traj_length = traj.time.shape[1]
+            assert (traj_length > 1)
+            dt = (traj.time[0, traj_length-1] - traj.time[0, 0])/(1.0 * (traj_length-1))
+            assert (dt > 0.0)
+        return smoothStartEndNDTrajectoryBasedOnPosition(ND_traj=traj, 
+                                                         percentage_padding=percentage_padding, 
+                                                         percentage_smoothing_points=percentage_smoothing_points, 
+                                                         mode=mode, dt=dt, 
+                                                         fc=smoothing_cutoff_frequency)
+    
+    def learnFromPath(self, training_data_dir_or_file_path, robot_task_servo_rate, start_column_idx=1, time_column_idx=0, 
+                      is_smoothing_training_traj_before_learning=False, 
+                      percentage_padding=None, percentage_smoothing_points=None, smoothing_mode=None, dt=None, smoothing_cutoff_frequency=None):
         set_traj_input = self.extractSetTrajectories(training_data_dir_or_file_path, start_column_idx, time_column_idx)
-        return self.learnGetDefaultUnrollParams(set_traj_input, robot_task_servo_rate)
+        if (is_smoothing_training_traj_before_learning):
+            processed_set_traj_input = list()
+            for traj_input in set_traj_input:
+                processed_set_traj_input.append(self.smoothStartEndTrajectoryBasedOnPosition(traj=traj_input, 
+                                                                                             percentage_padding=percentage_padding, 
+                                                                                             percentage_smoothing_points=percentage_smoothing_points, 
+                                                                                             mode=smoothing_mode, 
+                                                                                             dt=dt, 
+                                                                                             smoothing_cutoff_frequency=smoothing_cutoff_frequency))
+        else:
+            processed_set_traj_input = set_traj_input
+        return self.learnGetDefaultUnrollParams(processed_set_traj_input, robot_task_servo_rate)
     
     def learnGetDefaultUnrollParams(self, set_traj_input, robot_task_servo_rate):
         W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI = self.learn(set_traj_input, robot_task_servo_rate)

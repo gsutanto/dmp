@@ -20,6 +20,7 @@ from QuaternionDMPTrajectory import *
 from QuaternionDMPState import *
 from utilities import *
 import utility_quaternion as util_quat
+from utility_states_trajectories import *
 
 class QuaternionDMP(DMPDiscrete, object):
     'Class for QuaternionDMPs.'
@@ -88,6 +89,19 @@ class QuaternionDMP(DMPDiscrete, object):
     
     def extractSetTrajectories(self, training_data_dir_or_file_path, start_column_idx=1, time_column_idx=0, is_omega_and_omegad_provided=True):
         return extractSetQuaternionTrajectories(training_data_dir_or_file_path, start_column_idx, time_column_idx, is_omega_and_omegad_provided)
+    
+    def smoothStartEndTrajectoryBasedOnPosition(self, traj, percentage_padding, percentage_smoothing_points, mode, dt, smoothing_cutoff_frequency):
+        if (dt is None):
+            traj_length = traj.time.shape[1]
+            assert (traj_length > 1)
+            dt = (traj.time[0, traj_length-1] - traj.time[0, 0])/(1.0 * (traj_length-1))
+            assert (dt > 0.0)
+        return smoothStartEndQuatTrajectoryBasedOnQuaternion(Quat_traj=traj, 
+                                                             percentage_padding=percentage_padding, 
+                                                             percentage_smoothing_points=percentage_smoothing_points, 
+                                                             mode=mode, dt=dt, 
+                                                             fc=smoothing_cutoff_frequency, 
+                                                             is_plotting_smoothing_comparison=False)
     
     def learnGetDefaultUnrollParams(self, set_traj_input, robot_task_servo_rate):
         W, mean_A_learn, mean_tau, Ft, Fp, QgT, cX, cV, PSI = self.learn(set_traj_input, robot_task_servo_rate)

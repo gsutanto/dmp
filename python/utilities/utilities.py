@@ -100,62 +100,22 @@ def recreateDir(dir_path):
         shutil.rmtree(dir_path)
     os.makedirs(dir_path)
 
-def smoothStartEnd1DPositionProfile(oneD_position_prof, 
-                                    percentage_padding, 
-                                    percentage_smoothing_points, 
-                                    mode, 
-                                    b, a):
-    traj_length = oneD_position_prof.shape[0]
-    is_originally_a_vector = False
-    if (len(oneD_position_prof.shape) == 1):
-        oneD_position_prof = oneD_position_prof.reshape(traj_length, 1)
-        is_originally_a_vector = True
+def diffnc(X, dt):
+    '''
+    [X] = diffc(X,dt) does non causal differentiation with time interval
+    dt between data points. The returned vector (matrix) is of the same length
+    as the original one
+    '''
+    [traj_length, D] = X.shape
+    XX = np.zeros((traj_length+2, D))
+    for d in range(D):
+        XX[:, d] = np.convolve(X[:, d], np.array([1,0,-1])/2.0/dt)
     
-    num_padding = int(round((percentage_padding/100.0) * traj_length))
-    if (num_padding <= 2):
-        num_padding = 3 # minimum number of padding
+    X = XX[1:traj_length+1, :]
+    X[0, :] = X[1, :]
+    X[traj_length-1, :] = X[traj_length-2, :]
     
-    num_smoothing_points = int(round((percentage_smoothing_points/100.0) * traj_length))
-    if (num_smoothing_points <= (num_padding+2)):
-        num_smoothing_points = num_padding + 3 # minimum number of smoothing points
-    
-    smoothed_1D_position_prof = oneD_position_prof
-    if ((mode >= 1) and (mode <= 3)):
-        assert (num_padding > 2), 'num_padding must be greater than 2!'
-        assert (num_smoothing_points > (num_padding+2)), '# of smoothing points must be greater than (num_padding+2)!'
-        assert (len(smoothed_1D_position_prof.shape) == 2), 'Input tensor must be 2-dimensional'
-        assert (min(smoothed_1D_position_prof.shape) == 1), 'Input matrix must be 1-dimensional, i.e. a vector!'
-    
-    # mode == 1: smooth start only
-    # mode == 2: smooth end only
-    # mode == 3: smooth both start and end
-    # otherwise: no smoothing
-    
-    if ((mode == 1) or (mode == 3)):
-        smoothed_1D_position_prof[1:num_padding,:] = smoothed_1D_position_prof[0,:]
-        smoothed_1D_position_prof_idx = (range(0, num_padding) + range(num_smoothing_points, traj_length))
-        interp_position_prof_idx = range(num_padding, num_smoothing_points+1)
-        
-        smoothed_1D_position_prof[interp_position_prof_idx,:] = interp1d(smoothed_1D_position_prof_idx, 
-                                                                         smoothed_1D_position_prof[smoothed_1D_position_prof_idx,:], 
-                                                                         kind='linear', axis=0)(interp_position_prof_idx)
-    
-    if ((mode == 2) or (mode == 3)):
-        smoothed_1D_position_prof[traj_length-num_padding:traj_length-1,:] = smoothed_1D_position_prof[traj_length-1,:]
-        smoothed_1D_position_prof_idx = (range(0, traj_length-num_smoothing_points) + range(traj_length-num_padding, traj_length))
-        interp_position_prof_idx = range(traj_length-num_smoothing_points, traj_length-num_padding)
-        
-        smoothed_1D_position_prof[interp_position_prof_idx,:] = interp1d(smoothed_1D_position_prof_idx, 
-                                                                         smoothed_1D_position_prof[smoothed_1D_position_prof_idx,:], 
-                                                                         kind='linear', axis=0)(interp_position_prof_idx)
-    
-    # apply low-pass filter for smoothness:
-    smoothed_1D_position_prof = signal.filtfilt(b, a, smoothed_1D_position_prof, axis=0, padlen=3*(max(len(a), len(b))-1)) # padlen here is adapted to follow what MATLAB's filtfilt() does (for code synchronization)
-    
-    if (is_originally_a_vector):
-        smoothed_1D_position_prof = smoothed_1D_position_prof.reshape(traj_length,)
-    
-    return smoothed_1D_position_prof
+    return X
 
 def stretchTrajectory( input_trajectory, new_traj_length ):
     if (len(input_trajectory.shape) == 1):

@@ -24,7 +24,10 @@ from utilities import *
 def quat_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_path="../../../../", 
                                       canonical_order=2, time_reproduce_max=2.0, 
                                       tau_reproduce=2.0, unroll_ctraj_save_dir_path="", 
-                                      unroll_ctraj_save_filename=""):
+                                      unroll_ctraj_save_filename="", 
+                                      is_smoothing_training_traj_before_learning=False, 
+                                      percentage_padding=None, percentage_smoothing_points=None, 
+                                      smoothing_mode=None, dt=None, smoothing_cutoff_frequency=None):
     task_servo_rate = 300.0
     dt = 1.0/task_servo_rate
     model_size = 25
@@ -46,14 +49,20 @@ def quat_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_path="../../../../",
         if (k == 0):
             sub_quat_dmp_training_path = "/data/dmp_coupling/learn_tactile_feedback/scraping_w_tool/human_baseline/prim03/"
         elif (k == 1):
-            sub_quat_dmp_training_path = "/data/dmp_coupling/learn_tactile_feedback/scraping_wo_tool/human_baseline/prim03/"
+            sub_quat_dmp_training_path = "/data/dmp_coupling/learn_tactile_feedback/scraping_wo_tool/human_baseline/prim02/"
         
         [critical_states_learn, 
          W, mean_A_learn, mean_tau, 
          Ft, Fp, QgT, cX, cV, 
          PSI] = quat_dmp.learnFromPath(amd_clmc_dmp_home_dir_path + sub_quat_dmp_training_path, 
                                        task_servo_rate, 
-                                       start_column_idx=10, time_column_idx=0)
+                                       start_column_idx=10, time_column_idx=0, 
+                                       is_smoothing_training_traj_before_learning=is_smoothing_training_traj_before_learning, 
+                                       percentage_padding=percentage_padding, 
+                                       percentage_smoothing_points=percentage_smoothing_points, 
+                                       smoothing_mode=smoothing_mode, 
+                                       dt=dt, 
+                                       smoothing_cutoff_frequency=smoothing_cutoff_frequency)
         
         ## Reproduce
         quatdmp_unroll_init_params = QuaternionDMPUnrollInitParams(critical_states_learn, tau)

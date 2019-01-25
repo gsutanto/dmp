@@ -68,6 +68,11 @@ quat_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_abs_path, 2, 1.9976, 1.9
 compareTwoNumericFiles(devel_software_test_dir_abs_path+'/test_matlab_quat_dmp_multi_traj_training_test_0_2.txt', 
                        devel_software_test_dir_abs_path+'/test_python_quat_dmp_multi_traj_training_test_0_2.txt')
 
+print("Testing Learning QuaternionDMP from Smoothed Quaternion Trajectory...")
+quat_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_abs_path, 2, 1.9976, 1.9976, devel_software_test_dir_abs_path, 'test_python_quat_dmp_multi_smoothed_traj_training_test_0_2.txt', True, 1.5, 3.0, 3, 1.0/300.0, 1.5)
+compareTwoNumericFiles(devel_software_test_dir_abs_path+'/test_matlab_quat_dmp_multi_smoothed_traj_training_test_0_2.txt', 
+                       devel_software_test_dir_abs_path+'/test_python_quat_dmp_multi_smoothed_traj_training_test_0_2.txt')
+
 ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test(amd_clmc_dmp_home_dir_abs_path, 2, devel_software_test_dir_abs_path, "test_python_ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test.txt")
 compareTwoNumericFiles(devel_software_test_dir_abs_path+'/test_cpp_ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test.txt', 
                        devel_software_test_dir_abs_path+'/test_python_ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test.txt',
