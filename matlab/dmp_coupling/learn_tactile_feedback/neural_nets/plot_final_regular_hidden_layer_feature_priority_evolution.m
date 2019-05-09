@@ -26,7 +26,7 @@ assert(N_phase_display < n_rfs, 'N_phase_display must be smaller than n_rfs');
 dcp_franzi('init', 1, n_rfs, num2str(1), c_order);
 basis_centers 	= dcps.c;
 
-ref_setting_no 	= 5;    % reference setting
+ref_setting_no 	= 2;    % reference setting
 ref_trial_no   	= 3;   % reference trial of reference setting
 
 ref_phase_X   	= dataset_Ct_tactile_asm.sub_phase_X{prim_no, ref_setting_no}{ref_trial_no,1};

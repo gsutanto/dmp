@@ -7,8 +7,13 @@ function [ data_demo ] = extractSensoriMotorTracesAllSettings( in_data_dir_path 
     N_setting                   = 1;    % # of settings
     setting_data_dir_path       = [in_data_dir_path, '/', num2str(N_setting,'%d'),'/'];
     while (exist(setting_data_dir_path, 'dir') == 7)
-        N_setting               = N_setting + 1;
-        setting_data_dir_path   = [in_data_dir_path, '/', num2str(N_setting,'%d'),'/'];
+        data_files              = dir(strcat(setting_data_dir_path,'/','j*'));
+        if (size(data_files, 1) == 1)
+            N_setting               = N_setting + 1;
+            setting_data_dir_path   = [in_data_dir_path, '/', num2str(N_setting,'%d'),'/'];
+        else
+            break;
+        end
     end
     N_setting                   = N_setting - 1;
     

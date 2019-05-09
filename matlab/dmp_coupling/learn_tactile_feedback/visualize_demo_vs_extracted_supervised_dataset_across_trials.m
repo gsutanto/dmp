@@ -51,7 +51,7 @@ N_settings          = size(dataset_Ct_tactile_asm.sub_Ct_target, 2);
 % for np = 1:1:N_primitive
 for np = 2
 %     for ns = 1:1:N_settings
-    for ns = 8
+    for ns = 1
         N_demos = min(size(dataset_Ct_tactile_asm.trial_idx_ranked_by_outlier_metric_w_exclusion{np,ns}, 1), max_num_demo_display);
 
         Ctt_N_dim                   = size(dataset_Ct_tactile_asm.sub_Ct_target{1,1}{1,1}, 2);

@@ -8,7 +8,7 @@ from six.moves import cPickle as pickle
 import os
 import sys
 from colorama import init, Fore, Back, Style
-init()
+#init()
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../utilities/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../neural_nets/feedforward/autoencoder/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../neural_nets/feedforward/pmnn/'))
@@ -46,7 +46,7 @@ fraction_test_dataset  = 0.075
 chunk_size = 1
 
 is_performing_weighted_training = 1
-is_performing_generalization_test = 1
+is_performing_generalization_test = 0
 
 generalization_test_comparison_dimension = 4
 

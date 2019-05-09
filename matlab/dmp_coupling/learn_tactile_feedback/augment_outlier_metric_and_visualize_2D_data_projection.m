@@ -62,10 +62,10 @@ p2_and_p3_orientation_ct_beta_polarity  = [0; ...  % setting  1
                                            0; ...  % setting  3
                                            0; ...  % setting  4
                                            0; ...  % setting  5
-                                           0; ...  % setting  6
-                                           0; ...  % setting  7
-                                           0; ...  % setting  8
-                                           0; ...  % setting  9
+%                                            0; ...  % setting  6
+%                                            0; ...  % setting  7
+%                                            0; ...  % setting  8
+%                                            0; ...  % setting  9
                                           ];
 abs_max_prim2_orientation_ct_beta_fraction_retain   = 0.75;
 
@@ -99,14 +99,14 @@ dataset_Ct_tactile_asm.trial_idx_ranked_by_outlier_metric_w_exclusion   = cell(N
 %  e.g. due to Inconsistencies, etc.)
 
 for np=1:1:N_primitive
-    dataset_Ct_tactile_asm.exclude{np, 1}   = [7,9,10,17,20,21,22,26,28];
-    dataset_Ct_tactile_asm.exclude{np, 2}   = [1,4,5,6,7,8,9,10,13,14,22,23,25,27,28];
-    dataset_Ct_tactile_asm.exclude{np, 3}   = [1,3,5,6,8,10,11,12,13,14,18,30];
-    dataset_Ct_tactile_asm.exclude{np, 4}   = [3,4,5,6,9,10,11,13,19,28];
-    dataset_Ct_tactile_asm.exclude{np, 5}   = [1,6,7,9,10,14,18,24,27,28];
-    dataset_Ct_tactile_asm.exclude{np, 6}   = [1,2,3,4,5,8,12,13,14,16,18,20,26,27,29];
-    dataset_Ct_tactile_asm.exclude{np, 7}   = [1,5,7,8,24,25];
-    dataset_Ct_tactile_asm.exclude{np, 8}   = [1,4,5,6,12,13,14,16,19,26];
+    dataset_Ct_tactile_asm.exclude{np, 1}   = [1,7,11,6,15];
+    dataset_Ct_tactile_asm.exclude{np, 2}   = [1,2,3,10,5];
+    dataset_Ct_tactile_asm.exclude{np, 3}   = [1,4,3,7,2];
+    dataset_Ct_tactile_asm.exclude{np, 4}   = [10,14,5,1,11];
+    dataset_Ct_tactile_asm.exclude{np, 5}   = [1,2,5,13,15];
+    dataset_Ct_tactile_asm.exclude{np, 6}   = [];
+    dataset_Ct_tactile_asm.exclude{np, 7}   = [];
+    dataset_Ct_tactile_asm.exclude{np, 8}   = [];
 end
 
 %% Add Outlier Metric

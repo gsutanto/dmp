@@ -11,10 +11,13 @@ addpath('../../../matlab/utilities/quaternion/');
 
 generic_task_type           = 'scraping';
 specific_task_type          = 'scraping_w_tool';
-date                        = '20170831_3';
-additional_description      = '_after_pruning_inconsistent_demos_positive_side';
+% date                        = '20170831_3';
+% additional_description      = '_after_pruning_inconsistent_demos_positive_side';
+date                        = '20190508';
+additional_description      = '';
+experiment_name             = [date,'_',specific_task_type,'_correctable',additional_description];
 
-in_data_root_dir_path       = ['~/Desktop/dmp_robot_unroll_results/',generic_task_type,'/',date,'_',specific_task_type,'_correctable',additional_description,'/robot/'];
+in_data_root_dir_path       = ['~/Desktop/dmp_robot_unroll_results/',generic_task_type,'/',experiment_name,'/robot/'];
 out_data_root_dir_path      = [pwd, '/',generic_task_type,'/robot_unroll_data/'];
 sample_data_root_dir_path   = [pwd, '/',generic_task_type,'/unroll_test_dataset/all_prims/pos/mean/'];
 

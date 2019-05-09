@@ -55,7 +55,7 @@ function [] = testCoupledCartDMPUnroll(output_dir_path)
 
     outdata_root_dir_path	= [scraping_data_root_dir_path, 'unroll_test_dataset/all_prims/'];
 
-    setting_no  = 5;
+    setting_no  = 2;
     trial_no    = 3;
 
     trial_outdata_dir_path  = [outdata_root_dir_path, 'setting_', num2str(setting_no), '_trial_', num2str(trial_no), '/'];

@@ -26,7 +26,7 @@ int main(int argc, char** argv)
 {
     bool    is_real_time            = false;
 
-    uint    setting_no              = 5;
+    uint    setting_no              = 2;
     uint    trial_no                = 3;
 
     double  task_servo_rate         = 300.0;    // demonstration/training data frequency

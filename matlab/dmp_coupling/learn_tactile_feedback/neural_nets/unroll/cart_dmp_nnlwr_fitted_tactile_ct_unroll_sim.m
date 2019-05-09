@@ -56,7 +56,7 @@ load([rel_dir_path,'dataset_Ct_tactile_asm_scraping.mat']);
 % end of Load the Baseline Primitive Params to be Unrolled
 %% Test Setting and Trial Number Particular Selection
 
-setting_no  = 5;
+setting_no  = 2;
 trial_no    = 3;
 
 unroll_test_data.position   = cell(N_prims, 1);

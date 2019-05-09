@@ -166,7 +166,7 @@ load([matlab_learn_tactile_fb_dir_path, 'data_demo_',task_type,'.mat']);
 
 outdata_root_dir_path	= [data_learn_tactile_fb_task_type_dir_path, 'unroll_test_dataset/all_prims/'];
 
-setting_no  = 5;
+setting_no  = 2;
 trial_no    = 3;
 
 trial_outdata_dir_path  = [outdata_root_dir_path, 'setting_', num2str(setting_no), '_trial_', num2str(trial_no), '/'];
