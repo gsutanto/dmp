@@ -138,3 +138,14 @@ def stretchTrajectory( input_trajectory, new_traj_length ):
         stretched_trajectory = stretched_trajectory.reshape(new_traj_length, )
     
     return stretched_trajectory
+
+def getCatkinWSPath():
+    home_path = os.environ['HOME']
+    ros_pkg_paths = os.environ['ROS_PACKAGE_PATH'].split(':')
+    catkin_ws_path = None
+    for ros_pkg_path in ros_pkg_paths:
+        if ((ros_pkg_path[:len(home_path)] == home_path) and (ros_pkg_path[-14:] == "/workspace/src")):
+            catkin_ws_path = ros_pkg_path[:-4]
+    assert (catkin_ws_path is not None)
+    print("Catkin Workspace path is %s" % catkin_ws_path)
+    return catkin_ws_path
