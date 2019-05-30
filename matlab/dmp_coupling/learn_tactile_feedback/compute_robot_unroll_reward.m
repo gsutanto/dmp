@@ -17,7 +17,7 @@ experiment_name         = [date,'_',specific_task_type,'_correctable',additional
 homepath                = getenv('HOME');
 N_total_sense_dimensionality    = 45;
 
-env_setting_name        = 'p5';
+env_setting_name        = 'n5';
 unroll_types            = {'b', 'c'};   % 'b' = baseline; 'c' = coupled
 prim2_Rewards           = cell(size(unroll_types));
 prim3_Rewards           = cell(size(unroll_types));
