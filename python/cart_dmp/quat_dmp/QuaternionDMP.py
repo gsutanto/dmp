@@ -87,10 +87,16 @@ class QuaternionDMP(DMPDiscrete, object):
         assert (self.isValid()), "Post-condition(s) checking is failed: this QuaternionDMP became invalid!"
         return None
     
-    def extractSetTrajectories(self, training_data_dir_or_file_path, start_column_idx=1, time_column_idx=0, is_omega_and_omegad_provided=True):
-        return extractSetQuaternionTrajectories(training_data_dir_or_file_path, start_column_idx, time_column_idx, is_omega_and_omegad_provided)
+    def extractSetTrajectories(self, training_data_dir_or_file_path, 
+                               start_column_idx=1, time_column_idx=0, 
+                               is_omega_and_omegad_provided=True):
+        return extractSetQuaternionTrajectories(training_data_dir_or_file_path, 
+                                                start_column_idx, time_column_idx, 
+                                                is_omega_and_omegad_provided)
     
-    def smoothStartEndTrajectoryBasedOnPosition(self, traj, percentage_padding, percentage_smoothing_points, mode, dt, smoothing_cutoff_frequency):
+    def smoothStartEndTrajectoryBasedOnPosition(self, traj, percentage_padding, 
+                                                percentage_smoothing_points, mode, 
+                                                dt, smoothing_cutoff_frequency):
         if (dt is None):
             traj_length = traj.time.shape[1]
             assert (traj_length > 1)

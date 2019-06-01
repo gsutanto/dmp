@@ -149,3 +149,6 @@ def getCatkinWSPath():
     assert (catkin_ws_path is not None)
     print("Catkin Workspace path is %s" % catkin_ws_path)
     return catkin_ws_path
+
+def getAllCLMCDataFilePathsInDirectory(directory_path):
+    return [directory_path+'/'+f for f in os.listdir(directory_path) if re.match(r'd+\d{5,5}$', f)] # match the regex pattern of SL data files
