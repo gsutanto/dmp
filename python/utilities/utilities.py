@@ -152,3 +152,9 @@ def getCatkinWSPath():
 
 def getAllCLMCDataFilePathsInDirectory(directory_path):
     return [directory_path+'/'+f for f in os.listdir(directory_path) if re.match(r'd+\d{5,5}$', f)] # match the regex pattern of SL data files
+
+def deleteAllCLMCDataFilesInDirectory(directory_path):
+    dfilepaths = getAllCLMCDataFilePathsInDirectory(directory_path)
+    for dfilepath in dfilepaths:
+        os.remove(dfilepath)
+    return None
