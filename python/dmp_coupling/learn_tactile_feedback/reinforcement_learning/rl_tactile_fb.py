@@ -27,9 +27,12 @@ if (is_deleting_dfiles):
     # initialization by removing all SL data files inside sl_data_path
     py_util.deleteAllCLMCDataFilesInDirectory(sl_data_path)
 
-# compute initial reward
-mean_prim_Rewards = rl_util.computeMeanPrimRewardsFromCLMCDataFilesInDirectory(sl_data_path, 
-                                                                               N_primitive=N_primitive, 
-                                                                               N_Reward_components=N_total_sense_dimensionality)
+# extract initial unrolling results: trajectories, sensor trace deviations, reward
+[
+ prim_unroll_results, 
+ mean_prim_Rewards
+] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(sl_data_path, 
+                                                             N_primitive=N_primitive, 
+                                                             N_Reward_components=N_total_sense_dimensionality)
 
 count_pmnn_param_reuse = 0
