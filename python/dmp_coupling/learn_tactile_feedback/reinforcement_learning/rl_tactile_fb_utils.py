@@ -64,44 +64,48 @@ def extractUnrollResultFromCLMCDataFile(dfilepath, N_Reward_components):
     assert(DeltaST.shape[0] == prim_id.shape[0])
     assert(DeltaST.shape[1] == N_Reward_components)
     
-    unroll_result = {}
-    unroll_result["filepath"] = dfilepath
-    unroll_result["id"] = [None] * N_primitive
-    unroll_result["timeT"] = [None] * N_primitive
-    unroll_result["XT"] = [None] * N_primitive
-    unroll_result["XdT"] = [None] * N_primitive
-    unroll_result["XddT"] = [None] * N_primitive
-    unroll_result["QT"] = [None] * N_primitive
-    unroll_result["omegaT"] = [None] * N_primitive
-    unroll_result["omegadT"] = [None] * N_primitive
-    unroll_result["DeltaST"] = [None] * N_primitive
-    unroll_result["Reward"] = [None] * N_primitive
+    unroll_trajectory = {}
+    unroll_trajectory["filepath"] = dfilepath
+    unroll_trajectory["id"] = [None] * N_primitive
+    unroll_trajectory["timeT"] = [None] * N_primitive
+    unroll_trajectory["XT"] = [None] * N_primitive
+    unroll_trajectory["XdT"] = [None] * N_primitive
+    unroll_trajectory["XddT"] = [None] * N_primitive
+    unroll_trajectory["QT"] = [None] * N_primitive
+    unroll_trajectory["omegaT"] = [None] * N_primitive
+    unroll_trajectory["omegadT"] = [None] * N_primitive
+    unroll_trajectory["DeltaST"] = [None] * N_primitive
+    unroll_reward = [None] * N_primitive
     for ip in range(N_primitive):
-        unroll_result["id"][ip] = np.where(prim_id == ip)[0]
-        unroll_result["timeT"][ip] = timeT[unroll_result["id"][ip],:]
-        unroll_result["XT"][ip] = XT[unroll_result["id"][ip],:]
-        unroll_result["XdT"][ip] = XdT[unroll_result["id"][ip],:]
-        unroll_result["XddT"][ip] = XddT[unroll_result["id"][ip],:]
-        unroll_result["QT"][ip] = QT[unroll_result["id"][ip],:]
-        unroll_result["omegaT"][ip] = omegaT[unroll_result["id"][ip],:]
-        unroll_result["omegadT"][ip] = omegadT[unroll_result["id"][ip],:]
-        unroll_result["DeltaST"][ip] = DeltaST[unroll_result["id"][ip],:]
-        unroll_result["Reward"][ip] = -npla.norm(unroll_result["DeltaST"][ip], ord=2)
-    return unroll_result
+        unroll_trajectory["id"][ip] = np.where(prim_id == ip)[0]
+        unroll_trajectory["timeT"][ip] = timeT[unroll_trajectory["id"][ip],:]
+        unroll_trajectory["XT"][ip] = XT[unroll_trajectory["id"][ip],:]
+        unroll_trajectory["XdT"][ip] = XdT[unroll_trajectory["id"][ip],:]
+        unroll_trajectory["XddT"][ip] = XddT[unroll_trajectory["id"][ip],:]
+        unroll_trajectory["QT"][ip] = QT[unroll_trajectory["id"][ip],:]
+        unroll_trajectory["omegaT"][ip] = omegaT[unroll_trajectory["id"][ip],:]
+        unroll_trajectory["omegadT"][ip] = omegadT[unroll_trajectory["id"][ip],:]
+        unroll_trajectory["DeltaST"][ip] = DeltaST[unroll_trajectory["id"][ip],:]
+        unroll_reward[ip] = -npla.norm(unroll_trajectory["DeltaST"][ip], ord=2)
+    return unroll_trajectory, unroll_reward
 
 def extractUnrollResultsFromCLMCDataFilesInDirectory(directory_path, 
                                                      N_primitive, 
                                                      N_Reward_components):
-    all_trial_unroll_results_list = list()
-    all_trial_prim_Rewards_list = list()
+    unroll_results = {}
+    unroll_results["trajectory"] = list()
+    unroll_results["reward_per_trial"] = list()
     init_new_env_dfilepaths = py_util.getAllCLMCDataFilePathsInDirectory(directory_path)
     for init_new_env_dfilepath in init_new_env_dfilepaths:
         print("Computing rewards from datafile %s..." % init_new_env_dfilepath)
-        trial_unroll_result = extractUnrollResultFromCLMCDataFile(init_new_env_dfilepath, 
-                                                                  N_Reward_components=N_Reward_components)
-        assert (len(trial_unroll_result["Reward"]) == N_primitive)
-        all_trial_unroll_results_list.append(trial_unroll_result)
-        all_trial_prim_Rewards_list.append(trial_unroll_result["Reward"])
-    all_trial_prim_Rewards = np.vstack(all_trial_prim_Rewards_list)
-    mean_prim_Rewards = np.mean(all_trial_prim_Rewards, axis=0)
-    return all_trial_unroll_results_list, mean_prim_Rewards
+        [
+         trial_unroll_traj, 
+         trial_unroll_reward
+        ] = extractUnrollResultFromCLMCDataFile(init_new_env_dfilepath, 
+                                                N_Reward_components=N_Reward_components)
+        assert (len(trial_unroll_reward) == N_primitive)
+        unroll_results["trajectory"].append(trial_unroll_traj)
+        unroll_results["reward_per_trial"].append(trial_unroll_reward)
+    all_trial_prim_rewards = np.vstack(unroll_results["reward_per_trial"])
+    unroll_results["mean_reward"] = np.mean(all_trial_prim_rewards, axis=0)
+    return unroll_results

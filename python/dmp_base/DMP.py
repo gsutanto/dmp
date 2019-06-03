@@ -94,6 +94,13 @@ class DMP:
                       is_smoothing_training_traj_before_learning=False, 
                       percentage_padding=None, percentage_smoothing_points=None, smoothing_mode=None, dt=None, smoothing_cutoff_frequency=None):
         set_traj_input = self.extractSetTrajectories(training_data_dir_or_file_path, start_column_idx, time_column_idx)
+        return self.learnFromSetTrajectories(set_traj_input, robot_task_servo_rate, 
+                                             is_smoothing_training_traj_before_learning, 
+                                             percentage_padding, percentage_smoothing_points, smoothing_mode, dt, smoothing_cutoff_frequency)
+    
+    def learnFromSetTrajectories(self, set_traj_input, robot_task_servo_rate, 
+                                 is_smoothing_training_traj_before_learning=False, 
+                                 percentage_padding=None, percentage_smoothing_points=None, smoothing_mode=None, dt=None, smoothing_cutoff_frequency=None):
         if (is_smoothing_training_traj_before_learning):
             processed_set_traj_input = list()
             for traj_input in set_traj_input:
