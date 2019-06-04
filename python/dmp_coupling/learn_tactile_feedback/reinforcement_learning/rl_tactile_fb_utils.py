@@ -10,8 +10,19 @@ import os
 import sys
 import numpy as np
 import numpy.linalg as npla
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_state/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_param/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_base/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_discrete/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../cart_dmp/quat_dmp'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/clmcplot/'))
+from TauSystem import *
+from QuaternionDMPUnrollInitParams import *
+from CanonicalSystemDiscrete import *
+from QuaternionDMP import *
+import DMPTrajectory as dmp_traj
+import QuaternionDMPTrajectory as qdmp_traj
 import utilities as py_util
 import clmcplot_utils as clmcplot_util
 
@@ -27,10 +38,10 @@ def computeNPrimitives(prim_id_list):
     assert(max(valid_prim_ids) == N_prim - 1)
     return N_prim
 
-def extractUnrollResultFromCLMCDataFile(dfilepath, N_Reward_components):
+def extractUnrollResultFromCLMCDataFile(dfilepath, N_reward_components):
     clmcfile = clmcplot_util.ClmcFile(dfilepath)
     prim_id = clmcfile.get_variables(["ul_curr_prim_no"])[0].T
-    N_primitive = computeNPrimitives(prim_id)
+    N_primitives = computeNPrimitives(prim_id)
     
     # time:
     timeT = np.vstack([clmcfile.get_variables(['time'])]).T
@@ -60,23 +71,23 @@ def extractUnrollResultFromCLMCDataFile(dfilepath, N_Reward_components):
     assert(omegadT.shape[1] == dim_omega)
     
     # trajectory of Delta S:
-    DeltaST = np.vstack([clmcfile.get_variables(["X_vector_%02d" % i for i in range(N_Reward_components)])]).T
+    DeltaST = np.vstack([clmcfile.get_variables(["X_vector_%02d" % i for i in range(N_reward_components)])]).T
     assert(DeltaST.shape[0] == prim_id.shape[0])
-    assert(DeltaST.shape[1] == N_Reward_components)
+    assert(DeltaST.shape[1] == N_reward_components)
     
     unroll_trajectory = {}
     unroll_trajectory["filepath"] = dfilepath
-    unroll_trajectory["id"] = [None] * N_primitive
-    unroll_trajectory["timeT"] = [None] * N_primitive
-    unroll_trajectory["XT"] = [None] * N_primitive
-    unroll_trajectory["XdT"] = [None] * N_primitive
-    unroll_trajectory["XddT"] = [None] * N_primitive
-    unroll_trajectory["QT"] = [None] * N_primitive
-    unroll_trajectory["omegaT"] = [None] * N_primitive
-    unroll_trajectory["omegadT"] = [None] * N_primitive
-    unroll_trajectory["DeltaST"] = [None] * N_primitive
-    unroll_reward = [None] * N_primitive
-    for ip in range(N_primitive):
+    unroll_trajectory["id"] = [None] * N_primitives
+    unroll_trajectory["timeT"] = [None] * N_primitives
+    unroll_trajectory["XT"] = [None] * N_primitives
+    unroll_trajectory["XdT"] = [None] * N_primitives
+    unroll_trajectory["XddT"] = [None] * N_primitives
+    unroll_trajectory["QT"] = [None] * N_primitives
+    unroll_trajectory["omegaT"] = [None] * N_primitives
+    unroll_trajectory["omegadT"] = [None] * N_primitives
+    unroll_trajectory["DeltaST"] = [None] * N_primitives
+    unroll_reward = [None] * N_primitives
+    for ip in range(N_primitives):
         unroll_trajectory["id"][ip] = np.where(prim_id == ip)[0]
         unroll_trajectory["timeT"][ip] = timeT[unroll_trajectory["id"][ip],:]
         unroll_trajectory["XT"][ip] = XT[unroll_trajectory["id"][ip],:]
@@ -90,8 +101,8 @@ def extractUnrollResultFromCLMCDataFile(dfilepath, N_Reward_components):
     return unroll_trajectory, unroll_reward
 
 def extractUnrollResultsFromCLMCDataFilesInDirectory(directory_path, 
-                                                     N_primitive, 
-                                                     N_Reward_components):
+                                                     N_primitives, 
+                                                     N_reward_components):
     unroll_results = {}
     unroll_results["trajectory"] = list()
     unroll_results["reward_per_trial"] = list()
@@ -102,10 +113,102 @@ def extractUnrollResultsFromCLMCDataFilesInDirectory(directory_path,
          trial_unroll_traj, 
          trial_unroll_reward
         ] = extractUnrollResultFromCLMCDataFile(init_new_env_dfilepath, 
-                                                N_Reward_components=N_Reward_components)
-        assert (len(trial_unroll_reward) == N_primitive)
+                                                N_reward_components=N_reward_components)
+        assert (len(trial_unroll_reward) == N_primitives)
         unroll_results["trajectory"].append(trial_unroll_traj)
         unroll_results["reward_per_trial"].append(trial_unroll_reward)
     all_trial_prim_rewards = np.vstack(unroll_results["reward_per_trial"])
     unroll_results["mean_reward"] = np.mean(all_trial_prim_rewards, axis=0)
     return unroll_results
+
+def extractCartDMPTrajectoriesFromUnrollResults(unroll_results, 
+                                                is_time_start_from_zero=True):
+    N_trials = len(unroll_results["trajectory"])
+    N_primitives = len(unroll_results["trajectory"][0]["id"])
+    ccdmp_trajs = [None] * N_primitives
+    qdmp_trajs = [None] * N_primitives
+    for n_trial in range(N_trials):
+        for n_prim in range(N_primitives):
+            timeT = unroll_results["trajectory"][n_trial]["timeT"][n_prim].T
+            if (is_time_start_from_zero):
+                timeT = timeT - timeT[0,0]
+            XT = unroll_results["trajectory"][n_trial]["XT"][n_prim].T
+            XdT = unroll_results["trajectory"][n_trial]["XdT"][n_prim].T
+            XddT = unroll_results["trajectory"][n_trial]["XddT"][n_prim].T
+            QT = unroll_results["trajectory"][n_trial]["QT"][n_prim].T
+            omegaT = unroll_results["trajectory"][n_trial]["omegaT"][n_prim].T
+            omegadT = unroll_results["trajectory"][n_trial]["omegadT"][n_prim].T
+            if (n_trial == 0):
+                ccdmp_trajs[n_prim] = [None] * N_trials
+                qdmp_trajs[n_prim] = [None] * N_trials
+            ccdmp_trajs[n_prim][n_trial] = dmp_traj.DMPTrajectory(XT, 
+                                                                  XdT, 
+                                                                  XddT, 
+                                                                  timeT)
+            qdmp_trajs[n_prim][n_trial] = qdmp_traj.QuaternionDMPTrajectory(Q_init=QT, 
+                                                                            omega_init=omegaT, 
+                                                                            omegad_init=omegadT, 
+                                                                            time_init=timeT)
+            qdmp_trajs[n_prim][n_trial].computeQdAndQdd()
+    cdmp_trajs = {}
+    cdmp_trajs["CartCoord"] = ccdmp_trajs
+    cdmp_trajs["Quaternion"] = qdmp_trajs
+    return cdmp_trajs
+
+def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_improved="All", 
+                             is_smoothing_training_traj_before_learning=True, 
+                             is_plotting=False):
+    N_primitives = len(cdmp_trajs["Quaternion"])
+    if (prim_to_be_improved is "All"):
+        prim_to_be_improved = range(N_primitives)
+    
+    task_servo_rate = 300.0
+    dt = 1.0/task_servo_rate
+    tau = MIN_TAU
+    canonical_order = 2
+    model_size = 25
+    
+    if (is_smoothing_training_traj_before_learning):
+        percentage_padding = 1.5
+        percentage_smoothing_points = 3.0
+        smoothing_cutoff_frequency = 1.5
+    else:
+        percentage_padding = None
+        percentage_smoothing_points = None
+        smoothing_cutoff_frequency = None
+    
+    tau_sys = TauSystem(dt, tau)
+    canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
+    quat_dmp = QuaternionDMP(model_size, canonical_sys_discr)
+    
+    cdmp_params = {}
+    cdmp_params["Quaternion"] = [None] * N_primitives
+    for n_prim in prim_to_be_improved:
+        print("Learning (Improved) Open-Loop Primitive #%d" % (n_prim+1))
+        if (is_smoothing_training_traj_before_learning):
+            if (np == 0):
+                smoothing_mode = 1 # smooth start only
+            elif (np == N_primitives - 1):
+                smoothing_mode = 2 # smooth end only
+            else:
+                smoothing_mode = 0 # do not smooth
+        else:
+            smoothing_mode = None
+        cdmp_params["Quaternion"][n_prim] = {}
+        [
+         cdmp_params["Quaternion"][n_prim]["critical_states_learn"], 
+         cdmp_params["Quaternion"][n_prim]["W"], 
+         cdmp_params["Quaternion"][n_prim]["mean_A_learn"], 
+         cdmp_params["Quaternion"][n_prim]["mean_tau"], 
+         _, _, _, _, _, 
+         _
+         ] = quat_dmp.learnFromSetTrajectories(cdmp_trajs["Quaternion"][n_prim], task_servo_rate, 
+                                               is_smoothing_training_traj_before_learning=is_smoothing_training_traj_before_learning, 
+                                               percentage_padding=percentage_padding, 
+                                               percentage_smoothing_points=percentage_smoothing_points, 
+                                               smoothing_mode=smoothing_mode, 
+                                               smoothing_cutoff_frequency=smoothing_cutoff_frequency
+                                               )
+        if (is_plotting):
+            print("To-Do: Do plotting here!")
+    return cdmp_params
