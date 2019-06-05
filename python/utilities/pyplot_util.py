@@ -7,6 +7,8 @@ from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
 
+#all_color_list = ['b','g','r','c','m','y','k']
+all_color_list = ['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#800000', '#aaffc3', '#808000', '#000075', '#808080', '#000000']
 
 def hist(np_var, title, fig_num=1):
     plt.figure(fig_num)
@@ -20,13 +22,13 @@ def plot_3D(X_list, Y_list, Z_list, title,
             label_list=[''], color_style_list=[['b','-']], 
             is_showing_start_and_goal=False,
             N_data_display=-1,
-            is_auto_line_coloring_and_styling=False):
+            is_auto_line_coloring_and_styling=False, 
+            is_showing_grid=True):
     N_dataset = len(X_list)
     assert (N_dataset == len(Y_list))
     assert (N_dataset == len(Z_list))
     assert (N_dataset == len(label_list))
     if (is_auto_line_coloring_and_styling):
-        all_color_list = ['b','g','r','c','m','y','k']
         all_style_list = ['-','--','-.',':']
         color_style_list = [[c,s] for c in all_color_list for s in all_style_list]
     assert (N_dataset <= len(color_style_list))
@@ -49,7 +51,7 @@ def plot_3D(X_list, Y_list, Z_list, title,
     ax.set_ylabel(Y_label)
     ax.set_zlabel(Z_label)
     ax.legend()
-    ax.grid(True)
+    ax.grid(is_showing_grid)
     ax.set_title(title)
     plt.show()
     return None
@@ -59,12 +61,12 @@ def plot_2D(X_list, Y_list, title,
             label_list=[''], color_style_list=[['b','-']], 
             is_showing_start_and_goal=False,
             N_data_display=-1,
-            is_auto_line_coloring_and_styling=False):
+            is_auto_line_coloring_and_styling=False, 
+            is_showing_grid=True):
     N_dataset = len(X_list)
     assert (N_dataset == len(Y_list))
     assert (N_dataset == len(label_list))
     if (is_auto_line_coloring_and_styling):
-        all_color_list = ['b','g','r','c','m','y','k']
         all_style_list = ['-','--','-.',':']
         color_style_list = [[c,s] for s in all_style_list for c in all_color_list]
         assert (N_dataset <= len(color_style_list))
@@ -85,7 +87,7 @@ def plot_2D(X_list, Y_list, title,
     ax.set_xlabel(X_label)
     ax.set_ylabel(Y_label)
     ax.legend()
-    ax.grid(True)
+    ax.grid(is_showing_grid)
     ax.set_title(title)
     plt.show()
     return None
@@ -93,13 +95,13 @@ def plot_2D(X_list, Y_list, title,
 def scatter_3D(X_list, Y_list, Z_list, title, 
                X_label, Y_label, Z_label, fig_num=1, 
                label_list=[''], color_style_list=[['b','o']],
-               is_auto_line_coloring_and_styling=False):
+               is_auto_line_coloring_and_styling=False, 
+               is_showing_grid=True):
     N_dataset = len(X_list)
     assert (N_dataset == len(Y_list))
     assert (N_dataset == len(Z_list))
     assert (N_dataset == len(label_list))
     if (is_auto_line_coloring_and_styling):
-        all_color_list = ['b','g','r','c','m','y','k']
         all_style_list = ['o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X']
         color_style_list = [[c,s] for s in all_style_list for c in all_color_list]
         assert (N_dataset <= len(color_style_list)), "Not enough color style variations to cover all datasets!"
@@ -119,7 +121,7 @@ def scatter_3D(X_list, Y_list, Z_list, title,
     ax.set_ylabel(Y_label)
     ax.set_zlabel(Z_label)
     ax.legend()
-    ax.grid(True)
+    ax.grid(is_showing_grid)
     ax.set_title(title)
     plt.show()
     return None
@@ -127,12 +129,12 @@ def scatter_3D(X_list, Y_list, Z_list, title,
 def scatter_2D(X_list, Y_list, title, 
                X_label, Y_label, fig_num=1, 
                label_list=[''], color_style_list=[['b','o']],
-               is_auto_line_coloring_and_styling=False):
+               is_auto_line_coloring_and_styling=False, 
+               is_showing_grid=True):
     N_dataset = len(X_list)
     assert (N_dataset == len(Y_list))
     assert (N_dataset == len(label_list))
     if (is_auto_line_coloring_and_styling):
-        all_color_list = ['b','g','r','c','m','y','k']
         all_style_list = ['o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X']
         color_style_list = [[c,s] for s in all_style_list for c in all_color_list]
         assert (N_dataset <= len(color_style_list)), "Not enough color style variations to cover all datasets!"
@@ -150,7 +152,7 @@ def scatter_2D(X_list, Y_list, title,
     plt.ylabel(Y_label)
     plt.title(title)
     plt.legend()
-    plt.grid(True)
+    plt.grid(is_showing_grid)
     plt.show()
     return None
 
