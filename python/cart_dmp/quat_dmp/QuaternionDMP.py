@@ -14,6 +14,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../dmp_discrete/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../dmp_param/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../dmp_state/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../utilities/'))
+from QuaternionDMPUnrollInitParams import *
 from DMPDiscrete import *
 from TransformSystemQuaternion import *
 from QuaternionDMPTrajectory import *
@@ -116,3 +117,9 @@ class QuaternionDMP(DMPDiscrete, object):
         critical_states_list_learn[-1] = QuaternionDMPState(self.mean_goal_position)
         critical_states_learn = convertQuaternionDMPStatesListIntoQuaternionDMPTrajectory(critical_states_list_learn)
         return critical_states_learn, W, mean_A_learn, self.mean_tau, Ft, Fp, QgT, cX, cV, PSI
+    
+    def getDMPUnrollInitParams(self, critical_states_learn, tau):
+        return QuaternionDMPUnrollInitParams(critical_states_learn, tau)
+    
+    def convertDMPStatesListIntoDMPTrajectory(self, dmpstates_list):
+        return convertQuaternionDMPStatesListIntoQuaternionDMPTrajectory(dmpstates_list)

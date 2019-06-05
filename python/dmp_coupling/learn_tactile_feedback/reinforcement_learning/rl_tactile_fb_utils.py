@@ -183,8 +183,10 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_improved="All",
     
     cdmp_params = {}
     cdmp_params["Quaternion"] = [None] * N_primitives
+    cdmp_unroll = {}
+    cdmp_unroll["Quaternion"] = [None] * N_primitives
     for n_prim in prim_to_be_improved:
-        print("Learning (Improved) Open-Loop Primitive #%d" % (n_prim+1))
+        print("Learning (Modified) Open-Loop Primitive #%d" % (n_prim+1))
         if (is_smoothing_training_traj_before_learning):
             if (np == 0):
                 smoothing_mode = 1 # smooth start only
@@ -209,6 +211,11 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_improved="All",
                                                smoothing_mode=smoothing_mode, 
                                                smoothing_cutoff_frequency=smoothing_cutoff_frequency
                                                )
+        
         if (is_plotting):
+            cdmp_unroll["Quaternion"][n_prim] = quat_dmp.unroll(cdmp_params["Quaternion"][n_prim]["critical_states_learn"], 
+                                                                cdmp_params["Quaternion"][n_prim]["mean_tau"], 
+                                                                cdmp_params["Quaternion"][n_prim]["mean_tau"], 
+                                                                dt)
             print("To-Do: Do plotting here!")
-    return cdmp_params
+    return cdmp_params, cdmp_unroll

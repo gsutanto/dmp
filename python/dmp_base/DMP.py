@@ -14,6 +14,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../dmp_param/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../dmp_state/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../utilities/'))
 from TauSystem import *
+from DMPUnrollInitParams import *
 from CanonicalSystem import *
 from FunctionApproximator import *
 from TransformationSystem import *
@@ -135,5 +136,27 @@ class DMP:
     def getMeanTau(self):
         return copy.copy(self.mean_tau)
     
+    def getDMPUnrollInitParams(self, critical_states_learn, tau):
+        return DMPUnrollInitParams(critical_states_learn, tau)
+    
+    def convertDMPStatesListIntoDMPTrajectory(self, dmpstates_list):
+        return convertDMPStatesListIntoDMPTrajectory(dmpstates_list)
+    
     def setTransformSystemCouplingTermUsagePerDimensions(self, is_using_transform_sys_coupling_term_at_dimension_init):
         return self.transform_sys.setCouplingTermUsagePerDimensions(is_using_transform_sys_coupling_term_at_dimension_init)
+    
+    def unroll(self, critical_states_unroll, tau_unroll, time_unroll_max, dt):
+        dmp_unroll_init_params = self.getDMPUnrollInitParams(critical_states_unroll, tau_unroll)
+        
+        self.startWithUnrollParams(dmp_unroll_init_params)
+        
+        dmpstate_list = list()
+        for i in range(int(np.round(time_unroll_max/dt) + 1)):
+            [current_dmpstate, 
+             _, 
+             _, 
+             _, 
+             _
+             ] = self.getNextState(dt, True)
+            dmpstate_list.append(current_dmpstate)
+        return self.convertDMPStatesListIntoDMPTrajectory(dmpstate_list)

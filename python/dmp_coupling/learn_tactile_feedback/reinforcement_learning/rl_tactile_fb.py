@@ -40,7 +40,10 @@ rl_data[0] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(sl_data_pa
 
 count_pmnn_param_reuse = 0
 cdmp_trajs = rl_util.extractCartDMPTrajectoriesFromUnrollResults(rl_data[0])
-cdmp_params = rl_util.learnCartDMPUnrollParams(cdmp_trajs, 
-                                               prim_to_be_improved, 
-                                               is_smoothing_training_traj_before_learning, 
-                                               is_plotting)
+[
+ cdmp_params, 
+ cdmp_unroll
+] = rl_util.learnCartDMPUnrollParams(cdmp_trajs, 
+                                     prim_to_be_improved, 
+                                     is_smoothing_training_traj_before_learning, 
+                                     is_plotting)
