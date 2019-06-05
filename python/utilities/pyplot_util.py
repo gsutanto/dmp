@@ -159,7 +159,8 @@ def scatter_2D(X_list, Y_list, title,
 def subplot_ND(NDtraj_list, title, 
                Y_label_list, fig_num=1, 
                label_list=[''], color_style_list=[['b','o']],
-               is_auto_line_coloring_and_styling=False):
+               is_auto_line_coloring_and_styling=False, 
+               is_showing_grid=True):
     assert (len(NDtraj_list) >= 1)
     N_traj_to_plot = len(NDtraj_list)
     assert (len(label_list) == N_traj_to_plot)
@@ -190,11 +191,15 @@ def subplot_ND(NDtraj_list, title,
             ax[d].plot(traj, 
                        c=color, ls=linestyle, 
                        label=traj_label)
+            if (n_traj_to_plot == 0):
+                ax[d].grid(is_showing_grid)
     ax[0].legend()
     # Fine-tune figure; make subplots close to each other and hide x ticks for
     # all but bottom plot.
 #    f.subplots_adjust(hspace=0)
     plt.setp([a.get_xticklabels() for a in fig.axes[:-1]], visible=False)
+    plt.pause(0.05)
+    plt.show()
     return None
 
 

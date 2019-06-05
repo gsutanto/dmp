@@ -10,11 +10,14 @@ import os
 import sys
 import numpy as np
 import numpy.linalg as npla
+import matplotlib.pyplot as plt
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/clmcplot/'))
 import utilities as py_util
 import clmcplot_utils as clmcplot_util
 import rl_tactile_fb_utils as rl_util
+
+plt.close('all')
 
 catkin_ws_path = py_util.getCatkinWSPath()
 sl_data_path = catkin_ws_path + "/install/bin/arm"
