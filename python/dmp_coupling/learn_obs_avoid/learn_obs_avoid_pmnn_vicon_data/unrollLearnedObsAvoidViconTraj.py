@@ -78,7 +78,6 @@ def unrollLearnedObsAvoidViconTraj(demo_obs_avoid_traj_global,
 # =============================================================================
         [current_state_global, 
          _, 
-         _, 
          transform_sys_coupling_term_acc, 
          _, 
          _] = cart_coord_dmp.getNextState(unroll_dt, True)

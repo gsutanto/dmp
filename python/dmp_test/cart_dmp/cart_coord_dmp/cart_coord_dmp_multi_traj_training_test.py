@@ -70,7 +70,6 @@ def cart_coord_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_path="../../..
             time = 1.0 * (i*dt)
             
             [current_state, 
-             current_state_local, 
              transform_sys_forcing_term, 
              transform_sys_coupling_term_acc, 
              transform_sys_coupling_term_vel, 

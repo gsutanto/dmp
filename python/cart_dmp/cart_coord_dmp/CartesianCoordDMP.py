@@ -145,7 +145,7 @@ class CartesianCoordDMP(DMPDiscrete, object):
         assert (self.isValid()), "Post-condition(s) checking is failed: this CartesianCoordDMP became invalid!"
         return None
     
-    def getNextState(self, dt, update_canonical_state):
+    def getNextState(self, dt, update_canonical_state, is_also_returning_local_next_state=False):
         assert (self.is_started == True)
         assert (self.isValid()), "Pre-condition(s) checking is failed: this CartesianCoordDMP is invalid!"
         
@@ -169,7 +169,10 @@ class CartesianCoordDMP(DMPDiscrete, object):
         result_dmp_state_global = self.ctraj_critical_states_global_coord.getDMPStateAtIndex(1)
         
         assert (self.isValid()), "Post-condition(s) checking is failed: this CartesianCoordDMP became invalid!"
-        return result_dmp_state_global, result_dmp_state_local, transform_sys_forcing_term, transform_sys_coupling_term_acc, transform_sys_coupling_term_vel, func_approx_basis_function_vector
+        if (is_also_returning_local_next_state):
+            return result_dmp_state_global, result_dmp_state_local, transform_sys_forcing_term, transform_sys_coupling_term_acc, transform_sys_coupling_term_vel, func_approx_basis_function_vector
+        else:
+            return result_dmp_state_global, transform_sys_forcing_term, transform_sys_coupling_term_acc, transform_sys_coupling_term_vel, func_approx_basis_function_vector
     
     def getCurrentState(self):
         # update critical states in local coordinate frame (only current state and current goal state changes)

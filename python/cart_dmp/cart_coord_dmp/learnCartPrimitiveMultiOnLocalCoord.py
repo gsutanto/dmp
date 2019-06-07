@@ -77,7 +77,8 @@ def learnCartPrimitiveMultiOnLocalCoord(cart_global_traj, train_data_dt,
          transform_sys_forcing_term, 
          transform_sys_coupling_term_acc, 
          transform_sys_coupling_term_vel, 
-         func_approx_basis_function_vector] = cart_coord_dmp.getNextState(unroll_dt, True)
+         func_approx_basis_function_vector] = cart_coord_dmp.getNextState(unroll_dt, True, 
+                                                                          is_also_returning_local_next_state=True)
         
         list_cart_coord_dmpstate_unroll_fit_global[i] = current_state_global
         list_cart_coord_dmpstate_unroll_fit_local[i] = current_state_local

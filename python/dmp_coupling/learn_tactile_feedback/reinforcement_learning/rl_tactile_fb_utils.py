@@ -14,12 +14,14 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_state/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_param/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_base/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_discrete/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../cart_dmp/cart_coord_dmp'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../cart_dmp/quat_dmp'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/clmcplot/'))
 from TauSystem import *
 from QuaternionDMPUnrollInitParams import *
 from CanonicalSystemDiscrete import *
+from CartesianCoordDMP import *
 from QuaternionDMP import *
 import DMPTrajectory as dmp_traj
 import QuaternionDMPTrajectory as qdmp_traj
@@ -180,11 +182,15 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_improved="All",
     
     tau_sys = TauSystem(dt, tau)
     canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
-    quat_dmp = QuaternionDMP(model_size, canonical_sys_discr)
+    ccdmp = CartesianCoordDMP(model_size, canonical_sys_discr, GSUTANTO_LOCAL_COORD_FRAME)
+    qdmp = QuaternionDMP(model_size, canonical_sys_discr)
     
     cdmp_params = {}
+    cdmp_params["CartCoord"] = [None] * N_primitives
     cdmp_params["Quaternion"] = [None] * N_primitives
+    
     cdmp_unroll = {}
+    cdmp_unroll["CartCoord"] = [None] * N_primitives
     cdmp_unroll["Quaternion"] = [None] * N_primitives
     for n_prim in prim_to_be_improved:
         print("Learning (Modified) Open-Loop Primitive #%d" % (n_prim+1))
@@ -197,6 +203,23 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_improved="All",
                 smoothing_mode = 0 # do not smooth
         else:
             smoothing_mode = None
+        
+        cdmp_params["CartCoord"][n_prim] = {}
+        [
+         cdmp_params["CartCoord"][n_prim]["critical_states_learn"], 
+         cdmp_params["CartCoord"][n_prim]["W"], 
+         cdmp_params["CartCoord"][n_prim]["mean_A_learn"], 
+         cdmp_params["CartCoord"][n_prim]["mean_tau"], 
+         _, _, _, _, _, 
+         _
+         ] = ccdmp.learnFromSetTrajectories(cdmp_trajs["CartCoord"][n_prim], task_servo_rate, 
+                                            is_smoothing_training_traj_before_learning=is_smoothing_training_traj_before_learning, 
+                                            percentage_padding=percentage_padding, 
+                                            percentage_smoothing_points=percentage_smoothing_points, 
+                                            smoothing_mode=smoothing_mode, 
+                                            smoothing_cutoff_frequency=smoothing_cutoff_frequency
+                                            )
+        
         cdmp_params["Quaternion"][n_prim] = {}
         [
          cdmp_params["Quaternion"][n_prim]["critical_states_learn"], 
@@ -205,22 +228,65 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_improved="All",
          cdmp_params["Quaternion"][n_prim]["mean_tau"], 
          _, _, _, _, _, 
          _
-         ] = quat_dmp.learnFromSetTrajectories(cdmp_trajs["Quaternion"][n_prim], task_servo_rate, 
-                                               is_smoothing_training_traj_before_learning=is_smoothing_training_traj_before_learning, 
-                                               percentage_padding=percentage_padding, 
-                                               percentage_smoothing_points=percentage_smoothing_points, 
-                                               smoothing_mode=smoothing_mode, 
-                                               smoothing_cutoff_frequency=smoothing_cutoff_frequency
-                                               )
+         ] = qdmp.learnFromSetTrajectories(cdmp_trajs["Quaternion"][n_prim], task_servo_rate, 
+                                           is_smoothing_training_traj_before_learning=is_smoothing_training_traj_before_learning, 
+                                           percentage_padding=percentage_padding, 
+                                           percentage_smoothing_points=percentage_smoothing_points, 
+                                           smoothing_mode=smoothing_mode, 
+                                           smoothing_cutoff_frequency=smoothing_cutoff_frequency
+                                           )
         
         if (is_plotting):
-            cdmp_unroll["Quaternion"][n_prim] = quat_dmp.unroll(cdmp_params["Quaternion"][n_prim]["critical_states_learn"], 
-                                                                cdmp_params["Quaternion"][n_prim]["mean_tau"], 
-                                                                cdmp_params["Quaternion"][n_prim]["mean_tau"], 
-                                                                dt)
-            N_trials = len(cdmp_trajs["Quaternion"][n_prim])
+            cdmp_unroll["CartCoord"][n_prim] = ccdmp.unroll(cdmp_params["CartCoord"][n_prim]["critical_states_learn"], 
+                                                            cdmp_params["CartCoord"][n_prim]["mean_tau"], 
+                                                            cdmp_params["CartCoord"][n_prim]["mean_tau"], 
+                                                            dt)
+            cdmp_unroll["Quaternion"][n_prim] = qdmp.unroll(cdmp_params["Quaternion"][n_prim]["critical_states_learn"], 
+                                                            cdmp_params["Quaternion"][n_prim]["mean_tau"], 
+                                                            cdmp_params["Quaternion"][n_prim]["mean_tau"], 
+                                                            dt)
+            N_trials = len(cdmp_trajs["CartCoord"][n_prim])
             
-            # plotting Quaternion trajectory
+            # plotting unrolled (learned) Cartesian Coordinate trajectory
+            all_XT_list = [None] * (1 + N_trials)
+            for n_trial in range(N_trials):
+                all_XT_list[n_trial] = cdmp_trajs["CartCoord"][n_prim][n_trial].X.T
+            all_XT_list[1+n_trial] = cdmp_unroll["CartCoord"][n_prim].X.T
+            pypl_util.subplot_ND(NDtraj_list=all_XT_list, 
+                                 title='X Prim. #%d' % (n_prim+1), 
+                                 Y_label_list=['X%d' % X_dim for X_dim in range(dim_cart)], 
+                                 fig_num=3*n_prim+0, 
+                                 label_list=['trial #%d' % n_trial for n_trial in range(N_trials)] + ['unroll'], 
+                                 color_style_list=[['b',':']] * N_trials + [['g','-']], 
+                                 is_auto_line_coloring_and_styling=False)
+            
+            # plotting omega trajectory
+            all_XdT_list = [None] * (1 + N_trials)
+            for n_trial in range(N_trials):
+                all_XdT_list[n_trial] = cdmp_trajs["CartCoord"][n_prim][n_trial].Xd.T
+            all_XdT_list[1+n_trial] = cdmp_unroll["CartCoord"][n_prim].Xd.T
+            pypl_util.subplot_ND(NDtraj_list=all_XdT_list, 
+                                 title='Xd Prim. #%d' % (n_prim+1), 
+                                 Y_label_list=['Xd%d' % Xd_dim for Xd_dim in range(dim_cart)], 
+                                 fig_num=3*n_prim+1, 
+                                 label_list=['trial #%d' % n_trial for n_trial in range(N_trials)] + ['unroll'], 
+                                 color_style_list=[['b',':']] * N_trials + [['g','-']], 
+                                 is_auto_line_coloring_and_styling=False)
+            
+            # plotting omegad trajectory
+            all_XddT_list = [None] * (1 + N_trials)
+            for n_trial in range(N_trials):
+                all_XddT_list[n_trial] = cdmp_trajs["CartCoord"][n_prim][n_trial].Xdd.T
+            all_XddT_list[1+n_trial] = cdmp_unroll["CartCoord"][n_prim].Xdd.T
+            pypl_util.subplot_ND(NDtraj_list=all_XddT_list, 
+                                 title='Xdd Prim. #%d' % (n_prim+1), 
+                                 Y_label_list=['Xdd%d' % Xdd_dim for Xdd_dim in range(dim_cart)], 
+                                 fig_num=3*n_prim+2, 
+                                 label_list=['trial #%d' % n_trial for n_trial in range(N_trials)] + ['unroll'], 
+                                 color_style_list=[['b',':']] * N_trials + [['g','-']], 
+                                 is_auto_line_coloring_and_styling=False)
+            
+            # plotting unrolled (learned) Quaternion trajectory
             all_QT_list = [None] * (1 + N_trials)
             for n_trial in range(N_trials):
                 all_QT_list[n_trial] = cdmp_trajs["Quaternion"][n_prim][n_trial].X.T
