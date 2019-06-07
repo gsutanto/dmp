@@ -354,6 +354,14 @@ public:
 
     Matrix4x4 getHomogeneousTransformMatrixGlobalToLocal();
 
+    Vector3 getMeanStartGlobalPosition();
+
+    Vector3 getMeanGoalGlobalPosition();
+
+    Vector3 getMeanStartLocalPosition();
+
+    Vector3 getMeanGoalLocalPosition();
+
     /**
      * NON-REAL-TIME!!!\n
      * Write a Cartesian coordinate trajectory's information/content to a text file.

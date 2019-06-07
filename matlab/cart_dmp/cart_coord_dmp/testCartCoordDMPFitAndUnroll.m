@@ -53,11 +53,13 @@ function [] = testCartCoordDMPFitAndUnroll(output_dir_path)
     %% CartCoordDMP Training from Multiple Trajectories
     
     is_using_scaling    = [1, 0, 0];    % only DMP for local x-axis is using scaling; DMPs for local y and z-axes are NOT using scaling!
-    [ ~, ...
-      ccdmp_multi_trajs_training_test_0_2_t1_unroll_global_traj ]   = learnCartPrimitiveMultiOnLocalCoord(set_trajs_cart_coord_demo_1, dt_1, n_rfs_multi, 1, ctraj_local_coordinate_frame_selection, unroll_traj_length_multi, unroll_dt_multi, is_using_scaling);
+    [ cart_coord_dmp_params_1, ...
+      ccdmp_multi_trajs_training_test_0_2_t1_unroll_global_traj, ...
+      ~, ~, mean_tau_1 ]   = learnCartPrimitiveMultiOnLocalCoord(set_trajs_cart_coord_demo_1, dt_1, n_rfs_multi, 1, ctraj_local_coordinate_frame_selection, unroll_traj_length_multi, unroll_dt_multi, is_using_scaling);
     
-    [ ~, ...
-      ccdmp_multi_trajs_training_test_0_2_t2_unroll_global_traj ]   = learnCartPrimitiveMultiOnLocalCoord(set_trajs_cart_coord_demo_2, dt_2, n_rfs_multi, 1, ctraj_local_coordinate_frame_selection, unroll_traj_length_multi, unroll_dt_multi, is_using_scaling);
+    [ cart_coord_dmp_params_2, ...
+      ccdmp_multi_trajs_training_test_0_2_t2_unroll_global_traj, ...
+      ~, ~, mean_tau_2 ]   = learnCartPrimitiveMultiOnLocalCoord(set_trajs_cart_coord_demo_2, dt_2, n_rfs_multi, 1, ctraj_local_coordinate_frame_selection, unroll_traj_length_multi, unroll_dt_multi, is_using_scaling);
     
     % end of CartCoordDMP Training from Multiple Trajectories
     
@@ -74,7 +76,24 @@ function [] = testCartCoordDMPFitAndUnroll(output_dir_path)
         
         ccdmp_multi_trajs_training_test_0_2_t1_unroll_global_position   = [ccdmp_multi_trajs_training_test_0_2_t1_unroll_global_traj{4,1}-ccdmp_multi_trajs_training_test_0_2_t1_unroll_global_traj{4,1}(1,1), ccdmp_multi_trajs_training_test_0_2_t1_unroll_global_traj{1,1}];
         ccdmp_multi_trajs_training_test_0_2_t2_unroll_global_position   = [ccdmp_multi_trajs_training_test_0_2_t2_unroll_global_traj{4,1}-ccdmp_multi_trajs_training_test_0_2_t2_unroll_global_traj{4,1}(1,1), ccdmp_multi_trajs_training_test_0_2_t2_unroll_global_traj{1,1}];
-        ccdmp_multi_trajs_training_test_0_2_unroll_global_position      = [ccdmp_multi_trajs_training_test_0_2_t1_unroll_global_position; ccdmp_multi_trajs_training_test_0_2_t2_unroll_global_position];
+        ccdmp_multi_trajs_training_test_0_2_unroll_global_position      = [ccdmp_multi_trajs_training_test_0_2_t1_unroll_global_position; 
+                                                                           cart_coord_dmp_params_1.w, zeros(n_rfs_multi, 1); 
+                                                                           cart_coord_dmp_params_1.dG, mean_tau_1; 
+                                                                           cart_coord_dmp_params_1.mean_start_global.', 0.0; 
+                                                                           cart_coord_dmp_params_1.mean_goal_global.', 0.0; 
+                                                                           cart_coord_dmp_params_1.mean_start_local.', 0.0; 
+                                                                           cart_coord_dmp_params_1.mean_goal_local.', 0.0; 
+                                                                           cart_coord_dmp_params_1.T_local_to_global_H; 
+                                                                           cart_coord_dmp_params_1.T_global_to_local_H; 
+                                                                           ccdmp_multi_trajs_training_test_0_2_t2_unroll_global_position; 
+                                                                           cart_coord_dmp_params_2.w, zeros(n_rfs_multi, 1); 
+                                                                           cart_coord_dmp_params_2.dG, mean_tau_2; 
+                                                                           cart_coord_dmp_params_2.mean_start_global.', 0.0; 
+                                                                           cart_coord_dmp_params_2.mean_goal_global.', 0.0; 
+                                                                           cart_coord_dmp_params_2.mean_start_local.', 0.0; 
+                                                                           cart_coord_dmp_params_2.mean_goal_local.', 0.0; 
+                                                                           cart_coord_dmp_params_2.T_local_to_global_H; 
+                                                                           cart_coord_dmp_params_2.T_global_to_local_H];
         dlmwrite([output_dir_path, '/test_matlab_cart_coord_dmp_multi_traj_training_test_0_2.txt'], ccdmp_multi_trajs_training_test_0_2_unroll_global_position, 'delimiter', ' ', 'precision', '%.5f');
     else
         error('Output directory does NOT exist!');

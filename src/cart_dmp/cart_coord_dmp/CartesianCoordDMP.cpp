@@ -897,6 +897,26 @@ Matrix4x4 CartesianCoordDMP::getHomogeneousTransformMatrixGlobalToLocal()
     return (ctraj_hmg_transform_global_to_local_matrix);
 }
 
+Vector3 CartesianCoordDMP::getMeanStartGlobalPosition()
+{
+    return (mean_start_global_position);
+}
+
+Vector3 CartesianCoordDMP::getMeanGoalGlobalPosition()
+{
+    return (mean_goal_global_position);
+}
+
+Vector3 CartesianCoordDMP::getMeanStartLocalPosition()
+{
+    return (mean_start_local_position);
+}
+
+Vector3 CartesianCoordDMP::getMeanGoalLocalPosition()
+{
+    return (mean_goal_local_position);
+}
+
 /**
  * NON-REAL-TIME!!!\n
  * Write a Cartesian coordinate trajectory's information/content to a text file.

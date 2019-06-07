@@ -158,6 +158,37 @@ int main(int argc, char** argv)
     {
         return (-1);
     }
+
+    // Also print out the parameters:
+    MatrixNxM   w(3, model_size);
+    VectorN     A_learn(3);
+    if (rt_assert_main(cart_dmp.getParams(w, A_learn)) == false)
+    {
+        return (-1);
+    }
+    Vector3     mean_start_global_position = cart_dmp.getMeanStartGlobalPosition();
+    Vector3     mean_goal_global_position = cart_dmp.getMeanGoalGlobalPosition();
+    Vector3     mean_start_local_position = cart_dmp.getMeanStartLocalPosition();
+    Vector3     mean_goal_local_position = cart_dmp.getMeanGoalLocalPosition();
+    Matrix4x4   T_local_to_global_H = cart_dmp.getHomogeneousTransformMatrixLocalToGlobal();
+    Matrix4x4   T_global_to_local_H = cart_dmp.getHomogeneousTransformMatrixGlobalToLocal();
+    for (uint im = 0; im < model_size; im++)
+    {
+        printf("%.05f %.05f %.05f %.05f\n", w(0,im), w(1,im), w(2,im), 0.0);
+    }
+    printf("%.05f %.05f %.05f %.05f\n", A_learn(0), A_learn(1), A_learn(2), tau_learn_wo_obs);
+    printf("%.05f %.05f %.05f %.05f\n", mean_start_global_position(0), mean_start_global_position(1), mean_start_global_position(2), 0.0);
+    printf("%.05f %.05f %.05f %.05f\n", mean_goal_global_position(0),  mean_goal_global_position(1),  mean_goal_global_position(2), 0.0);
+    printf("%.05f %.05f %.05f %.05f\n", mean_start_local_position(0),  mean_start_local_position(1),  mean_start_local_position(2), 0.0);
+    printf("%.05f %.05f %.05f %.05f\n", mean_goal_local_position(0),   mean_goal_local_position(1),   mean_goal_local_position(2), 0.0);
+    for (uint ir = 0; ir < 4; ir++)
+    {
+        printf("%.05f %.05f %.05f %.05f\n", T_local_to_global_H(ir,0), T_local_to_global_H(ir,1), T_local_to_global_H(ir,2), T_local_to_global_H(ir,3));
+    }
+    for (uint ir = 0; ir < 4; ir++)
+    {
+        printf("%.05f %.05f %.05f %.05f\n", T_global_to_local_H(ir,0), T_global_to_local_H(ir,1), T_global_to_local_H(ir,2), T_global_to_local_H(ir,3));
+    }
     ///////////////////////////////////// Without Obstacle (End) /////////////////////////////////////
 
 
@@ -207,6 +238,35 @@ int main(int argc, char** argv)
     if (rt_assert_main(cart_dmp.saveParams(get_plot_path("/cart_dmp/cart_coord_dmp/multi_traj_training/w_obs/").c_str())) == false)
     {
         return (-1);
+    }
+
+    // Also print out the parameters:
+    if (rt_assert_main(cart_dmp.getParams(w, A_learn)) == false)
+    {
+        return (-1);
+    }
+    mean_start_global_position = cart_dmp.getMeanStartGlobalPosition();
+    mean_goal_global_position = cart_dmp.getMeanGoalGlobalPosition();
+    mean_start_local_position = cart_dmp.getMeanStartLocalPosition();
+    mean_goal_local_position = cart_dmp.getMeanGoalLocalPosition();
+    T_local_to_global_H = cart_dmp.getHomogeneousTransformMatrixLocalToGlobal();
+    T_global_to_local_H = cart_dmp.getHomogeneousTransformMatrixGlobalToLocal();
+    for (uint im = 0; im < model_size; im++)
+    {
+        printf("%.05f %.05f %.05f %.05f\n", w(0,im), w(1,im), w(2,im), 0.0);
+    }
+    printf("%.05f %.05f %.05f %.05f\n", A_learn(0), A_learn(1), A_learn(2), tau_learn_w_obs);
+    printf("%.05f %.05f %.05f %.05f\n", mean_start_global_position(0), mean_start_global_position(1), mean_start_global_position(2), 0.0);
+    printf("%.05f %.05f %.05f %.05f\n", mean_goal_global_position(0),  mean_goal_global_position(1),  mean_goal_global_position(2), 0.0);
+    printf("%.05f %.05f %.05f %.05f\n", mean_start_local_position(0),  mean_start_local_position(1),  mean_start_local_position(2), 0.0);
+    printf("%.05f %.05f %.05f %.05f\n", mean_goal_local_position(0),   mean_goal_local_position(1),   mean_goal_local_position(2), 0.0);
+    for (uint ir = 0; ir < 4; ir++)
+    {
+        printf("%.05f %.05f %.05f %.05f\n", T_local_to_global_H(ir,0), T_local_to_global_H(ir,1), T_local_to_global_H(ir,2), T_local_to_global_H(ir,3));
+    }
+    for (uint ir = 0; ir < 4; ir++)
+    {
+        printf("%.05f %.05f %.05f %.05f\n", T_global_to_local_H(ir,0), T_global_to_local_H(ir,1), T_global_to_local_H(ir,2), T_global_to_local_H(ir,3));
     }
     ///////////////////////////////////// With Obstacle (End) /////////////////////////////////////
 

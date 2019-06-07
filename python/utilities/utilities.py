@@ -52,7 +52,7 @@ def compareTwoMatrices(matrix1, matrix2,
                        scalar_max_abs_diff_threshold=1.001e-5, 
                        scalar_max_rel_abs_diff_threshold=1.501e-3,
                        name1='', name2=''):
-    assert (matrix1.shape == matrix2.shape), 'File dimension mis-match!'
+    assert (matrix1.shape == matrix2.shape), 'File dimension mis-match! %s vs %s' % (str(matrix1.shape), str(matrix2.shape))
     
     file_diff = matrix1 - matrix2
     abs_diff = np.abs(file_diff)

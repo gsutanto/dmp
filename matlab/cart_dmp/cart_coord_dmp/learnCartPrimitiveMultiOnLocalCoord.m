@@ -106,6 +106,7 @@ function [ varargout ] = learnCartPrimitiveMultiOnLocalCoord( varargin )
         varargout(2)    = {cart_coord_dmp_unroll_fit_global_traj};
         varargout(3)    = {cart_coord_dmp_unroll_fit_local_traj};
         varargout(4)    = {Ffit};
+        varargout(5)    = {mean_tau};
     else
         cart_coord_dmp_params   = completeCartCoordDMPParams( cart_coord_dmp_params_basic,...
                                                               unroll_cart_coord_params_basic );
