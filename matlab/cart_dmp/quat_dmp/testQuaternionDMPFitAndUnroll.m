@@ -80,20 +80,20 @@ function [] = testQuaternionDMPFitAndUnroll(output_dir_path)
     
     %% QuaternionDMP Training from Multiple Trajectories
     
-    [ ~, ...
+    [ Quat_dmp_params_1, ...
       quatdmp_multi_trajs_training_test_0_2_t1_unroll_traj ] = learnQuatPrimitiveMulti(set_trajs_quat_demo_1, dt_1, n_rfs_multi, 1, unroll_tau);
     
-    [ ~, ...
+    [ Quat_dmp_params_2, ...
       quatdmp_multi_trajs_training_test_0_2_t2_unroll_traj ] = learnQuatPrimitiveMulti(set_trajs_quat_demo_2, dt_2, n_rfs_multi, 1, unroll_tau);
     
     % end of QuaternionDMP Training from Multiple Trajectories
     
     %% QuaternionDMP Training from Multiple Smoothed Trajectories
     
-    [ ~, ...
+    [ Quat_dmp_smoothed_params_1, ...
       quatdmp_multi_smoothed_trajs_training_test_0_2_t1_unroll_traj ] = learnQuatPrimitiveMulti(set_smoothed_trajs_quat_demo_1, dt_1, n_rfs_multi, 1, unroll_tau);
     
-    [ ~, ...
+    [ Quat_dmp_smoothed_params_2, ...
       quatdmp_multi_smoothed_trajs_training_test_0_2_t2_unroll_traj ] = learnQuatPrimitiveMulti(set_smoothed_trajs_quat_demo_2, dt_2, n_rfs_multi, 1, unroll_tau);
     
     % end of QuaternionDMP Training from Multiple Smoothed Trajectories
@@ -111,13 +111,35 @@ function [] = testQuaternionDMPFitAndUnroll(output_dir_path)
         
         quatdmp_multi_trajs_training_test_0_2_t1_unroll_Q   = [quatdmp_multi_trajs_training_test_0_2_t1_unroll_traj{6,1}-quatdmp_multi_trajs_training_test_0_2_t1_unroll_traj{6,1}(1,1), quatdmp_multi_trajs_training_test_0_2_t1_unroll_traj{1,1}];
         quatdmp_multi_trajs_training_test_0_2_t2_unroll_Q   = [quatdmp_multi_trajs_training_test_0_2_t2_unroll_traj{6,1}-quatdmp_multi_trajs_training_test_0_2_t2_unroll_traj{6,1}(1,1), quatdmp_multi_trajs_training_test_0_2_t2_unroll_traj{1,1}];
-        quatdmp_multi_trajs_training_test_0_2_unroll_Q      = [quatdmp_multi_trajs_training_test_0_2_t1_unroll_Q; quatdmp_multi_trajs_training_test_0_2_t2_unroll_Q];
+        quatdmp_multi_trajs_training_test_0_2_unroll_Q      = [quatdmp_multi_trajs_training_test_0_2_t1_unroll_Q; 
+                                                               quatdmp_multi_trajs_training_test_0_2_t2_unroll_Q];
         dlmwrite([output_dir_path, '/test_matlab_quat_dmp_multi_traj_training_test_0_2.txt'], quatdmp_multi_trajs_training_test_0_2_unroll_Q, 'delimiter', ' ', 'precision', '%.10f');
+        
+        quatdmp_multi_trajs_training_test_0_2_unroll_learned_params = [Quat_dmp_params_1.w, zeros(n_rfs_multi, 2); 
+                                                                       Quat_dmp_params_1.dG.', Quat_dmp_params_1.fit_mean_tau, 0.0; 
+                                                                       Quat_dmp_params_1.fit_mean_Q0.', 0.0; 
+                                                                       Quat_dmp_params_1.fit_mean_QG.', 0.0; 
+                                                                       Quat_dmp_params_2.w, zeros(n_rfs_multi, 2); 
+                                                                       Quat_dmp_params_2.dG.', Quat_dmp_params_2.fit_mean_tau, 0.0; 
+                                                                       Quat_dmp_params_2.fit_mean_Q0.', 0.0; 
+                                                                       Quat_dmp_params_2.fit_mean_QG.', 0.0];
+        dlmwrite([output_dir_path, '/test_matlab_quat_dmp_multi_traj_training_test_0_2_learned_params.txt'], quatdmp_multi_trajs_training_test_0_2_unroll_learned_params, 'delimiter', ' ', 'precision', '%.10f');
         
         quatdmp_multi_smoothed_trajs_training_test_0_2_t1_unroll_Q   = [quatdmp_multi_smoothed_trajs_training_test_0_2_t1_unroll_traj{6,1}-quatdmp_multi_smoothed_trajs_training_test_0_2_t1_unroll_traj{6,1}(1,1), quatdmp_multi_smoothed_trajs_training_test_0_2_t1_unroll_traj{1,1}];
         quatdmp_multi_smoothed_trajs_training_test_0_2_t2_unroll_Q   = [quatdmp_multi_smoothed_trajs_training_test_0_2_t2_unroll_traj{6,1}-quatdmp_multi_smoothed_trajs_training_test_0_2_t2_unroll_traj{6,1}(1,1), quatdmp_multi_smoothed_trajs_training_test_0_2_t2_unroll_traj{1,1}];
-        quatdmp_multi_smoothed_trajs_training_test_0_2_unroll_Q      = [quatdmp_multi_smoothed_trajs_training_test_0_2_t1_unroll_Q; quatdmp_multi_smoothed_trajs_training_test_0_2_t2_unroll_Q];
+        quatdmp_multi_smoothed_trajs_training_test_0_2_unroll_Q      = [quatdmp_multi_smoothed_trajs_training_test_0_2_t1_unroll_Q; 
+                                                                        quatdmp_multi_smoothed_trajs_training_test_0_2_t2_unroll_Q];
         dlmwrite([output_dir_path, '/test_matlab_quat_dmp_multi_smoothed_traj_training_test_0_2.txt'], quatdmp_multi_smoothed_trajs_training_test_0_2_unroll_Q, 'delimiter', ' ', 'precision', '%.10f');
+        
+        qdmp_multi_smoothed_trajs_training_test_0_2_unroll_lparams = [Quat_dmp_smoothed_params_1.w, zeros(n_rfs_multi, 2); 
+                                                                      Quat_dmp_smoothed_params_1.dG.', Quat_dmp_smoothed_params_1.fit_mean_tau, 0.0; 
+                                                                      Quat_dmp_smoothed_params_1.fit_mean_Q0.', 0.0; 
+                                                                      Quat_dmp_smoothed_params_1.fit_mean_QG.', 0.0; 
+                                                                      Quat_dmp_smoothed_params_2.w, zeros(n_rfs_multi, 2); 
+                                                                      Quat_dmp_smoothed_params_2.dG.', Quat_dmp_smoothed_params_2.fit_mean_tau, 0.0; 
+                                                                      Quat_dmp_smoothed_params_2.fit_mean_Q0.', 0.0; 
+                                                                      Quat_dmp_smoothed_params_2.fit_mean_QG.', 0.0];
+        dlmwrite([output_dir_path, '/test_matlab_quat_dmp_multi_smoothed_traj_training_test_0_2_learned_params.txt'], qdmp_multi_smoothed_trajs_training_test_0_2_unroll_lparams, 'delimiter', ' ', 'precision', '%.10f');
     else
         error('Output directory does NOT exist!');
     end

@@ -40,18 +40,21 @@ def computeWNMSE(predictions, ground_truth, weight, axis=0):
 
 def compareTwoNumericFiles(file_1_path, file_2_path, 
                            scalar_max_abs_diff_threshold=1.001e-5, 
-                           scalar_max_rel_abs_diff_threshold=1.501e-3):
+                           scalar_max_rel_abs_diff_threshold=1.001e-5, 
+                           is_relaxed_comparison=False):
     file_1 = np.loadtxt(file_1_path)
     file_2 = np.loadtxt(file_2_path)
     return compareTwoMatrices(file_1, file_2, 
                               scalar_max_abs_diff_threshold, 
                               scalar_max_rel_abs_diff_threshold,
-                              file_1_path, file_2_path)
+                              file_1_path, file_2_path, 
+                              is_relaxed_comparison)
 
 def compareTwoMatrices(matrix1, matrix2, 
                        scalar_max_abs_diff_threshold=1.001e-5, 
-                       scalar_max_rel_abs_diff_threshold=1.501e-3,
-                       name1='', name2=''):
+                       scalar_max_rel_abs_diff_threshold=1.001e-5,
+                       name1='', name2='', 
+                       is_relaxed_comparison=False):
     assert (matrix1.shape == matrix2.shape), 'File dimension mis-match! %s vs %s' % (str(matrix1.shape), str(matrix2.shape))
     
     file_diff = matrix1 - matrix2
@@ -62,15 +65,39 @@ def compareTwoMatrices(matrix1, matrix2,
     scalar_max_abs_diff_col = np.argmax(rowvec_max_abs_diff)
     scalar_max_abs_diff_row = rowvec_max_idx_abs_diff[scalar_max_abs_diff_col]
     
-    if (scalar_max_abs_diff > scalar_max_abs_diff_threshold):
-        print ('Comparing:')
-        print (name1)
-        print ('and')
-        print (name2)
-        assert (False), ('Two files are NOT similar: scalar_max_abs_diff=' + str(scalar_max_abs_diff) + 
-                         ' is beyond threshold=' + str(scalar_max_abs_diff_threshold) + ' at [row,col]=[' + str(scalar_max_abs_diff_row) + ',' + str(scalar_max_abs_diff_col) + '], i.e. ' + 
-                         str(matrix1[scalar_max_abs_diff_row, scalar_max_abs_diff_col]) + ' vs ' + 
-                         str(matrix2[scalar_max_abs_diff_row, scalar_max_abs_diff_col]) + ' !')
+    if (is_relaxed_comparison == False):
+        if (scalar_max_abs_diff > scalar_max_abs_diff_threshold):
+            print ('Comparing:')
+            print (name1)
+            print ('and')
+            print (name2)
+            assert (False), ('Two files are NOT similar: scalar_max_abs_diff=' + str(scalar_max_abs_diff) + 
+                             ' is beyond threshold=' + str(scalar_max_abs_diff_threshold) + ' at [row,col]=[' + str(1+scalar_max_abs_diff_row) + ',' + str(1+scalar_max_abs_diff_col) + '], i.e. ' + 
+                             str(matrix1[scalar_max_abs_diff_row, scalar_max_abs_diff_col]) + ' vs ' + 
+                             str(matrix2[scalar_max_abs_diff_row, scalar_max_abs_diff_col]) + ' !')
+    else: # if (is_relaxed_comparison == True):
+        abs_min_matrix = np.minimum(np.abs(matrix1), np.abs(matrix2))
+        rel_abs_diff = abs_diff / (abs_min_matrix + 1.0e-38)
+        violation_check = np.logical_and((abs_diff     > scalar_max_abs_diff_threshold), 
+                                         (rel_abs_diff > scalar_max_rel_abs_diff_threshold))
+        
+        if (violation_check.any()):
+            print ('Comparing:')
+            print (name1)
+            print ('and')
+            print (name2)
+            violation_addresses = np.where(violation_check == True)
+            assert (len(violation_addresses) == 2)
+            first_violation_row = violation_addresses[0][0]
+            first_violation_col = violation_addresses[1][0]
+            assert (False), ('Two files are NOT similar: ' + 
+                             'abs_diff=' + str(abs_diff[first_violation_row,first_violation_col]) + 
+                             ' is beyond threshold=' + str(scalar_max_abs_diff_threshold) + 
+                             ' AND rel_abs_diff=' + str(rel_abs_diff[first_violation_row,first_violation_col]) + 
+                             ' is beyond threshold=' + str(scalar_max_rel_abs_diff_threshold) + 
+                             ' at [row,col]=[' + str(1+first_violation_row) + ',' + str(1+first_violation_col) + '], i.e. ' + 
+                             str(matrix1[first_violation_row, first_violation_col]) + ' vs ' + 
+                             str(matrix2[first_violation_row, first_violation_col]) + ' !')
     return None
 
 def naturalSort(l): 

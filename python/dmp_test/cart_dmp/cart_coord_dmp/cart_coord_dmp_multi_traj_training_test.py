@@ -98,7 +98,6 @@ def cart_coord_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_path="../../..
     unroll_ctraj_concatenated = np.vstack(unroll_ctraj_list)
     
     if (os.path.isdir(unroll_ctraj_save_dir_path)):
-        
         np.savetxt(unroll_ctraj_save_dir_path + "/" + unroll_ctraj_save_filename, np.vstack(unroll_log))
     
     return unroll_ctraj_concatenated, W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI
