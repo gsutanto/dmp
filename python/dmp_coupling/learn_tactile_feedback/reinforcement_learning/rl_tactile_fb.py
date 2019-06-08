@@ -51,9 +51,9 @@ cdmp_trajs = rl_util.extractCartDMPTrajectoriesFromUnrollResults(rl_data[0])
  cdmp_params, 
  cdmp_unroll
 ] = rl_util.learnCartDMPUnrollParams(cdmp_trajs, 
-                                     prim_to_be_improved, 
-                                     is_smoothing_training_traj_before_learning, 
-                                     is_plotting)
+                                     prim_to_be_learned="All", 
+                                     is_smoothing_training_traj_before_learning=is_smoothing_training_traj_before_learning, 
+                                     is_plotting=is_plotting)
 
 if (is_deleting_dfiles):
     py_util.deleteAllCLMCDataFilesInDirectory(sl_data_dirpath)
