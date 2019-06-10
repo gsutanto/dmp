@@ -218,19 +218,8 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All",
                                             smoothing_mode=smoothing_mode, 
                                             smoothing_cutoff_frequency=smoothing_cutoff_frequency
                                             )
-        cdmp_params["CartCoord"][n_prim] = {}
+        cdmp_params["CartCoord"][n_prim] = ccdmp.getParamsAsDict()
 #        cdmp_params["CartCoord"][n_prim]["critical_states_learn"] = ccdmp_critical_states_learn
-        cdmp_params["CartCoord"][n_prim]["w"] = ccdmp_W.T
-        cdmp_params["CartCoord"][n_prim]["A_learn"] = ccdmp_mean_A_learn.T
-        cdmp_params["CartCoord"][n_prim]["start_global"] = ccdmp.mean_start_global_position.T
-        cdmp_params["CartCoord"][n_prim]["goal_global"] = ccdmp.mean_goal_global_position.T
-        cdmp_params["CartCoord"][n_prim]["start_local"] = ccdmp.mean_start_local_position.T
-        cdmp_params["CartCoord"][n_prim]["goal_local"] = ccdmp.mean_goal_local_position.T
-        cdmp_params["CartCoord"][n_prim]["T_local_to_global_H"] = ccdmp.ctraj_hmg_transform_local_to_global_matrix
-        cdmp_params["CartCoord"][n_prim]["T_global_to_local_H"] = ccdmp.ctraj_hmg_transform_global_to_local_matrix
-        cdmp_params["CartCoord"][n_prim]["tau"] = ccdmp_mean_tau
-        cdmp_params["CartCoord"][n_prim]["canonical_sys_order"] = ccdmp.canonical_sys_discrete.order
-        cdmp_params["CartCoord"][n_prim]["ctraj_local_coordinate_frame_selection"] = ccdmp.ctraj_local_coord_selection
         
         [
          qdmp_critical_states_learn, 
@@ -246,23 +235,17 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All",
                                            smoothing_mode=smoothing_mode, 
                                            smoothing_cutoff_frequency=smoothing_cutoff_frequency
                                            )
-        cdmp_params["Quaternion"][n_prim] = {}
+        cdmp_params["Quaternion"][n_prim] = qdmp.getParamsAsDict()
 #        cdmp_params["Quaternion"][n_prim]["critical_states_learn"] = qdmp_critical_states_learn
-        cdmp_params["Quaternion"][n_prim]["w"] = qdmp_W.T
-        cdmp_params["Quaternion"][n_prim]["A_learn"] = qdmp_mean_A_learn.T
-        cdmp_params["Quaternion"][n_prim]["start"] = qdmp.mean_start_position.T
-        cdmp_params["Quaternion"][n_prim]["goal"] = qdmp.mean_goal_position.T
-        cdmp_params["Quaternion"][n_prim]["tau"] = qdmp_mean_tau
-        cdmp_params["Quaternion"][n_prim]["canonical_sys_order"] = qdmp.canonical_sys_discrete.order
         
         if (is_plotting):
             cdmp_unroll["CartCoord"][n_prim] = ccdmp.unroll(ccdmp_critical_states_learn, 
-                                                            cdmp_params["CartCoord"][n_prim]["tau"], 
-                                                            cdmp_params["CartCoord"][n_prim]["tau"], 
+                                                            cdmp_params["CartCoord"][n_prim]["mean_tau"], 
+                                                            cdmp_params["CartCoord"][n_prim]["mean_tau"], 
                                                             dt)
             cdmp_unroll["Quaternion"][n_prim] = qdmp.unroll(qdmp_critical_states_learn, 
-                                                            cdmp_params["Quaternion"][n_prim]["tau"], 
-                                                            cdmp_params["Quaternion"][n_prim]["tau"], 
+                                                            cdmp_params["Quaternion"][n_prim]["mean_tau"], 
+                                                            cdmp_params["Quaternion"][n_prim]["mean_tau"], 
                                                             dt)
             N_trials = len(cdmp_trajs["CartCoord"][n_prim])
             
