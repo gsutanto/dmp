@@ -49,6 +49,18 @@ class CanonicalSystemDiscrete(CanonicalSystem, object):
         assert (self.beta >= 0.0), "self.beta=" + str(self.beta) + " < 0.0 (invalid!)"
         return True
     
+#    def setOrder(self, new_order):
+#        assert ((new_order == 1) or (new_order == 2)), "Discrete canonical system order=" + str(new_order) + " is not supported! The only supported discrete canonical system order is either order==1 or order==2."
+#        self.order = new_order
+#        if (self.order == 2):
+#            self.alpha = 25.0
+#            self.beta = self.alpha/4.0
+#        elif (self.order == 1):
+#            self.alpha = 25.0/3.0
+#            self.beta = 0.0
+#        assert (self.isValid()), "Post-condition(s) checking is failed: this CanonicalSystemDiscrete became invalid!"
+#        return None
+    
     def start(self):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this CanonicalSystemDiscrete is invalid!"
         self.x = 1.0

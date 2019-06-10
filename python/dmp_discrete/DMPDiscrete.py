@@ -127,8 +127,15 @@ class DMPDiscrete(DMP, object):
         return dmp_params
     
     def setParamsFromDict(self, dmp_params):
-        if ('canonical_order' in dmp_params.keys()):
-            self.canonical_sys_discrete.order = dmp_params['canonical_order']
+        # gsutanto's Remarks:
+        # The following setting of the canonical system order may be risky.
+        # Please re-think/consider it (for all possible cases) more carefully!!!
+        # (for now, user must set this order manually during the initialization of 
+        #  the canonical system...once set, it won't be changed/updated!!!
+        #  In all cases so far, canonical system order==2 works best, 
+        #  and can be considered as the default value selection for this.)
+#        if ('canonical_order' in dmp_params.keys()):
+#            self.canonical_sys_discrete.setOrder(dmp_params['canonical_order'])
         self.setParams(dmp_params['W'], dmp_params['A_learn'])
         self.mean_start_position = dmp_params['mean_start_position']
         self.mean_goal_position = dmp_params['mean_goal_position']
