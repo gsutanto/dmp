@@ -60,7 +60,7 @@ def learnCartPrimitiveMultiOnLocalCoord(cart_global_traj, train_data_dt,
     
     cart_coord_dmp.startWithUnrollParams(dmp_unroll_init_params)
     
-    cart_coord_dmp_params = cart_coord_dmp.getParamsCartCoordDMPasDict()
+    cart_coord_dmp_params = cart_coord_dmp.getParamsAsDict()
     cart_coord_dmp_params['train_data_dt'] = train_data_dt
     cart_coord_dmp_params['unroll_dt'] = unroll_dt
     cart_coord_dmp_params['unroll_tau'] = unroll_tau

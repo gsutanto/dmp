@@ -115,32 +115,149 @@ class DMPDiscrete(DMP, object):
         self.transform_sys_discrete.setLearningAmplitude(new_A_learn)
         return self.func_approx_discrete.setWeights(new_weights)
     
-    def saveParams(self, dir_path, file_name_weights="f_weights_matrix.txt", file_name_A_learn="f_A_learn_matrix.txt",
-                   file_name_mean_start_position="mean_start_position.txt", file_name_mean_goal_position="mean_goal_position.txt", 
-                   file_name_mean_tau="mean_tau.txt"):
+    def getParamsAsDict(self):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPDiscrete is invalid!"
-        assert (os.path.isdir(dir_path)), dir_path + " is NOT a directory!"
-        weights_to_be_saved, A_learn_to_be_saved = self.getParams()
-        np.savetxt(dir_path + "/" + file_name_weights, weights_to_be_saved)
-        np.savetxt(dir_path + "/" + file_name_A_learn, A_learn_to_be_saved)
-        np.savetxt(dir_path + "/" + file_name_mean_start_position, self.mean_start_position)
-        np.savetxt(dir_path + "/" + file_name_mean_goal_position, self.mean_goal_position)
-        np.savetxt(dir_path + "/" + file_name_mean_tau, self.mean_tau)
+        dmp_params = {}
+        dmp_params['canonical_order'] = self.canonical_sys_discrete.order
+        dmp_params['W'], dmp_params['A_learn'] = self.getParams()
+        dmp_params['mean_start_position'] = copy.copy(self.mean_start_position)
+        dmp_params['mean_goal_position'] = copy.copy(self.mean_goal_position)
+        dmp_params['mean_tau'] = self.mean_tau
+        assert (self.isValid()), "Post-condition(s) checking is failed: this DMPDiscrete became invalid!"
+        return dmp_params
+    
+    def setParamsFromDict(self, dmp_params):
+        if ('canonical_order' in dmp_params.keys()):
+            self.canonical_sys_discrete.order = dmp_params['canonical_order']
+        self.setParams(dmp_params['W'], dmp_params['A_learn'])
+        self.mean_start_position = dmp_params['mean_start_position']
+        self.mean_goal_position = dmp_params['mean_goal_position']
+        self.mean_tau = dmp_params['mean_tau']
         assert (self.isValid()), "Post-condition(s) checking is failed: this DMPDiscrete became invalid!"
         return None
     
-    def loadParams(self, dir_path, file_name_weights="f_weights_matrix.txt", file_name_A_learn="f_A_learn_matrix.txt",
-                   file_name_mean_start_position="mean_start_position.txt", file_name_mean_goal_position="mean_goal_position.txt", 
-                   file_name_mean_tau="mean_tau.txt"):
+    def loadParamsAsDict(self, dir_path, 
+                         file_name_weights="f_weights_matrix.txt", 
+                         file_name_A_learn="f_A_learn_matrix.txt",
+                         file_name_mean_start_position="mean_start_position.txt", 
+                         file_name_mean_goal_position="mean_goal_position.txt", 
+                         file_name_mean_tau="mean_tau.txt", 
+                         file_name_canonical_system_order="canonical_order.txt", 
+                         file_name_mean_start_position_global=None, 
+                         file_name_mean_goal_position_global=None, 
+                         file_name_mean_start_position_local=None, 
+                         file_name_mean_goal_position_local=None, 
+                         file_name_ctraj_local_coordinate_frame_selection=None, 
+                         file_name_ctraj_hmg_transform_local_to_global_matrix=None, 
+                         file_name_ctraj_hmg_transform_global_to_local_matrix=None):
+        assert (file_name_mean_start_position_global is None)
+        assert (file_name_mean_goal_position_global is None)
+        assert (file_name_mean_start_position_local is None)
+        assert (file_name_mean_goal_position_local is None)
+        assert (file_name_ctraj_local_coordinate_frame_selection is None)
+        assert (file_name_ctraj_hmg_transform_local_to_global_matrix is None)
+        assert (file_name_ctraj_hmg_transform_global_to_local_matrix is None)
         assert (os.path.isdir(dir_path)), dir_path + " is NOT a directory!"
-        loaded_weights = np.loadtxt(dir_path + "/" + file_name_weights)
-        loaded_A_learn = np.loadtxt(dir_path + "/" + file_name_A_learn)
-        loaded_mean_start_position = np.loadtxt(dir_path + "/" + file_name_mean_start_position)
-        loaded_mean_goal_position = np.loadtxt(dir_path + "/" + file_name_mean_goal_position)
-        loaded_mean_tau = np.loadtxt(dir_path + "/" + file_name_mean_tau)
-        self.setParams(loaded_weights, loaded_A_learn)
-        self.mean_start_position = loaded_mean_start_position
-        self.mean_goal_position = loaded_mean_goal_position
-        self.mean_tau = loaded_mean_tau
+        dmp_params = {}
+        canonical_system_order_file_path = dir_path + "/" + file_name_canonical_system_order
+        if (os.path.isfile(canonical_system_order_file_path)):
+            dmp_params['canonical_order'] = int(round(np.loadtxt(canonical_system_order_file_path)))
+        dmp_params['W'] = np.loadtxt(dir_path + "/" + file_name_weights)
+        dmp_params['A_learn'] = np.loadtxt(dir_path + "/" + file_name_A_learn)
+        dmp_params['mean_start_position'] = np.loadtxt(dir_path + "/" + file_name_mean_start_position)
+        dmp_params['mean_goal_position'] = np.loadtxt(dir_path + "/" + file_name_mean_goal_position)
+        dmp_params['mean_tau'] = np.loadtxt(dir_path + "/" + file_name_mean_tau)
+        assert (self.isValid()), "Post-condition(s) checking is failed: this DMPDiscrete became invalid!"
+        return dmp_params
+    
+    def saveParamsFromDict(self, dir_path, dmp_params, 
+                           file_name_weights="f_weights_matrix.txt", 
+                           file_name_A_learn="f_A_learn_matrix.txt",
+                           file_name_mean_start_position="mean_start_position.txt", 
+                           file_name_mean_goal_position="mean_goal_position.txt", 
+                           file_name_mean_tau="mean_tau.txt", 
+                           file_name_canonical_system_order="canonical_order.txt", 
+                           file_name_mean_start_position_global=None, 
+                           file_name_mean_goal_position_global=None, 
+                           file_name_mean_start_position_local=None, 
+                           file_name_mean_goal_position_local=None, 
+                           file_name_ctraj_local_coordinate_frame_selection=None, 
+                           file_name_ctraj_hmg_transform_local_to_global_matrix=None, 
+                           file_name_ctraj_hmg_transform_global_to_local_matrix=None):
+        assert (file_name_mean_start_position_global is None)
+        assert (file_name_mean_goal_position_global is None)
+        assert (file_name_mean_start_position_local is None)
+        assert (file_name_mean_goal_position_local is None)
+        assert (file_name_ctraj_local_coordinate_frame_selection is None)
+        assert (file_name_ctraj_hmg_transform_local_to_global_matrix is None)
+        assert (file_name_ctraj_hmg_transform_global_to_local_matrix is None)
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPDiscrete is invalid!"
+        assert (os.path.isdir(dir_path)), dir_path + " is NOT a directory!"
+        if ('canonical_order' in dmp_params.keys()):
+            np.savetxt(dir_path + "/" + file_name_canonical_system_order, dmp_params['canonical_order'])
+        np.savetxt(dir_path + "/" + file_name_weights, dmp_params['W'])
+        np.savetxt(dir_path + "/" + file_name_A_learn, dmp_params['A_learn'])
+        np.savetxt(dir_path + "/" + file_name_mean_start_position, dmp_params['mean_start_position'])
+        np.savetxt(dir_path + "/" + file_name_mean_goal_position, dmp_params['mean_goal_position'])
+        np.savetxt(dir_path + "/" + file_name_mean_tau, dmp_params['mean_tau'])
         assert (self.isValid()), "Post-condition(s) checking is failed: this DMPDiscrete became invalid!"
         return None
+    
+    def loadParams(self, dir_path, 
+                   file_name_weights="f_weights_matrix.txt", 
+                   file_name_A_learn="f_A_learn_matrix.txt",
+                   file_name_mean_start_position="mean_start_position.txt", 
+                   file_name_mean_goal_position="mean_goal_position.txt", 
+                   file_name_mean_tau="mean_tau.txt", 
+                   file_name_canonical_system_order="canonical_order.txt", 
+                   file_name_mean_start_position_global=None, 
+                   file_name_mean_goal_position_global=None, 
+                   file_name_mean_start_position_local=None, 
+                   file_name_mean_goal_position_local=None, 
+                   file_name_ctraj_local_coordinate_frame_selection=None, 
+                   file_name_ctraj_hmg_transform_local_to_global_matrix=None, 
+                   file_name_ctraj_hmg_transform_global_to_local_matrix=None):
+        dmp_params = self.loadParamsAsDict(dir_path, file_name_weights, 
+                                           file_name_A_learn,
+                                           file_name_mean_start_position, 
+                                           file_name_mean_goal_position, 
+                                           file_name_mean_tau, 
+                                           file_name_canonical_system_order, 
+                                           file_name_mean_start_position_global, 
+                                           file_name_mean_goal_position_global, 
+                                           file_name_mean_start_position_local, 
+                                           file_name_mean_goal_position_local, 
+                                           file_name_ctraj_local_coordinate_frame_selection, 
+                                           file_name_ctraj_hmg_transform_local_to_global_matrix, 
+                                           file_name_ctraj_hmg_transform_global_to_local_matrix)
+        return self.setParamsFromDict(dmp_params)
+    
+    def saveParams(self, dir_path, 
+                   file_name_weights="f_weights_matrix.txt", 
+                   file_name_A_learn="f_A_learn_matrix.txt",
+                   file_name_mean_start_position="mean_start_position.txt", 
+                   file_name_mean_goal_position="mean_goal_position.txt", 
+                   file_name_mean_tau="mean_tau.txt", 
+                   file_name_canonical_system_order="canonical_order.txt", 
+                   file_name_mean_start_position_global=None, 
+                   file_name_mean_goal_position_global=None, 
+                   file_name_mean_start_position_local=None, 
+                   file_name_mean_goal_position_local=None, 
+                   file_name_ctraj_local_coordinate_frame_selection=None, 
+                   file_name_ctraj_hmg_transform_local_to_global_matrix=None, 
+                   file_name_ctraj_hmg_transform_global_to_local_matrix=None):
+        dmp_params = self.getParamsAsDict()
+        return self.saveParamsFromDict(dir_path, dmp_params, 
+                                       file_name_weights, 
+                                       file_name_A_learn,
+                                       file_name_mean_start_position, 
+                                       file_name_mean_goal_position, 
+                                       file_name_mean_tau, 
+                                       file_name_canonical_system_order, 
+                                       file_name_mean_start_position_global, 
+                                       file_name_mean_goal_position_global, 
+                                       file_name_mean_start_position_local, 
+                                       file_name_mean_goal_position_local, 
+                                       file_name_ctraj_local_coordinate_frame_selection, 
+                                       file_name_ctraj_hmg_transform_local_to_global_matrix, 
+                                       file_name_ctraj_hmg_transform_global_to_local_matrix)

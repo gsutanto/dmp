@@ -246,62 +246,9 @@ class CartesianCoordDMP(DMPDiscrete, object):
     def extractSetTrajectories(self, training_data_dir_or_file_path, start_column_idx=1, time_column_idx=0):
         return extractSetCartCoordTrajectories(training_data_dir_or_file_path, start_column_idx, time_column_idx)
     
-    def saveParamsCartCoordDMP(self, dir_path, 
-                               file_name_weights="f_weights_matrix.txt",
-                               file_name_A_learn="f_A_learn_matrix.txt",
-                               file_name_mean_start_position_global="mean_start_position_global.txt",
-                               file_name_mean_goal_position_global="mean_goal_position_global.txt",
-                               file_name_mean_tau="mean_tau.txt",
-                               file_name_mean_start_position_local="mean_start_position_local.txt",
-                               file_name_mean_goal_position_local="mean_goal_position_local.txt",
-                               file_name_ctraj_hmg_transform_local_to_global_matrix="ctraj_hmg_transform_local_to_global_matrix.txt",
-                               file_name_ctraj_hmg_transform_global_to_local_matrix="ctraj_hmg_transform_global_to_local_matrix.txt"):
+    def getParamsAsDict(self):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this CartesianCoordDMP is invalid!"
-        super(CartesianCoordDMP, self).saveParams(dir_path,
-                                                  file_name_weights,
-                                                  file_name_A_learn,
-                                                  file_name_mean_start_position_global,
-                                                  file_name_mean_goal_position_global,
-                                                  file_name_mean_tau)
-        np.savetxt(dir_path + "/" + file_name_mean_start_position_local, self.mean_start_local_position)
-        np.savetxt(dir_path + "/" + file_name_mean_goal_position_local, self.mean_goal_local_position)
-        np.savetxt(dir_path + "/" + file_name_mean_start_position_global, self.mean_start_global_position)
-        np.savetxt(dir_path + "/" + file_name_mean_goal_position_global, self.mean_goal_global_position)
-        np.savetxt(dir_path + "/" + file_name_ctraj_hmg_transform_local_to_global_matrix, self.ctraj_hmg_transform_local_to_global_matrix)
-        np.savetxt(dir_path + "/" + file_name_ctraj_hmg_transform_global_to_local_matrix, self.ctraj_hmg_transform_global_to_local_matrix)
-        return None
-    
-    def loadParamsCartCoordDMP(self, dir_path, 
-                               file_name_weights="f_weights_matrix.txt",
-                               file_name_A_learn="f_A_learn_matrix.txt",
-                               file_name_mean_start_position_global="mean_start_position_global.txt",
-                               file_name_mean_goal_position_global="mean_goal_position_global.txt",
-                               file_name_mean_tau="mean_tau.txt",
-                               file_name_mean_start_position_local="mean_start_position_local.txt",
-                               file_name_mean_goal_position_local="mean_goal_position_local.txt",
-                               file_name_ctraj_hmg_transform_local_to_global_matrix="ctraj_hmg_transform_local_to_global_matrix.txt",
-                               file_name_ctraj_hmg_transform_global_to_local_matrix="ctraj_hmg_transform_global_to_local_matrix.txt"):
-        assert (self.isValid()), "Pre-condition(s) checking is failed: this CartesianCoordDMP is invalid!"
-        super(CartesianCoordDMP, self).loadParams(dir_path,
-                                                  file_name_weights,
-                                                  file_name_A_learn,
-                                                  file_name_mean_start_position_global,
-                                                  file_name_mean_goal_position_global,
-                                                  file_name_mean_tau)
-        self.mean_start_local_position = np.loadtxt(dir_path + "/" + file_name_mean_start_position_local).reshape(3,1)
-        self.mean_goal_local_position = np.loadtxt(dir_path + "/" + file_name_mean_goal_position_local).reshape(3,1)
-        self.mean_start_global_position = np.loadtxt(dir_path + "/" + file_name_mean_start_position_global).reshape(3,1)
-        self.mean_goal_global_position = np.loadtxt(dir_path + "/" + file_name_mean_goal_position_global).reshape(3,1)
-        self.ctraj_hmg_transform_local_to_global_matrix = np.loadtxt(dir_path + "/" + file_name_ctraj_hmg_transform_local_to_global_matrix)
-        self.ctraj_hmg_transform_global_to_local_matrix = np.loadtxt(dir_path + "/" + file_name_ctraj_hmg_transform_global_to_local_matrix)
-        return None
-    
-    def getParamsCartCoordDMPasDict(self):
-        cart_coord_dmp_params = {}
-        cart_coord_dmp_params['model_size'] = self.func_approx_discrete.model_size
-        cart_coord_dmp_params['canonical_order'] = self.canonical_sys_discrete.order
-        cart_coord_dmp_params['W'], cart_coord_dmp_params['A_learn'] = self.getParams()
-        cart_coord_dmp_params['mean_tau'] = self.mean_tau
+        cart_coord_dmp_params = super(CartesianCoordDMP, self).getParamsAsDict()
         cart_coord_dmp_params['mean_start_global_position'] = copy.copy(self.mean_start_global_position)
         cart_coord_dmp_params['mean_goal_global_position'] = copy.copy(self.mean_goal_global_position)
         cart_coord_dmp_params['mean_start_local_position'] = copy.copy(self.mean_start_local_position)
@@ -309,5 +256,153 @@ class CartesianCoordDMP(DMPDiscrete, object):
         cart_coord_dmp_params['ctraj_local_coordinate_frame_selection'] = self.ctraj_local_coord_selection
         cart_coord_dmp_params['T_local_to_global_H'] = copy.copy(self.ctraj_hmg_transform_local_to_global_matrix)
         cart_coord_dmp_params['T_global_to_local_H'] = copy.copy(self.ctraj_hmg_transform_global_to_local_matrix)
-        
+        assert (self.isValid()), "Post-condition(s) checking is failed: this CartesianCoordDMP became invalid!"
         return cart_coord_dmp_params
+    
+    def setParamsFromDict(self, cart_coord_dmp_params):
+        super(CartesianCoordDMP, self).setParamsFromDict(cart_coord_dmp_params)
+        self.mean_start_global_position = cart_coord_dmp_params['mean_start_global_position']
+        self.mean_goal_global_position = cart_coord_dmp_params['mean_goal_global_position']
+        self.mean_start_local_position = cart_coord_dmp_params['mean_start_local_position']
+        self.mean_goal_local_position = cart_coord_dmp_params['mean_goal_local_position']
+        self.ctraj_local_coord_selection = cart_coord_dmp_params['ctraj_local_coordinate_frame_selection']
+        self.ctraj_hmg_transform_local_to_global_matrix = cart_coord_dmp_params['T_local_to_global_H']
+        self.ctraj_hmg_transform_global_to_local_matrix = cart_coord_dmp_params['T_global_to_local_H']
+        assert (self.isValid()), "Post-condition(s) checking is failed: this CartesianCoordDMP became invalid!"
+        return None
+    
+    def loadParamsAsDict(self, dir_path, 
+                         file_name_weights="f_weights_matrix.txt", 
+                         file_name_A_learn="f_A_learn_matrix.txt", 
+                         file_name_mean_start_position="mean_start_position.txt", 
+                         file_name_mean_goal_position="mean_goal_position.txt", 
+                         file_name_mean_tau="mean_tau.txt", 
+                         file_name_canonical_system_order="canonical_order.txt", 
+                         file_name_mean_start_position_global="mean_start_position_global.txt", 
+                         file_name_mean_goal_position_global="mean_goal_position_global.txt", 
+                         file_name_mean_start_position_local="mean_start_position_local.txt", 
+                         file_name_mean_goal_position_local="mean_goal_position_local.txt", 
+                         file_name_ctraj_local_coordinate_frame_selection="ctraj_local_coordinate_frame_selection.txt", 
+                         file_name_ctraj_hmg_transform_local_to_global_matrix="ctraj_hmg_transform_local_to_global_matrix.txt", 
+                         file_name_ctraj_hmg_transform_global_to_local_matrix="ctraj_hmg_transform_global_to_local_matrix.txt"):
+        assert (file_name_mean_start_position_global is not None)
+        assert (file_name_mean_goal_position_global is not None)
+        assert (file_name_mean_start_position_local is not None)
+        assert (file_name_mean_goal_position_local is not None)
+        assert (file_name_ctraj_local_coordinate_frame_selection is not None)
+        assert (file_name_ctraj_hmg_transform_local_to_global_matrix is not None)
+        assert (file_name_ctraj_hmg_transform_global_to_local_matrix is not None)
+        cart_coord_dmp_params = super(CartesianCoordDMP, self).loadParamsAsDict(dir_path,
+                                                                                file_name_weights,
+                                                                                file_name_A_learn,
+                                                                                file_name_mean_start_position,
+                                                                                file_name_mean_goal_position,
+                                                                                file_name_mean_tau, 
+                                                                                file_name_canonical_system_order)
+        cart_coord_dmp_params['mean_start_global_position'] = np.loadtxt(dir_path + "/" + file_name_mean_start_position_global).reshape(3,1)
+        cart_coord_dmp_params['mean_goal_global_position'] = np.loadtxt(dir_path + "/" + file_name_mean_goal_position_global).reshape(3,1)
+        cart_coord_dmp_params['mean_start_local_position'] = np.loadtxt(dir_path + "/" + file_name_mean_start_position_local).reshape(3,1)
+        cart_coord_dmp_params['mean_goal_local_position'] = np.loadtxt(dir_path + "/" + file_name_mean_goal_position_local).reshape(3,1)
+        cart_coord_dmp_params['ctraj_local_coordinate_frame_selection'] = int(round(np.loadtxt(dir_path + "/" + file_name_ctraj_local_coordinate_frame_selection)))
+        cart_coord_dmp_params['T_local_to_global_H'] = np.loadtxt(dir_path + "/" + file_name_ctraj_hmg_transform_local_to_global_matrix)
+        cart_coord_dmp_params['T_global_to_local_H'] = np.loadtxt(dir_path + "/" + file_name_ctraj_hmg_transform_global_to_local_matrix)
+        assert (self.isValid()), "Post-condition(s) checking is failed: this CartesianCoordDMP became invalid!"
+        return cart_coord_dmp_params
+    
+    def saveParamsFromDict(self, dir_path, cart_coord_dmp_params, 
+                           file_name_weights="f_weights_matrix.txt", 
+                           file_name_A_learn="f_A_learn_matrix.txt", 
+                           file_name_mean_start_position="mean_start_position.txt", 
+                           file_name_mean_goal_position="mean_goal_position.txt", 
+                           file_name_mean_tau="mean_tau.txt", 
+                           file_name_canonical_system_order="canonical_order.txt", 
+                           file_name_mean_start_position_global="mean_start_position_global.txt", 
+                           file_name_mean_goal_position_global="mean_goal_position_global.txt", 
+                           file_name_mean_start_position_local="mean_start_position_local.txt", 
+                           file_name_mean_goal_position_local="mean_goal_position_local.txt", 
+                           file_name_ctraj_local_coordinate_frame_selection="ctraj_local_coordinate_frame_selection.txt", 
+                           file_name_ctraj_hmg_transform_local_to_global_matrix="ctraj_hmg_transform_local_to_global_matrix.txt", 
+                           file_name_ctraj_hmg_transform_global_to_local_matrix="ctraj_hmg_transform_global_to_local_matrix.txt"):
+        assert (file_name_mean_start_position_global is not None)
+        assert (file_name_mean_goal_position_global is not None)
+        assert (file_name_mean_start_position_local is not None)
+        assert (file_name_mean_goal_position_local is not None)
+        assert (file_name_ctraj_local_coordinate_frame_selection is not None)
+        assert (file_name_ctraj_hmg_transform_local_to_global_matrix is not None)
+        assert (file_name_ctraj_hmg_transform_global_to_local_matrix is not None)
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this CartesianCoordDMP is invalid!"
+        super(CartesianCoordDMP, self).saveParamsFromDict(dir_path, cart_coord_dmp_params, 
+                                                          file_name_weights,
+                                                          file_name_A_learn,
+                                                          file_name_mean_start_position,
+                                                          file_name_mean_goal_position,
+                                                          file_name_mean_tau, 
+                                                          file_name_canonical_system_order)
+        np.savetxt(dir_path + "/" + file_name_mean_start_position_global, cart_coord_dmp_params['mean_start_global_position'])
+        np.savetxt(dir_path + "/" + file_name_mean_goal_position_global, cart_coord_dmp_params['mean_goal_global_position'])
+        np.savetxt(dir_path + "/" + file_name_mean_start_position_local, cart_coord_dmp_params['mean_start_local_position'])
+        np.savetxt(dir_path + "/" + file_name_mean_goal_position_local, cart_coord_dmp_params['mean_goal_local_position'])
+        np.savetxt(dir_path + "/" + file_name_ctraj_local_coordinate_frame_selection, cart_coord_dmp_params['ctraj_local_coordinate_frame_selection'])
+        np.savetxt(dir_path + "/" + file_name_ctraj_hmg_transform_local_to_global_matrix, cart_coord_dmp_params['T_local_to_global_H'])
+        np.savetxt(dir_path + "/" + file_name_ctraj_hmg_transform_global_to_local_matrix, cart_coord_dmp_params['T_global_to_local_H'])
+        assert (self.isValid()), "Post-condition(s) checking is failed: this CartesianCoordDMP became invalid!"
+        return None
+    
+    def loadParams(self, dir_path, 
+                   file_name_weights="f_weights_matrix.txt", 
+                   file_name_A_learn="f_A_learn_matrix.txt", 
+                   file_name_mean_start_position="mean_start_position.txt", 
+                   file_name_mean_goal_position="mean_goal_position.txt", 
+                   file_name_mean_tau="mean_tau.txt", 
+                   file_name_canonical_system_order="canonical_order.txt", 
+                   file_name_mean_start_position_global="mean_start_position_global.txt", 
+                   file_name_mean_goal_position_global="mean_goal_position_global.txt", 
+                   file_name_mean_start_position_local="mean_start_position_local.txt", 
+                   file_name_mean_goal_position_local="mean_goal_position_local.txt", 
+                   file_name_ctraj_local_coordinate_frame_selection="ctraj_local_coordinate_frame_selection.txt", 
+                   file_name_ctraj_hmg_transform_local_to_global_matrix="ctraj_hmg_transform_local_to_global_matrix.txt", 
+                   file_name_ctraj_hmg_transform_global_to_local_matrix="ctraj_hmg_transform_global_to_local_matrix.txt"):
+        cart_coord_dmp_params = self.loadParamsAsDict(dir_path, file_name_weights, 
+                                                      file_name_A_learn,
+                                                      file_name_mean_start_position, 
+                                                      file_name_mean_goal_position, 
+                                                      file_name_mean_tau, 
+                                                      file_name_canonical_system_order, 
+                                                      file_name_mean_start_position_global, 
+                                                      file_name_mean_goal_position_global, 
+                                                      file_name_mean_start_position_local, 
+                                                      file_name_mean_goal_position_local, 
+                                                      file_name_ctraj_local_coordinate_frame_selection, 
+                                                      file_name_ctraj_hmg_transform_local_to_global_matrix, 
+                                                      file_name_ctraj_hmg_transform_global_to_local_matrix)
+        return self.setParamsFromDict(cart_coord_dmp_params)
+    
+    def saveParams(self, dir_path, 
+                   file_name_weights="f_weights_matrix.txt", 
+                   file_name_A_learn="f_A_learn_matrix.txt", 
+                   file_name_mean_start_position="mean_start_position.txt", 
+                   file_name_mean_goal_position="mean_goal_position.txt", 
+                   file_name_mean_tau="mean_tau.txt", 
+                   file_name_canonical_system_order="canonical_order.txt", 
+                   file_name_mean_start_position_global="mean_start_position_global.txt", 
+                   file_name_mean_goal_position_global="mean_goal_position_global.txt", 
+                   file_name_mean_start_position_local="mean_start_position_local.txt", 
+                   file_name_mean_goal_position_local="mean_goal_position_local.txt", 
+                   file_name_ctraj_local_coordinate_frame_selection="ctraj_local_coordinate_frame_selection.txt", 
+                   file_name_ctraj_hmg_transform_local_to_global_matrix="ctraj_hmg_transform_local_to_global_matrix.txt", 
+                   file_name_ctraj_hmg_transform_global_to_local_matrix="ctraj_hmg_transform_global_to_local_matrix.txt"):
+        cart_coord_dmp_params = self.getParamsAsDict()
+        return self.saveParamsFromDict(dir_path, cart_coord_dmp_params, 
+                                       file_name_weights, 
+                                       file_name_A_learn,
+                                       file_name_mean_start_position, 
+                                       file_name_mean_goal_position, 
+                                       file_name_mean_tau, 
+                                       file_name_canonical_system_order, 
+                                       file_name_mean_start_position_global, 
+                                       file_name_mean_goal_position_global, 
+                                       file_name_mean_start_position_local, 
+                                       file_name_mean_goal_position_local, 
+                                       file_name_ctraj_local_coordinate_frame_selection, 
+                                       file_name_ctraj_hmg_transform_local_to_global_matrix, 
+                                       file_name_ctraj_hmg_transform_global_to_local_matrix)

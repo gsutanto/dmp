@@ -70,17 +70,21 @@ def ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test(amd_clmc_dmp_home_dir_path
                                        ctraj_local_coordinate_frame_selection,
                                        transform_couplers_list)
     cart_coord_dmp.setScalingUsage(is_using_scaling)
-    cart_coord_dmp.loadParamsCartCoordDMP(loa_data_prim_dir_path,
-                                          "w",
-                                          "A_learn",
-                                          "start_global",
-                                          "goal_global",
-                                          "tau",
-                                          "start_local",
-                                          "goal_local",
-                                          "T_local_to_global_H",
-                                          "T_global_to_local_H")
-    ccdmp_baseline_params = cart_coord_dmp.getParamsCartCoordDMPasDict()
+    cart_coord_dmp.loadParams(dir_path=loa_data_prim_dir_path, 
+                              file_name_weights="w", 
+                              file_name_A_learn="A_learn", 
+                              file_name_mean_start_position="start_global", 
+                              file_name_mean_goal_position="goal_global", 
+                              file_name_mean_tau="tau", 
+                              file_name_canonical_system_order="canonical_order", 
+                              file_name_mean_start_position_global="start_global", 
+                              file_name_mean_goal_position_global="goal_global", 
+                              file_name_mean_start_position_local="start_local", 
+                              file_name_mean_goal_position_local="goal_local", 
+                              file_name_ctraj_local_coordinate_frame_selection="ctraj_local_coordinate_frame_selection", 
+                              file_name_ctraj_hmg_transform_local_to_global_matrix="T_local_to_global_H", 
+                              file_name_ctraj_hmg_transform_global_to_local_matrix="T_global_to_local_H")
+    ccdmp_baseline_params = cart_coord_dmp.getParamsAsDict()
     
     if (os.path.isfile(data_global_coord_filepath)):
         data_global_coord = loadObj(data_global_coord_filepath)

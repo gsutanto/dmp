@@ -11,8 +11,16 @@ import os
 import sys
 import copy
 import glob
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_param/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_base/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_discrete/'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../cart_dmp/cart_coord_dmp'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../neural_nets/feedforward/pmnn/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/'))
+from TauSystem import *
+from CanonicalSystemDiscrete import *
+from CartesianCoordTransformer import *
+from CartesianCoordDMP import *
 from PMNN import *
 from utilities import *
 
@@ -23,17 +31,31 @@ dmp_baseline_params = loadObj('dmp_baseline_params_obs_avoid.pkl')
 ccdmp_baseline_params = dmp_baseline_params["cart_coord"][0]
 dmp_out_dirpath = '../../../../data/dmp_coupling/learn_obs_avoid/static_obs/learned_prims_params/position/prim1/'
 
-np.savetxt(dmp_out_dirpath + 'w', ccdmp_baseline_params['W'])
-np.savetxt(dmp_out_dirpath + 'A_learn', ccdmp_baseline_params['A_learn'])
-np.savetxt(dmp_out_dirpath + 'start_global', ccdmp_baseline_params['mean_start_global_position'])
-np.savetxt(dmp_out_dirpath + 'goal_global', ccdmp_baseline_params['mean_goal_global_position'])
-np.savetxt(dmp_out_dirpath + 'start_local', ccdmp_baseline_params['mean_start_local_position'])
-np.savetxt(dmp_out_dirpath + 'goal_local', ccdmp_baseline_params['mean_goal_local_position'])
-np.savetxt(dmp_out_dirpath + 'T_local_to_global_H', ccdmp_baseline_params['T_local_to_global_H'])
-np.savetxt(dmp_out_dirpath + 'T_global_to_local_H', ccdmp_baseline_params['T_global_to_local_H'])
+task_servo_rate = 300.0
+dt = 1.0/task_servo_rate
+model_size = 25
+tau = 0.5
+canonical_order = 2
+
+tau_sys = TauSystem(dt, tau)
+canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
+ccdmp = CartesianCoordDMP(model_size, canonical_sys_discr, SCHAAL_LOCAL_COORD_FRAME)
+
+ccdmp.saveParamsFromDict(dir_path=dmp_out_dirpath, cart_coord_dmp_params=ccdmp_baseline_params, 
+                         file_name_weights="w", 
+                         file_name_A_learn="A_learn", 
+                         file_name_mean_start_position="start_global", 
+                         file_name_mean_goal_position="goal_global", 
+                         file_name_mean_tau="mean_tau", 
+                         file_name_canonical_system_order="canonical_sys_order", 
+                         file_name_mean_start_position_global="start_global", 
+                         file_name_mean_goal_position_global="goal_global", 
+                         file_name_mean_start_position_local="start_local", 
+                         file_name_mean_goal_position_local="goal_local", 
+                         file_name_ctraj_local_coordinate_frame_selection="ctraj_local_coordinate_frame_selection", 
+                         file_name_ctraj_hmg_transform_local_to_global_matrix="T_local_to_global_H", 
+                         file_name_ctraj_hmg_transform_global_to_local_matrix="T_global_to_local_H")
 np.savetxt(dmp_out_dirpath + 'tau', np.array([ccdmp_baseline_params['unroll_tau']]))
-np.savetxt(dmp_out_dirpath + 'canonical_sys_order', np.array([ccdmp_baseline_params['canonical_order']]))
-np.savetxt(dmp_out_dirpath + 'ctraj_local_coordinate_frame_selection', np.array([ccdmp_baseline_params['ctraj_local_coordinate_frame_selection']]))
 
 pmnn_name = 'my_PMNN_obs_avoid_fb'
 D_input = 17
