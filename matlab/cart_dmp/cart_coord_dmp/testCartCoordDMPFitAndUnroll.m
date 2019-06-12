@@ -32,7 +32,7 @@ function [] = testCartCoordDMPFitAndUnroll(output_dir_path)
     
     % params for "CartCoordDMP Training from Multiple Trajectories":
     n_rfs_multi                             = 25;
-    unroll_dt_multi                         = 1/420.0;
+    unroll_dt_multi                         = 1/1000.0;
     unroll_tau_multi                        = 0.5;
     unroll_traj_length_multi                = round(unroll_tau_multi/unroll_dt_multi) + 1;
     

@@ -57,11 +57,12 @@ def computeQuaternionLogMap(Q_input, div_epsilon=division_epsilon):
     if (len(Q_input.shape) == 1):
         Q_input = Q_input.reshape(1, 4)
     assert (Q_input.shape[1] == 4), "Each row of Q_input has to be 4-dimensional!!!"
+    assert (np.iscomplex(Q_input).any() == False)
     
     tensor_length = Q_input.shape[0]
     
     # normalize the input Quaternion first:
-    Q_prep = normalizeQuaternion(Q_input).reshape(tensor_length, 4)
+    Q_prep = normalizeQuaternion(np.real(Q_input)).reshape(tensor_length, 4)
     
     u = Q_prep[:,0].reshape(tensor_length, 1)
     q = Q_prep[:,1:4]
@@ -110,17 +111,19 @@ def computeQuaternionLogMap(Q_input, div_epsilon=division_epsilon):
     assert (np.isnan(log_Q_output).any() == False), "log_Q_output contains NaN!"
     if (tensor_length == 1):
         log_Q_output = log_Q_output[0,:]
-    return log_Q_output
+    assert (np.iscomplex(log_Q_output).any() == False)
+    return np.real(log_Q_output)
 
 def computeQuaternionExpMap(log_Q_input, div_epsilon=division_epsilon):
     assert ((len(log_Q_input.shape) >= 1) and (len(log_Q_input.shape) <= 2)), "log_Q_input has invalid number of dimensions!"
     if (len(log_Q_input.shape) == 1):
         log_Q_input = log_Q_input.reshape(1, 3)
     assert (log_Q_input.shape[1] == 3), "Each row of log_Q_input has to be 3-dimensional!!!"
+    assert (np.iscomplex(log_Q_input).any() == False)
     
     tensor_length = log_Q_input.shape[0]
     
-    r = log_Q_input
+    r = np.real(log_Q_input)
     norm_r = npla.norm(r, ord=2, axis=1).reshape(tensor_length, 1)
     cos_norm_r = np.cos(norm_r)
     sin_norm_r = np.sin(norm_r)
@@ -153,7 +156,8 @@ def computeQuaternionExpMap(log_Q_input, div_epsilon=division_epsilon):
     assert (np.isnan(Q_output).any() == False), "Q_output contains NaN!"
     # don't forget to normalize the resulting Quaternion:
     Q_output = normalizeQuaternion(Q_output)
-    return Q_output
+    assert (np.iscomplex(Q_output).any() == False)
+    return np.real(Q_output)
 
 def computeQuatConjugate(Q_input):
     assert ((len(Q_input.shape) >= 1) and (len(Q_input.shape) <= 2)), "Q_input has invalid number of dimensions!"
@@ -176,6 +180,10 @@ def computeQuatProduct( Qp, Qq ):
     if (len(Qq.shape) == 1):
         Qq = Qq.reshape(1, 4)
     assert (Qp.shape[0] == Qq.shape[0]), 'Qp and Qq length are NOT equal!!!'
+    assert (np.iscomplex(Qp).any() == False)
+    Qp = np.real(Qp)
+    assert (np.iscomplex(Qq).any() == False)
+    Qq = np.real(Qq)
     tensor_length = Qp.shape[0]
     
     p0 = Qp[:,0]
@@ -208,7 +216,8 @@ def computeQuatProduct( Qp, Qq ):
     Qr = np.matmul(P, Qq.reshape(tensor_length,4,1)).reshape(tensor_length,4)
     if (tensor_length == 1):
         Qr = Qr[0,:]
-    return Qr
+    assert (np.iscomplex(Qr).any() == False)
+    return np.real(Qr)
 
 def computeTwiceLogQuatDifference( Qp, Qq, is_standardizing_quat_diff=True ):
     if (not is_standardizing_quat_diff): # if NOT standardizing before applying Log Mapping

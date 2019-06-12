@@ -90,6 +90,6 @@ class LearningSystemDiscrete(LearningSystem, object):
         [b, a] = signal.butter(N_filter_order, Wn)
         Ft_filtered = signal.filtfilt(b, a, Ft, axis=1)
         nmse_fit = computeNMSE(Fp.T, Ft_filtered.T)
-        print("NMSE of forcing term fitting = " + str(nmse_fit))
+#        print("NMSE of forcing term fitting = " + str(nmse_fit))
         
         return W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI

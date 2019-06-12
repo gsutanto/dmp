@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 {
     bool        is_real_time                = false;
 
-    double      task_servo_rate             = 420.0;    // MasterArm robot's task servo rate
+    double      task_servo_rate             = 1000.0;    // MasterArm robot's task servo rate
     double      dt                          = 1.0/task_servo_rate;
     uint        model_size                  = 25;
     double      tau                         = 0.5;      // this value will be changed (possibly many times) during learning, because each trajectory have different tau value

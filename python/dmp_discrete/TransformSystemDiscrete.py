@@ -156,6 +156,7 @@ class TransformSystemDiscrete(TransformationSystem, object):
         else:
             goal_steady_dmpstate_demo_local = DMPState(steady_state_goal_position_local)
         A_learn = goal_steady_dmpstate_demo_local.X - start_dmpstate_demo_local.X
+        # here we assume the data is collected at a constant dt or sampling rate (ideally at a hard real-time condition, e.g. with Xenomai):
         dt = (goal_steady_dmpstate_demo_local.time[0,0] - start_dmpstate_demo_local.time[0,0])/(traj_length - 1.0)
         if (dt <= 0.0):
             dt = 1.0/robot_task_servo_rate

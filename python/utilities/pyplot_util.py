@@ -179,21 +179,28 @@ def subplot_ND(NDtraj_list, title,
         assert (NDtraj_list[n_traj_to_plot].shape[1] == D)
         traj_label = label_list[n_traj_to_plot]
         for d in range(D):
+            if (D == 1):
+                axd = ax
+            else:
+                axd = ax[d]
             if (n_traj_to_plot == 0):
                 if (d == 0):
-                    ax[d].set_title(title)
-                ax[d].set_ylabel(Y_label_list[d])
+                    axd.set_title(title)
+                axd.set_ylabel(Y_label_list[d])
                 if (d == D-1):
-                    ax[d].set_xlabel('Time Index')
+                    axd.set_xlabel('Time Index')
             traj = NDtraj_list[n_traj_to_plot][:,d]
             color = color_style_list[n_traj_to_plot][0]
             linestyle = color_style_list[n_traj_to_plot][1]
-            ax[d].plot(traj, 
-                       c=color, ls=linestyle, 
-                       label=traj_label)
+            axd.plot(traj, 
+                     c=color, ls=linestyle, 
+                     label=traj_label)
             if (n_traj_to_plot == 0):
-                ax[d].grid(is_showing_grid)
-    ax[0].legend()
+                axd.grid(is_showing_grid)
+    if (D == 1):
+        ax.legend()
+    else:
+        ax[0].legend()
     # Fine-tune figure; make subplots close to each other and hide x ticks for
     # all but bottom plot.
 #    f.subplots_adjust(hspace=0)

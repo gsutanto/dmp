@@ -27,7 +27,6 @@ import DMPTrajectory as dmp_traj
 import QuaternionDMPTrajectory as qdmp_traj
 import utilities as py_util
 import clmcplot_utils as clmcplot_util
-import pyplot_util as pypl_util
 
 dim_cart = 3
 dim_Q = 4
@@ -247,83 +246,10 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All",
                                                             cdmp_params["Quaternion"][n_prim]["mean_tau"], 
                                                             cdmp_params["Quaternion"][n_prim]["mean_tau"], 
                                                             dt)
-            N_trials = len(cdmp_trajs["CartCoord"][n_prim])
             
-            # plotting unrolled (learned) Cartesian Coordinate trajectory
-            all_XT_list = [None] * (1 + N_trials)
-            for n_trial in range(N_trials):
-                all_XT_list[n_trial] = cdmp_trajs["CartCoord"][n_prim][n_trial].X.T
-            all_XT_list[1+n_trial] = cdmp_unroll["CartCoord"][n_prim].X.T
-            pypl_util.subplot_ND(NDtraj_list=all_XT_list, 
-                                 title='X Prim. #%d' % (n_prim+1), 
-                                 Y_label_list=['X%d' % X_dim for X_dim in range(dim_cart)], 
-                                 fig_num=3*n_prim+0, 
-                                 label_list=['trial #%d' % n_trial for n_trial in range(N_trials)] + ['unroll'], 
-                                 color_style_list=[['b',':']] * N_trials + [['g','-']], 
-                                 is_auto_line_coloring_and_styling=False)
-            
-            # plotting omega trajectory
-            all_XdT_list = [None] * (1 + N_trials)
-            for n_trial in range(N_trials):
-                all_XdT_list[n_trial] = cdmp_trajs["CartCoord"][n_prim][n_trial].Xd.T
-            all_XdT_list[1+n_trial] = cdmp_unroll["CartCoord"][n_prim].Xd.T
-            pypl_util.subplot_ND(NDtraj_list=all_XdT_list, 
-                                 title='Xd Prim. #%d' % (n_prim+1), 
-                                 Y_label_list=['Xd%d' % Xd_dim for Xd_dim in range(dim_cart)], 
-                                 fig_num=3*n_prim+1, 
-                                 label_list=['trial #%d' % n_trial for n_trial in range(N_trials)] + ['unroll'], 
-                                 color_style_list=[['b',':']] * N_trials + [['g','-']], 
-                                 is_auto_line_coloring_and_styling=False)
-            
-            # plotting omegad trajectory
-            all_XddT_list = [None] * (1 + N_trials)
-            for n_trial in range(N_trials):
-                all_XddT_list[n_trial] = cdmp_trajs["CartCoord"][n_prim][n_trial].Xdd.T
-            all_XddT_list[1+n_trial] = cdmp_unroll["CartCoord"][n_prim].Xdd.T
-            pypl_util.subplot_ND(NDtraj_list=all_XddT_list, 
-                                 title='Xdd Prim. #%d' % (n_prim+1), 
-                                 Y_label_list=['Xdd%d' % Xdd_dim for Xdd_dim in range(dim_cart)], 
-                                 fig_num=3*n_prim+2, 
-                                 label_list=['trial #%d' % n_trial for n_trial in range(N_trials)] + ['unroll'], 
-                                 color_style_list=[['b',':']] * N_trials + [['g','-']], 
-                                 is_auto_line_coloring_and_styling=False)
-            
-            # plotting unrolled (learned) Quaternion trajectory
-            all_QT_list = [None] * (1 + N_trials)
-            for n_trial in range(N_trials):
-                all_QT_list[n_trial] = cdmp_trajs["Quaternion"][n_prim][n_trial].X.T
-            all_QT_list[1+n_trial] = cdmp_unroll["Quaternion"][n_prim].X.T
-            pypl_util.subplot_ND(NDtraj_list=all_QT_list, 
-                                 title='Quaternion Prim. #%d' % (n_prim+1), 
-                                 Y_label_list=['Q%d' % Q_dim for Q_dim in range(dim_Q)], 
-                                 fig_num=3*n_prim+0, 
-                                 label_list=['trial #%d' % n_trial for n_trial in range(N_trials)] + ['unroll'], 
-                                 color_style_list=[['b',':']] * N_trials + [['g','-']], 
-                                 is_auto_line_coloring_and_styling=False)
-            
-            # plotting omega trajectory
-            all_omegaT_list = [None] * (1 + N_trials)
-            for n_trial in range(N_trials):
-                all_omegaT_list[n_trial] = cdmp_trajs["Quaternion"][n_prim][n_trial].omega.T
-            all_omegaT_list[1+n_trial] = cdmp_unroll["Quaternion"][n_prim].omega.T
-            pypl_util.subplot_ND(NDtraj_list=all_omegaT_list, 
-                                 title='omega Prim. #%d' % (n_prim+1), 
-                                 Y_label_list=['omega%d' % omega_dim for omega_dim in range(dim_omega)], 
-                                 fig_num=3*n_prim+1, 
-                                 label_list=['trial #%d' % n_trial for n_trial in range(N_trials)] + ['unroll'], 
-                                 color_style_list=[['b',':']] * N_trials + [['g','-']], 
-                                 is_auto_line_coloring_and_styling=False)
-            
-            # plotting omegad trajectory
-            all_omegadT_list = [None] * (1 + N_trials)
-            for n_trial in range(N_trials):
-                all_omegadT_list[n_trial] = cdmp_trajs["Quaternion"][n_prim][n_trial].omegad.T
-            all_omegadT_list[1+n_trial] = cdmp_unroll["Quaternion"][n_prim].omegad.T
-            pypl_util.subplot_ND(NDtraj_list=all_omegadT_list, 
-                                 title='omegad Prim. #%d' % (n_prim+1), 
-                                 Y_label_list=['omegad%d' % omegad_dim for omegad_dim in range(dim_omega)], 
-                                 fig_num=3*n_prim+2, 
-                                 label_list=['trial #%d' % n_trial for n_trial in range(N_trials)] + ['unroll'], 
-                                 color_style_list=[['b',':']] * N_trials + [['g','-']], 
-                                 is_auto_line_coloring_and_styling=False)
+            ccdmp.plotDemosVsUnroll(cdmp_trajs["CartCoord"][n_prim], cdmp_unroll["CartCoord"][n_prim], 
+                                    title_suffix=" Prim. #%d" % (n_prim+1), fig_num_offset=6*n_prim)
+            qdmp.plotDemosVsUnroll(cdmp_trajs["Quaternion"][n_prim], cdmp_unroll["Quaternion"][n_prim], 
+                                   title_suffix=" Prim. #%d" % (n_prim+1), fig_num_offset=(6*n_prim)+3)
+        
     return cdmp_params, cdmp_unroll
