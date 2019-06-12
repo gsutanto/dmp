@@ -53,7 +53,12 @@ def quat_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_path="../../../../",
         if (k == 0):
             sub_quat_dmp_training_path = "/data/dmp_coupling/learn_tactile_feedback/scraping_w_tool/human_baseline/prim03/"
         elif (k == 1):
-            sub_quat_dmp_training_path = "/data/dmp_coupling/learn_tactile_feedback/scraping_wo_tool/human_baseline/prim02/"
+#            sub_quat_dmp_training_path = "/data/dmp_coupling/learn_tactile_feedback/scraping_wo_tool/human_baseline/prim02/"
+            # this one is a more challenging case, because Quaternions -Q and Q both represent the same orientation
+            # (this is to see if the low-pass filtering on such Quaternion trajectory is done right; 
+            #  if NOT low-pass filtering will just make things 
+            #  (especially the QuaternionDMP fitting) so much worse and WRONG):
+            sub_quat_dmp_training_path = "/data/cart_dmp/quat_dmp_unscrewing/"
         
         set_qtraj_input = quat_dmp.extractSetTrajectories(amd_clmc_dmp_home_dir_path + sub_quat_dmp_training_path, 
                                                           start_column_idx=10, time_column_idx=0)
@@ -100,8 +105,8 @@ def quat_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_path="../../../../",
     return unroll_qtraj_concatenated, W, mean_A_learn, mean_tau, Ft, Fp, QgT, cX, cV, PSI
 
 if __name__ == "__main__":
-    unroll_qtraj_concatenated, W, mean_A_learn, mean_tau, Ft, Fp, QgT, cX, cV, PSI = quat_dmp_multi_traj_training_test(time_reproduce_max=1.9976, 
-                                                                                                                       tau_reproduce=1.9976, 
+    unroll_qtraj_concatenated, W, mean_A_learn, mean_tau, Ft, Fp, QgT, cX, cV, PSI = quat_dmp_multi_traj_training_test(time_reproduce_max=5.98734,#1.9976, 
+                                                                                                                       tau_reproduce=5.98734,#1.9976, 
                                                                                                                        is_smoothing_training_traj_before_learning=True, 
                                                                                                                        percentage_padding=1.5, percentage_smoothing_points=3.0, 
                                                                                                                        smoothing_mode=3, smoothing_cutoff_frequency=1.5, 

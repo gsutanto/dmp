@@ -43,7 +43,14 @@ def quat_dmp_single_traj_training_test(amd_clmc_dmp_home_dir_path="../../../../"
     canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
     quat_dmp = QuaternionDMP(model_size, canonical_sys_discr)
     
-    set_qtraj_input = quat_dmp.extractSetTrajectories(amd_clmc_dmp_home_dir_path + "/data/dmp_coupling/learn_tactile_feedback/scraping_w_tool/human_baseline/prim03/07.txt", 
+#    sub_quat_dmp_training_file_path = "/data/dmp_coupling/learn_tactile_feedback/scraping_w_tool/human_baseline/prim03/07.txt"
+    # this one is a more challenging case, because Quaternions -Q and Q both represent the same orientation
+    # (this is to see if the low-pass filtering on such Quaternion trajectory is done right; 
+    #  if NOT low-pass filtering will just make things 
+    #  (especially the QuaternionDMP fitting) so much worse and WRONG):
+    sub_quat_dmp_training_file_path = "/data/cart_dmp/quat_dmp_unscrewing/prim02_03.txt"
+    
+    set_qtraj_input = quat_dmp.extractSetTrajectories(amd_clmc_dmp_home_dir_path + sub_quat_dmp_training_file_path, 
                                                       start_column_idx=10, time_column_idx=0)
     
     [critical_states_learn, 
