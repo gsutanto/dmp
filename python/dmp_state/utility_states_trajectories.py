@@ -123,14 +123,44 @@ def smoothStartEndQuatTrajectoryBasedOnQuaternion(Quat_traj,
                                                   percentage_smoothing_points, 
                                                   mode, dt, 
                                                   fc=40.0, # cutoff frequency
-                                                  is_plotting_smoothing_comparison=False):
+                                                  is_plotting_smoothing_comparison=False, 
+                                                  is_plotting_Qsignal_preprocessing_comparison=False):
     N_filter_order = 2
     fs = 1.0/dt # sampling frequency
     Wn = fc/(fs/2)
     b, a = signal.butter(N_filter_order, Wn)
     
-    Quat_prof = Quat_traj.X.T
+    # GSutanto remarks: the following commented line has an issue, 
+    # in particular when suddenly there is a flip sign on the Quaternion signal
+    # (remember that Quaternion Q and Quaternion -Q both represent 
+    #  the same orientation). Although there is a sign flipping, 
+    # the Quaternion signal is still valid, but it will be mistakenly
+    # considered as a discontinuity, which by the low-pass filter will be
+    # smoothened out (this smoothening out will make things even worse & WRONG).
+    # Please note that we do low-pass filtering on the log(Q) signal 
+    # (not on the Q signal directly), however,
+    # even though Q and -Q represent the same orientation, log(Q) and log(-Q) 
+    # is usually are not of the same (vector) value, which is why doing 
+    # low-pass filtering on log(Q) signal which have a sign flipping on 
+    # the Q signal is BAD and WRONG:
+#    Quat_prof = Quat_traj.X.T
+    # That's why we do Quaternion signal preprocessing here, to make sure 
+    # the Q signal does NOT have a sign flipping:
+    Quat_prof = util_quat.preprocessQuaternionSignal(Quat_traj.X.T, Quat_traj.omega.T, dt)
     log_Quat_prof = util_quat.computeQuaternionLogMap(Quat_prof)
+    
+    if (is_plotting_Qsignal_preprocessing_comparison):
+        all_QT_list = [None] * 2
+        all_QT_list[0] = Quat_traj.X.T
+        all_QT_list[1] = Quat_prof
+        pyplot_util.subplot_ND(NDtraj_list=all_QT_list, 
+                               title='Quaternion', 
+                               Y_label_list=['Q%d' % Q_dim for Q_dim in range(4)], 
+                               fig_num=100+0, 
+                               label_list=['original', 'preprocessed'], 
+                               color_style_list=[['b','-'], ['g','-']], 
+                               is_auto_line_coloring_and_styling=False)
+    
     smoothed_log_Quat_prof = smoothStartEndNDPositionProfile(log_Quat_prof, 
                                                              percentage_padding, 
                                                              percentage_smoothing_points, 

@@ -74,6 +74,7 @@ def dmp_1D_test(amd_clmc_dmp_home_dir_path="../../../", canonical_order=2, time_
     time_idx_goal_change = int(np.round(time_goal_change*task_servo_rate) + 1)
     #t0 = time.time()
     for i in xrange(unroll_traj_length):
+        # testing goal change:
         if (i == time_idx_goal_change):
             dmp_discrete_1D.setNewSteadyStateGoalPosition(new_goal)
         

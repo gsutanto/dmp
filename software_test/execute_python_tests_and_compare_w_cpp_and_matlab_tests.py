@@ -62,18 +62,18 @@ quat_dmp_single_traj_training_test(amd_clmc_dmp_home_dir_abs_path, 2, 1.9976, 1.
 compareTwoNumericFiles(devel_software_test_dir_abs_path+'/test_matlab_quat_dmp_single_traj_training_test_0_1.txt', 
                        devel_software_test_dir_abs_path+'/test_python_quat_dmp_single_traj_training_test_0_1.txt')
 compareTwoNumericFiles(devel_software_test_dir_abs_path+'/test_matlab_quat_dmp_single_traj_training_test_0_2.txt', 
-                       devel_software_test_dir_abs_path+'/test_python_quat_dmp_single_traj_training_test_0_2.txt')
+                       devel_software_test_dir_abs_path+'/test_python_quat_dmp_single_traj_training_test_0_2.txt', 2.301e-5)
 
 quat_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_abs_path, 2, 1.9976, 1.9976, devel_software_test_dir_abs_path, 'test_python_quat_dmp_multi_traj_training_test_0_2.txt', 
                                   False, None, None, None, None, devel_software_test_dir_abs_path, 'test_python_quat_dmp_multi_traj_training_test_0_2_learned_params.txt')
 compareTwoNumericFiles(devel_software_test_dir_abs_path+'/test_matlab_quat_dmp_multi_traj_training_test_0_2.txt', 
-                       devel_software_test_dir_abs_path+'/test_python_quat_dmp_multi_traj_training_test_0_2.txt')
+                       devel_software_test_dir_abs_path+'/test_python_quat_dmp_multi_traj_training_test_0_2.txt', 1.251e-5)
 compareTwoNumericFiles(devel_software_test_dir_abs_path+'/test_matlab_quat_dmp_multi_traj_training_test_0_2_learned_params.txt', 
-                       devel_software_test_dir_abs_path+'/test_python_quat_dmp_multi_traj_training_test_0_2_learned_params.txt', 1.001e-5, 7.5e-4, True)
+                       devel_software_test_dir_abs_path+'/test_python_quat_dmp_multi_traj_training_test_0_2_learned_params.txt', 1.001e-5, 8.75e-4, True)
 
 print("Testing Learning QuaternionDMP from Smoothed Quaternion Trajectory...")
 quat_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_abs_path, 2, 1.9976, 1.9976, devel_software_test_dir_abs_path, 'test_python_quat_dmp_multi_smoothed_traj_training_test_0_2.txt', 
-                                  True, 1.5, 3.0, 3, 1.5, devel_software_test_dir_abs_path, 'test_python_quat_dmp_multi_smoothed_traj_training_test_0_2_learned_params.txt')
+                                  True, 1.5, 3.0, 3, 5.0, devel_software_test_dir_abs_path, 'test_python_quat_dmp_multi_smoothed_traj_training_test_0_2_learned_params.txt')
 compareTwoNumericFiles(devel_software_test_dir_abs_path+'/test_matlab_quat_dmp_multi_smoothed_traj_training_test_0_2.txt', 
                        devel_software_test_dir_abs_path+'/test_python_quat_dmp_multi_smoothed_traj_training_test_0_2.txt')
 compareTwoNumericFiles(devel_software_test_dir_abs_path+'/test_matlab_quat_dmp_multi_smoothed_traj_training_test_0_2_learned_params.txt', 

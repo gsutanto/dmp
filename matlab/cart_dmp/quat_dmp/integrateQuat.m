@@ -1,7 +1,6 @@
 function [ Qt_plus_1 ] = integrateQuat( Qt, omega, dt, tau )
     % Author    : Giovanni Sutanto
     % Date      : November 24, 2016
-    assert(size(Qt,2) == 1,'Currently integrateQuat() function only supports 1-dimensional problem.');
     assert(norm(Qt) > 0,'ERROR: integrateQuat(): norm(Qt) == 0!');
 
     theta_v     = (1/2) * omega * (dt/tau);

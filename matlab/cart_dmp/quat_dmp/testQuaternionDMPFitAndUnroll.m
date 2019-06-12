@@ -12,7 +12,12 @@ function [] = testQuaternionDMPFitAndUnroll(output_dir_path)
     %% Data Loading
     
     % The Trajectory for "QuaternionDMP Training from Single Trajectory":
-    traj_quat_demo_path             = '../../../data/dmp_coupling/learn_tactile_feedback/scraping_w_tool/human_baseline/prim03/07.txt';
+%     traj_quat_demo_path             = '../../../data/dmp_coupling/learn_tactile_feedback/scraping_w_tool/human_baseline/prim03/07.txt';
+    % this one is a more challenging case, because Quaternions -Q and Q both represent the same orientation
+    % (this is to see if the low-pass filtering on such Quaternion trajectory is done right; 
+    %  if NOT low-pass filtering will just make things 
+    %  (especially the QuaternionDMP fitting) so much worse and WRONG):
+    traj_quat_demo_path             = '../../../data/cart_dmp/quat_dmp_unscrewing/prim02/03.txt';
     [ traj_quat_demo, dt_0 ]        = extractSetQuaternionTrajectories( traj_quat_demo_path, 11, 1 );
     
     % The Trajectory Set #1 for "QuaternionDMP Training from Multiple Trajectories":
@@ -20,7 +25,12 @@ function [] = testQuaternionDMPFitAndUnroll(output_dir_path)
     [ set_trajs_quat_demo_1, dt_1 ] = extractSetQuaternionTrajectories( set_trajs_quat_demo_1_path, 11, 1 );
     
     % The Trajectory Set #2 for "QuaternionDMP Training from Multiple Trajectories":
-    set_trajs_quat_demo_2_path      = '../../../data/dmp_coupling/learn_tactile_feedback/scraping_wo_tool/human_baseline/prim02/';
+%     set_trajs_quat_demo_2_path      = '../../../data/dmp_coupling/learn_tactile_feedback/scraping_wo_tool/human_baseline/prim02/';
+    % this one is a more challenging case, because Quaternions -Q and Q both represent the same orientation
+    % (this is to see if the low-pass filtering on such Quaternion trajectory is done right; 
+    %  if NOT low-pass filtering will just make things 
+    %  (especially the QuaternionDMP fitting) so much worse and WRONG):
+    set_trajs_quat_demo_2_path      = '../../../data/cart_dmp/quat_dmp_unscrewing/prim02/';
     [ set_trajs_quat_demo_2, dt_2 ] = extractSetQuaternionTrajectories( set_trajs_quat_demo_2_path, 11, 1 );
     
     % end of Data Loading
@@ -31,7 +41,7 @@ function [] = testQuaternionDMPFitAndUnroll(output_dir_path)
     percentage_smoothing_points_pose_and_joint  = 3.0;
     smoothing_mode                              = 3;
     dt                                          = 1.0/300.0;
-    low_pass_cutoff_freq                        = 1.5;
+    low_pass_cutoff_freq                        = 5.0;
     
     N_traj1                                     = size(set_trajs_quat_demo_1, 2);
     set_smoothed_trajs_quat_demo_1              = cell(3, N_traj1);

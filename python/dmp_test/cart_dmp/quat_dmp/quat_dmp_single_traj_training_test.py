@@ -22,6 +22,8 @@ from CanonicalSystemDiscrete import *
 from QuaternionDMP import *
 from utilities import *
 
+plt.close('all')
+
 def quat_dmp_single_traj_training_test(amd_clmc_dmp_home_dir_path="../../../../", 
                                        canonical_order=2, time_reproduce_max=0.0, 
                                        tau_reproduce=0.0, unroll_qtraj_save_dir_path="", 
@@ -48,7 +50,7 @@ def quat_dmp_single_traj_training_test(amd_clmc_dmp_home_dir_path="../../../../"
     # (this is to see if the low-pass filtering on such Quaternion trajectory is done right; 
     #  if NOT low-pass filtering will just make things 
     #  (especially the QuaternionDMP fitting) so much worse and WRONG):
-    sub_quat_dmp_training_file_path = "/data/cart_dmp/quat_dmp_unscrewing/prim02_03.txt"
+    sub_quat_dmp_training_file_path = "/data/cart_dmp/quat_dmp_unscrewing/prim02/03.txt"
     
     set_qtraj_input = quat_dmp.extractSetTrajectories(amd_clmc_dmp_home_dir_path + sub_quat_dmp_training_file_path, 
                                                       start_column_idx=10, time_column_idx=0)
@@ -79,7 +81,6 @@ def quat_dmp_single_traj_training_test(amd_clmc_dmp_home_dir_path="../../../../"
         np.savetxt(unroll_qtraj_save_dir_path + "/" + unroll_qtraj_save_filename, unroll_qtraj)
     
     if (is_plotting):
-        plt.close('all')
         quat_dmp.plotDemosVsUnroll(set_qtraj_input, qdmp_unroll)
     
     return unroll_qtraj, W, mean_A_learn, mean_tau, Ft, Fp, QgT, cX, cV, PSI
@@ -87,5 +88,5 @@ def quat_dmp_single_traj_training_test(amd_clmc_dmp_home_dir_path="../../../../"
 if __name__ == "__main__":
     unroll_qtraj, W, mean_A_learn, mean_tau, Ft, Fp, QgT, cX, cV, PSI = quat_dmp_single_traj_training_test(is_smoothing_training_traj_before_learning=True, 
                                                                                                            percentage_padding=1.5, percentage_smoothing_points=3.0, 
-                                                                                                           smoothing_mode=3, smoothing_cutoff_frequency=1.5, 
+                                                                                                           smoothing_mode=3, smoothing_cutoff_frequency=10.0, 
                                                                                                            is_plotting=True)

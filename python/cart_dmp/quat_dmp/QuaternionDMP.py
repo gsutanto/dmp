@@ -108,8 +108,7 @@ class QuaternionDMP(DMPDiscrete, object):
                                                              percentage_padding=percentage_padding, 
                                                              percentage_smoothing_points=percentage_smoothing_points, 
                                                              mode=mode, dt=dt, 
-                                                             fc=smoothing_cutoff_frequency, 
-                                                             is_plotting_smoothing_comparison=False)
+                                                             fc=smoothing_cutoff_frequency)
     
     def learnGetDefaultUnrollParams(self, set_traj_input, robot_task_servo_rate):
         W, mean_A_learn, mean_tau, Ft, Fp, QgT, cX, cV, PSI = self.learn(set_traj_input, robot_task_servo_rate)

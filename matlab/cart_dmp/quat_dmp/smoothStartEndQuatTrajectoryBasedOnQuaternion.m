@@ -17,7 +17,23 @@ function [ smoothed_Quat_traj ] = smoothStartEndQuatTrajectoryBasedOnQuaternion(
     fs      = 1/dt;                 % sampling frequency
     [b, a]  = butter(2, fc/(fs/2)); % 2nd order Butterworth filter
     
-    Quat_prof               = Quat_traj{1,1};
+    % GSutanto remarks: the following commented line has an issue, 
+    % in particular when suddenly there is a flip sign on the Quaternion signal
+    % (remember that Quaternion Q and Quaternion -Q both represent 
+    %  the same orientation). Although there is a sign flipping, 
+    % the Quaternion signal is still valid, but it will be mistakenly
+    % considered as a discontinuity, which by the low-pass filter will be
+    % smoothened out (this smoothening out will make things even worse & WRONG).
+    % Please note that we do low-pass filtering on the log(Q) signal 
+    % (not on the Q signal directly), however,
+    % even though Q and -Q represent the same orientation, log(Q) and log(-Q) 
+    % is usually are not of the same (vector) value, which is why doing 
+    % low-pass filtering on log(Q) signal which have a sign flipping on 
+    % the Q signal is BAD and WRONG:
+%     Quat_prof               = Quat_traj{1,1};
+    % That's why we do Quaternion signal preprocessing here, to make sure 
+    % the Q signal does NOT have a sign flipping:
+    Quat_prof               = preprocessQuaternionSignal(Quat_traj{1,1}, Quat_traj{2,1}, dt);
     log_Quat_prof           = computeLogMapQuat(Quat_prof);
     smoothed_log_Quat_prof  = smoothStartEndNDPositionProfile( log_Quat_prof.', ...
                                                                percentage_padding, ...

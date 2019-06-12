@@ -15,6 +15,7 @@ import os
 import sys
 import copy
 import pyplot_util
+from utilities import *
 
 division_epsilon = 1.0e-100
 
@@ -142,7 +143,7 @@ def computeQuaternionExpMap(log_Q_input, div_epsilon=division_epsilon):
     if (log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r.size > 0):
         Q_output[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0] = cos_norm_r[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0]
         Q_output[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 1:4] = (npma.repmat(np.exp(np.log(sin_norm_r[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0]) - 
-                                                                                                                         np.log(norm_r[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0])).reshape(tensor_length, 1), 1, 3) * 
+                                                                                                                         np.log(norm_r[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0])).reshape(log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r.shape[0], 1), 1, 3) * 
                                                                                                       r[log_Q_input_idx_sin_norm_r_gt_zero_intersect_log_Q_input_idx_nonzero_norm_r, :])
     
     log_Q_input_idx_sin_norm_r_lt_zero = np.where(sin_norm_r[:,0] < 0)[0]
@@ -150,7 +151,7 @@ def computeQuaternionExpMap(log_Q_input, div_epsilon=division_epsilon):
     if (log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r.size > 0):
         Q_output[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0] = cos_norm_r[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0]
         Q_output[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 1:4] = (npma.repmat(np.exp(np.log(-sin_norm_r[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0]) - 
-                                                                                                                         np.log(norm_r[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0])).reshape(tensor_length, 1), 1, 3) * 
+                                                                                                                         np.log(norm_r[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, 0])).reshape(log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r.shape[0], 1), 1, 3) * 
                                                                                                       (-r[log_Q_input_idx_sin_norm_r_lt_zero_intersect_log_Q_input_idx_nonzero_norm_r, :]))
     
     assert (np.isnan(Q_output).any() == False), "Q_output contains NaN!"
@@ -334,3 +335,25 @@ def computeAverageQuaternions( Qs ):
     else:
         mean_Q = standardizeNormalizeQuaternion(V[:,max_eig_val_idx])
     return mean_Q
+
+def preprocessQuaternionSignal( QtT, omega_tT, dt ):
+    Qt_plus_1T = integrateQuat( QtT, omega_tT, dt )
+    QtT_prediction = copy.deepcopy(QtT)
+    QtT_prediction[1:,:] = Qt_plus_1T[0:-1,:]
+    sign_mismatch_per_Q_dim = ((QtT_prediction / (QtT + division_epsilon)) < 0)
+    sign_mismatch_summary = np.logical_and(np.logical_and(sign_mismatch_per_Q_dim[:,0], 
+                                                          sign_mismatch_per_Q_dim[:,1]), 
+                                           np.logical_and(sign_mismatch_per_Q_dim[:,2], 
+                                                          sign_mismatch_per_Q_dim[:,3]))
+    if (sign_mismatch_summary.any() == False):
+        return QtT
+    else:
+        sign_mismatch_idx = list(np.where(sign_mismatch_summary == True))
+        if ((len(sign_mismatch_idx) % 2) == 1):
+            sign_mismatch_idx.append(QtT.shape[0])
+        sign_mismatch_idx_pairs = list(chunks(sign_mismatch_idx, 2))
+        sign_corrector = np.ones(QtT.shape)
+        for sign_mismatch_idx_pair in sign_mismatch_idx_pairs:
+            sign_corrector[range(sign_mismatch_idx_pair[0], sign_mismatch_idx_pair[1]),:] *= -1
+        QtT_sign_corrected = sign_corrector * QtT
+        return QtT_sign_corrected

@@ -22,6 +22,8 @@ from CanonicalSystemDiscrete import *
 from QuaternionDMP import *
 from utilities import *
 
+plt.close('all')
+
 def quat_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_path="../../../../", 
                                       canonical_order=2, time_reproduce_max=2.0, 
                                       tau_reproduce=2.0, unroll_qtraj_save_dir_path="", 
@@ -58,7 +60,7 @@ def quat_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_path="../../../../",
             # (this is to see if the low-pass filtering on such Quaternion trajectory is done right; 
             #  if NOT low-pass filtering will just make things 
             #  (especially the QuaternionDMP fitting) so much worse and WRONG):
-            sub_quat_dmp_training_path = "/data/cart_dmp/quat_dmp_unscrewing/"
+            sub_quat_dmp_training_path = "/data/cart_dmp/quat_dmp_unscrewing/prim02/"
         
         set_qtraj_input = quat_dmp.extractSetTrajectories(amd_clmc_dmp_home_dir_path + sub_quat_dmp_training_path, 
                                                           start_column_idx=10, time_column_idx=0)
@@ -99,7 +101,6 @@ def quat_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_path="../../../../",
         np.savetxt(unroll_learned_params_save_dir_path + "/" + unroll_learned_params_save_filename, unroll_learned_params_concatenated)
     
     if (is_plotting):
-        plt.close('all')
         quat_dmp.plotDemosVsUnroll(set_qtraj_input, qdmp_unroll)
     
     return unroll_qtraj_concatenated, W, mean_A_learn, mean_tau, Ft, Fp, QgT, cX, cV, PSI
@@ -107,7 +108,7 @@ def quat_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_path="../../../../",
 if __name__ == "__main__":
     unroll_qtraj_concatenated, W, mean_A_learn, mean_tau, Ft, Fp, QgT, cX, cV, PSI = quat_dmp_multi_traj_training_test(time_reproduce_max=5.98734,#1.9976, 
                                                                                                                        tau_reproduce=5.98734,#1.9976, 
-                                                                                                                       is_smoothing_training_traj_before_learning=True, 
-                                                                                                                       percentage_padding=1.5, percentage_smoothing_points=3.0, 
-                                                                                                                       smoothing_mode=3, smoothing_cutoff_frequency=1.5, 
+                                                                                                                       is_smoothing_training_traj_before_learning=False,#True, 
+#                                                                                                                       percentage_padding=1.5, percentage_smoothing_points=3.0, 
+#                                                                                                                       smoothing_mode=3, smoothing_cutoff_frequency=5.0, 
                                                                                                                        is_plotting=True)
