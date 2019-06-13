@@ -22,6 +22,7 @@ plt.close('all')
 
 catkin_ws_path = py_util.getCatkinWSPath()
 sl_data_dirpath = catkin_ws_path + "/install/bin/arm"
+orig_prims_params_dirpath = "../../../../data/dmp_coupling/learn_tactile_feedback/scraping/learned_prims_params/"
 outdata_dirpath = './'
 
 is_deleting_dfiles = False#True
@@ -48,12 +49,14 @@ py_util.saveObj(rl_data, outdata_dirpath+'rl_data.pkl')
 count_pmnn_param_reuse = 0
 cdmp_trajs = rl_util.extractCartDMPTrajectoriesFromUnrollResults(rl_data[0])
 [
- cdmp_params, 
- cdmp_unroll
+ rl_data[0]["cdmp_params_all_dim_learned"], 
+ rl_data[0]["cdmp_unroll_all_dim_learned"]
 ] = rl_util.learnCartDMPUnrollParams(cdmp_trajs, 
                                      prim_to_be_learned="All", 
                                      is_smoothing_training_traj_before_learning=is_smoothing_training_traj_before_learning, 
                                      is_plotting=is_plotting)
+
+orig_cdmp_params = rl_util.loadPrimsParamsAsDictFromDirPath(orig_prims_params_dirpath, N_primitives)
 
 if (is_deleting_dfiles):
     py_util.deleteAllCLMCDataFilesInDirectory(sl_data_dirpath)

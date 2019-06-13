@@ -173,7 +173,7 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All",
     if (is_smoothing_training_traj_before_learning):
         percentage_padding = 1.5
         percentage_smoothing_points = 3.0
-        smoothing_cutoff_frequency = 1.5
+        smoothing_cutoff_frequency = 5.0
     else:
         percentage_padding = None
         percentage_smoothing_points = None
@@ -218,7 +218,7 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All",
                                             smoothing_cutoff_frequency=smoothing_cutoff_frequency
                                             )
         cdmp_params["CartCoord"][n_prim] = ccdmp.getParamsAsDict()
-#        cdmp_params["CartCoord"][n_prim]["critical_states_learn"] = ccdmp_critical_states_learn
+        cdmp_params["CartCoord"][n_prim]["critical_states_learn"] = ccdmp_critical_states_learn
         
         [
          qdmp_critical_states_learn, 
@@ -235,21 +235,60 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All",
                                            smoothing_cutoff_frequency=smoothing_cutoff_frequency
                                            )
         cdmp_params["Quaternion"][n_prim] = qdmp.getParamsAsDict()
-#        cdmp_params["Quaternion"][n_prim]["critical_states_learn"] = qdmp_critical_states_learn
+        cdmp_params["Quaternion"][n_prim]["critical_states_learn"] = qdmp_critical_states_learn
+        
+        cdmp_unroll["CartCoord"][n_prim] = ccdmp.unroll(ccdmp_critical_states_learn, 
+                                                        cdmp_params["CartCoord"][n_prim]["mean_tau"], 
+                                                        cdmp_params["CartCoord"][n_prim]["mean_tau"], 
+                                                        dt)
+        cdmp_unroll["Quaternion"][n_prim] = qdmp.unroll(qdmp_critical_states_learn, 
+                                                        cdmp_params["Quaternion"][n_prim]["mean_tau"], 
+                                                        cdmp_params["Quaternion"][n_prim]["mean_tau"], 
+                                                        dt)
         
         if (is_plotting):
-            cdmp_unroll["CartCoord"][n_prim] = ccdmp.unroll(ccdmp_critical_states_learn, 
-                                                            cdmp_params["CartCoord"][n_prim]["mean_tau"], 
-                                                            cdmp_params["CartCoord"][n_prim]["mean_tau"], 
-                                                            dt)
-            cdmp_unroll["Quaternion"][n_prim] = qdmp.unroll(qdmp_critical_states_learn, 
-                                                            cdmp_params["Quaternion"][n_prim]["mean_tau"], 
-                                                            cdmp_params["Quaternion"][n_prim]["mean_tau"], 
-                                                            dt)
-            
             ccdmp.plotDemosVsUnroll(cdmp_trajs["CartCoord"][n_prim], cdmp_unroll["CartCoord"][n_prim], 
                                     title_suffix=" Prim. #%d" % (n_prim+1), fig_num_offset=6*n_prim)
             qdmp.plotDemosVsUnroll(cdmp_trajs["Quaternion"][n_prim], cdmp_unroll["Quaternion"][n_prim], 
                                    title_suffix=" Prim. #%d" % (n_prim+1), fig_num_offset=(6*n_prim)+3)
         
     return cdmp_params, cdmp_unroll
+
+def loadPrimsParamsAsDictFromDirPath(prims_params_dirpath, N_primitives):
+    task_servo_rate = 300.0
+    dt = 1.0/task_servo_rate
+    tau = MIN_TAU
+    canonical_order = 2
+    model_size = 25
+    
+    tau_sys = TauSystem(dt, tau)
+    canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
+    ccdmp = CartesianCoordDMP(model_size, canonical_sys_discr, SCHAAL_LOCAL_COORD_FRAME)
+    qdmp = QuaternionDMP(model_size, canonical_sys_discr)
+    
+    cdmp_params = {}
+    cdmp_params["CartCoord"] = [None] * N_primitives
+    cdmp_params["Quaternion"] = [None] * N_primitives
+    for n_prim in range(N_primitives):
+        cdmp_params["CartCoord"][n_prim] = ccdmp.loadParamsAsDict(prims_params_dirpath+"/position/prim%d/"%(n_prim+1), 
+                                                                  file_name_weights="w", 
+                                                                  file_name_A_learn="A_learn", 
+                                                                  file_name_mean_start_position="start_global", 
+                                                                  file_name_mean_goal_position="goal_global", 
+                                                                  file_name_mean_tau="tau", 
+                                                                  file_name_canonical_system_order="canonical_sys_order", 
+                                                                  file_name_mean_start_position_global="start_global", 
+                                                                  file_name_mean_goal_position_global="goal_global", 
+                                                                  file_name_mean_start_position_local="start_local", 
+                                                                  file_name_mean_goal_position_local="goal_local", 
+                                                                  file_name_ctraj_local_coordinate_frame_selection="ctraj_local_coordinate_frame_selection", 
+                                                                  file_name_ctraj_hmg_transform_local_to_global_matrix="T_local_to_global_H", 
+                                                                  file_name_ctraj_hmg_transform_global_to_local_matrix="T_global_to_local_H")
+        cdmp_params["Quaternion"][n_prim] = qdmp.loadParamsAsDict(prims_params_dirpath+"/orientation/prim%d/"%(n_prim+1), 
+                                                                  file_name_weights="w", 
+                                                                  file_name_A_learn="A_learn", 
+                                                                  file_name_mean_start_position="start", 
+                                                                  file_name_mean_goal_position="goal", 
+                                                                  file_name_mean_tau="tau", 
+                                                                  file_name_canonical_system_order="canonical_sys_order")
+    return cdmp_params
