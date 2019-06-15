@@ -191,6 +191,10 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All",
     cdmp_unroll = {}
     cdmp_unroll["CartCoord"] = [None] * N_primitives
     cdmp_unroll["Quaternion"] = [None] * N_primitives
+    
+    cdmp_smoothened_trajs = {}
+    cdmp_smoothened_trajs["CartCoord"] = [None] * N_primitives
+    cdmp_smoothened_trajs["Quaternion"] = [None] * N_primitives
     for n_prim in prim_to_be_learned:
         print("Learning (Modified) Open-Loop Primitive #%d" % (n_prim+1))
         if (is_smoothing_training_traj_before_learning):
@@ -204,35 +208,35 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All",
             smoothing_mode = None
         
         [
-         ccdmp_critical_states_learn, 
-         ccdmp_W, 
-         ccdmp_mean_A_learn, 
-         ccdmp_mean_tau, 
-         _, _, _, _, _, 
-         _
+         [ccdmp_critical_states_learn, 
+          _, _, _, 
+          _, _, _, _, _, 
+          _], 
+         cdmp_smoothened_trajs["CartCoord"][n_prim]
          ] = ccdmp.learnFromSetTrajectories(cdmp_trajs["CartCoord"][n_prim], task_servo_rate, 
                                             is_smoothing_training_traj_before_learning=is_smoothing_training_traj_before_learning, 
                                             percentage_padding=percentage_padding, 
                                             percentage_smoothing_points=percentage_smoothing_points, 
                                             smoothing_mode=smoothing_mode, 
-                                            smoothing_cutoff_frequency=smoothing_cutoff_frequency
+                                            smoothing_cutoff_frequency=smoothing_cutoff_frequency, 
+                                            is_returning_smoothened_training_traj=True
                                             )
         cdmp_params["CartCoord"][n_prim] = ccdmp.getParamsAsDict()
         cdmp_params["CartCoord"][n_prim]["critical_states_learn"] = ccdmp_critical_states_learn
         
         [
-         qdmp_critical_states_learn, 
-         qdmp_W, 
-         qdmp_mean_A_learn, 
-         qdmp_mean_tau, 
-         _, _, _, _, _, 
-         _
+         [qdmp_critical_states_learn, 
+          _, _, _, 
+          _, _, _, _, _, 
+          _], 
+         cdmp_smoothened_trajs["Quaternion"][n_prim]
          ] = qdmp.learnFromSetTrajectories(cdmp_trajs["Quaternion"][n_prim], task_servo_rate, 
                                            is_smoothing_training_traj_before_learning=is_smoothing_training_traj_before_learning, 
                                            percentage_padding=percentage_padding, 
                                            percentage_smoothing_points=percentage_smoothing_points, 
                                            smoothing_mode=smoothing_mode, 
-                                           smoothing_cutoff_frequency=smoothing_cutoff_frequency
+                                           smoothing_cutoff_frequency=smoothing_cutoff_frequency, 
+                                           is_returning_smoothened_training_traj=True
                                            )
         cdmp_params["Quaternion"][n_prim] = qdmp.getParamsAsDict()
         cdmp_params["Quaternion"][n_prim]["critical_states_learn"] = qdmp_critical_states_learn
@@ -245,6 +249,17 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All",
                                                         cdmp_params["Quaternion"][n_prim]["mean_tau"], 
                                                         cdmp_params["Quaternion"][n_prim]["mean_tau"], 
                                                         dt)
+        py_util.computeAndDisplayTrajectoryNMSE(cdmp_trajs["CartCoord"][n_prim], cdmp_unroll["CartCoord"][n_prim], 
+                                                print_prefix="CartCoord  Prim. #%d w.r.t. Original   Demo Trajs " % (n_prim+1), is_orientation_trajectory=False)
+        py_util.computeAndDisplayTrajectoryNMSE(cdmp_trajs["Quaternion"][n_prim], cdmp_unroll["Quaternion"][n_prim], 
+                                                print_prefix="Quaternion Prim. #%d w.r.t. Original   Demo Trajs " % (n_prim+1), is_orientation_trajectory=True)
+        print("")
+        py_util.computeAndDisplayTrajectoryNMSE(cdmp_smoothened_trajs["CartCoord"][n_prim], cdmp_unroll["CartCoord"][n_prim], 
+                                                print_prefix="CartCoord  Prim. #%d w.r.t. Smoothened Demo Trajs " % (n_prim+1), is_orientation_trajectory=False)
+        py_util.computeAndDisplayTrajectoryNMSE(cdmp_smoothened_trajs["Quaternion"][n_prim], cdmp_unroll["Quaternion"][n_prim], 
+                                                print_prefix="Quaternion Prim. #%d w.r.t. Smoothened Demo Trajs " % (n_prim+1), is_orientation_trajectory=True)
+        print("")
+        print("")
         
         if (is_plotting):
             ccdmp.plotDemosVsUnroll(cdmp_trajs["CartCoord"][n_prim], cdmp_unroll["CartCoord"][n_prim], 

@@ -102,7 +102,8 @@ class DMP:
     
     def learnFromSetTrajectories(self, set_traj_input, robot_task_servo_rate, 
                                  is_smoothing_training_traj_before_learning=False, 
-                                 percentage_padding=None, percentage_smoothing_points=None, smoothing_mode=None, smoothing_cutoff_frequency=None):
+                                 percentage_padding=None, percentage_smoothing_points=None, smoothing_mode=None, smoothing_cutoff_frequency=None, 
+                                 is_returning_smoothened_training_traj=False):
         if (is_smoothing_training_traj_before_learning):
             processed_set_traj_input = list()
             for traj_input in set_traj_input:
@@ -114,7 +115,10 @@ class DMP:
                                                                                              smoothing_cutoff_frequency=smoothing_cutoff_frequency))
         else:
             processed_set_traj_input = set_traj_input
-        return self.learnGetDefaultUnrollParams(processed_set_traj_input, robot_task_servo_rate)
+        if (not is_returning_smoothened_training_traj):
+            return self.learnGetDefaultUnrollParams(processed_set_traj_input, robot_task_servo_rate)
+        else:
+            return self.learnGetDefaultUnrollParams(processed_set_traj_input, robot_task_servo_rate), processed_set_traj_input
     
     def learnGetDefaultUnrollParams(self, set_traj_input, robot_task_servo_rate):
         W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI = self.learn(set_traj_input, robot_task_servo_rate)

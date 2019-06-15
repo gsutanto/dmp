@@ -185,3 +185,62 @@ def deleteAllCLMCDataFilesInDirectory(directory_path):
     for dfilepath in dfilepaths:
         os.remove(dfilepath)
     return None
+
+def computeAndDisplayTrajectoryNMSE(set_demo_trajs, unroll_traj, print_prefix="", is_orientation_trajectory=False):
+    # assumes trajectory structure like DMPTrajectory or QuaternionDMPTrajectory
+    unroll_traj_position = unroll_traj.X
+    if (not is_orientation_trajectory):
+        unroll_traj_velocity = unroll_traj.Xd
+        unroll_traj_acceleration = unroll_traj.Xdd
+    else:
+        unroll_traj_velocity = unroll_traj.omega
+        unroll_traj_acceleration = unroll_traj.omegad
+    stretched_unroll_traj_position_list = list()
+    stretched_unroll_traj_velocity_list = list()
+    stretched_unroll_traj_acceleration_list = list()
+    demo_traj_position_list = list()
+    demo_traj_velocity_list = list()
+    demo_traj_acceleration_list = list()
+    for demo_traj in set_demo_trajs:
+        demo_traj_position = demo_traj.X
+        if (not is_orientation_trajectory):
+            demo_traj_velocity = demo_traj.Xd
+            demo_traj_acceleration = demo_traj.Xdd
+        else:
+            demo_traj_velocity = demo_traj.omega
+            demo_traj_acceleration = demo_traj.omegad
+        demo_traj_position_list.append(demo_traj_position)
+        demo_traj_velocity_list.append(demo_traj_velocity)
+        demo_traj_acceleration_list.append(demo_traj_acceleration)
+        
+        demo_traj_length = demo_traj_position.shape[1]
+        
+        if (unroll_traj_position.shape[1] != demo_traj_length):
+            stretched_unroll_traj_position = stretchTrajectory( unroll_traj_position, demo_traj_length )
+            stretched_unroll_traj_velocity = stretchTrajectory( unroll_traj_velocity, demo_traj_length )
+            stretched_unroll_traj_acceleration = stretchTrajectory( unroll_traj_acceleration, demo_traj_length )
+        else:
+            stretched_unroll_traj_position = unroll_traj_position
+            stretched_unroll_traj_velocity = unroll_traj_velocity
+            stretched_unroll_traj_acceleration = unroll_traj_acceleration
+        stretched_unroll_traj_position_list.append(stretched_unroll_traj_position)
+        stretched_unroll_traj_velocity_list.append(stretched_unroll_traj_velocity)
+        stretched_unroll_traj_acceleration_list.append(stretched_unroll_traj_acceleration)
+    stacked_stretched_unroll_traj_position = np.hstack(stretched_unroll_traj_position_list)
+    stacked_stretched_unroll_traj_velocity = np.hstack(stretched_unroll_traj_velocity_list)
+    stacked_stretched_unroll_traj_acceleration = np.hstack(stretched_unroll_traj_acceleration_list)
+    stacked_demo_traj_position = np.hstack(demo_traj_position_list)
+    stacked_demo_traj_velocity = np.hstack(demo_traj_velocity_list)
+    stacked_demo_traj_acceleration = np.hstack(demo_traj_acceleration_list)
+    NMSE_position = computeNMSE(predictions=stacked_stretched_unroll_traj_position, ground_truth=stacked_demo_traj_position, axis=1)
+    NMSE_velocity = computeNMSE(predictions=stacked_stretched_unroll_traj_velocity, ground_truth=stacked_demo_traj_velocity, axis=1)
+    NMSE_acceleration = computeNMSE(predictions=stacked_stretched_unroll_traj_acceleration, ground_truth=stacked_demo_traj_acceleration, axis=1)
+    if (not is_orientation_trajectory):
+        print (print_prefix + "X      NMSE = " + str(NMSE_position))
+        print (print_prefix + "Xd     NMSE = " + str(NMSE_velocity))
+        print (print_prefix + "Xdd    NMSE = " + str(NMSE_acceleration))
+    else:
+        print (print_prefix + "Q      NMSE = " + str(NMSE_position))
+        print (print_prefix + "omega  NMSE = " + str(NMSE_velocity))
+        print (print_prefix + "omegad NMSE = " + str(NMSE_acceleration))
+    return None
