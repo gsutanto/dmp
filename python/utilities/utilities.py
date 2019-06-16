@@ -243,4 +243,4 @@ def computeAndDisplayTrajectoryNMSE(set_demo_trajs, unroll_traj, print_prefix=""
         print (print_prefix + "Q      NMSE = " + str(NMSE_position))
         print (print_prefix + "omega  NMSE = " + str(NMSE_velocity))
         print (print_prefix + "omegad NMSE = " + str(NMSE_acceleration))
-    return None
+    return NMSE_position, NMSE_velocity, NMSE_acceleration

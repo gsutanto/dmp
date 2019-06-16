@@ -254,10 +254,12 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All",
         py_util.computeAndDisplayTrajectoryNMSE(cdmp_trajs["Quaternion"][n_prim], cdmp_unroll["Quaternion"][n_prim], 
                                                 print_prefix="Quaternion Prim. #%d w.r.t. Original   Demo Trajs " % (n_prim+1), is_orientation_trajectory=True)
         print("")
-        py_util.computeAndDisplayTrajectoryNMSE(cdmp_smoothened_trajs["CartCoord"][n_prim], cdmp_unroll["CartCoord"][n_prim], 
-                                                print_prefix="CartCoord  Prim. #%d w.r.t. Smoothened Demo Trajs " % (n_prim+1), is_orientation_trajectory=False)
-        py_util.computeAndDisplayTrajectoryNMSE(cdmp_smoothened_trajs["Quaternion"][n_prim], cdmp_unroll["Quaternion"][n_prim], 
-                                                print_prefix="Quaternion Prim. #%d w.r.t. Smoothened Demo Trajs " % (n_prim+1), is_orientation_trajectory=True)
+        [nmse_smoothened_X, _, _
+         ]= py_util.computeAndDisplayTrajectoryNMSE(cdmp_smoothened_trajs["CartCoord"][n_prim], cdmp_unroll["CartCoord"][n_prim], 
+                                                    print_prefix="CartCoord  Prim. #%d w.r.t. Smoothened Demo Trajs " % (n_prim+1), is_orientation_trajectory=False)
+        [nmse_smoothened_Q, _, _
+         ]= py_util.computeAndDisplayTrajectoryNMSE(cdmp_smoothened_trajs["Quaternion"][n_prim], cdmp_unroll["Quaternion"][n_prim], 
+                                                    print_prefix="Quaternion Prim. #%d w.r.t. Smoothened Demo Trajs " % (n_prim+1), is_orientation_trajectory=True)
         print("")
         print("")
         
@@ -266,6 +268,10 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All",
                                     title_suffix=" Prim. #%d" % (n_prim+1), fig_num_offset=6*n_prim)
             qdmp.plotDemosVsUnroll(cdmp_trajs["Quaternion"][n_prim], cdmp_unroll["Quaternion"][n_prim], 
                                    title_suffix=" Prim. #%d" % (n_prim+1), fig_num_offset=(6*n_prim)+3)
+        
+        if (n_prim != 1): # 2nd primitive's position DMP fitting maybe bad because there's no change in position (no position movement)
+            assert ((nmse_smoothened_X < 1.0).all())
+        assert ((nmse_smoothened_Q < 1.0).all())
         
     return cdmp_params, cdmp_unroll
 
