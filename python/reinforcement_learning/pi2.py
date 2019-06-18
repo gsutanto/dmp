@@ -34,10 +34,14 @@ class Pi2():
             soft-max probabilities of the policy samples.
     """
     def __init__(self, kl_threshold = 1.0, covariance_damping = 0.0,
-                       min_temperature = 0.001):
+                       min_temperature = 0.001, 
+                       is_computing_eta_per_timestep = True, 
+                       is_printing_min_eta_warning = False):
         self._kl_threshold = kl_threshold
         self._covariance_damping = covariance_damping
         self._min_temperature = min_temperature
+        self._is_computing_eta_per_timestep = is_computing_eta_per_timestep
+        self._is_printing_min_eta_warning = is_printing_min_eta_warning
     
     def update(self, samples, costs, mean_old, cov_old):        
         """
@@ -63,36 +67,36 @@ class Pi2():
         assert (mean_old.shape == (D_params,))
         assert (cov_old.shape  == (D_params,D_params))
         
+        epsilon = 1.0e-38
+        
+        mean_new_per_timestep = np.zeros((T,D_params))
+        cov_new_per_timestep  = np.zeros((T,D_params,D_params))
+        
+        # Compute cost-to-go for each time step for each sample.
         cost_to_go_per_timestep = np.zeros((N_samples,T))
         cost_to_go_per_timestep[:,T-1] = costs[:,T-1]
         for t in xrange(T-2,-1,-1):
             cost_to_go_per_timestep[:,t] = costs[:,t] + cost_to_go_per_timestep[:,t+1]
         
-        mean_new_per_timestep = np.zeros((T,D_params))
-        cov_new_per_timestep  = np.zeros((T,D_params,D_params))
+        if (not self._is_computing_eta_per_timestep): # NOT quite working well...
+            [normalized_cost_to_go_per_timestep_vectorized, eta
+             ] = self.normalizeCostAndComputeTemperatureParameterEta(np.reshape(cost_to_go_per_timestep, 
+                                                                                (N_samples*T,)), epsilon)
+            normalized_cost_to_go_per_timestep = np.reshape(normalized_cost_to_go_per_timestep_vectorized, 
+                                                            (N_samples,T))
         
-        epsilon = 1.0e-10
-
         # Iterate over time steps.
         for t in xrange(T):
-            # Compute cost-to-go for each time step for each sample.           
-            cost_to_go = np.sum(costs[:, t:T], axis=1)
-            
-            # Normalize costs.
-            min_cost_to_go = np.min(cost_to_go)
-            max_cost_to_go = np.max(cost_to_go)
-            cost_to_go = (cost_to_go - min_cost_to_go) / (
-                max_cost_to_go - min_cost_to_go + epsilon)
-
-            # Perform REPS-like optimization of the temperature eta.
-            res = minimize(self.KL_dual, 1.0, bounds=((self._min_temperature, 
-                                                       None),), 
-                           args=(self._kl_threshold, cost_to_go))
-            eta = res.x
+            if (self._is_computing_eta_per_timestep):
+                cost_to_go = cost_to_go_per_timestep[:,t]
+                [normalized_cost_to_go, eta
+                 ] = self.normalizeCostAndComputeTemperatureParameterEta(cost_to_go, epsilon)
+            else: # NOT quite working well...
+                normalized_cost_to_go = normalized_cost_to_go_per_timestep[:,t]
 
             # Compute probabilities of each sample.
-            exp_cost = np.exp(-cost_to_go / eta)
-            prob = exp_cost / np.sum(exp_cost)
+            exp_cost = np.exp(-normalized_cost_to_go / eta)
+            prob = exp_cost / (np.sum(exp_cost) + epsilon)
 
             # Update policy mean with weighted max-likelihood.
             mean_new_per_timestep[t] = np.sum(prob[:, np.newaxis] * samples, axis=0)
@@ -127,7 +131,22 @@ class Pi2():
         chol_cov_new = sp.linalg.cholesky(cov_new)
 
         return mean_new, cov_new, inv_cov_new, chol_cov_new
+    
+    def normalizeCostAndComputeTemperatureParameterEta(self, costs, epsilon=1.0e-10):
+        # Normalize costs.
+        min_cost = np.min(costs)
+        max_cost = np.max(costs)
+        normalized_costs = ((costs - min_cost) / (max_cost - min_cost + epsilon))
 
+        # Perform REPS-like optimization of the temperature eta.
+        res = minimize(self.KL_dual, 1.0, bounds=((self._min_temperature, 
+                                                   None),), 
+                       args=(self._kl_threshold, normalized_costs))
+        eta = res.x
+        if (self._is_printing_min_eta_warning and (eta <= self._min_temperature)):
+            print("WARNING: minimum temperature parameter eta is attained; eta = %f" % eta)
+        return normalized_costs, eta
+    
     def KL_dual(self, eta, kl_threshold, costs):
         """
         Dual function for optimizing the temperature eta according to the given

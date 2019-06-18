@@ -25,7 +25,8 @@ def pi2_test():
     N_sample = 15
     N_timestep = 200
     
-    pi2_opt = Pi2(kl_threshold = 1.0, covariance_damping = 2.0)
+    pi2_opt = Pi2(kl_threshold = 1.0, covariance_damping = 2.0, 
+                  is_computing_eta_per_timestep = True)
     
     # initialization:
     position_mean = start
@@ -41,8 +42,8 @@ def pi2_test():
         position_costs_max = npla.norm(goal[np.newaxis,:] - position_samples, axis=1, ord=2)
         position_costs = position_costs_max[:,np.newaxis] * timestep_multipliers[np.newaxis,:]
         [position_mean, position_cov, _, _
-         ]  = pi2_opt.update(position_samples, position_costs, 
-                             position_mean, position_cov)
+         ] = pi2_opt.update(position_samples, position_costs, 
+                            position_mean, position_cov)
     
     return None
 
