@@ -33,6 +33,9 @@ N_total_sense_dimensionality = 45
 N_primitives = 3
 prim_to_be_improved = [1,2] # 2nd and 3rd primitives
 
+# not sure if the original (nominal) primitives below is needed or not...:
+orig_cdmp_params = rl_util.loadPrimsParamsAsDictFromDirPath(orig_prims_params_dirpath, N_primitives)
+
 if (is_deleting_dfiles):
     # initialization by removing all SL data files inside sl_data_dirpath
     py_util.deleteAllCLMCDataFilesInDirectory(sl_data_dirpath)
@@ -56,8 +59,12 @@ cdmp_trajs = rl_util.extractCartDMPTrajectoriesFromUnrollResults(rl_data[0])
                                      is_smoothing_training_traj_before_learning=is_smoothing_training_traj_before_learning, 
                                      is_plotting=is_plotting)
 
-orig_cdmp_params = rl_util.loadPrimsParamsAsDictFromDirPath(orig_prims_params_dirpath, N_primitives)
-
 if (is_deleting_dfiles):
     py_util.deleteAllCLMCDataFilesInDirectory(sl_data_dirpath)
 
+# set to-be-perturbed DMP params (2nd dimension of orientation) as mean, and define the initial covariance matrix
+# sample K perturbed DMP params from the multivariate normal distribution with mean and cov parameters (and log these K samples of perturbed DMP params)
+# For Debugging via visualizations: unroll each of these K perturbed DMP params, log the unrolled trajectories, and visualize them as plots (as needed)
+# save these K perturbed DMP params (one at a time) as text files, to be loaded by C++ program and executed by the robot, to evaluate each of their costs.
+# summarize these K perturbed DMP params into mean_new and cov_new using PI2 update, based on each of their cost
+# save mean_new (which is a DMP params by itself) as text files, to be loaded by C++ program and executed by the robot, to evaluate its cost Nu times, to ensure the average cost is really lower than the original one

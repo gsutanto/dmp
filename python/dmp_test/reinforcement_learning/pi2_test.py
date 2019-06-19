@@ -20,7 +20,7 @@ def pi2_test():
     D = 2
     goal = np.ones(D)
     start = np.zeros(D)
-    init_std = 0.05
+    init_std = 0.1
     N_iter = 1000
     N_sample = 15
     N_timestep = 200
