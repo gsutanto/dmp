@@ -19,17 +19,17 @@ N_total_sense_dimensionality    = 45;
 
 env_setting_name        = 'n5';
 unroll_types            = {'b', 'c'};   % 'b' = baseline; 'c' = coupled
-prim2_Rewards           = cell(size(unroll_types));
-prim3_Rewards           = cell(size(unroll_types));
-prim2_aveRewards        = cell(size(unroll_types));
-prim3_aveRewards        = cell(size(unroll_types));
+prim2_costs           = cell(size(unroll_types));
+prim3_costs           = cell(size(unroll_types));
+prim2_avecosts        = cell(size(unroll_types));
+prim3_avecosts        = cell(size(unroll_types));
 disp(['Environment Setting ', env_setting_name]);
 for uti = 1:length(unroll_types)
     data_dir_path       = [homepath,'/Desktop/dmp_robot_unroll_results/scraping/',experiment_name,'/robot/',env_setting_name,'/',unroll_types{1,uti}];
     data_files          = dir([data_dir_path,'/d*']);
     N_files             = length(data_files);
-    prim2_Rewards{1,uti}= zeros(N_files, 1);
-    prim3_Rewards{1,uti}= zeros(N_files, 1);
+    prim2_costs{1,uti}= zeros(N_files, 1);
+    prim3_costs{1,uti}= zeros(N_files, 1);
     n_file              = 0;
     for data_file = data_files'
         n_file          = n_file + 1;
@@ -48,12 +48,12 @@ for uti = 1:length(unroll_types)
         prim2_X_vector  = X_vector(prim2_indices,:);
         prim3_X_vector  = X_vector(prim3_indices,:);
 
-        prim2_Rewards{1,uti}(n_file,1)  = -norm(prim2_X_vector);
-        prim3_Rewards{1,uti}(n_file,1)  = -norm(prim3_X_vector);
+        prim2_costs{1,uti}(n_file,1)  = sum(sum(prim2_X_vector .^ 2));
+        prim3_costs{1,uti}(n_file,1)  = sum(sum(prim3_X_vector .^ 2));
     end
-    prim2_aveRewards{1,uti}  = mean(prim2_Rewards{1,uti});
-    prim3_aveRewards{1,uti}  = mean(prim3_Rewards{1,uti});
+    prim2_avecosts{1,uti}  = mean(prim2_costs{1,uti});
+    prim3_avecosts{1,uti}  = mean(prim3_costs{1,uti});
     disp(['   Unroll Type ', unroll_types{1,uti}]);
-    disp(['      Prim. 2 Average Reward = ', num2str(prim2_aveRewards{1,uti})]);
-    disp(['      Prim. 3 Average Reward = ', num2str(prim3_aveRewards{1,uti})]);
+    disp(['      Prim. 2 Average cost = ', num2str(prim2_avecosts{1,uti})]);
+    disp(['      Prim. 3 Average cost = ', num2str(prim3_avecosts{1,uti})]);
 end

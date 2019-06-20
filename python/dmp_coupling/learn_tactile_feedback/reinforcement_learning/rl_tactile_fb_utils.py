@@ -40,7 +40,7 @@ def computeNPrimitives(prim_id_list):
     assert(max(valid_prim_ids) == N_prim - 1)
     return N_prim
 
-def extractUnrollResultFromCLMCDataFile(dfilepath, N_reward_components):
+def extractUnrollResultFromCLMCDataFile(dfilepath, N_cost_components):
     clmcfile = clmcplot_util.ClmcFile(dfilepath)
     prim_id = clmcfile.get_variables(["ul_curr_prim_no"])[0].T
     N_primitives = computeNPrimitives(prim_id)
@@ -73,9 +73,9 @@ def extractUnrollResultFromCLMCDataFile(dfilepath, N_reward_components):
     assert(omegadT.shape[1] == dim_omega)
     
     # trajectory of Delta S:
-    DeltaST = np.vstack([clmcfile.get_variables(["X_vector_%02d" % i for i in range(N_reward_components)])]).T
+    DeltaST = np.vstack([clmcfile.get_variables(["X_vector_%02d" % i for i in range(N_cost_components)])]).T
     assert(DeltaST.shape[0] == prim_id.shape[0])
-    assert(DeltaST.shape[1] == N_reward_components)
+    assert(DeltaST.shape[1] == N_cost_components)
     
     unroll_trajectory = {}
     unroll_trajectory["filepath"] = dfilepath
@@ -88,7 +88,8 @@ def extractUnrollResultFromCLMCDataFile(dfilepath, N_reward_components):
     unroll_trajectory["omegaT"] = [None] * N_primitives
     unroll_trajectory["omegadT"] = [None] * N_primitives
     unroll_trajectory["DeltaST"] = [None] * N_primitives
-    unroll_reward = [None] * N_primitives
+    unroll_trajectory["cost_per_timestep"] = [None] * N_primitives
+    unroll_cost = [None] * N_primitives
     for ip in range(N_primitives):
         unroll_trajectory["id"][ip] = np.where(prim_id == ip)[0]
         unroll_trajectory["timeT"][ip] = timeT[unroll_trajectory["id"][ip],:]
@@ -99,28 +100,30 @@ def extractUnrollResultFromCLMCDataFile(dfilepath, N_reward_components):
         unroll_trajectory["omegaT"][ip] = omegaT[unroll_trajectory["id"][ip],:]
         unroll_trajectory["omegadT"][ip] = omegadT[unroll_trajectory["id"][ip],:]
         unroll_trajectory["DeltaST"][ip] = DeltaST[unroll_trajectory["id"][ip],:]
-        unroll_reward[ip] = -npla.norm(unroll_trajectory["DeltaST"][ip], ord=2)
-    return unroll_trajectory, unroll_reward
+        unroll_trajectory["cost_per_timestep"][ip] = py_util.computeSumSquaredL2Norm(unroll_trajectory["DeltaST"][ip],
+                                                                                     axis=1).reshape((len(unroll_trajectory["id"][ip]),1))
+        unroll_cost[ip] = np.sum(unroll_trajectory["cost_per_timestep"][ip])
+    return unroll_trajectory, unroll_cost
 
 def extractUnrollResultsFromCLMCDataFilesInDirectory(directory_path, 
                                                      N_primitives, 
-                                                     N_reward_components):
+                                                     N_cost_components):
     unroll_results = {}
     unroll_results["trajectory"] = list()
-    unroll_results["reward_per_trial"] = list()
+    unroll_results["accum_cost_per_trial"] = list()
     init_new_env_dfilepaths = py_util.getAllCLMCDataFilePathsInDirectory(directory_path)
     for init_new_env_dfilepath in init_new_env_dfilepaths:
-        print("Computing rewards from datafile %s..." % init_new_env_dfilepath)
+        print("Computing costs from datafile %s..." % init_new_env_dfilepath)
         [
          trial_unroll_traj, 
-         trial_unroll_reward
+         trial_unroll_cost
         ] = extractUnrollResultFromCLMCDataFile(init_new_env_dfilepath, 
-                                                N_reward_components=N_reward_components)
-        assert (len(trial_unroll_reward) == N_primitives)
+                                                N_cost_components=N_cost_components)
+        assert (len(trial_unroll_cost) == N_primitives)
         unroll_results["trajectory"].append(trial_unroll_traj)
-        unroll_results["reward_per_trial"].append(trial_unroll_reward)
-    all_trial_prim_rewards = np.vstack(unroll_results["reward_per_trial"])
-    unroll_results["mean_reward"] = np.mean(all_trial_prim_rewards, axis=0)
+        unroll_results["accum_cost_per_trial"].append(trial_unroll_cost)
+    all_trial_prim_costs = np.vstack(unroll_results["accum_cost_per_trial"])
+    unroll_results["mean_accum_cost"] = np.mean(all_trial_prim_costs, axis=0)
     return unroll_results
 
 def extractCartDMPTrajectoriesFromUnrollResults(unroll_results, 

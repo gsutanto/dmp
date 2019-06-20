@@ -38,6 +38,9 @@ def computeWNMSE(predictions, ground_truth, weight, axis=0):
     wnmse = np.divide(wmse, wvar_gt)    # Normalized Weighted Mean-Squared Error (NWMSE)
     return wnmse
 
+def computeSumSquaredL2Norm(matrix, axis=None):
+    return np.sum(np.square(matrix), axis=axis)
+
 def compareTwoNumericFiles(file_1_path, file_2_path, 
                            scalar_max_abs_diff_threshold=1.001e-5, 
                            scalar_max_rel_abs_diff_threshold=1.001e-5, 
