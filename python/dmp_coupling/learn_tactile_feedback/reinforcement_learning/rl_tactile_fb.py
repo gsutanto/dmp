@@ -8,6 +8,7 @@ Created on Fri May 10 17:00:00 2019
 
 import os
 import sys
+import copy
 import numpy as np
 import numpy.linalg as npla
 import scipy.io as sio
@@ -31,11 +32,15 @@ is_plotting = True#False
 
 N_total_sense_dimensionality = 45
 N_primitives = 3
+K_PI2_samples = 75 # K
+
 #prims_tbi = [1,2] # TODO (un-comment): 2nd and 3rd primitives are to-be-improved (tbi)
 prims_tbi = [1] # TODO (comment): for testing purpose we work on 2nd primitive only as the one to-be-improved (tbi)
+cart_dim_tbi_dict = {}
+cart_dim_tbi_dict["Quaternion"] = np.array([1]) # to-be-improved (tbi): Quaternion DMP, 2nd dimension
+cart_types_tbi_list = cart_dim_tbi_dict.keys()
+
 cost_threshold = [0.0, 18928850.8053, 11066375.797]
-cart_dim_tbi = {}
-cart_dim_tbi["Quaternion"] = np.array([1]) # to-be-improved (tbi): Quaternion DMP, 2nd dimension
 
 # not sure if the original (nominal) primitives below is needed or not...:
 #orig_cdmp_params = rl_util.loadPrimsParamsAsDictFromDirPath(orig_prims_params_dirpath, N_primitives)
@@ -86,15 +91,30 @@ for prim_tbi in prims_tbi:
         
         # TODO: check (assert?) if J' is closely similar to J?
         
-        for cart_type_tbi in cart_dim_tbi.keys():
-            # set to-be-perturbed DMP params (2nd dimension of orientation) as mean, and define the initial covariance matrix
-            param_mean = rl_data[prim_tbi][it]["cdmp_params_all_dim_learned"][cart_type_tbi][prim_tbi]["W"][cart_dim_tbi[cart_type_tbi],:]
-            # param_cov = 
-            
-            assert False
-            
-            # TODO: sample K perturbed DMP params from the multivariate normal distribution with mean and cov parameters (and log these K samples of perturbed DMP params)
-            # TODO: For Debugging via visualizations: unroll each of these K perturbed DMP params, log the unrolled trajectories, and visualize them as plots (as needed)
-            # TODO: save these K perturbed DMP params (one at a time) as text files, to be loaded by C++ program and executed by the robot, to evaluate each of their costs.
-            # TODO: summarize these K perturbed DMP params into mean_new and cov_new using PI2 update, based on each of their cost
-            # TODO: save mean_new (which is a DMP params by itself) as text files, to be loaded by C++ program and executed by the robot, to evaluate its cost Nu times, to ensure the average cost is really lower than the original one
+        # set to-be-perturbed DMP params as mean, and define the initial covariance matrix
+        [param_mean, param_dim_list
+         ] = rl_util.extractParamsToBeImproved(rl_data[prim_tbi][it]["cdmp_params_all_dim_learned"], 
+                                               cart_dim_tbi_dict, cart_types_tbi_list, prim_tbi)
+        param_init_std = rl_util.computeParamInitStdHeuristic(param_mean)
+        param_cov = np.diag(np.ones(len(param_mean)) * (param_init_std * param_init_std))
+        
+        param_samples = np.random.multivariate_normal(param_mean, param_cov, K_PI2_samples)
+        
+        rl_data[prim_tbi][it]["PI2_samples"] = {}
+        for k in range(K_PI2_samples):
+            param_sample = param_samples[k,:]
+            rl_data[prim_tbi][it]["PI2_samples"][k] = {}
+            rl_data[prim_tbi][it]["PI2_samples"][k]["cdmp_params_all_dim_learned"] = copy.deepcopy(rl_data[prim_tbi][it]["cdmp_params_all_dim_learned"])
+            rl_data[prim_tbi][it]["PI2_samples"][k]["cdmp_params_all_dim_learned"] = rl_util.updateParamsToBeImproved(rl_data[prim_tbi][it]["PI2_samples"][k]["cdmp_params_all_dim_learned"], 
+                                                                                                                      cart_dim_tbi_dict, 
+                                                                                                                      cart_types_tbi_list, 
+                                                                                                                      prim_tbi, 
+                                                                                                                      param_sample, 
+                                                                                                                      param_dim_list)
+        
+        assert False
+        
+        # TODO: For Debugging via visualizations: unroll each of these K perturbed DMP params, log the unrolled trajectories, and visualize them as plots (as needed)
+        # TODO: save these K perturbed DMP params (one at a time) as text files, to be loaded by C++ program and executed by the robot, to evaluate each of their costs.
+        # TODO: summarize these K perturbed DMP params into mean_new and cov_new using PI2 update, based on each of their cost
+        # TODO: save mean_new (which is a DMP params by itself) as text files, to be loaded by C++ program and executed by the robot, to evaluate its cost Nu times, to ensure the average cost is really lower than the original one

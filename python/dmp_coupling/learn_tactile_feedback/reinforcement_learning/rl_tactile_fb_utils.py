@@ -316,3 +316,32 @@ def loadPrimsParamsAsDictFromDirPath(prims_params_dirpath, N_primitives):
                                                                   file_name_mean_tau="tau", 
                                                                   file_name_canonical_system_order="canonical_sys_order")
     return cdmp_params
+
+def extractParamsToBeImproved(params_dict, type_dim_tbi_dict, types_tbi_list, prim_tbi):
+    params_tbi_list = list()
+    params_tbi_dims_list = list()
+    for type_tbi in types_tbi_list:
+        params_tbi_dims = [len(type_dim_tbi_dict[type_tbi]), params_dict[type_tbi][prim_tbi]["W"].shape[1]]
+        params_tbi_length = params_tbi_dims[0] * params_tbi_dims[1]
+        params_tbi_list.append(params_dict[type_tbi][prim_tbi]["W"][type_dim_tbi_dict[type_tbi],:].reshape(params_tbi_length,1))
+        params_tbi_dims_list.append(params_tbi_dims)
+    params_tbi_column_vector = np.vstack(params_tbi_list)
+    params_tbi = params_tbi_column_vector.reshape((params_tbi_column_vector.shape[0],))
+    return params_tbi, params_tbi_dims_list
+
+def updateParamsToBeImproved(params_dict, type_dim_tbi_dict, types_tbi_list, prim_tbi, params_tbi, params_tbi_dims_list):
+    # the opposite operation of extractParamsToBeImproved():
+    params_tbi_addr_offset = 0
+    params_tbi_dims_list_idx = 0
+    for type_tbi in types_tbi_list:
+        params_tbi_dims = params_tbi_dims_list[params_tbi_dims_list_idx]
+        params_tbi_length = params_tbi_dims[0] * params_tbi_dims[1]
+        params_dict[type_tbi][prim_tbi]["W"][type_dim_tbi_dict[type_tbi],:] = params_tbi[params_tbi_addr_offset:(params_tbi_addr_offset+params_tbi_length)].reshape(params_tbi_dims)
+        params_tbi_addr_offset += params_tbi_length
+        params_tbi_dims_list_idx += 1
+    return params_dict
+
+def computeParamInitStdHeuristic(param_mean):
+    params_extrema_to_init_std_factor = 0.5
+    param_init_std = params_extrema_to_init_std_factor * (0.5 * (np.max(np.fabs(param_mean)) + np.min(np.fabs(param_mean))))
+    return param_init_std
