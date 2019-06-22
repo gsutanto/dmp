@@ -100,17 +100,23 @@ for prim_tbi in prims_tbi:
         
         param_samples = np.random.multivariate_normal(param_mean, param_cov, K_PI2_samples)
         
-        rl_data[prim_tbi][it]["PI2_samples"] = {}
+        rl_data[prim_tbi][it]["PI2_params_samples"] = {}
         for k in range(K_PI2_samples):
             param_sample = param_samples[k,:]
-            rl_data[prim_tbi][it]["PI2_samples"][k] = {}
-            rl_data[prim_tbi][it]["PI2_samples"][k]["cdmp_params_all_dim_learned"] = copy.deepcopy(rl_data[prim_tbi][it]["cdmp_params_all_dim_learned"])
-            rl_data[prim_tbi][it]["PI2_samples"][k]["cdmp_params_all_dim_learned"] = rl_util.updateParamsToBeImproved(rl_data[prim_tbi][it]["PI2_samples"][k]["cdmp_params_all_dim_learned"], 
-                                                                                                                      cart_dim_tbi_dict, 
-                                                                                                                      cart_types_tbi_list, 
-                                                                                                                      prim_tbi, 
-                                                                                                                      param_sample, 
-                                                                                                                      param_dim_list)
+            rl_data[prim_tbi][it]["PI2_params_samples"][k] = {}
+            rl_data[prim_tbi][it]["PI2_params_samples"][k]["cdmp_params_all_dim_learned"] = copy.deepcopy(rl_data[prim_tbi][it]["cdmp_params_all_dim_learned"])
+            rl_data[prim_tbi][it]["PI2_params_samples"][k]["cdmp_params_all_dim_learned"] = rl_util.updateParamsToBeImproved(rl_data[prim_tbi][it]["PI2_params_samples"][k]["cdmp_params_all_dim_learned"], 
+                                                                                                                             cart_dim_tbi_dict, 
+                                                                                                                             cart_types_tbi_list, 
+                                                                                                                             prim_tbi, 
+                                                                                                                             param_sample, 
+                                                                                                                             param_dim_list)
+        
+        rl_data[prim_tbi][it]["PI2_unroll_samples"] = rl_util.unrollPI2ParamsSamples(pi2_params_samples=rl_data[prim_tbi][it]["PI2_params_samples"], 
+                                                                                     prim_to_be_improved=prim_tbi, 
+                                                                                     cart_types_to_be_improved=cart_types_tbi_list, 
+                                                                                     pi2_unroll_mean=rl_data[prim_tbi][it]["cdmp_unroll_all_dim_learned"], 
+                                                                                     is_plotting=is_plotting)
         
         assert False
         

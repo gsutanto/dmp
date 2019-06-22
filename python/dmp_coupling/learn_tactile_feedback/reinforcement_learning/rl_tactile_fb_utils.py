@@ -32,6 +32,17 @@ dim_cart = 3
 dim_Q = 4
 dim_omega = 3
 
+task_servo_rate = 300.0
+dt = 1.0/task_servo_rate
+tau = MIN_TAU
+canonical_order = 2
+model_size = 25
+
+tau_sys = TauSystem(dt, tau)
+canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
+ccdmp = CartesianCoordDMP(model_size, canonical_sys_discr, SCHAAL_LOCAL_COORD_FRAME)
+qdmp = QuaternionDMP(model_size, canonical_sys_discr)
+    
 def computeNPrimitives(prim_id_list):
     prim_ids = list(set(prim_id_list))
     prim_ids.sort()
@@ -167,12 +178,6 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All",
     if (prim_to_be_learned is "All"):
         prim_to_be_learned = range(N_primitives)
     
-    task_servo_rate = 300.0
-    dt = 1.0/task_servo_rate
-    tau = MIN_TAU
-    canonical_order = 2
-    model_size = 25
-    
     if (is_smoothing_training_traj_before_learning):
         percentage_padding = 1.5
         percentage_smoothing_points = 3.0
@@ -181,11 +186,6 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All",
         percentage_padding = None
         percentage_smoothing_points = None
         smoothing_cutoff_frequency = None
-    
-    tau_sys = TauSystem(dt, tau)
-    canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
-    ccdmp = CartesianCoordDMP(model_size, canonical_sys_discr, SCHAAL_LOCAL_COORD_FRAME)
-    qdmp = QuaternionDMP(model_size, canonical_sys_discr)
     
     cdmp_params = {}
     cdmp_params["CartCoord"] = [None] * N_primitives
@@ -278,18 +278,39 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All",
         
     return cdmp_params, cdmp_unroll
 
+def unrollPI2ParamsSamples(pi2_params_samples, prim_to_be_improved, cart_types_to_be_improved, pi2_unroll_mean=None, is_plotting=False):
+    K_PI2_samples = len(pi2_params_samples.keys())
+    pi2_cdmp_unroll_samples = {}
+    for cart_type_tbi in cart_types_to_be_improved:
+        print ("Unrolling PI2 Params Samples of Type %s, Primitive # %d" % (cart_type_tbi, prim_to_be_improved+1))
+        pi2_cdmp_unroll_samples[cart_type_tbi] = [None] * K_PI2_samples
+        if (cart_type_tbi == "CartCoord"):
+            cdmp_instance = ccdmp
+            components_to_be_plotted = ["X", "Xd", "Xdd"]
+        elif (cart_type_tbi == "Quaternion"):
+            cdmp_instance = qdmp
+            components_to_be_plotted = ["X", "omega", "omegad"]
+        else:
+            assert False, "cart_type_tbi == %s is un-defined!"
+        for k in range(K_PI2_samples):
+            print ("   Unrolling PI2 sample # %d/%d ..." % (k+1, K_PI2_samples))
+            cdmp_instance.setParamsFromDict(pi2_params_samples[k]["cdmp_params_all_dim_learned"][cart_type_tbi][prim_to_be_improved])
+            pi2_cdmp_unroll_samples[cart_type_tbi][k] = cdmp_instance.unroll(pi2_params_samples[k]["cdmp_params_all_dim_learned"][cart_type_tbi][prim_to_be_improved]["critical_states_learn"], 
+                                                                             pi2_params_samples[k]["cdmp_params_all_dim_learned"][cart_type_tbi][prim_to_be_improved]["mean_tau"], 
+                                                                             pi2_params_samples[k]["cdmp_params_all_dim_learned"][cart_type_tbi][prim_to_be_improved]["mean_tau"], 
+                                                                             dt)
+        
+        if (is_plotting):
+            assert (pi2_unroll_mean is not None)
+            py_util.plotManyTrajsVsOneTraj(set_many_trajs=pi2_cdmp_unroll_samples[cart_type_tbi], 
+                                           one_traj=pi2_unroll_mean[cart_type_tbi][prim_to_be_improved], 
+                                           title_suffix=" Prim. #%d" % (prim_to_be_improved+1), 
+                                           fig_num_offset=0, 
+                                           components_to_be_plotted=components_to_be_plotted, 
+                                           many_traj_label="pi2_samples", one_traj_label="pi2_mean")
+    return pi2_cdmp_unroll_samples
+
 def loadPrimsParamsAsDictFromDirPath(prims_params_dirpath, N_primitives):
-    task_servo_rate = 300.0
-    dt = 1.0/task_servo_rate
-    tau = MIN_TAU
-    canonical_order = 2
-    model_size = 25
-    
-    tau_sys = TauSystem(dt, tau)
-    canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
-    ccdmp = CartesianCoordDMP(model_size, canonical_sys_discr, SCHAAL_LOCAL_COORD_FRAME)
-    qdmp = QuaternionDMP(model_size, canonical_sys_discr)
-    
     cdmp_params = {}
     cdmp_params["CartCoord"] = [None] * N_primitives
     cdmp_params["Quaternion"] = [None] * N_primitives
@@ -342,6 +363,6 @@ def updateParamsToBeImproved(params_dict, type_dim_tbi_dict, types_tbi_list, pri
     return params_dict
 
 def computeParamInitStdHeuristic(param_mean):
-    params_extrema_to_init_std_factor = 0.5
+    params_extrema_to_init_std_factor = 5.0
     param_init_std = params_extrema_to_init_std_factor * (0.5 * (np.max(np.fabs(param_mean)) + np.min(np.fabs(param_mean))))
     return param_init_std
