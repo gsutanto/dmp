@@ -22,6 +22,7 @@ from QuaternionDMPState import *
 from utilities import *
 import utility_quaternion as util_quat
 from utility_states_trajectories import *
+import utilities as py_util
 import pyplot_util as pypl_util
 
 class QuaternionDMP(DMPDiscrete, object):
@@ -126,46 +127,7 @@ class QuaternionDMP(DMPDiscrete, object):
     
     def plotDemosVsUnroll(self, set_demo_Qtrajs, unroll_Qtraj, 
                           title_suffix="", fig_num_offset=0):
-        N_demos = len(set_demo_Qtrajs)
-        
-        dim_Q = 4
-        dim_omega = 3
-        
-        # plotting Quaternion trajectory
-        all_QT_list = [None] * (1 + N_demos)
-        for n_demo in range(N_demos):
-            all_QT_list[n_demo] = set_demo_Qtrajs[n_demo].X.T
-        all_QT_list[1+n_demo] = unroll_Qtraj.X.T
-        pypl_util.subplot_ND(NDtraj_list=all_QT_list, 
-                             title='Quaternion' + title_suffix, 
-                             Y_label_list=['Q%d' % Q_dim for Q_dim in range(dim_Q)], 
-                             fig_num=fig_num_offset+0, 
-                             label_list=['demo #%d' % n_demo for n_demo in range(N_demos)] + ['unroll'], 
-                             color_style_list=[['b',':']] * N_demos + [['g','-']], 
-                             is_auto_line_coloring_and_styling=False)
-        
-        # plotting omega trajectory
-        all_omegaT_list = [None] * (1 + N_demos)
-        for n_demo in range(N_demos):
-            all_omegaT_list[n_demo] = set_demo_Qtrajs[n_demo].omega.T
-        all_omegaT_list[1+n_demo] = unroll_Qtraj.omega.T
-        pypl_util.subplot_ND(NDtraj_list=all_omegaT_list, 
-                             title='omega' + title_suffix, 
-                             Y_label_list=['omega%d' % omega_dim for omega_dim in range(dim_omega)], 
-                             fig_num=fig_num_offset+1, 
-                             label_list=['demo #%d' % n_demo for n_demo in range(N_demos)] + ['unroll'], 
-                             color_style_list=[['b',':']] * N_demos + [['g','-']], 
-                             is_auto_line_coloring_and_styling=False)
-        
-        # plotting omegad trajectory
-        all_omegadT_list = [None] * (1 + N_demos)
-        for n_demo in range(N_demos):
-            all_omegadT_list[n_demo] = set_demo_Qtrajs[n_demo].omegad.T
-        all_omegadT_list[1+n_demo] = unroll_Qtraj.omegad.T
-        pypl_util.subplot_ND(NDtraj_list=all_omegadT_list, 
-                             title='omegad' + title_suffix, 
-                             Y_label_list=['omegad%d' % omegad_dim for omegad_dim in range(dim_omega)], 
-                             fig_num=fig_num_offset+2, 
-                             label_list=['demo #%d' % n_demo for n_demo in range(N_demos)] + ['unroll'], 
-                             color_style_list=[['b',':']] * N_demos + [['g','-']], 
-                             is_auto_line_coloring_and_styling=False)
+        return py_util.plotManyTrajsVsOneTraj(set_many_trajs=set_demo_Qtrajs, one_traj=unroll_Qtraj, 
+                                              title_suffix=title_suffix, fig_num_offset=fig_num_offset, 
+                                              components_to_be_plotted=["X", "omega", "omegad"], 
+                                              many_traj_label="demo", one_traj_label="unroll")

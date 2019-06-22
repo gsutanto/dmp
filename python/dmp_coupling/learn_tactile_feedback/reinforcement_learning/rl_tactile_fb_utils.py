@@ -244,11 +244,11 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All",
         cdmp_params["Quaternion"][n_prim] = qdmp.getParamsAsDict()
         cdmp_params["Quaternion"][n_prim]["critical_states_learn"] = qdmp_critical_states_learn
         
-        cdmp_unroll["CartCoord"][n_prim] = ccdmp.unroll(ccdmp_critical_states_learn, 
+        cdmp_unroll["CartCoord"][n_prim] = ccdmp.unroll(cdmp_params["CartCoord"][n_prim]["critical_states_learn"], 
                                                         cdmp_params["CartCoord"][n_prim]["mean_tau"], 
                                                         cdmp_params["CartCoord"][n_prim]["mean_tau"], 
                                                         dt)
-        cdmp_unroll["Quaternion"][n_prim] = qdmp.unroll(qdmp_critical_states_learn, 
+        cdmp_unroll["Quaternion"][n_prim] = qdmp.unroll(cdmp_params["Quaternion"][n_prim]["critical_states_learn"], 
                                                         cdmp_params["Quaternion"][n_prim]["mean_tau"], 
                                                         cdmp_params["Quaternion"][n_prim]["mean_tau"], 
                                                         dt)

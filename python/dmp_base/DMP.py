@@ -22,6 +22,7 @@ from DMPState import *
 from DMPTrajectory import *
 from DataIO import *
 from utility_states_trajectories import smoothStartEndNDTrajectoryBasedOnPosition
+import utilities as py_util
 import pyplot_util as pypl_util
 
 class DMP:
@@ -168,44 +169,7 @@ class DMP:
     
     def plotDemosVsUnroll(self, set_demo_trajs, unroll_traj, 
                           title_suffix="", fig_num_offset=0):
-        N_demos = len(set_demo_trajs)
-        dim_X = unroll_traj.dmp_num_dimensions
-        
-        # plotting X trajectory
-        all_XT_list = [None] * (1 + N_demos)
-        for n_demo in range(N_demos):
-            all_XT_list[n_demo] = set_demo_trajs[n_demo].X.T
-        all_XT_list[1+n_demo] = unroll_traj.X.T
-        pypl_util.subplot_ND(NDtraj_list=all_XT_list, 
-                             title='X' + title_suffix, 
-                             Y_label_list=['X%d' % X_dim for X_dim in range(dim_X)], 
-                             fig_num=fig_num_offset+0, 
-                             label_list=['demo #%d' % n_demo for n_demo in range(N_demos)] + ['unroll'], 
-                             color_style_list=[['b',':']] * N_demos + [['g','-']], 
-                             is_auto_line_coloring_and_styling=False)
-        
-        # plotting Xd trajectory
-        all_XdT_list = [None] * (1 + N_demos)
-        for n_demo in range(N_demos):
-            all_XdT_list[n_demo] = set_demo_trajs[n_demo].Xd.T
-        all_XdT_list[1+n_demo] = unroll_traj.Xd.T
-        pypl_util.subplot_ND(NDtraj_list=all_XdT_list, 
-                             title='Xd' + title_suffix, 
-                             Y_label_list=['Xd%d' % Xd_dim for Xd_dim in range(dim_X)], 
-                             fig_num=fig_num_offset+1, 
-                             label_list=['demo #%d' % n_demo for n_demo in range(N_demos)] + ['unroll'], 
-                             color_style_list=[['b',':']] * N_demos + [['g','-']], 
-                             is_auto_line_coloring_and_styling=False)
-        
-        # plotting Xdd trajectory
-        all_XddT_list = [None] * (1 + N_demos)
-        for n_demo in range(N_demos):
-            all_XddT_list[n_demo] = set_demo_trajs[n_demo].Xdd.T
-        all_XddT_list[1+n_demo] = unroll_traj.Xdd.T
-        pypl_util.subplot_ND(NDtraj_list=all_XddT_list, 
-                             title='Xdd' + title_suffix, 
-                             Y_label_list=['Xdd%d' % Xdd_dim for Xdd_dim in range(dim_X)], 
-                             fig_num=fig_num_offset+2, 
-                             label_list=['demo #%d' % n_demo for n_demo in range(N_demos)] + ['unroll'], 
-                             color_style_list=[['b',':']] * N_demos + [['g','-']], 
-                             is_auto_line_coloring_and_styling=False)
+        return py_util.plotManyTrajsVsOneTraj(set_many_trajs=set_demo_trajs, one_traj=unroll_traj, 
+                                              title_suffix=title_suffix, fig_num_offset=fig_num_offset, 
+                                              components_to_be_plotted=["X", "Xd", "Xdd"], 
+                                              many_traj_label="demo", one_traj_label="unroll")

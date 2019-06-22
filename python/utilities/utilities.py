@@ -16,6 +16,7 @@ import pickle
 import shutil
 from scipy import signal
 from scipy.interpolate import interp1d
+import pyplot_util as pypl_util
 
 def chunks(l, n):
     """Yield successive n-sized chunks from l."""
@@ -187,6 +188,48 @@ def deleteAllCLMCDataFilesInDirectory(directory_path):
     dfilepaths = getAllCLMCDataFilePathsInDirectory(directory_path)
     for dfilepath in dfilepaths:
         os.remove(dfilepath)
+    return None
+
+def plotManyTrajsVsOneTraj(set_many_trajs, one_traj, 
+                           title_suffix="", fig_num_offset=0, 
+                           components_to_be_plotted=["X", "Xd", "Xdd"], 
+                           many_traj_label="many", one_traj_label="one"):
+    # plotting many trajectories against one trajectory (for visual comparison)
+    N_many_trajs = len(set_many_trajs)
+    
+    for comp_idx in range(len(components_to_be_plotted)):
+        comp = components_to_be_plotted[comp_idx]
+        all_compT_list = [None] * (1 + N_many_trajs)
+        if (comp == "X"):
+            for n_demo in range(N_many_trajs):
+                all_compT_list[n_demo] = set_many_trajs[n_demo].X.T
+            all_compT_list[1+n_demo] = one_traj.X.T
+        elif (comp == "Xd"):
+            for n_demo in range(N_many_trajs):
+                all_compT_list[n_demo] = set_many_trajs[n_demo].Xd.T
+            all_compT_list[1+n_demo] = one_traj.Xd.T
+        elif (comp == "Xdd"):
+            for n_demo in range(N_many_trajs):
+                all_compT_list[n_demo] = set_many_trajs[n_demo].Xdd.T
+            all_compT_list[1+n_demo] = one_traj.Xdd.T
+        elif (comp == "omega"):
+            for n_demo in range(N_many_trajs):
+                all_compT_list[n_demo] = set_many_trajs[n_demo].omega.T
+            all_compT_list[1+n_demo] = one_traj.omega.T
+        elif (comp == "omegad"):
+            for n_demo in range(N_many_trajs):
+                all_compT_list[n_demo] = set_many_trajs[n_demo].omegad.T
+            all_compT_list[1+n_demo] = one_traj.omegad.T
+        else:
+            assert False, "Trajectory component named %s is un-defined!"%comp
+        pypl_util.subplot_ND(NDtraj_list=all_compT_list, 
+                             title=comp + title_suffix, 
+                             Y_label_list=[comp+'%d'%comp_dim for comp_dim in range(all_compT_list[1+n_demo].shape[1])], 
+                             fig_num=fig_num_offset+comp_idx, 
+                             label_list=[many_traj_label+' #%d' % n_many_traj for n_many_traj in range(N_many_trajs)] + [one_traj_label], 
+                             color_style_list=[['b',':']] * N_many_trajs + [['g','-']], 
+                             is_auto_line_coloring_and_styling=False)
+    
     return None
 
 def computeAndDisplayTrajectoryNMSE(set_demo_trajs, unroll_traj, print_prefix="", is_orientation_trajectory=False):
