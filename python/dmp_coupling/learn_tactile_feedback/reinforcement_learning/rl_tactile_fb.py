@@ -28,11 +28,12 @@ outdata_dirpath = './'
 
 is_deleting_dfiles = False#True # TODO (remove this)
 is_smoothing_training_traj_before_learning = True
+is_unrolling_pi2_samples = True
 is_plotting = True#False
 
 N_total_sense_dimensionality = 45
 N_primitives = 3
-K_PI2_samples = 75 # K
+K_PI2_samples = 38#75 # K
 
 #prims_tbi = [1,2] # TODO (un-comment): 2nd and 3rd primitives are to-be-improved (tbi)
 prims_tbi = [1] # TODO (comment): for testing purpose we work on 2nd primitive only as the one to-be-improved (tbi)
@@ -70,6 +71,8 @@ for prim_tbi in prims_tbi:
     py_util.saveObj(rl_data, outdata_dirpath+'rl_data.pkl')
     
     while (rl_data[prim_tbi][it]["mean_accum_cost"][prim_tbi] > cost_threshold[prim_tbi]): # while (J > threshold):
+        plt.close('all')
+        
         # convert current closed-loop behavior into an equivalent open-loop behavior on
         # the current (assumed-static) environment setting
         cdmp_trajs = rl_util.extractCartDMPTrajectoriesFromUnrollResults(rl_data[prim_tbi][it])
@@ -83,6 +86,10 @@ for prim_tbi in prims_tbi:
         
         py_util.saveObj(rl_data, outdata_dirpath+'rl_data.pkl')
         
+        raw_input("Press [ENTER] to continue...")
+        
+        plt.close('all')
+        
         if (is_deleting_dfiles): # TODO (remove this)
             py_util.deleteAllCLMCDataFilesInDirectory(sl_data_dirpath)
         
@@ -95,7 +102,8 @@ for prim_tbi in prims_tbi:
         [param_mean, param_dim_list
          ] = rl_util.extractParamsToBeImproved(rl_data[prim_tbi][it]["cdmp_params_all_dim_learned"], 
                                                cart_dim_tbi_dict, cart_types_tbi_list, prim_tbi)
-        param_init_std = rl_util.computeParamInitStdHeuristic(param_mean)
+        param_init_std = rl_util.computeParamInitStdHeuristic(param_mean, 
+                                                              params_mean_extrema_to_init_std_factor=5.0)
         param_cov = np.diag(np.ones(len(param_mean)) * (param_init_std * param_init_std))
         
         param_samples = np.random.multivariate_normal(param_mean, param_cov, K_PI2_samples)
@@ -112,15 +120,23 @@ for prim_tbi in prims_tbi:
                                                                                                                              param_sample, 
                                                                                                                              param_dim_list)
         
-        rl_data[prim_tbi][it]["PI2_unroll_samples"] = rl_util.unrollPI2ParamsSamples(pi2_params_samples=rl_data[prim_tbi][it]["PI2_params_samples"], 
-                                                                                     prim_to_be_improved=prim_tbi, 
-                                                                                     cart_types_to_be_improved=cart_types_tbi_list, 
-                                                                                     pi2_unroll_mean=rl_data[prim_tbi][it]["cdmp_unroll_all_dim_learned"], 
-                                                                                     is_plotting=is_plotting)
+        if (is_unrolling_pi2_samples):
+            rl_data[prim_tbi][it]["PI2_unroll_samples"] = rl_util.unrollPI2ParamsSamples(pi2_params_samples=rl_data[prim_tbi][it]["PI2_params_samples"], 
+                                                                                         prim_to_be_improved=prim_tbi, 
+                                                                                         cart_types_to_be_improved=cart_types_tbi_list, 
+                                                                                         pi2_unroll_mean=rl_data[prim_tbi][it]["cdmp_unroll_all_dim_learned"], 
+                                                                                         is_plotting=is_plotting)
+        
+        for k in range(K_PI2_samples):
+            if (is_deleting_dfiles): # TODO (remove this)
+                py_util.deleteAllCLMCDataFilesInDirectory(sl_data_dirpath)
+            # TODO: save these K perturbed DMP params (one at a time) as text files, to be loaded by C++ program and executed by the robot, to evaluate each of their costs.
         
         assert False
         
-        # TODO: For Debugging via visualizations: unroll each of these K perturbed DMP params, log the unrolled trajectories, and visualize them as plots (as needed)
-        # TODO: save these K perturbed DMP params (one at a time) as text files, to be loaded by C++ program and executed by the robot, to evaluate each of their costs.
         # TODO: summarize these K perturbed DMP params into mean_new and cov_new using PI2 update, based on each of their cost
         # TODO: save mean_new (which is a DMP params by itself) as text files, to be loaded by C++ program and executed by the robot, to evaluate its cost Nu times, to ensure the average cost is really lower than the original one
+        
+        py_util.saveObj(rl_data, outdata_dirpath+'rl_data.pkl')
+        
+        raw_input("Press [ENTER] to continue...")

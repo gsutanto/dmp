@@ -362,7 +362,7 @@ def updateParamsToBeImproved(params_dict, type_dim_tbi_dict, types_tbi_list, pri
         params_tbi_dims_list_idx += 1
     return params_dict
 
-def computeParamInitStdHeuristic(param_mean):
-    params_extrema_to_init_std_factor = 5.0
-    param_init_std = params_extrema_to_init_std_factor * (0.5 * (np.max(np.fabs(param_mean)) + np.min(np.fabs(param_mean))))
+def computeParamInitStdHeuristic(param_mean, params_mean_extrema_to_init_std_factor=0.5):
+    param_init_std = params_mean_extrema_to_init_std_factor * (0.5 * (np.max(np.fabs(param_mean)) + 
+                                                                      np.min(np.fabs(param_mean))))
     return param_init_std
