@@ -23,7 +23,10 @@ plt.close('all')
 
 catkin_ws_path = py_util.getCatkinWSPath()
 sl_data_dirpath = catkin_ws_path + "/install/bin/arm"
-orig_prims_params_dirpath = "../../../../data/dmp_coupling/learn_tactile_feedback/scraping/learned_prims_params/"
+nominal_prims_params_dirpath       = "../../../../data/dmp_coupling/learn_tactile_feedback/scraping/learned_prims_params/"
+openloopequiv_prims_params_dirpath = "../../../../data/dmp_coupling/learn_tactile_feedback/scraping/reinforcement_learning/learned_prims_params/"
+initial_pmnn_params_dirpath        = "../../../../data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/cpp_models/"
+iter_pmnn_params_dirpath           = "../../../../data/dmp_coupling/learn_tactile_feedback/scraping/reinforcement_learning/neural_nets/pmnn/cpp_models/"
 outdata_dirpath = './'
 
 is_deleting_dfiles = False#True # TODO (remove this)
@@ -43,8 +46,8 @@ cart_types_tbi_list = cart_dim_tbi_dict.keys()
 
 cost_threshold = [0.0, 18928850.8053, 11066375.797]
 
-# not sure if the original (nominal) primitives below is needed or not...:
-#orig_cdmp_params = rl_util.loadPrimsParamsAsDictFromDirPath(orig_prims_params_dirpath, N_primitives)
+# not sure if the nominal (original) primitives below is needed or not...:
+#nominal_cdmp_params = rl_util.loadPrimsParamsAsDictFromDirPath(nominal_prims_params_dirpath, N_primitives)
 
 if (is_deleting_dfiles): # TODO (remove this)
     # initialization by removing all SL data files inside sl_data_dirpath
