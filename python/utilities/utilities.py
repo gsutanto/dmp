@@ -126,6 +126,10 @@ def loadObj(file_path):
     with open(file_path, 'rb') as f:
         return pickle.load(f)
 
+def createDirIfNotExist(dir_path):
+    if (not os.path.isdir(dir_path)):
+        os.makedirs(dir_path)
+
 def recreateDir(dir_path):
     if (os.path.isdir(dir_path)):
         shutil.rmtree(dir_path)

@@ -338,6 +338,37 @@ def loadPrimsParamsAsDictFromDirPath(prims_params_dirpath, N_primitives):
                                                                   file_name_canonical_system_order="canonical_sys_order")
     return cdmp_params
 
+def savePrimsParamsFromDictAtDirPath(prims_params_dirpath, cdmp_params):
+    N_primitives = len(cdmp_params["CartCoord"].keys())
+    py_util.createDirIfNotExist(prims_params_dirpath)
+    for n_prim in range(N_primitives):
+        ccdmp_prim_param_dirpath = prims_params_dirpath+"/position/prim%d/"%(n_prim+1)
+        py_util.recreateDir(ccdmp_prim_param_dirpath)
+        ccdmp.saveParamsFromDict(dir_path=ccdmp_prim_param_dirpath, cart_coord_dmp_params=cdmp_params["CartCoord"][n_prim], 
+                                 file_name_weights="w", 
+                                 file_name_A_learn="A_learn", 
+                                 file_name_mean_start_position="start_global", 
+                                 file_name_mean_goal_position="goal_global", 
+                                 file_name_mean_tau="tau", 
+                                 file_name_canonical_system_order="canonical_sys_order", 
+                                 file_name_mean_start_position_global="start_global", 
+                                 file_name_mean_goal_position_global="goal_global", 
+                                 file_name_mean_start_position_local="start_local", 
+                                 file_name_mean_goal_position_local="goal_local", 
+                                 file_name_ctraj_local_coordinate_frame_selection="ctraj_local_coordinate_frame_selection", 
+                                 file_name_ctraj_hmg_transform_local_to_global_matrix="T_local_to_global_H", 
+                                 file_name_ctraj_hmg_transform_global_to_local_matrix="T_global_to_local_H")
+        qdmp_prim_param_dirpath = prims_params_dirpath+"/orientation/prim%d/"%(n_prim+1)
+        py_util.recreateDir(qdmp_prim_param_dirpath)
+        qdmp.saveParamsFromDict(dir_path=qdmp_prim_param_dirpath, dmp_params=cdmp_params["Quaternion"][n_prim], 
+                                file_name_weights="w", 
+                                file_name_A_learn="A_learn", 
+                                file_name_mean_start_position="start", 
+                                file_name_mean_goal_position="goal", 
+                                file_name_mean_tau="tau", 
+                                file_name_canonical_system_order="canonical_sys_order")
+    return None
+
 def extractParamsToBeImproved(params_dict, type_dim_tbi_dict, types_tbi_list, prim_tbi):
     params_tbi_list = list()
     params_tbi_dims_list = list()
