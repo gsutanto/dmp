@@ -25,7 +25,7 @@ import rl_tactile_fb_utils as rl_util
 
 class RLTactileFeedback:
     def updateRobotReadyStatusCallback(self, robot_ready_notification_msg):
-        print ("Robot is ready to accept command!")
+#        print ("Robot is ready to accept command!")
         self.is_robot_ready = robot_ready_notification_msg.data
     
     def __init__(self, node_name="rl_tactile_feedback", loop_rate=100):
@@ -49,7 +49,7 @@ class RLTactileFeedback:
         self.is_deleting_dfiles = False#True # TODO (remove this)
         self.is_smoothing_training_traj_before_learning = True
         self.is_unrolling_pi2_samples = True
-        self.is_plotting = True#False
+        self.is_plotting = False#True
         
         self.N_total_sense_dimensionality = 45
         self.N_primitives = 3

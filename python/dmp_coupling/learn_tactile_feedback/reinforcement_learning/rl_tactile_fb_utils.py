@@ -339,7 +339,7 @@ def loadPrimsParamsAsDictFromDirPath(prims_params_dirpath, N_primitives):
     return cdmp_params
 
 def savePrimsParamsFromDictAtDirPath(prims_params_dirpath, cdmp_params):
-    N_primitives = len(cdmp_params["CartCoord"].keys())
+    N_primitives = len(cdmp_params["CartCoord"])
     py_util.createDirIfNotExist(prims_params_dirpath)
     for n_prim in range(N_primitives):
         ccdmp_prim_param_dirpath = prims_params_dirpath+"/position/prim%d/"%(n_prim+1)

@@ -342,7 +342,7 @@ class CartesianCoordDMP(DMPDiscrete, object):
         np.savetxt(dir_path + "/" + file_name_mean_goal_position_global, cart_coord_dmp_params['mean_goal_global_position'])
         np.savetxt(dir_path + "/" + file_name_mean_start_position_local, cart_coord_dmp_params['mean_start_local_position'])
         np.savetxt(dir_path + "/" + file_name_mean_goal_position_local, cart_coord_dmp_params['mean_goal_local_position'])
-        np.savetxt(dir_path + "/" + file_name_ctraj_local_coordinate_frame_selection, cart_coord_dmp_params['ctraj_local_coordinate_frame_selection'])
+        np.savetxt(dir_path + "/" + file_name_ctraj_local_coordinate_frame_selection, [cart_coord_dmp_params['ctraj_local_coordinate_frame_selection']])
         np.savetxt(dir_path + "/" + file_name_ctraj_hmg_transform_local_to_global_matrix, cart_coord_dmp_params['T_local_to_global_H'])
         np.savetxt(dir_path + "/" + file_name_ctraj_hmg_transform_global_to_local_matrix, cart_coord_dmp_params['T_global_to_local_H'])
         assert (self.isValid()), "Post-condition(s) checking is failed: this CartesianCoordDMP became invalid!"

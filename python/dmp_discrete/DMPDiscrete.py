@@ -201,12 +201,12 @@ class DMPDiscrete(DMP, object):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPDiscrete is invalid!"
         assert (os.path.isdir(dir_path)), dir_path + " is NOT a directory!"
         if ('canonical_order' in dmp_params.keys()):
-            np.savetxt(dir_path + "/" + file_name_canonical_system_order, dmp_params['canonical_order'])
+            np.savetxt(dir_path + "/" + file_name_canonical_system_order, [dmp_params['canonical_order']])
         np.savetxt(dir_path + "/" + file_name_weights, dmp_params['W'])
         np.savetxt(dir_path + "/" + file_name_A_learn, dmp_params['A_learn'])
         np.savetxt(dir_path + "/" + file_name_mean_start_position, dmp_params['mean_start_position'])
         np.savetxt(dir_path + "/" + file_name_mean_goal_position, dmp_params['mean_goal_position'])
-        np.savetxt(dir_path + "/" + file_name_mean_tau, dmp_params['mean_tau'])
+        np.savetxt(dir_path + "/" + file_name_mean_tau, [dmp_params['mean_tau']])
         assert (self.isValid()), "Post-condition(s) checking is failed: this DMPDiscrete became invalid!"
         return None
     

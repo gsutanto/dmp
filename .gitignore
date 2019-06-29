@@ -5,6 +5,7 @@ data/dmp_coupling/learn_obs_avoid/static_obs/neural_nets/pmnn/python_models/prim
 #data/dmp_coupling/learn_obs_avoid/static_obs/neural_nets/pmnn/unroll_test_dataset/*.txt
 data/dmp_coupling/learn_tactile_feedback/scraping/robot_unroll_data/**/*.txt
 data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/python_models/prim_*_nmse_test_unroll.mat
+data/dmp_coupling/learn_tactile_feedback/scraping/reinforcement_learning/*/*/*/*
 matlab/dmp_coupling/learn_obs_avoid/data/data_multi_demo_vicon_static_global_coord.mat
 matlab/dmp_coupling/learn_obs_avoid/learn_obs_avoid_fixed_learning_algo/Ct.mat
 matlab/dmp_coupling/learn_obs_avoid/learn_obs_avoid_fixed_learning_algo/wi.mat
