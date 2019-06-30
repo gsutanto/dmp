@@ -59,7 +59,7 @@ class RLTactileFeedback:
         self.N_total_sense_dimensionality = 45
         self.N_primitives = 3
         self.K_PI2_samples = 5#38#75 # K
-        self.N_cost_evaluation_general = 5
+        self.N_cost_evaluation_general = 3
         self.N_cost_evaluation_per_PI2_sample = 1
         
         #self.prims_tbi = [1,2] # TODO (un-comment): 2nd and 3rd primitives are to-be-improved (tbi)
@@ -90,11 +90,10 @@ class RLTactileFeedback:
                 self.dmp_rl_tactile_fb_robot_exec_mode_msg.execute_behavior_until_prim_no = self.N_primitives - 1
                 self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Evaluating Closed-Loop Behavior, Execute All Primitives, Trial # %d/%d" % (self.n_cost_evaluation_general+1, self.N_cost_evaluation_general)
                 
-                self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
-                
                 print (self.dmp_rl_tactile_fb_robot_exec_mode_msg.description)
                 
                 while (self.is_robot_ready):
+                    self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
                     print ("Waiting for the robot to finish processing transmitted command...")
                     time.sleep(1)
                 
@@ -153,11 +152,10 @@ class RLTactileFeedback:
                         self.dmp_rl_tactile_fb_robot_exec_mode_msg.execute_behavior_until_prim_no = self.prim_tbi
                         self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Evaluating Open-Loop-Equivalent Primitive, Execute until Prim. # %d, Trial # %d/%d" % (self.prim_tbi+1, self.n_cost_evaluation_general+1, self.N_cost_evaluation_general)
                         
-                        self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
-                        
                         print (self.dmp_rl_tactile_fb_robot_exec_mode_msg.description)
                         
                         while (self.is_robot_ready):
+                            self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
                             print ("Waiting for the robot to finish processing transmitted command...")
                             time.sleep(1)
                         
@@ -218,11 +216,10 @@ class RLTactileFeedback:
                             self.dmp_rl_tactile_fb_robot_exec_mode_msg.execute_behavior_until_prim_no = self.prim_tbi
                             self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Evaluating PI2 Perturbed Open-Loop-Equivalent Primitive Sample # %d/%d, Execute until Prim. # %d, Trial # %d/%d" % (self.k+1, self.K_PI2_samples, self.prim_tbi+1, self.n_cost_evaluation_per_PI2_sample+1, self.N_cost_evaluation_per_PI2_sample)
                             
-                            self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
-                            
                             print (self.dmp_rl_tactile_fb_robot_exec_mode_msg.description)
                             
                             while (self.is_robot_ready):
+                                self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
                                 print ("Waiting for the robot to finish processing transmitted command...")
                                 time.sleep(1)
                             
@@ -273,11 +270,10 @@ class RLTactileFeedback:
                         self.dmp_rl_tactile_fb_robot_exec_mode_msg.execute_behavior_until_prim_no = self.prim_tbi
                         self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Evaluating Open-Loop-Equivalent Primitive New Sample Mean, Execute until Prim. # %d, Trial # %d/%d" % (self.prim_tbi+1, self.n_cost_evaluation_general+1, self.N_cost_evaluation_general)
                         
-                        self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
-                        
                         print (self.dmp_rl_tactile_fb_robot_exec_mode_msg.description)
                         
                         while (self.is_robot_ready):
+                            self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
                             print ("Waiting for the robot to finish processing transmitted command...")
                             time.sleep(1)
                         

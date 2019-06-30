@@ -149,6 +149,7 @@ def extractCartDMPTrajectoriesFromUnrollResults(unroll_results,
             timeT = unroll_results["trajectory"][n_trial]["timeT"][n_prim].T
             if (is_time_start_from_zero):
                 timeT = timeT - timeT[0,0]
+            assert (np.amin(timeT) >= 0.0), "min(timeT)=" + str(np.amin(timeT)) + " < 0.0 (invalid!), at index " + str(np.unravel_index(timeT.argmin(), timeT.shape)) + ", timeT.shape = " + str(timeT.shape)
             XT = unroll_results["trajectory"][n_trial]["XT"][n_prim].T
             XdT = unroll_results["trajectory"][n_trial]["XdT"][n_prim].T
             XddT = unroll_results["trajectory"][n_trial]["XddT"][n_prim].T
@@ -267,7 +268,7 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All",
         print("")
         print("")
         
-        if (is_plotting):
+        if (is_plotting or ((n_prim != 1) and ((nmse_smoothened_X >= 1.0).any())) or ((nmse_smoothened_Q >= 1.0).any())):
             ccdmp.plotDemosVsUnroll(cdmp_trajs["CartCoord"][n_prim], cdmp_unroll["CartCoord"][n_prim], 
                                     title_suffix=" Prim. #%d" % (n_prim+1), fig_num_offset=6*n_prim)
             qdmp.plotDemosVsUnroll(cdmp_trajs["Quaternion"][n_prim], cdmp_unroll["Quaternion"][n_prim], 
