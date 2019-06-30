@@ -84,15 +84,15 @@ class RLTactileFeedback:
                 while (not self.is_robot_ready):
                     print ("Waiting for the robot to be ready to accept command...")
                 
-                print ("Evaluating Closed-Loop Behavior, Execute All Primitives")
-                
                 # command the C++ side to load the text files containing the parameters and execute it on the robot
                 self.dmp_rl_tactile_fb_robot_exec_mode_msg = DMPRLTactileFeedbackRobotExecMode()
                 self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_NOMINAL_DMP_AND_INITIAL_PMNN
                 self.dmp_rl_tactile_fb_robot_exec_mode_msg.execute_behavior_until_prim_no = self.N_primitives - 1
-                self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Load Closed-Loop Behavior Parameters, Execute All Primitives"
+                self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Evaluating Closed-Loop Behavior, Execute All Primitives, Trial # %d/%d" % (self.n_cost_evaluation_general+1, self.N_cost_evaluation_general)
                 
                 self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
+                
+                print (self.dmp_rl_tactile_fb_robot_exec_mode_msg.description)
                 
                 while (self.is_robot_ready):
                     print ("Waiting for the robot to finish processing transmitted command...")
@@ -143,8 +143,6 @@ class RLTactileFeedback:
                         while (not self.is_robot_ready):
                             print ("Waiting for the robot to be ready to accept command...")
                         
-                        print ("Evaluating Open-Loop-Equivalent Primitive, Execute until Prim. # %d" % (self.prim_tbi+1))
-                        
                         # save open-loop-equivalent primitive parameters into text files
                         rl_util.savePrimsParamsFromDictAtDirPath(prims_params_dirpath=self.openloopequiv_prims_params_dirpath, 
                                                                  cdmp_params=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params_all_dim_learned"])
@@ -153,9 +151,11 @@ class RLTactileFeedback:
                         self.dmp_rl_tactile_fb_robot_exec_mode_msg = DMPRLTactileFeedbackRobotExecMode()
                         self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_OPENLOOPEQUIV_DMP_ONLY
                         self.dmp_rl_tactile_fb_robot_exec_mode_msg.execute_behavior_until_prim_no = self.prim_tbi
-                        self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Load Open-Loop-Equivalent Primitive Parameters, Execute until Prim. # %d" % (self.prim_tbi+1)
+                        self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Evaluating Open-Loop-Equivalent Primitive, Execute until Prim. # %d, Trial # %d/%d" % (self.prim_tbi+1, self.n_cost_evaluation_general+1, self.N_cost_evaluation_general)
                         
                         self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
+                        
+                        print (self.dmp_rl_tactile_fb_robot_exec_mode_msg.description)
                         
                         while (self.is_robot_ready):
                             print ("Waiting for the robot to finish processing transmitted command...")
@@ -208,8 +208,6 @@ class RLTactileFeedback:
                             while (not self.is_robot_ready):
                                 print ("Waiting for the robot to be ready to accept command...")
                             
-                            print ("Evaluating PI2 Perturbed Open-Loop-Equivalent Primitive Sample # %d/%d, Execute until Prim. # %d" % ((self.k+1), self.K_PI2_samples, (self.prim_tbi+1)))
-                            
                             # save sampled perturbed open-loop-equivalent primitive parameters into text files
                             rl_util.savePrimsParamsFromDictAtDirPath(prims_params_dirpath=self.openloopequiv_prims_params_dirpath, 
                                                                      cdmp_params=self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_params_all_dim_learned"])
@@ -218,9 +216,11 @@ class RLTactileFeedback:
                             self.dmp_rl_tactile_fb_robot_exec_mode_msg = DMPRLTactileFeedbackRobotExecMode()
                             self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_OPENLOOPEQUIV_DMP_ONLY
                             self.dmp_rl_tactile_fb_robot_exec_mode_msg.execute_behavior_until_prim_no = self.prim_tbi
-                            self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Load Perturbed Open-Loop-Equivalent Primitive Parameters, Sample # %d/%d, Execute until Prim. # %d" % ((self.k+1), self.K_PI2_samples, (self.prim_tbi+1))
+                            self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Evaluating PI2 Perturbed Open-Loop-Equivalent Primitive Sample # %d/%d, Execute until Prim. # %d, Trial # %d/%d" % (self.k+1, self.K_PI2_samples, self.prim_tbi+1, self.n_cost_evaluation_per_PI2_sample+1, self.N_cost_evaluation_per_PI2_sample)
                             
                             self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
+                            
+                            print (self.dmp_rl_tactile_fb_robot_exec_mode_msg.description)
                             
                             while (self.is_robot_ready):
                                 print ("Waiting for the robot to finish processing transmitted command...")
@@ -263,8 +263,6 @@ class RLTactileFeedback:
                         while (not self.is_robot_ready):
                             print ("Waiting for the robot to be ready to accept command...")
                         
-                        print ("Evaluating Open-Loop-Equivalent Primitive New Sample Mean, Execute until Prim. # %d" % (self.prim_tbi+1))
-                        
                         # save open-loop-equivalent primitive's new sample mean parameters into text files
                         rl_util.savePrimsParamsFromDictAtDirPath(prims_params_dirpath=self.openloopequiv_prims_params_dirpath, 
                                                                  cdmp_params=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_params"])
@@ -273,9 +271,11 @@ class RLTactileFeedback:
                         self.dmp_rl_tactile_fb_robot_exec_mode_msg = DMPRLTactileFeedbackRobotExecMode()
                         self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_OPENLOOPEQUIV_DMP_ONLY
                         self.dmp_rl_tactile_fb_robot_exec_mode_msg.execute_behavior_until_prim_no = self.prim_tbi
-                        self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Load Open-Loop-Equivalent Primitive New Sample Mean Parameters, Execute until Prim. # %d" % (self.prim_tbi+1)
+                        self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Evaluating Open-Loop-Equivalent Primitive New Sample Mean, Execute until Prim. # %d, Trial # %d/%d" % (self.prim_tbi+1, self.n_cost_evaluation_general+1, self.N_cost_evaluation_general)
                         
                         self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
+                        
+                        print (self.dmp_rl_tactile_fb_robot_exec_mode_msg.description)
                         
                         while (self.is_robot_ready):
                             print ("Waiting for the robot to finish processing transmitted command...")
