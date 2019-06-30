@@ -188,6 +188,12 @@ def getCatkinWSPath():
 def getAllCLMCDataFilePathsInDirectory(directory_path):
     return [directory_path+'/'+f for f in os.listdir(directory_path) if re.match(r'd+\d{5,5}$', f)] # match the regex pattern of SL data files
 
+def waitUntilTotalCLMCDataFilesReaches(directory_path, desired_total_clmc_data_files):
+    dfilepaths = getAllCLMCDataFilePathsInDirectory(directory_path)
+    while (len(dfilepaths) < desired_total_clmc_data_files):
+        dfilepaths = getAllCLMCDataFilePathsInDirectory(directory_path)
+    return None
+
 def deleteAllCLMCDataFilesInDirectory(directory_path):
     dfilepaths = getAllCLMCDataFilePathsInDirectory(directory_path)
     for dfilepath in dfilepaths:

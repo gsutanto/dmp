@@ -294,10 +294,10 @@ def unrollPI2ParamsSamples(pi2_params_samples, prim_to_be_improved, cart_types_t
             assert False, "cart_type_tbi == %s is un-defined!"
         for k in range(K_PI2_samples):
             print ("   Unrolling PI2 sample # %d/%d ..." % (k+1, K_PI2_samples))
-            cdmp_instance.setParamsFromDict(pi2_params_samples[k]["cdmp_params_all_dim_learned"][cart_type_tbi][prim_to_be_improved])
-            pi2_cdmp_unroll_samples[cart_type_tbi][k] = cdmp_instance.unroll(pi2_params_samples[k]["cdmp_params_all_dim_learned"][cart_type_tbi][prim_to_be_improved]["critical_states_learn"], 
-                                                                             pi2_params_samples[k]["cdmp_params_all_dim_learned"][cart_type_tbi][prim_to_be_improved]["mean_tau"], 
-                                                                             pi2_params_samples[k]["cdmp_params_all_dim_learned"][cart_type_tbi][prim_to_be_improved]["mean_tau"], 
+            cdmp_instance.setParamsFromDict(pi2_params_samples[k]["ole_cdmp_params_all_dim_learned"][cart_type_tbi][prim_to_be_improved])
+            pi2_cdmp_unroll_samples[cart_type_tbi][k] = cdmp_instance.unroll(pi2_params_samples[k]["ole_cdmp_params_all_dim_learned"][cart_type_tbi][prim_to_be_improved]["critical_states_learn"], 
+                                                                             pi2_params_samples[k]["ole_cdmp_params_all_dim_learned"][cart_type_tbi][prim_to_be_improved]["mean_tau"], 
+                                                                             pi2_params_samples[k]["ole_cdmp_params_all_dim_learned"][cart_type_tbi][prim_to_be_improved]["mean_tau"], 
                                                                              dt)
         
         if (is_plotting):
