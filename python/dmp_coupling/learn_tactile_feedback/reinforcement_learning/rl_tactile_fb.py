@@ -27,11 +27,66 @@ import rl_tactile_fb_utils as rl_util
 
 class RLTactileFeedback:
     def updateRobotReadyStatusCallback(self, robot_ready_notification_msg):
-        if (self.is_executing_on_robot):
-            self.is_robot_ready = robot_ready_notification_msg.data
+        self.is_robot_ready = robot_ready_notification_msg.data
+    
+    def executeBehaviorOnRobotNTimes(self, N_unroll, 
+                                     exec_behavior_until_prim_no, 
+                                     behavior_params=None, 
+                                     feedback_model_params=None, 
+                                     exec_mode="EXEC_OPENLOOPEQUIV_DMP_ONLY", 
+                                     periodic_wait_time_until_robot_is_ready=0.0, 
+                                     periodic_wait_time_until_robot_is_finished_processing_transmitted_cmd=0.05
+                                     ):
+        # start by removing all SL data files inside sl_data_dirpath
+        py_util.deleteAllCLMCDataFilesInDirectory(self.sl_data_dirpath)
+        
+        for n_unroll in range(N_unroll):
+            while (not self.is_robot_ready):
+                print ("Waiting for the robot to be ready to accept command...")
+                if (periodic_wait_time_until_robot_is_ready > 0.0):
+                    time.sleep(periodic_wait_time_until_robot_is_ready)
+            
+            if (exec_mode == "EXEC_OPENLOOPEQUIV_DMP_ONLY"):
+                assert (behavior_params is not None)
+                # save open-loop-equivalent primitive/behavior parameters into text files
+                rl_util.savePrimsParamsFromDictAtDirPath(prims_params_dirpath=self.openloopequiv_prims_params_dirpath, 
+                                                         cdmp_params=behavior_params)
+            elif (exec_mode == "EXEC_NOMINAL_DMP_AND_ITERATION_PMNN"):
+                assert (feedback_model_params is not None)
+                # TODO: save feedback model (PMNN) parameters into text files
+                assert (False), "Not implemented yet!!!"
+            
+            # command the C++ side to load the text files containing the saved parameters and execute it on the robot
+            self.dmp_rl_tactile_fb_robot_exec_mode_msg = DMPRLTactileFeedbackRobotExecMode()
+            self.dmp_rl_tactile_fb_robot_exec_mode_msg.execute_behavior_until_prim_no = exec_behavior_until_prim_no
+            if (exec_mode == "EXEC_NOMINAL_DMP_ONLY"):
+                self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_NOMINAL_DMP_ONLY
+                exec_description = "Open-Loop Behavior"
+            elif (exec_mode == "EXEC_NOMINAL_DMP_AND_INITIAL_PMNN"):
+                self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_NOMINAL_DMP_AND_INITIAL_PMNN
+                exec_description = "Initial Closed-Loop Behavior"
+            elif (exec_mode == "EXEC_OPENLOOPEQUIV_DMP_ONLY"):
+                self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_OPENLOOPEQUIV_DMP_ONLY
+                exec_description = "Open-Loop-Equivalent Behavior"
+            elif (exec_mode == "EXEC_NOMINAL_DMP_AND_ITERATION_PMNN"):
+                self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_NOMINAL_DMP_AND_ITERATION_PMNN
+                exec_description = "Current Iteration Closed-Loop Behavior"
+            else:
+                assert (False), "exec_mode==%s is un-defined!" % exec_mode
+            self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Evaluating %s, Execute until Prim. # %d, Trial # %d/%d" % (exec_description, exec_behavior_until_prim_no+1, n_unroll+1, N_unroll)
+            
+            print (self.dmp_rl_tactile_fb_robot_exec_mode_msg.description)
+            
+            while (self.is_robot_ready):
+                self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
+                print ("Waiting for the robot to finish processing transmitted command...")
+                if (periodic_wait_time_until_robot_is_finished_processing_transmitted_cmd > 0.0):
+                    time.sleep(periodic_wait_time_until_robot_is_finished_processing_transmitted_cmd)
+            
+            py_util.waitUntilTotalCLMCDataFilesReaches(self.sl_data_dirpath, n_unroll+1)
+        return None
     
     def __init__(self, node_name="rl_tactile_feedback", loop_rate=100, 
-                 is_executing_on_robot=False, 
                  is_unrolling_pi2_samples=True, 
                  is_plotting=True):
         self.is_robot_ready = False
@@ -52,7 +107,6 @@ class RLTactileFeedback:
         self.outdata_dirpath = './'
         
         self.is_smoothing_training_traj_before_learning = True
-        self.is_executing_on_robot = is_executing_on_robot
         self.is_unrolling_pi2_samples = is_unrolling_pi2_samples
         self.is_plotting = is_plotting
         
@@ -75,29 +129,12 @@ class RLTactileFeedback:
         
         # not sure if the nominal (original) primitives below is needed or not...:
         #nominal_cdmp_params = rl_util.loadPrimsParamsAsDictFromDirPath(nominal_prims_params_dirpath, N_primitives)
-        
-        if (self.is_executing_on_robot):
-            # initialization by removing all SL data files inside sl_data_dirpath
-            py_util.deleteAllCLMCDataFilesInDirectory(self.sl_data_dirpath)
-            
-            for self.n_cost_evaluation_general in range(self.N_cost_evaluation_general):
-                while (not self.is_robot_ready):
-                    print ("Waiting for the robot to be ready to accept command...")
-                
-                # command the C++ side to load the text files containing the parameters and execute it on the robot
-                self.dmp_rl_tactile_fb_robot_exec_mode_msg = DMPRLTactileFeedbackRobotExecMode()
-                self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_NOMINAL_DMP_AND_INITIAL_PMNN
-                self.dmp_rl_tactile_fb_robot_exec_mode_msg.execute_behavior_until_prim_no = self.N_primitives - 1
-                self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Evaluating Closed-Loop Behavior, Execute All Primitives, Trial # %d/%d" % (self.n_cost_evaluation_general+1, self.N_cost_evaluation_general)
-                
-                print (self.dmp_rl_tactile_fb_robot_exec_mode_msg.description)
-                
-                while (self.is_robot_ready):
-                    self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
-                    print ("Waiting for the robot to finish processing transmitted command...")
-                    time.sleep(1)
-                
-                py_util.waitUntilTotalCLMCDataFilesReaches(self.sl_data_dirpath, self.n_cost_evaluation_general+1)
+                 
+        self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_general, 
+                                          exec_behavior_until_prim_no=self.N_primitives - 1, 
+                                          behavior_params=None, 
+                                          feedback_model_params=None, 
+                                          exec_mode="EXEC_NOMINAL_DMP_AND_INITIAL_PMNN")
         
         self.rl_data = {}
         
@@ -135,31 +172,11 @@ class RLTactileFeedback:
                 
                 plt.close('all')
                 
-                if (self.is_executing_on_robot):
-                    py_util.deleteAllCLMCDataFilesInDirectory(self.sl_data_dirpath)
-                    
-                    for self.n_cost_evaluation_general in range(self.N_cost_evaluation_general):
-                        while (not self.is_robot_ready):
-                            print ("Waiting for the robot to be ready to accept command...")
-                        
-                        # save open-loop-equivalent primitive parameters into text files
-                        rl_util.savePrimsParamsFromDictAtDirPath(prims_params_dirpath=self.openloopequiv_prims_params_dirpath, 
-                                                                 cdmp_params=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params_all_dim_learned"])
-                        
-                        # command the C++ side to load the text files containing the saved parameters and execute it on the robot
-                        self.dmp_rl_tactile_fb_robot_exec_mode_msg = DMPRLTactileFeedbackRobotExecMode()
-                        self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_OPENLOOPEQUIV_DMP_ONLY
-                        self.dmp_rl_tactile_fb_robot_exec_mode_msg.execute_behavior_until_prim_no = self.prim_tbi
-                        self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Evaluating Open-Loop-Equivalent Primitive, Execute until Prim. # %d, Trial # %d/%d" % (self.prim_tbi+1, self.n_cost_evaluation_general+1, self.N_cost_evaluation_general)
-                        
-                        print (self.dmp_rl_tactile_fb_robot_exec_mode_msg.description)
-                        
-                        while (self.is_robot_ready):
-                            self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
-                            print ("Waiting for the robot to finish processing transmitted command...")
-                            time.sleep(1)
-                        
-                        py_util.waitUntilTotalCLMCDataFilesReaches(self.sl_data_dirpath, self.n_cost_evaluation_general+1)
+                self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_general, 
+                                                  exec_behavior_until_prim_no=self.prim_tbi, 
+                                                  behavior_params=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params_all_dim_learned"], 
+                                                  feedback_model_params=None, 
+                                                  exec_mode="EXEC_OPENLOOPEQUIV_DMP_ONLY")
                 
                 # evaluate the cost of the open-loop-equivalent primitive
                 self.rl_data[self.prim_tbi][self.it]["ole_cdmp_evals_all_dim_learned"] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(self.sl_data_dirpath, 
@@ -199,31 +216,11 @@ class RLTactileFeedback:
                                                                                                                                                              self.param_sample, 
                                                                                                                                                              self.rl_data[self.prim_tbi][self.it]["PI2_param_dim_list"])
                     
-                    if (self.is_executing_on_robot):
-                        py_util.deleteAllCLMCDataFilesInDirectory(self.sl_data_dirpath)
-                        
-                        for self.n_cost_evaluation_per_PI2_sample in range(self.N_cost_evaluation_per_PI2_sample):
-                            while (not self.is_robot_ready):
-                                print ("Waiting for the robot to be ready to accept command...")
-                            
-                            # save sampled perturbed open-loop-equivalent primitive parameters into text files
-                            rl_util.savePrimsParamsFromDictAtDirPath(prims_params_dirpath=self.openloopequiv_prims_params_dirpath, 
-                                                                     cdmp_params=self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_params_all_dim_learned"])
-                            
-                            # command the C++ side to load the text files containing the saved parameters and execute it on the robot
-                            self.dmp_rl_tactile_fb_robot_exec_mode_msg = DMPRLTactileFeedbackRobotExecMode()
-                            self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_OPENLOOPEQUIV_DMP_ONLY
-                            self.dmp_rl_tactile_fb_robot_exec_mode_msg.execute_behavior_until_prim_no = self.prim_tbi
-                            self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Evaluating PI2 Perturbed Open-Loop-Equivalent Primitive Sample # %d/%d, Execute until Prim. # %d, Trial # %d/%d" % (self.k+1, self.K_PI2_samples, self.prim_tbi+1, self.n_cost_evaluation_per_PI2_sample+1, self.N_cost_evaluation_per_PI2_sample)
-                            
-                            print (self.dmp_rl_tactile_fb_robot_exec_mode_msg.description)
-                            
-                            while (self.is_robot_ready):
-                                self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
-                                print ("Waiting for the robot to finish processing transmitted command...")
-                                time.sleep(1)
-                            
-                            py_util.waitUntilTotalCLMCDataFilesReaches(self.sl_data_dirpath, self.n_cost_evaluation_per_PI2_sample+1)
+                    self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_per_PI2_sample, 
+                                                      exec_behavior_until_prim_no=self.prim_tbi, 
+                                                      behavior_params=self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_params_all_dim_learned"], 
+                                                      feedback_model_params=None, 
+                                                      exec_mode="EXEC_OPENLOOPEQUIV_DMP_ONLY")
                     
                     # evaluate the k-th sample's cost
                     self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_evals_all_dim_learned"] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(self.sl_data_dirpath, 
@@ -252,32 +249,11 @@ class RLTactileFeedback:
                                                                                                                self.rl_data[self.prim_tbi][self.it]["PI2_param_new_mean"], 
                                                                                                                self.rl_data[self.prim_tbi][self.it]["PI2_param_dim_list"])
                 
-                # save mean_new (which is a DMP params by itself) as text files, to be loaded by C++ program and executed by the robot, to evaluate its cost Nu times, to ensure the average cost is really lower than the original one
-                if (self.is_executing_on_robot):
-                    py_util.deleteAllCLMCDataFilesInDirectory(self.sl_data_dirpath)
-                    
-                    for self.n_cost_evaluation_general in range(self.N_cost_evaluation_general):
-                        while (not self.is_robot_ready):
-                            print ("Waiting for the robot to be ready to accept command...")
-                        
-                        # save open-loop-equivalent primitive's new sample mean parameters into text files
-                        rl_util.savePrimsParamsFromDictAtDirPath(prims_params_dirpath=self.openloopequiv_prims_params_dirpath, 
-                                                                 cdmp_params=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_params"])
-                        
-                        # command the C++ side to load the text files containing the saved parameters and execute it on the robot
-                        self.dmp_rl_tactile_fb_robot_exec_mode_msg = DMPRLTactileFeedbackRobotExecMode()
-                        self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_OPENLOOPEQUIV_DMP_ONLY
-                        self.dmp_rl_tactile_fb_robot_exec_mode_msg.execute_behavior_until_prim_no = self.prim_tbi
-                        self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Evaluating Open-Loop-Equivalent Primitive New Sample Mean, Execute until Prim. # %d, Trial # %d/%d" % (self.prim_tbi+1, self.n_cost_evaluation_general+1, self.N_cost_evaluation_general)
-                        
-                        print (self.dmp_rl_tactile_fb_robot_exec_mode_msg.description)
-                        
-                        while (self.is_robot_ready):
-                            self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
-                            print ("Waiting for the robot to finish processing transmitted command...")
-                            time.sleep(1)
-                        
-                        py_util.waitUntilTotalCLMCDataFilesReaches(self.sl_data_dirpath, self.n_cost_evaluation_general+1)
+                self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_general, 
+                                                  exec_behavior_until_prim_no=self.prim_tbi, 
+                                                  behavior_params=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_params"], 
+                                                  feedback_model_params=None, 
+                                                  exec_mode="EXEC_OPENLOOPEQUIV_DMP_ONLY")
                 
                 py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
                 
@@ -294,6 +270,5 @@ class RLTactileFeedback:
                 py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
 
 if __name__ == '__main__':
-    rl_tactile_fb = RLTactileFeedback(is_executing_on_robot=True, 
-                                      is_unrolling_pi2_samples=False, 
+    rl_tactile_fb = RLTactileFeedback(is_unrolling_pi2_samples=False, 
                                       is_plotting=False)

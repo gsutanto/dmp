@@ -23,10 +23,14 @@ def chunks(l, n):
     for i in xrange(0, len(l), n):
         yield l[i:i + n]
 
-def computeNMSE(predictions, ground_truth, axis=0):
+def computeMSEVarGTNMSE(predictions, ground_truth, axis=0):
     mse = np.mean(np.square(predictions - ground_truth), axis=axis) # Mean-Squared Error (MSE)
     var_ground_truth = np.var(ground_truth, axis=axis)              # Variance of the Ground-Truth
     nmse = np.divide(mse, var_ground_truth)                         # Normalized Mean-Squared Error (NMSE)
+    return mse, var_ground_truth, nmse
+
+def computeNMSE(predictions, ground_truth, axis=0):
+    [_, _, nmse] = computeMSEVarGTNMSE(predictions, ground_truth, axis)
     return nmse
 
 def computeWNMSE(predictions, ground_truth, weight, axis=0):
@@ -222,6 +226,10 @@ def plotManyTrajsVsOneTraj(set_many_trajs, one_traj,
             for n_demo in range(N_many_trajs):
                 all_compT_list[n_demo] = set_many_trajs[n_demo].Xdd.T
             all_compT_list[1+n_demo] = one_traj.Xdd.T
+        elif (comp == "Q"):
+            for n_demo in range(N_many_trajs):
+                all_compT_list[n_demo] = set_many_trajs[n_demo].X.T
+            all_compT_list[1+n_demo] = one_traj.X.T
         elif (comp == "omega"):
             for n_demo in range(N_many_trajs):
                 all_compT_list[n_demo] = set_many_trajs[n_demo].omega.T
@@ -242,7 +250,7 @@ def plotManyTrajsVsOneTraj(set_many_trajs, one_traj,
     
     return None
 
-def computeAndDisplayTrajectoryNMSE(set_demo_trajs, unroll_traj, print_prefix="", is_orientation_trajectory=False):
+def computeAndDisplayTrajectoryMSEVarGTNMSE(set_demo_trajs, unroll_traj, print_prefix="", is_orientation_trajectory=False):
     # assumes trajectory structure like DMPTrajectory or QuaternionDMPTrajectory
     unroll_traj_position = unroll_traj.X
     if (not is_orientation_trajectory):
@@ -288,15 +296,37 @@ def computeAndDisplayTrajectoryNMSE(set_demo_trajs, unroll_traj, print_prefix=""
     stacked_demo_traj_position = np.hstack(demo_traj_position_list)
     stacked_demo_traj_velocity = np.hstack(demo_traj_velocity_list)
     stacked_demo_traj_acceleration = np.hstack(demo_traj_acceleration_list)
-    NMSE_position = computeNMSE(predictions=stacked_stretched_unroll_traj_position, ground_truth=stacked_demo_traj_position, axis=1)
-    NMSE_velocity = computeNMSE(predictions=stacked_stretched_unroll_traj_velocity, ground_truth=stacked_demo_traj_velocity, axis=1)
-    NMSE_acceleration = computeNMSE(predictions=stacked_stretched_unroll_traj_acceleration, ground_truth=stacked_demo_traj_acceleration, axis=1)
+    [MSE_position, varGT_position, NMSE_position
+     ] = computeMSEVarGTNMSE(predictions=stacked_stretched_unroll_traj_position, ground_truth=stacked_demo_traj_position, axis=1)
+    [MSE_velocity, varGT_velocity, NMSE_velocity
+     ] = computeMSEVarGTNMSE(predictions=stacked_stretched_unroll_traj_velocity, ground_truth=stacked_demo_traj_velocity, axis=1)
+    [MSE_acceleration, varGT_acceleration, NMSE_acceleration
+     ] = computeMSEVarGTNMSE(predictions=stacked_stretched_unroll_traj_acceleration, ground_truth=stacked_demo_traj_acceleration, axis=1)
     if (not is_orientation_trajectory):
+        print (print_prefix + "X      MSE  = " + str(MSE_position))
+        print (print_prefix + "Xd     MSE  = " + str(MSE_velocity))
+        print (print_prefix + "Xdd    MSE  = " + str(MSE_acceleration))
+        print ("")
+        print (print_prefix + "X      varGT= " + str(varGT_position))
+        print (print_prefix + "Xd     varGT= " + str(varGT_velocity))
+        print (print_prefix + "Xdd    varGT= " + str(varGT_acceleration))
+        print ("")
         print (print_prefix + "X      NMSE = " + str(NMSE_position))
         print (print_prefix + "Xd     NMSE = " + str(NMSE_velocity))
         print (print_prefix + "Xdd    NMSE = " + str(NMSE_acceleration))
     else:
+        print (print_prefix + "Q      MSE  = " + str(MSE_position))
+        print (print_prefix + "omega  MSE  = " + str(MSE_velocity))
+        print (print_prefix + "omegad MSE  = " + str(MSE_acceleration))
+        print ("")
+        print (print_prefix + "Q      varGT= " + str(varGT_position))
+        print (print_prefix + "omega  varGT= " + str(varGT_velocity))
+        print (print_prefix + "oemgad varGT= " + str(varGT_acceleration))
+        print ("")
         print (print_prefix + "Q      NMSE = " + str(NMSE_position))
         print (print_prefix + "omega  NMSE = " + str(NMSE_velocity))
         print (print_prefix + "omegad NMSE = " + str(NMSE_acceleration))
-    return NMSE_position, NMSE_velocity, NMSE_acceleration
+    return [MSE_position,  MSE_velocity,  MSE_acceleration, 
+            varGT_position,varGT_velocity,varGT_acceleration, 
+            NMSE_position, NMSE_velocity, NMSE_acceleration
+            ]

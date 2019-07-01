@@ -175,7 +175,8 @@ def extractCartDMPTrajectoriesFromUnrollResults(unroll_results,
 
 def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All", 
                              is_smoothing_training_traj_before_learning=True, 
-                             is_plotting=False):
+                             is_plotting=False, 
+                             threshold_var_ground_truth_Q= 1.0e-5):
     N_primitives = len(cdmp_trajs["Quaternion"])
     if (prim_to_be_learned is "All"):
         prim_to_be_learned = range(N_primitives)
@@ -254,17 +255,17 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All",
                                                         cdmp_params["Quaternion"][n_prim]["mean_tau"], 
                                                         cdmp_params["Quaternion"][n_prim]["mean_tau"], 
                                                         dt)
-        py_util.computeAndDisplayTrajectoryNMSE(cdmp_trajs["CartCoord"][n_prim], cdmp_unroll["CartCoord"][n_prim], 
-                                                print_prefix="CartCoord  Prim. #%d w.r.t. Original   Demo Trajs " % (n_prim+1), is_orientation_trajectory=False)
-        py_util.computeAndDisplayTrajectoryNMSE(cdmp_trajs["Quaternion"][n_prim], cdmp_unroll["Quaternion"][n_prim], 
-                                                print_prefix="Quaternion Prim. #%d w.r.t. Original   Demo Trajs " % (n_prim+1), is_orientation_trajectory=True)
+        py_util.computeAndDisplayTrajectoryMSEVarGTNMSE(cdmp_trajs["CartCoord"][n_prim], cdmp_unroll["CartCoord"][n_prim], 
+                                                        print_prefix="CartCoord  Prim. #%d w.r.t. Original   Demo Trajs " % (n_prim+1), is_orientation_trajectory=False)
+        py_util.computeAndDisplayTrajectoryMSEVarGTNMSE(cdmp_trajs["Quaternion"][n_prim], cdmp_unroll["Quaternion"][n_prim], 
+                                                        print_prefix="Quaternion Prim. #%d w.r.t. Original   Demo Trajs " % (n_prim+1), is_orientation_trajectory=True)
         print("")
-        [nmse_smoothened_X, _, _
-         ]= py_util.computeAndDisplayTrajectoryNMSE(cdmp_smoothened_trajs["CartCoord"][n_prim], cdmp_unroll["CartCoord"][n_prim], 
-                                                    print_prefix="CartCoord  Prim. #%d w.r.t. Smoothened Demo Trajs " % (n_prim+1), is_orientation_trajectory=False)
-        [nmse_smoothened_Q, _, _
-         ]= py_util.computeAndDisplayTrajectoryNMSE(cdmp_smoothened_trajs["Quaternion"][n_prim], cdmp_unroll["Quaternion"][n_prim], 
-                                                    print_prefix="Quaternion Prim. #%d w.r.t. Smoothened Demo Trajs " % (n_prim+1), is_orientation_trajectory=True)
+        [mse_smoothened_X, _, _, vargt_smoothened_X, _, _, nmse_smoothened_X, _, _
+         ]= py_util.computeAndDisplayTrajectoryMSEVarGTNMSE(cdmp_smoothened_trajs["CartCoord"][n_prim], cdmp_unroll["CartCoord"][n_prim], 
+                                                            print_prefix="CartCoord  Prim. #%d w.r.t. Smoothened Demo Trajs " % (n_prim+1), is_orientation_trajectory=False)
+        [mse_smoothened_Q, _, _, vargt_smoothened_Q, _, _, nmse_smoothened_Q, _, _
+         ]= py_util.computeAndDisplayTrajectoryMSEVarGTNMSE(cdmp_smoothened_trajs["Quaternion"][n_prim], cdmp_unroll["Quaternion"][n_prim], 
+                                                            print_prefix="Quaternion Prim. #%d w.r.t. Smoothened Demo Trajs " % (n_prim+1), is_orientation_trajectory=True)
         print("")
         print("")
         
@@ -276,7 +277,7 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All",
         
         if (n_prim != 1): # 2nd primitive's position DMP fitting maybe bad because there's no change in position (no position movement)
             assert ((nmse_smoothened_X < 1.0).all())
-        assert ((nmse_smoothened_Q < 1.0).all())
+        assert (np.bitwise_or(nmse_smoothened_Q < 1.0, vargt_smoothened_Q < threshold_var_ground_truth_Q).all())
         
     return cdmp_params, cdmp_unroll
 
@@ -291,7 +292,7 @@ def unrollPI2ParamsSamples(pi2_params_samples, prim_to_be_improved, cart_types_t
             components_to_be_plotted = ["X", "Xd", "Xdd"]
         elif (cart_type_tbi == "Quaternion"):
             cdmp_instance = qdmp
-            components_to_be_plotted = ["X", "omega", "omegad"]
+            components_to_be_plotted = ["Q", "omega", "omegad"]
         else:
             assert False, "cart_type_tbi == %s is un-defined!"
         for k in range(K_PI2_samples):

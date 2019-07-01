@@ -129,5 +129,5 @@ class QuaternionDMP(DMPDiscrete, object):
                           title_suffix="", fig_num_offset=0):
         return py_util.plotManyTrajsVsOneTraj(set_many_trajs=set_demo_Qtrajs, one_traj=unroll_Qtraj, 
                                               title_suffix=title_suffix, fig_num_offset=fig_num_offset, 
-                                              components_to_be_plotted=["X", "omega", "omegad"], 
+                                              components_to_be_plotted=["Q", "omega", "omegad"], 
                                               many_traj_label="demo", one_traj_label="unroll")
