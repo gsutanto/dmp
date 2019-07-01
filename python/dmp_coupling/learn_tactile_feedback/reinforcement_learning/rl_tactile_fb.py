@@ -34,8 +34,10 @@ class RLTactileFeedback:
                                      behavior_params=None, 
                                      feedback_model_params=None, 
                                      exec_mode="EXEC_OPENLOOPEQUIV_DMP_ONLY", 
-                                     periodic_wait_time_until_robot_is_ready=0.0, 
-                                     periodic_wait_time_until_robot_is_finished_processing_transmitted_cmd=0.05
+                                     suffix_exec_description="", 
+                                     periodic_wait_time_until_robot_is_ready_secs=0.0, 
+                                     periodic_wait_time_until_robot_is_finished_processing_transmitted_cmd_secs=0.05, 
+                                     wait_time_until_robot_is_finished_logging_into_datafile_secs=2.0
                                      ):
         # start by removing all SL data files inside sl_data_dirpath
         py_util.deleteAllCLMCDataFilesInDirectory(self.sl_data_dirpath)
@@ -43,8 +45,8 @@ class RLTactileFeedback:
         for n_unroll in range(N_unroll):
             while (not self.is_robot_ready):
                 print ("Waiting for the robot to be ready to accept command...")
-                if (periodic_wait_time_until_robot_is_ready > 0.0):
-                    time.sleep(periodic_wait_time_until_robot_is_ready)
+                if (periodic_wait_time_until_robot_is_ready_secs > 0.0):
+                    time.sleep(periodic_wait_time_until_robot_is_ready_secs)
             
             if (exec_mode == "EXEC_OPENLOOPEQUIV_DMP_ONLY"):
                 assert (behavior_params is not None)
@@ -73,17 +75,18 @@ class RLTactileFeedback:
                 exec_description = "Current Iteration Closed-Loop Behavior"
             else:
                 assert (False), "exec_mode==%s is un-defined!" % exec_mode
-            self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Evaluating %s, Execute until Prim. # %d, Trial # %d/%d" % (exec_description, exec_behavior_until_prim_no+1, n_unroll+1, N_unroll)
+            self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Evaluating %s Trial # %d/%d, Execute until Prim. # %d" % (exec_description+suffix_exec_description, n_unroll+1, N_unroll, exec_behavior_until_prim_no+1)
             
             print (self.dmp_rl_tactile_fb_robot_exec_mode_msg.description)
             
             while (self.is_robot_ready):
                 self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
                 print ("Waiting for the robot to finish processing transmitted command...")
-                if (periodic_wait_time_until_robot_is_finished_processing_transmitted_cmd > 0.0):
-                    time.sleep(periodic_wait_time_until_robot_is_finished_processing_transmitted_cmd)
+                if (periodic_wait_time_until_robot_is_finished_processing_transmitted_cmd_secs > 0.0):
+                    time.sleep(periodic_wait_time_until_robot_is_finished_processing_transmitted_cmd_secs)
             
             py_util.waitUntilTotalCLMCDataFilesReaches(self.sl_data_dirpath, n_unroll+1)
+            time.sleep(wait_time_until_robot_is_finished_logging_into_datafile_secs)
         return None
     
     def __init__(self, node_name="rl_tactile_feedback", loop_rate=100, 
@@ -220,7 +223,8 @@ class RLTactileFeedback:
                                                       exec_behavior_until_prim_no=self.prim_tbi, 
                                                       behavior_params=self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_params_all_dim_learned"], 
                                                       feedback_model_params=None, 
-                                                      exec_mode="EXEC_OPENLOOPEQUIV_DMP_ONLY")
+                                                      exec_mode="EXEC_OPENLOOPEQUIV_DMP_ONLY", 
+                                                      suffix_exec_description=" PI2 Sample # %d/%d" % (self.k+1, self.K_PI2_samples))
                     
                     # evaluate the k-th sample's cost
                     self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_evals_all_dim_learned"] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(self.sl_data_dirpath, 

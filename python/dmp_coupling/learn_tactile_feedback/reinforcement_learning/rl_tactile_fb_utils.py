@@ -148,6 +148,11 @@ def extractCartDMPTrajectoriesFromUnrollResults(unroll_results,
         for n_prim in range(N_primitives):
             timeT = unroll_results["trajectory"][n_trial]["timeT"][n_prim].T
             if (is_time_start_from_zero):
+                if ((timeT < timeT[0,0]).any()): # debugging for abnormality:
+                    [row_min_timeT, col_min_timeT] = np.unravel_index(timeT.argmin(), timeT.shape)
+                    if ((col_min_timeT > 0) and (col_min_timeT < timeT.shape[1]-1)):
+                        for col_idx_offset_plus_1 in range(3):
+                            print ("timeT[%d,%d] = %f" % (row_min_timeT, col_min_timeT+col_idx_offset_plus_1-1, timeT[row_min_timeT, col_min_timeT+col_idx_offset_plus_1-1]))
                 timeT = timeT - timeT[0,0]
             assert (np.amin(timeT) >= 0.0), "min(timeT)=" + str(np.amin(timeT)) + " < 0.0 (invalid!), at index " + str(np.unravel_index(timeT.argmin(), timeT.shape)) + ", timeT.shape = " + str(timeT.shape)
             XT = unroll_results["trajectory"][n_trial]["XT"][n_prim].T
