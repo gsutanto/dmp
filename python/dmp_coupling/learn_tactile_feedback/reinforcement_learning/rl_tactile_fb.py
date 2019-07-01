@@ -43,8 +43,11 @@ class RLTactileFeedback:
         py_util.deleteAllCLMCDataFilesInDirectory(self.sl_data_dirpath)
         
         for n_unroll in range(N_unroll):
+            is_waiting_robot_ready_msg_printed_out = False
             while (not self.is_robot_ready):
-                print ("Waiting for the robot to be ready to accept command...")
+                if (not is_waiting_robot_ready_msg_printed_out):
+                    print ("Waiting for the robot to be ready to accept command...")
+                is_waiting_robot_ready_msg_printed_out = True
                 if (periodic_wait_time_until_robot_is_ready_secs > 0.0):
                     time.sleep(periodic_wait_time_until_robot_is_ready_secs)
             
@@ -60,6 +63,7 @@ class RLTactileFeedback:
             
             # command the C++ side to load the text files containing the saved parameters and execute it on the robot
             self.dmp_rl_tactile_fb_robot_exec_mode_msg = DMPRLTactileFeedbackRobotExecMode()
+            # TODO (for robustness): add timestamp field in self.dmp_rl_tactile_fb_robot_exec_mode_msg, and add checking in the C++ side, only execute command if message is NOT too outdated
             self.dmp_rl_tactile_fb_robot_exec_mode_msg.execute_behavior_until_prim_no = exec_behavior_until_prim_no
             if (exec_mode == "EXEC_NOMINAL_DMP_ONLY"):
                 self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_NOMINAL_DMP_ONLY
@@ -179,7 +183,8 @@ class RLTactileFeedback:
                                                   exec_behavior_until_prim_no=self.prim_tbi, 
                                                   behavior_params=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params_all_dim_learned"], 
                                                   feedback_model_params=None, 
-                                                  exec_mode="EXEC_OPENLOOPEQUIV_DMP_ONLY")
+                                                  exec_mode="EXEC_OPENLOOPEQUIV_DMP_ONLY", 
+                                                  suffix_exec_description=" RL Iter. %d" % (self.it))
                 
                 # evaluate the cost of the open-loop-equivalent primitive
                 self.rl_data[self.prim_tbi][self.it]["ole_cdmp_evals_all_dim_learned"] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(self.sl_data_dirpath, 
@@ -188,9 +193,9 @@ class RLTactileFeedback:
                 self.J_prime = self.rl_data[self.prim_tbi][self.it]["ole_cdmp_evals_all_dim_learned"]["mean_accum_cost"][self.prim_tbi]
                 self.abs_diff_J_and_J_prime = np.fabs(self.J - self.J_prime)
                 
-                print ("prim_tbi # %d : J = %f ; J_prime = %f ; abs_diff_J_and_J_prime = %f" % (self.prim_tbi+1, self.J, self.J_prime, self.abs_diff_J_and_J_prime))
-                raw_input("Press [ENTER] to continue...")
+                print ("prim_tbi # %d RL iter # %03d : J = %f ; J_prime = %f ; abs_diff_J_and_J_prime = %f" % (self.prim_tbi+1, self.it, self.J, self.J_prime, self.abs_diff_J_and_J_prime))
                 # TODO: check (assert?) if J' is closely similar to J?
+                raw_input("Press [ENTER] to continue...") 
                 
                 # set to-be-perturbed DMP params as mean, and define the initial covariance matrix
                 [self.rl_data[self.prim_tbi][self.it]["PI2_param_mean"], self.rl_data[self.prim_tbi][self.it]["PI2_param_dim_list"]
@@ -224,7 +229,7 @@ class RLTactileFeedback:
                                                       behavior_params=self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_params_all_dim_learned"], 
                                                       feedback_model_params=None, 
                                                       exec_mode="EXEC_OPENLOOPEQUIV_DMP_ONLY", 
-                                                      suffix_exec_description=" PI2 Sample # %d/%d" % (self.k+1, self.K_PI2_samples))
+                                                      suffix_exec_description=" RL Iter. %d PI2 Sample # %d/%d" % (self.it, self.k+1, self.K_PI2_samples))
                     
                     # evaluate the k-th sample's cost
                     self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_evals_all_dim_learned"] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(self.sl_data_dirpath, 
@@ -257,7 +262,22 @@ class RLTactileFeedback:
                                                   exec_behavior_until_prim_no=self.prim_tbi, 
                                                   behavior_params=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_params"], 
                                                   feedback_model_params=None, 
-                                                  exec_mode="EXEC_OPENLOOPEQUIV_DMP_ONLY")
+                                                  exec_mode="EXEC_OPENLOOPEQUIV_DMP_ONLY", 
+                                                  suffix_exec_description=" RL Iter. %d" % (self.it))
+                
+                # evaluate the new sample mean's cost
+                self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_evals"] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(self.sl_data_dirpath, 
+                                                                                                                                      N_primitives=self.prim_tbi+1, 
+                                                                                                                                      N_cost_components=self.N_total_sense_dimensionality)
+                
+                self.J_prime_new = self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_evals"]["mean_accum_cost"][self.prim_tbi]
+                self.J_prime_new_minus_J_prime = self.J_prime_new - self.J_prime
+                self.J_prime_new_minus_J = self.J_prime_new - self.J
+                
+                print ("prim_tbi # %d RL iter # %03d : J = %f ; J_prime = %f ; J_prime_new = %f" % (self.prim_tbi+1, self.it, self.J, self.J_prime, self.J_prime_new))
+                print ("                             J_prime_new_minus_J_prime = %f" % self.J_prime_new_minus_J_prime)
+                print ("                             J_prime_new_minus_J       = %f" % self.J_prime_new_minus_J)
+                # TODO: check (assert?) if (J'new < J') and (J'new < J)?
                 
                 py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
                 
@@ -267,9 +287,8 @@ class RLTactileFeedback:
                 self.rl_data[self.prim_tbi][self.it] = {}
                 
                 # extract unrolling results: trajectories, sensor trace deviations, cost
-                self.rl_data[self.prim_tbi][self.it]["unroll_results"] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(self.sl_data_dirpath, 
-                                                                                                                                  N_primitives=self.N_primitives, 
-                                                                                                                                  N_cost_components=self.N_total_sense_dimensionality)
+                # TODO: change the line below (this one is temporary, just to test that the PI2 algorithm is working fine in the experiment...)
+                self.rl_data[self.prim_tbi][self.it]["unroll_results"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it-1]["ole_cdmp_new_evals"])
                 
                 py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
 

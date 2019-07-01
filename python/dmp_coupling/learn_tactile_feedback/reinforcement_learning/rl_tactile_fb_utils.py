@@ -181,7 +181,7 @@ def extractCartDMPTrajectoriesFromUnrollResults(unroll_results,
 def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All", 
                              is_smoothing_training_traj_before_learning=True, 
                              is_plotting=False, 
-                             threshold_var_ground_truth_Q= 1.0e-5):
+                             threshold_var_ground_truth_Q= 1.0e-4):
     N_primitives = len(cdmp_trajs["Quaternion"])
     if (prim_to_be_learned is "All"):
         prim_to_be_learned = range(N_primitives)
