@@ -63,6 +63,7 @@ class RLTactileFeedback:
             
             # command the C++ side to load the text files containing the saved parameters and execute it on the robot
             self.dmp_rl_tactile_fb_robot_exec_mode_msg = DMPRLTactileFeedbackRobotExecMode()
+            self.dmp_rl_tactile_fb_robot_exec_mode_msg.header.stamp = rospy.Time.now()
             # TODO (for robustness): add timestamp field in self.dmp_rl_tactile_fb_robot_exec_mode_msg, and add checking in the C++ side, only execute command if message is NOT too outdated
             self.dmp_rl_tactile_fb_robot_exec_mode_msg.execute_behavior_until_prim_no = exec_behavior_until_prim_no
             if (exec_mode == "EXEC_NOMINAL_DMP_ONLY"):
