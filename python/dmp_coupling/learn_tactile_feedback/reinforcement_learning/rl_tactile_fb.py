@@ -41,8 +41,10 @@ class RLTactileFeedback:
                                      ):
         # start by removing all SL data files inside sl_data_dirpath
         py_util.deleteAllCLMCDataFilesInDirectory(self.sl_data_dirpath)
+        prev_clmc_dfilepaths_list = []
+        n_unroll = 0
         
-        for n_unroll in range(N_unroll):
+        while (n_unroll < N_unroll):
             is_waiting_robot_ready_msg_printed_out = False
             while (not self.is_robot_ready):
                 if (not is_waiting_robot_ready_msg_printed_out):
@@ -89,8 +91,22 @@ class RLTactileFeedback:
                 if (periodic_wait_time_until_robot_is_finished_processing_transmitted_cmd_secs > 0.0):
                     time.sleep(periodic_wait_time_until_robot_is_finished_processing_transmitted_cmd_secs)
             
-            py_util.waitUntilTotalCLMCDataFilesReaches(self.sl_data_dirpath, n_unroll+1)
+            curr_clmc_dfilepaths_list = py_util.waitUntilTotalCLMCDataFilesReaches(self.sl_data_dirpath, n_unroll+1)
+            new_clmc_dfilepath = list(set(curr_clmc_dfilepaths_list) - set(prev_clmc_dfilepaths_list))
+            assert (len(new_clmc_dfilepath) == 1)
+            new_clmc_dfilepath = new_clmc_dfilepath[0]
+            
             time.sleep(wait_time_until_robot_is_finished_logging_into_datafile_secs)
+            
+            if (rl_util.checkUnrollResultCLMCDataFileValidity(new_clmc_dfilepath) == True):
+                n_unroll += 1 # only advance counter if the latest-obtained CLMC datafile is valid
+                prev_clmc_dfilepaths_list = copy.deepcopy(curr_clmc_dfilepaths_list)
+            else:
+                print ("The latest-obtained unroll result CLMC datafile %s is invalid!!! Deleting it and repeating the unroll..." % new_clmc_dfilepath)
+                os.remove(new_clmc_dfilepath)
+        
+        assert (len(prev_clmc_dfilepaths_list) == N_unroll)
+        
         return None
     
     def __init__(self, node_name="rl_tactile_feedback", loop_rate=100, 
@@ -148,6 +164,7 @@ class RLTactileFeedback:
         self.count_pmnn_param_reuse = 0
         for self.prim_tbi in self.prims_tbi:
             self.rl_data[self.prim_tbi] = {}
+            # TODO: add capability to restart from some particular RL iteration (indexed by self.it)!
             self.it = 0
             self.rl_data[self.prim_tbi][self.it] = {}
             
@@ -224,6 +241,7 @@ class RLTactileFeedback:
                                                                                                                                                              self.param_sample, 
                                                                                                                                                              self.rl_data[self.prim_tbi][self.it]["PI2_param_dim_list"])
                     
+                    # TODO: plot the PI2 sample of perturbed open-loop-equivalent primitive before unrolling it on the robot!
                     self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_per_PI2_sample, 
                                                       exec_behavior_until_prim_no=self.prim_tbi, 
                                                       behavior_params=self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_params_all_dim_learned"], 

@@ -196,7 +196,7 @@ def waitUntilTotalCLMCDataFilesReaches(directory_path, desired_total_clmc_data_f
     dfilepaths = getAllCLMCDataFilePathsInDirectory(directory_path)
     while (len(dfilepaths) < desired_total_clmc_data_files):
         dfilepaths = getAllCLMCDataFilePathsInDirectory(directory_path)
-    return None
+    return dfilepaths
 
 def deleteAllCLMCDataFilesInDirectory(directory_path):
     dfilepaths = getAllCLMCDataFilePathsInDirectory(directory_path)

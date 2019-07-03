@@ -51,6 +51,24 @@ def computeNPrimitives(prim_id_list):
     assert(max(valid_prim_ids) == N_prim - 1)
     return N_prim
 
+def checkUnrollResultCLMCDataFileValidity(dfilepath):
+    clmcfile = clmcplot_util.ClmcFile(dfilepath)
+    prim_id = clmcfile.get_variables(["ul_curr_prim_no"])[0].T
+    N_primitives = computeNPrimitives(prim_id)
+    
+    # time:
+    timeT = np.vstack([clmcfile.get_variables(['time'])]).T
+    assert(timeT.shape[0] == prim_id.shape[0])
+    assert(timeT.shape[1] == 1)
+    
+    for ip in range(N_primitives):
+        prim_indices = np.where(prim_id == ip)[0]
+        prim_timeT = timeT[prim_indices,:]
+        prim_timeT = prim_timeT - prim_timeT[0,0]
+        if (np.amin(prim_timeT) < 0.0):
+            return False # invalid!
+    return True # valid!
+
 def extractUnrollResultFromCLMCDataFile(dfilepath, N_cost_components):
     clmcfile = clmcplot_util.ClmcFile(dfilepath)
     prim_id = clmcfile.get_variables(["ul_curr_prim_no"])[0].T
