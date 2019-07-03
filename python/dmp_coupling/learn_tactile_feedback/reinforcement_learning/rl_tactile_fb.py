@@ -26,92 +26,11 @@ import clmcplot_utils as clmcplot_util
 import rl_tactile_fb_utils as rl_util
 
 class RLTactileFeedback:
-    def updateRobotReadyStatusCallback(self, robot_ready_notification_msg):
-        self.is_robot_ready = robot_ready_notification_msg.data
-    
-    def executeBehaviorOnRobotNTimes(self, N_unroll, 
-                                     exec_behavior_until_prim_no, 
-                                     behavior_params=None, 
-                                     feedback_model_params=None, 
-                                     exec_mode="EXEC_OPENLOOPEQUIV_DMP_ONLY", 
-                                     suffix_exec_description="", 
-                                     periodic_wait_time_until_robot_is_ready_secs=0.0, 
-                                     periodic_wait_time_until_robot_is_finished_processing_transmitted_cmd_secs=0.05, 
-                                     wait_time_until_robot_is_finished_logging_into_datafile_secs=2.0
-                                     ):
-        # start by removing all SL data files inside sl_data_dirpath
-        py_util.deleteAllCLMCDataFilesInDirectory(self.sl_data_dirpath)
-        prev_clmc_dfilepaths_list = []
-        n_unroll = 0
-        
-        while (n_unroll < N_unroll):
-            is_waiting_robot_ready_msg_printed_out = False
-            while (not self.is_robot_ready):
-                if (not is_waiting_robot_ready_msg_printed_out):
-                    print ("Waiting for the robot to be ready to accept command...")
-                is_waiting_robot_ready_msg_printed_out = True
-                if (periodic_wait_time_until_robot_is_ready_secs > 0.0):
-                    time.sleep(periodic_wait_time_until_robot_is_ready_secs)
-            
-            if (exec_mode == "EXEC_OPENLOOPEQUIV_DMP_ONLY"):
-                assert (behavior_params is not None)
-                # save open-loop-equivalent primitive/behavior parameters into text files
-                rl_util.savePrimsParamsFromDictAtDirPath(prims_params_dirpath=self.openloopequiv_prims_params_dirpath, 
-                                                         cdmp_params=behavior_params)
-            elif (exec_mode == "EXEC_NOMINAL_DMP_AND_ITERATION_PMNN"):
-                assert (feedback_model_params is not None)
-                # TODO: save feedback model (PMNN) parameters into text files
-                assert (False), "Not implemented yet!!!"
-            
-            # command the C++ side to load the text files containing the saved parameters and execute it on the robot
-            self.dmp_rl_tactile_fb_robot_exec_mode_msg = DMPRLTactileFeedbackRobotExecMode()
-            self.dmp_rl_tactile_fb_robot_exec_mode_msg.execute_behavior_until_prim_no = exec_behavior_until_prim_no
-            if (exec_mode == "EXEC_NOMINAL_DMP_ONLY"):
-                self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_NOMINAL_DMP_ONLY
-                exec_description = "Open-Loop Behavior"
-            elif (exec_mode == "EXEC_NOMINAL_DMP_AND_INITIAL_PMNN"):
-                self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_NOMINAL_DMP_AND_INITIAL_PMNN
-                exec_description = "Initial Closed-Loop Behavior"
-            elif (exec_mode == "EXEC_OPENLOOPEQUIV_DMP_ONLY"):
-                self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_OPENLOOPEQUIV_DMP_ONLY
-                exec_description = "Open-Loop-Equivalent Behavior"
-            elif (exec_mode == "EXEC_NOMINAL_DMP_AND_ITERATION_PMNN"):
-                self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_NOMINAL_DMP_AND_ITERATION_PMNN
-                exec_description = "Current Iteration Closed-Loop Behavior"
-            else:
-                assert (False), "exec_mode==%s is un-defined!" % exec_mode
-            self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Evaluating %s Trial # %d/%d, Execute until Prim. # %d" % (exec_description+suffix_exec_description, n_unroll+1, N_unroll, exec_behavior_until_prim_no+1)
-            
-            print (self.dmp_rl_tactile_fb_robot_exec_mode_msg.description)
-            
-            while (self.is_robot_ready):
-                self.dmp_rl_tactile_fb_robot_exec_mode_msg.header.stamp = rospy.Time.now()
-                self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
-                print ("Waiting for the robot to finish processing transmitted command...")
-                if (periodic_wait_time_until_robot_is_finished_processing_transmitted_cmd_secs > 0.0):
-                    time.sleep(periodic_wait_time_until_robot_is_finished_processing_transmitted_cmd_secs)
-            
-            curr_clmc_dfilepaths_list = py_util.waitUntilTotalCLMCDataFilesReaches(self.sl_data_dirpath, n_unroll+1)
-            new_clmc_dfilepath = list(set(curr_clmc_dfilepaths_list) - set(prev_clmc_dfilepaths_list))
-            assert (len(new_clmc_dfilepath) == 1)
-            new_clmc_dfilepath = new_clmc_dfilepath[0]
-            
-            time.sleep(wait_time_until_robot_is_finished_logging_into_datafile_secs)
-            
-            if (rl_util.checkUnrollResultCLMCDataFileValidity(new_clmc_dfilepath) == True):
-                n_unroll += 1 # only advance counter if the latest-obtained CLMC datafile is valid
-                prev_clmc_dfilepaths_list = copy.deepcopy(curr_clmc_dfilepaths_list)
-            else:
-                print ("The latest-obtained unroll result CLMC datafile %s is invalid!!! Deleting it and repeating the unroll..." % new_clmc_dfilepath)
-                os.remove(new_clmc_dfilepath)
-        
-        assert (len(prev_clmc_dfilepaths_list) == N_unroll)
-        
-        return None
-    
     def __init__(self, node_name="rl_tactile_feedback", loop_rate=100, 
                  is_unrolling_pi2_samples=True, 
-                 is_plotting=True):
+                 is_plotting=True, 
+                 starting_prim_tbi=-1, 
+                 starting_rl_iter=-1):
         self.is_robot_ready = False
         
         rospy.init_node(node_name)
@@ -139,8 +58,6 @@ class RLTactileFeedback:
         self.N_cost_evaluation_general = 3
         self.N_cost_evaluation_per_PI2_sample = 1
         
-        #self.prims_tbi = [1,2] # TODO (un-comment): 2nd and 3rd primitives are to-be-improved (tbi)
-        self.prims_tbi = [1] # TODO (comment): for testing purpose we work on 2nd primitive only as the one to-be-improved (tbi)
         self.cart_dim_tbi_dict = {}
         self.cart_dim_tbi_dict["Quaternion"] = np.array([1]) # to-be-improved (tbi): Quaternion DMP, 2nd dimension
         self.cart_types_tbi_list = self.cart_dim_tbi_dict.keys()
@@ -150,30 +67,51 @@ class RLTactileFeedback:
         self.pi2_opt = Pi2(kl_threshold = 1.0, covariance_damping = 2.0, 
                            is_computing_eta_per_timestep = True)
         
-        # not sure if the nominal (original) primitives below is needed or not...:
-        #nominal_cdmp_params = rl_util.loadPrimsParamsAsDictFromDirPath(nominal_prims_params_dirpath, N_primitives)
-                 
-        self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_general, 
-                                          exec_behavior_until_prim_no=self.N_primitives - 1, 
-                                          behavior_params=None, 
-                                          feedback_model_params=None, 
-                                          exec_mode="EXEC_NOMINAL_DMP_AND_INITIAL_PMNN")
+        #starting_prims_tbi = [1,2] # TODO (un-comment): 2nd and 3rd primitives are to-be-improved (tbi)
+        starting_prims_tbi = [1] # TODO (comment): for testing purpose we work on 2nd primitive only as the one to-be-improved (tbi)
         
-        self.rl_data = {}
+        assert (len(starting_prims_tbi) <= self.N_primitives)
+        assert ((np.array(starting_prims_tbi) >= 0).all() and (np.array(starting_prims_tbi) < self.N_primitives).all())
+        assert (sorted(starting_prims_tbi) == starting_prims_tbi)
+        assert (list(set(starting_prims_tbi)) == starting_prims_tbi)
+        self.starting_prims_tbi_idx = 0
+        if (starting_prim_tbi >= 0):
+            assert (starting_prim_tbi < self.N_primitives)
+            assert (starting_prim_tbi in starting_prims_tbi)
+            self.starting_prims_tbi_idx = np.where(np.array(starting_prims_tbi) == starting_prim_tbi)[0][0]
+        self.prims_tbi = starting_prims_tbi[self.starting_prims_tbi_idx:]
+        
+        if ((self.starting_prims_tbi_idx > 0) or (starting_rl_iter > 0)):
+            self.rl_data = py_util.loadObj(self.outdata_dirpath+'rl_data.pkl')
+        else:
+            self.rl_data = {}
+            
+            # not sure if the nominal (original) primitives below is needed or not...:
+            #nominal_cdmp_params = rl_util.loadPrimsParamsAsDictFromDirPath(nominal_prims_params_dirpath, N_primitives)
+                     
+            self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_general, 
+                                              exec_behavior_until_prim_no=self.N_primitives - 1, 
+                                              behavior_params=None, 
+                                              feedback_model_params=None, 
+                                              exec_mode="EXEC_NOMINAL_DMP_AND_INITIAL_PMNN")
         
         self.count_pmnn_param_reuse = 0
         for self.prim_tbi in self.prims_tbi:
-            self.rl_data[self.prim_tbi] = {}
-            # TODO: add capability to restart from some particular RL iteration (indexed by self.it)!
-            self.it = 0
-            self.rl_data[self.prim_tbi][self.it] = {}
-            
-            # extract initial unrolling results: trajectories, sensor trace deviations, cost
-            self.rl_data[self.prim_tbi][self.it]["unroll_results"] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(self.sl_data_dirpath, 
-                                                                                                                              N_primitives=self.N_primitives, 
-                                                                                                                              N_cost_components=self.N_total_sense_dimensionality)
-            
-            py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
+            if ((starting_rl_iter <= 0) or (self.prim_tbi != self.prims_tbi[0])):
+                self.rl_data[self.prim_tbi] = {}
+                
+                self.it = 0
+                
+                self.rl_data[self.prim_tbi][self.it] = {}
+                
+                # extract initial unrolling results: trajectories, sensor trace deviations, cost
+                self.rl_data[self.prim_tbi][self.it]["unroll_results"] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(self.sl_data_dirpath, 
+                                                                                                                                  N_primitives=self.N_primitives, 
+                                                                                                                                  N_cost_components=self.N_total_sense_dimensionality)
+                
+                py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
+            else:
+                self.it = starting_rl_iter
             
             while (self.rl_data[self.prim_tbi][self.it]["unroll_results"]["mean_accum_cost"][self.prim_tbi] > self.cost_threshold[self.prim_tbi]): # while (J > threshold):
                 self.J = self.rl_data[self.prim_tbi][self.it]["unroll_results"]["mean_accum_cost"][self.prim_tbi]
@@ -189,10 +127,6 @@ class RLTactileFeedback:
                                                      prim_to_be_learned="All", 
                                                      is_smoothing_training_traj_before_learning=self.is_smoothing_training_traj_before_learning, 
                                                      is_plotting=self.is_plotting)
-                
-                py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
-                
-                raw_input("Press [ENTER] to continue...")
                 
                 plt.close('all')
                 
@@ -212,7 +146,7 @@ class RLTactileFeedback:
                 
                 print ("prim_tbi # %d RL iter # %03d : J = %f ; J_prime = %f ; abs_diff_J_and_J_prime = %f" % (self.prim_tbi+1, self.it, self.J, self.J_prime, self.abs_diff_J_and_J_prime))
                 # TODO: check (assert?) if J' is closely similar to J?
-                raw_input("Press [ENTER] to continue...") 
+                raw_input("Press [ENTER] to continue...")
                 
                 # set to-be-perturbed DMP params as mean, and define the initial covariance matrix
                 [self.rl_data[self.prim_tbi][self.it]["PI2_param_mean"], self.rl_data[self.prim_tbi][self.it]["PI2_param_dim_list"]
@@ -296,9 +230,6 @@ class RLTactileFeedback:
                 print ("                             J_prime_new_minus_J_prime = %f" % self.J_prime_new_minus_J_prime)
                 print ("                             J_prime_new_minus_J       = %f" % self.J_prime_new_minus_J)
                 # TODO: check (assert?) if (J'new < J') and (J'new < J)?
-                
-                py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
-                
                 raw_input("Press [ENTER] to continue...")
                 
                 self.it += 1
@@ -309,7 +240,92 @@ class RLTactileFeedback:
                 self.rl_data[self.prim_tbi][self.it]["unroll_results"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it-1]["ole_cdmp_new_evals"])
                 
                 py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
+    
+    def updateRobotReadyStatusCallback(self, robot_ready_notification_msg):
+        self.is_robot_ready = robot_ready_notification_msg.data
+    
+    def executeBehaviorOnRobotNTimes(self, N_unroll, 
+                                     exec_behavior_until_prim_no, 
+                                     behavior_params=None, 
+                                     feedback_model_params=None, 
+                                     exec_mode="EXEC_OPENLOOPEQUIV_DMP_ONLY", 
+                                     suffix_exec_description="", 
+                                     periodic_wait_time_until_robot_is_ready_secs=0.0, 
+                                     periodic_wait_time_until_robot_is_finished_processing_transmitted_cmd_secs=0.05, 
+                                     wait_time_until_robot_is_finished_logging_into_datafile_secs=2.0
+                                     ):
+        # start by removing all SL data files inside sl_data_dirpath
+        py_util.deleteAllCLMCDataFilesInDirectory(self.sl_data_dirpath)
+        prev_clmc_dfilepaths_list = []
+        n_unroll = 0
+        
+        while (n_unroll < N_unroll):
+            is_waiting_robot_ready_msg_printed_out = False
+            while (not self.is_robot_ready):
+                if (not is_waiting_robot_ready_msg_printed_out):
+                    print ("Waiting for the robot to be ready to accept command...")
+                is_waiting_robot_ready_msg_printed_out = True
+                if (periodic_wait_time_until_robot_is_ready_secs > 0.0):
+                    time.sleep(periodic_wait_time_until_robot_is_ready_secs)
+            
+            if (exec_mode == "EXEC_OPENLOOPEQUIV_DMP_ONLY"):
+                assert (behavior_params is not None)
+                # save open-loop-equivalent primitive/behavior parameters into text files
+                rl_util.savePrimsParamsFromDictAtDirPath(prims_params_dirpath=self.openloopequiv_prims_params_dirpath, 
+                                                         cdmp_params=behavior_params)
+            elif (exec_mode == "EXEC_NOMINAL_DMP_AND_ITERATION_PMNN"):
+                assert (feedback_model_params is not None)
+                # TODO: save feedback model (PMNN) parameters into text files
+                assert (False), "Not implemented yet!!!"
+            
+            # command the C++ side to load the text files containing the saved parameters and execute it on the robot
+            self.dmp_rl_tactile_fb_robot_exec_mode_msg = DMPRLTactileFeedbackRobotExecMode()
+            self.dmp_rl_tactile_fb_robot_exec_mode_msg.execute_behavior_until_prim_no = exec_behavior_until_prim_no
+            if (exec_mode == "EXEC_NOMINAL_DMP_ONLY"):
+                self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_NOMINAL_DMP_ONLY
+                exec_description = "Open-Loop Behavior"
+            elif (exec_mode == "EXEC_NOMINAL_DMP_AND_INITIAL_PMNN"):
+                self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_NOMINAL_DMP_AND_INITIAL_PMNN
+                exec_description = "Initial Closed-Loop Behavior"
+            elif (exec_mode == "EXEC_OPENLOOPEQUIV_DMP_ONLY"):
+                self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_OPENLOOPEQUIV_DMP_ONLY
+                exec_description = "Open-Loop-Equivalent Behavior"
+            elif (exec_mode == "EXEC_NOMINAL_DMP_AND_ITERATION_PMNN"):
+                self.dmp_rl_tactile_fb_robot_exec_mode_msg.rl_tactile_fb_robot_exec_mode = self.dmp_rl_tactile_fb_robot_exec_mode_msg.EXEC_NOMINAL_DMP_AND_ITERATION_PMNN
+                exec_description = "Current Iteration Closed-Loop Behavior"
+            else:
+                assert (False), "exec_mode==%s is un-defined!" % exec_mode
+            self.dmp_rl_tactile_fb_robot_exec_mode_msg.description = "Evaluating %s Trial # %d/%d, Execute until Prim. # %d" % (exec_description+suffix_exec_description, n_unroll+1, N_unroll, exec_behavior_until_prim_no+1)
+            
+            print (self.dmp_rl_tactile_fb_robot_exec_mode_msg.description)
+            
+            while (self.is_robot_ready):
+                self.dmp_rl_tactile_fb_robot_exec_mode_msg.header.stamp = rospy.Time.now()
+                self.dmp_rl_tactile_fb_robot_exec_mode_msg_pub.publish(self.dmp_rl_tactile_fb_robot_exec_mode_msg)
+                print ("Waiting for the robot to finish processing transmitted command...")
+                if (periodic_wait_time_until_robot_is_finished_processing_transmitted_cmd_secs > 0.0):
+                    time.sleep(periodic_wait_time_until_robot_is_finished_processing_transmitted_cmd_secs)
+            
+            curr_clmc_dfilepaths_list = py_util.waitUntilTotalCLMCDataFilesReaches(self.sl_data_dirpath, n_unroll+1)
+            new_clmc_dfilepath = list(set(curr_clmc_dfilepaths_list) - set(prev_clmc_dfilepaths_list))
+            assert (len(new_clmc_dfilepath) == 1)
+            new_clmc_dfilepath = new_clmc_dfilepath[0]
+            
+            time.sleep(wait_time_until_robot_is_finished_logging_into_datafile_secs)
+            
+            if (rl_util.checkUnrollResultCLMCDataFileValidity(new_clmc_dfilepath) == True):
+                n_unroll += 1 # only advance counter if the latest-obtained CLMC datafile is valid
+                prev_clmc_dfilepaths_list = copy.deepcopy(curr_clmc_dfilepaths_list)
+            else:
+                print ("The latest-obtained unroll result CLMC datafile %s is invalid!!! Deleting it and repeating the unroll..." % new_clmc_dfilepath)
+                os.remove(new_clmc_dfilepath)
+        
+        assert (len(prev_clmc_dfilepaths_list) == N_unroll)
+        
+        return None
 
 if __name__ == '__main__':
     rl_tactile_fb = RLTactileFeedback(is_unrolling_pi2_samples=False, 
-                                      is_plotting=False)
+                                      is_plotting=False, 
+                                      starting_prim_tbi=1, 
+                                      starting_rl_iter=7)

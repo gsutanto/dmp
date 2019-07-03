@@ -69,10 +69,12 @@ def checkUnrollResultCLMCDataFileValidity(dfilepath):
             return False # invalid!
     return True # valid!
 
-def extractUnrollResultFromCLMCDataFile(dfilepath, N_cost_components):
+def extractUnrollResultFromCLMCDataFile(dfilepath, N_cost_components, N_supposed_primitives=None):
     clmcfile = clmcplot_util.ClmcFile(dfilepath)
     prim_id = clmcfile.get_variables(["ul_curr_prim_no"])[0].T
     N_primitives = computeNPrimitives(prim_id)
+    if (N_supposed_primitives is not None):
+        assert (N_primitives == N_supposed_primitives), "N_primitives = %d ; N_supposed_primitives = %d" % (N_primitives, N_supposed_primitives)
     
     # time:
     timeT = np.vstack([clmcfile.get_variables(['time'])]).T
@@ -147,8 +149,9 @@ def extractUnrollResultsFromCLMCDataFilesInDirectory(directory_path,
          trial_unroll_traj, 
          trial_unroll_cost
         ] = extractUnrollResultFromCLMCDataFile(init_new_env_dfilepath, 
-                                                N_cost_components=N_cost_components)
-        assert (len(trial_unroll_cost) == N_primitives)
+                                                N_cost_components=N_cost_components, 
+                                                N_supposed_primitives=N_primitives)
+        assert (len(trial_unroll_cost) == N_primitives), "len(trial_unroll_cost) = %d ; N_primitives = %d" % (len(trial_unroll_cost), N_primitives)
         unroll_results["trajectory"].append(trial_unroll_traj)
         unroll_results["accum_cost_per_trial"].append(np.array(trial_unroll_cost).reshape((1,N_primitives)))
     all_trial_prim_costs = np.vstack(unroll_results["accum_cost_per_trial"])
