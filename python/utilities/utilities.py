@@ -321,7 +321,7 @@ def computeAndDisplayTrajectoryMSEVarGTNMSE(set_demo_trajs, unroll_traj, print_p
         print ("")
         print (print_prefix + "Q      varGT= " + str(varGT_position))
         print (print_prefix + "omega  varGT= " + str(varGT_velocity))
-        print (print_prefix + "oemgad varGT= " + str(varGT_acceleration))
+        print (print_prefix + "omegad varGT= " + str(varGT_acceleration))
         print ("")
         print (print_prefix + "Q      NMSE = " + str(NMSE_position))
         print (print_prefix + "omega  NMSE = " + str(NMSE_velocity))

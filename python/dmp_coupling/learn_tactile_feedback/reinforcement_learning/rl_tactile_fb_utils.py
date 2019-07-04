@@ -27,6 +27,7 @@ from QuaternionDMP import *
 import DMPTrajectory as dmp_traj
 import QuaternionDMPTrajectory as qdmp_traj
 import utilities as py_util
+import pyplot_util as pypl_util
 import clmcplot_utils as clmcplot_util
 
 dim_cart = 3
@@ -356,6 +357,34 @@ def plotUnrollPI2ParamSampleVsParamMean(k, prim_to_be_improved, cart_types_to_be
                                        fig_num_offset=0, 
                                        components_to_be_plotted=components_to_be_plotted, 
                                        many_traj_label="pi2_sample # %d/%d" % (k+1, len(pi2_unroll_samples[cart_type_tbi])), one_traj_label="pi2_mean")
+    return None
+
+def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter):
+    it = 0
+    J_list = list()
+    J_prime_list = list()
+    J_prime_new_list = list()
+    it_list = list()
+    while ((it in rl_data[prim_to_be_improved].keys()) and (it <= end_plot_iter)):
+        J_list.append(rl_data[prim_to_be_improved][it]["unroll_results"]["mean_accum_cost"][prim_to_be_improved])
+        J_prime_list.append(rl_data[prim_to_be_improved][it]["ole_cdmp_evals_all_dim_learned"]["mean_accum_cost"][prim_to_be_improved])
+        J_prime_new_list.append(rl_data[prim_to_be_improved][it]["ole_cdmp_new_evals"]["mean_accum_cost"][prim_to_be_improved])
+        it_list.append(it)
+        it += 1
+    Y_list = list()
+    Y_list.append(np.array(J_list))
+    Y_list.append(np.array(J_prime_list))
+    Y_list.append(np.array(J_prime_new_list))
+    X_list = [np.array(it_list)] * len(Y_list)
+    plt.close('all')
+    pypl_util.plot_2D(X_list=X_list, 
+                      Y_list=Y_list, 
+                      title='Total Cost per Iteration', 
+                      X_label='Iteration', 
+                      Y_label='Total Cost', 
+                      fig_num=0, 
+                      label_list=['J',"J_prime", "J_prime_new"], 
+                      color_style_list=[['r','-'],['g','-.'],['b',':']])
     return None
 
 def loadPrimsParamsAsDictFromDirPath(prims_params_dirpath, N_primitives):

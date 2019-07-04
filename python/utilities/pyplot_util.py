@@ -9,11 +9,13 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
 #all_color_list = ['b','g','r','c','m','y','k']
 all_color_list = ['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#800000', '#aaffc3', '#808000', '#000075', '#808080', '#000000']
-
+plt_pause_time_secs = 0.05
+                  
 def hist(np_var, title, fig_num=1):
     plt.figure(fig_num)
     plt.hist(np_var, bins='auto')
     plt.title(title)
+    plt.pause(plt_pause_time_secs)
     plt.show()
     return None
 
@@ -53,6 +55,7 @@ def plot_3D(X_list, Y_list, Z_list, title,
     ax.legend()
     ax.grid(is_showing_grid)
     ax.set_title(title)
+    plt.pause(plt_pause_time_secs)
     plt.show()
     return None
 
@@ -89,6 +92,7 @@ def plot_2D(X_list, Y_list, title,
     ax.legend()
     ax.grid(is_showing_grid)
     ax.set_title(title)
+    plt.pause(plt_pause_time_secs)
     plt.show()
     return None
 
@@ -123,6 +127,7 @@ def scatter_3D(X_list, Y_list, Z_list, title,
     ax.legend()
     ax.grid(is_showing_grid)
     ax.set_title(title)
+    plt.pause(plt_pause_time_secs)
     plt.show()
     return None
 
@@ -153,6 +158,7 @@ def scatter_2D(X_list, Y_list, title,
     plt.title(title)
     plt.legend()
     plt.grid(is_showing_grid)
+    plt.pause(plt_pause_time_secs)
     plt.show()
     return None
 
@@ -205,7 +211,7 @@ def subplot_ND(NDtraj_list, title,
     # all but bottom plot.
 #    f.subplots_adjust(hspace=0)
     plt.setp([a.get_xticklabels() for a in fig.axes[:-1]], visible=False)
-    plt.pause(0.05)
+    plt.pause(plt_pause_time_secs)
     plt.show()
     return None
 
