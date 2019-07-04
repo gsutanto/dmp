@@ -51,6 +51,8 @@ class RLTactileFeedback:
         self.is_smoothing_training_traj_before_learning = True
         self.is_unrolling_pi2_samples = is_unrolling_pi2_samples
         self.is_plotting = is_plotting
+        self.is_plotting_pi2_sample_before_robot_exec = True
+        self.is_pausing = False
         
         self.N_total_sense_dimensionality = 45
         self.N_primitives = 3
@@ -146,7 +148,8 @@ class RLTactileFeedback:
                 
                 print ("prim_tbi # %d RL iter # %03d : J = %f ; J_prime = %f ; abs_diff_J_and_J_prime = %f" % (self.prim_tbi+1, self.it, self.J, self.J_prime, self.abs_diff_J_and_J_prime))
                 # TODO: check (assert?) if J' is closely similar to J?
-                raw_input("Press [ENTER] to continue...")
+                if (self.is_pausing):
+                    raw_input("Press [ENTER] to continue...")
                 
                 # set to-be-perturbed DMP params as mean, and define the initial covariance matrix
                 [self.rl_data[self.prim_tbi][self.it]["PI2_param_mean"], self.rl_data[self.prim_tbi][self.it]["PI2_param_dim_list"]
@@ -174,8 +177,25 @@ class RLTactileFeedback:
                                                                                                                                                              self.prim_tbi, 
                                                                                                                                                              self.param_sample, 
                                                                                                                                                              self.rl_data[self.prim_tbi][self.it]["PI2_param_dim_list"])
+                
+                if (self.is_unrolling_pi2_samples):
+                    self.rl_data[self.prim_tbi][self.it]["PI2_unroll_samples"] = rl_util.unrollPI2ParamsSamples(pi2_params_samples=self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"], 
+                                                                                                                prim_to_be_improved=self.prim_tbi, 
+                                                                                                                cart_types_to_be_improved=self.cart_types_tbi_list, 
+                                                                                                                pi2_unroll_mean=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_unroll_all_dim_learned"], 
+                                                                                                                is_plotting=self.is_plotting)
+                
+                for self.k in range(self.K_PI2_samples):
+                    if (self.is_plotting_pi2_sample_before_robot_exec or self.is_plotting):
+                        rl_util.plotUnrollPI2ParamSampleVsParamMean(self.k, 
+                                                                    prim_to_be_improved=self.prim_tbi, 
+                                                                    cart_types_to_be_improved=self.cart_types_tbi_list, 
+                                                                    pi2_unroll_samples=self.rl_data[self.prim_tbi][self.it]["PI2_unroll_samples"], 
+                                                                    pi2_unroll_mean=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_unroll_all_dim_learned"])
                     
-                    # TODO: plot the PI2 sample of perturbed open-loop-equivalent primitive before unrolling it on the robot!
+                    if (self.is_pausing):
+                        raw_input("Press [ENTER] to continue...")
+                    
                     self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_per_PI2_sample, 
                                                       exec_behavior_until_prim_no=self.prim_tbi, 
                                                       behavior_params=self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_params_all_dim_learned"], 
@@ -194,13 +214,6 @@ class RLTactileFeedback:
                 [self.rl_data[self.prim_tbi][self.it]["PI2_param_new_mean"], self.rl_data[self.prim_tbi][self.it]["PI2_param_new_cov"], _, _
                  ] = self.pi2_opt.update(self.param_samples, self.rl_data[self.prim_tbi][self.it]["PI2_param_sample_cost_per_time_step"], 
                                          self.rl_data[self.prim_tbi][self.it]["PI2_param_mean"], self.rl_data[self.prim_tbi][self.it]["PI2_param_cov"])
-                
-                if (self.is_unrolling_pi2_samples):
-                    self.rl_data[self.prim_tbi][self.it]["PI2_unroll_samples"] = rl_util.unrollPI2ParamsSamples(pi2_params_samples=self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"], 
-                                                                                                                prim_to_be_improved=self.prim_tbi, 
-                                                                                                                cart_types_to_be_improved=self.cart_types_tbi_list, 
-                                                                                                                pi2_unroll_mean=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_unroll_all_dim_learned"], 
-                                                                                                                is_plotting=self.is_plotting)
                 
                 self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_params"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params_all_dim_learned"])
                 self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_params"] = rl_util.updateParamsToBeImproved(self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_params"], 
@@ -230,7 +243,10 @@ class RLTactileFeedback:
                 print ("                             J_prime_new_minus_J_prime = %f" % self.J_prime_new_minus_J_prime)
                 print ("                             J_prime_new_minus_J       = %f" % self.J_prime_new_minus_J)
                 # TODO: check (assert?) if (J'new < J') and (J'new < J)?
-                raw_input("Press [ENTER] to continue...")
+                if (self.is_pausing):
+                    raw_input("Press [ENTER] to continue...")
+                
+                # TODO: plot learning (cost) curve, to see if it's decreasing
                 
                 self.it += 1
                 self.rl_data[self.prim_tbi][self.it] = {}
@@ -325,7 +341,7 @@ class RLTactileFeedback:
         return None
 
 if __name__ == '__main__':
-    rl_tactile_fb = RLTactileFeedback(is_unrolling_pi2_samples=False, 
+    rl_tactile_fb = RLTactileFeedback(is_unrolling_pi2_samples=True, 
                                       is_plotting=False, 
                                       starting_prim_tbi=1, 
-                                      starting_rl_iter=7)
+                                      starting_rl_iter=22)

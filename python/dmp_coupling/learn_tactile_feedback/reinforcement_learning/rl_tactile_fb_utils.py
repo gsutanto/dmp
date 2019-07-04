@@ -10,6 +10,7 @@ import os
 import sys
 import numpy as np
 import numpy.linalg as npla
+import matplotlib.pyplot as plt
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_state/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_param/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_base/'))
@@ -202,7 +203,7 @@ def extractCartDMPTrajectoriesFromUnrollResults(unroll_results,
 def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All", 
                              is_smoothing_training_traj_before_learning=True, 
                              is_plotting=False, 
-                             threshold_var_ground_truth_Q= 1.0e-4):
+                             threshold_var_ground_truth_Q= 5.0e-4):
     N_primitives = len(cdmp_trajs["Quaternion"])
     if (prim_to_be_learned is "All"):
         prim_to_be_learned = range(N_primitives)
@@ -309,10 +310,10 @@ def learnCartDMPUnrollParams(cdmp_trajs, prim_to_be_learned="All",
 
 def unrollPI2ParamsSamples(pi2_params_samples, prim_to_be_improved, cart_types_to_be_improved, pi2_unroll_mean=None, is_plotting=False):
     K_PI2_samples = len(pi2_params_samples.keys())
-    pi2_cdmp_unroll_samples = {}
+    pi2_unroll_samples = {}
     for cart_type_tbi in cart_types_to_be_improved:
         print ("Unrolling PI2 Params Samples of Type %s, Primitive # %d" % (cart_type_tbi, prim_to_be_improved+1))
-        pi2_cdmp_unroll_samples[cart_type_tbi] = [None] * K_PI2_samples
+        pi2_unroll_samples[cart_type_tbi] = [None] * K_PI2_samples
         if (cart_type_tbi == "CartCoord"):
             cdmp_instance = ccdmp
             components_to_be_plotted = ["X", "Xd", "Xdd"]
@@ -324,20 +325,38 @@ def unrollPI2ParamsSamples(pi2_params_samples, prim_to_be_improved, cart_types_t
         for k in range(K_PI2_samples):
             print ("   Unrolling PI2 sample # %d/%d ..." % (k+1, K_PI2_samples))
             cdmp_instance.setParamsFromDict(pi2_params_samples[k]["ole_cdmp_params_all_dim_learned"][cart_type_tbi][prim_to_be_improved])
-            pi2_cdmp_unroll_samples[cart_type_tbi][k] = cdmp_instance.unroll(pi2_params_samples[k]["ole_cdmp_params_all_dim_learned"][cart_type_tbi][prim_to_be_improved]["critical_states_learn"], 
-                                                                             pi2_params_samples[k]["ole_cdmp_params_all_dim_learned"][cart_type_tbi][prim_to_be_improved]["mean_tau"], 
-                                                                             pi2_params_samples[k]["ole_cdmp_params_all_dim_learned"][cart_type_tbi][prim_to_be_improved]["mean_tau"], 
-                                                                             dt)
+            pi2_unroll_samples[cart_type_tbi][k] = cdmp_instance.unroll(pi2_params_samples[k]["ole_cdmp_params_all_dim_learned"][cart_type_tbi][prim_to_be_improved]["critical_states_learn"], 
+                                                                        pi2_params_samples[k]["ole_cdmp_params_all_dim_learned"][cart_type_tbi][prim_to_be_improved]["mean_tau"], 
+                                                                        pi2_params_samples[k]["ole_cdmp_params_all_dim_learned"][cart_type_tbi][prim_to_be_improved]["mean_tau"], 
+                                                                        dt)
         
         if (is_plotting):
             assert (pi2_unroll_mean is not None)
-            py_util.plotManyTrajsVsOneTraj(set_many_trajs=pi2_cdmp_unroll_samples[cart_type_tbi], 
+            plt.close('all')
+            py_util.plotManyTrajsVsOneTraj(set_many_trajs=pi2_unroll_samples[cart_type_tbi], 
                                            one_traj=pi2_unroll_mean[cart_type_tbi][prim_to_be_improved], 
                                            title_suffix=" Prim. #%d" % (prim_to_be_improved+1), 
                                            fig_num_offset=0, 
                                            components_to_be_plotted=components_to_be_plotted, 
                                            many_traj_label="pi2_samples", one_traj_label="pi2_mean")
-    return pi2_cdmp_unroll_samples
+    return pi2_unroll_samples
+
+def plotUnrollPI2ParamSampleVsParamMean(k, prim_to_be_improved, cart_types_to_be_improved, pi2_unroll_samples, pi2_unroll_mean):
+    for cart_type_tbi in cart_types_to_be_improved:
+        if (cart_type_tbi == "CartCoord"):
+            components_to_be_plotted = ["X", "Xd", "Xdd"]
+        elif (cart_type_tbi == "Quaternion"):
+            components_to_be_plotted = ["Q", "omega", "omegad"]
+        else:
+            assert False, "cart_type_tbi == %s is un-defined!"
+        plt.close('all')
+        py_util.plotManyTrajsVsOneTraj(set_many_trajs=[pi2_unroll_samples[cart_type_tbi][k]], 
+                                       one_traj=pi2_unroll_mean[cart_type_tbi][prim_to_be_improved], 
+                                       title_suffix=" Prim. #%d" % (prim_to_be_improved+1), 
+                                       fig_num_offset=0, 
+                                       components_to_be_plotted=components_to_be_plotted, 
+                                       many_traj_label="pi2_sample # %d/%d" % (k+1, len(pi2_unroll_samples[cart_type_tbi])), one_traj_label="pi2_mean")
+    return None
 
 def loadPrimsParamsAsDictFromDirPath(prims_params_dirpath, N_primitives):
     cdmp_params = {}
