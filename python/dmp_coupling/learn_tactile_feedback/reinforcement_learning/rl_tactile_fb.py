@@ -166,6 +166,13 @@ class RLTactileFeedback:
             self.starting_prims_tbi_idx = np.where(np.array(starting_prims_tbi) == starting_prim_tbi)[0][0]
         self.prims_tbi = starting_prims_tbi[self.starting_prims_tbi_idx:]
         
+        print ("*********************************************************")
+        print ("*********************************************************")
+        print ("** Either execute the initial closed-loop behavior on  **")
+        print ("** the robot, or start from a particular RL iteration  **")
+        print ("** by loading from a data file                         **")
+        print ("*********************************************************")
+        print ("*********************************************************")
         if ((self.starting_prims_tbi_idx > 0) or (starting_rl_iter > 0)):
             self.rl_data = py_util.loadObj(self.outdata_dirpath+'rl_data.pkl')
         else:
@@ -202,8 +209,14 @@ class RLTactileFeedback:
                 self.J = self.rl_data[self.prim_tbi][self.it]["unroll_results"]["mean_accum_cost"][self.prim_tbi]
                 plt.close('all')
                 
-                # convert current closed-loop behavior into an open-loop-equivalent (ole) behavior on
-                # the current (assumed-static) environment setting
+                print ("*********************************************************")
+                print ("*********************************************************")
+                print ("** Conversion of the current closed-loop behavior      **")
+                print ("** into an open-loop-equivalent (OLE) behavior         **")
+                print ("** in the current (assumed-static) environment setting **")
+                print ("** and evaluate the OLE behavior on the robot          **")
+                print ("*********************************************************")
+                print ("*********************************************************")
                 self.cdmp_trajs = rl_util.extractCartDMPTrajectoriesFromUnrollResults(self.rl_data[self.prim_tbi][self.it]["unroll_results"])
                 [
                  self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params_all_dim_learned"], 
@@ -248,6 +261,13 @@ class RLTactileFeedback:
                 self.param_samples = np.random.multivariate_normal(self.rl_data[self.prim_tbi][self.it]["PI2_param_mean"], 
                                                                    self.rl_data[self.prim_tbi][self.it]["PI2_param_cov"], self.K_PI2_samples)
                 
+                print ("*********************************************************")
+                print ("*********************************************************")
+                print ("** PI2 sampling:                                       **")
+                print ("** Sampling of the perturbed OLE behavior parameters   **")
+                print ("** and evaluate each sample on the robot               **")
+                print ("*********************************************************")
+                print ("*********************************************************")
                 self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"] = {}
                 self.param_sample_cost_per_time_step_list = list()
                 for self.k in range(self.K_PI2_samples):
@@ -294,6 +314,13 @@ class RLTactileFeedback:
                 
                 self.rl_data[self.prim_tbi][self.it]["PI2_param_sample_cost_per_time_step"] = np.vstack(self.param_sample_cost_per_time_step_list)
                 
+                print ("**********************************************************")
+                print ("**********************************************************")
+                print ("** PI2 update:                                          **")
+                print ("** Updating the OLE behavior parameters to a better one **")
+                print ("** and evaluate it on the robot                         **")
+                print ("**********************************************************")
+                print ("**********************************************************")
                 [self.rl_data[self.prim_tbi][self.it]["PI2_param_new_mean"], self.rl_data[self.prim_tbi][self.it]["PI2_param_new_cov"], _, _
                  ] = self.pi2_opt.update(self.param_samples, self.rl_data[self.prim_tbi][self.it]["PI2_param_sample_cost_per_time_step"], 
                                          self.rl_data[self.prim_tbi][self.it]["PI2_param_mean"], self.rl_data[self.prim_tbi][self.it]["PI2_param_cov"])
