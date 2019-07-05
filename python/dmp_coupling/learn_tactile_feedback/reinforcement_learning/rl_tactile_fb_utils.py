@@ -64,10 +64,18 @@ def checkUnrollResultCLMCDataFileValidity(dfilepath):
     assert(timeT.shape[1] == 1)
     
     for ip in range(N_primitives):
-        prim_indices = np.where(prim_id == ip)[0]
-        prim_timeT = timeT[prim_indices,:]
-        prim_timeT = prim_timeT - prim_timeT[0,0]
+        id_candidate0 = np.where(prim_id == ip)[0]
+        id_candidate1 = np.union1d(np.where(timeT[:,0] > 0)[0], np.array([0]))
+        id_candidate = np.sort(np.intersect1d(id_candidate0, id_candidate1))
+        assert ((id_candidate[1:] - id_candidate[:-1]) == 1).all()
+        prim_indices = copy.deepcopy(id_candidate)
+        prim_timeT_unsubtracted = timeT[prim_indices,:]
+        prim_timeT = prim_timeT_unsubtracted - prim_timeT_unsubtracted[0,0]
         if (np.amin(prim_timeT) < 0.0):
+            [row_min_prim_timeT, col_min_prim_timeT] = np.unravel_index(prim_timeT.argmin(), prim_timeT.shape)
+            if ((row_min_prim_timeT > 0) and (row_min_prim_timeT < prim_timeT.shape[0]-1)):
+                for row_idx_offset_plus_1 in range(3):
+                    print ("prim # %d/%d: prim_timeT_unsubtracted[%d,%d] = %f" % (ip+1, N_primitives, row_min_prim_timeT+row_idx_offset_plus_1-1, col_min_prim_timeT, prim_timeT_unsubtracted[row_min_prim_timeT+row_idx_offset_plus_1-1, col_min_prim_timeT]))
             return False # invalid!
     return True # valid!
 
@@ -124,7 +132,11 @@ def extractUnrollResultFromCLMCDataFile(dfilepath, N_cost_components, N_supposed
     unroll_trajectory["cost_per_timestep"] = [None] * N_primitives
     unroll_cost = [None] * N_primitives
     for ip in range(N_primitives):
-        unroll_trajectory["id"][ip] = np.where(prim_id == ip)[0]
+        id_candidate0 = np.where(prim_id == ip)[0]
+        id_candidate1 = np.union1d(np.where(timeT[:,0] > 0)[0], np.array([0]))
+        id_candidate = np.sort(np.intersect1d(id_candidate0, id_candidate1))
+        assert ((id_candidate[1:] - id_candidate[:-1]) == 1).all()
+        unroll_trajectory["id"][ip] = copy.deepcopy(id_candidate)
         unroll_trajectory["timeT"][ip] = timeT[unroll_trajectory["id"][ip],:]
         unroll_trajectory["XT"][ip] = XT[unroll_trajectory["id"][ip],:]
         unroll_trajectory["XdT"][ip] = XdT[unroll_trajectory["id"][ip],:]
@@ -359,7 +371,7 @@ def plotUnrollPI2ParamSampleVsParamMean(k, prim_to_be_improved, cart_types_to_be
                                        many_traj_label="pi2_sample # %d/%d" % (k+1, len(pi2_unroll_samples[cart_type_tbi])), one_traj_label="pi2_mean")
     return None
 
-def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter):
+def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath=None):
     it = 0
     J_list = list()
     J_prime_list = list()
@@ -375,7 +387,7 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter):
     Y_list.append(np.array(J_list))
     Y_list.append(np.array(J_prime_list))
     Y_list.append(np.array(J_prime_new_list))
-    X_list = [np.array(it_list)] * len(Y_list)
+    X_list = [np.array(it_list).astype(int)] * len(Y_list)
     plt.close('all')
     pypl_util.plot_2D(X_list=X_list, 
                       Y_list=Y_list, 
@@ -384,7 +396,18 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter):
                       Y_label='Total Cost', 
                       fig_num=0, 
                       label_list=['J',"J_prime", "J_prime_new"], 
-                      color_style_list=[['r','-'],['g','-.'],['b',':']])
+                      color_style_list=[['r','-'],['g','-.'],['b',':']], 
+                      save_filepath=save_filepath)
+    plt.close('all')
+    pypl_util.plot_2D(X_list=X_list, 
+                      Y_list=Y_list, 
+                      title='Total Cost per Iteration', 
+                      X_label='Iteration', 
+                      Y_label='Total Cost', 
+                      fig_num=0, 
+                      label_list=['J',"J_prime", "J_prime_new"], 
+                      color_style_list=[['r','-'],['g','-.'],['b',':']], 
+                      save_filepath=None)
     return None
 
 def loadPrimsParamsAsDictFromDirPath(prims_params_dirpath, N_primitives):

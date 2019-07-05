@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -65,7 +66,8 @@ def plot_2D(X_list, Y_list, title,
             is_showing_start_and_goal=False,
             N_data_display=-1,
             is_auto_line_coloring_and_styling=False, 
-            is_showing_grid=True):
+            is_showing_grid=True, 
+            save_filepath=None):
     N_dataset = len(X_list)
     assert (N_dataset == len(Y_list))
     assert (N_dataset == len(label_list))
@@ -92,8 +94,13 @@ def plot_2D(X_list, Y_list, title,
     ax.legend()
     ax.grid(is_showing_grid)
     ax.set_title(title)
-    plt.pause(plt_pause_time_secs)
-    plt.show()
+    if (save_filepath is not None):
+        assert (os.path.isdir(os.path.abspath(os.path.join(save_filepath, os.pardir)))), "Parent directory of %s does not exist!" % save_filepath
+        assert (save_filepath[-4:] == '.png'), "Only supports *.png extension!!!"
+        plt.savefig(save_filepath, bbox_inches='tight')
+    else:
+        plt.pause(plt_pause_time_secs)
+        plt.show()
     return None
 
 def scatter_3D(X_list, Y_list, Z_list, title, 
@@ -241,7 +248,9 @@ if __name__ == '__main__':
             Y_label='Value', 
             fig_num=2, 
             label_list=['x','x^8'], 
-            color_style_list=[['b','-'],['r','-']])
+            color_style_list=[['b','-'],['r','-']], 
+            save_filepath=None
+            )
     
     x_pow_2 = np.power(x,2)
     x_pow_3 = np.power(x,3)

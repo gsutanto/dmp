@@ -354,7 +354,7 @@ class RLTactileFeedback:
                 print ("                             J_prime_new_minus_J       = %f" % self.J_prime_new_minus_J)
                 # TODO: check (assert?) if (J'new < J') and (J'new < J)?
                 
-                rl_util.plotLearningCurve(rl_data=self.rl_data, prim_to_be_improved=self.prim_tbi, end_plot_iter=self.it)
+                rl_util.plotLearningCurve(rl_data=self.rl_data, prim_to_be_improved=self.prim_tbi, end_plot_iter=self.it, save_filepath=self.outdata_dirpath+'learning_curve.png')
                 
                 if (self.is_pausing):
                     raw_input("Press [ENTER] to continue...")
@@ -367,6 +367,11 @@ class RLTactileFeedback:
                 self.rl_data[self.prim_tbi][self.it]["unroll_results"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it-1]["ole_cdmp_new_evals"])
                 
                 py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
+                
+                # TODO: display X_vector in SL_oscilloscope
+                # TODO: automate PI2 sample surveillance by omegad threshold checking?
+                # TODO: increase number of samples for PI2
+                # TODO: fix per-trial-inconsistency in start and goal of each primitive (especially primitive 1)
 
 if __name__ == '__main__':
     rl_tactile_fb = RLTactileFeedback(is_unrolling_pi2_samples=True, 
