@@ -368,7 +368,6 @@ class RLTactileFeedback:
                 
                 py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
                 
-                # TODO: display X_vector in SL_oscilloscope
                 # TODO: automate PI2 sample surveillance by omegad threshold checking?
                 # TODO: increase number of samples for PI2
                 # TODO: fix per-trial-inconsistency in start and goal of each primitive (especially primitive 1)

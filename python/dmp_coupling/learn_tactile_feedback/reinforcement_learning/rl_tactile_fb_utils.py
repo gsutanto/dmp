@@ -67,7 +67,7 @@ def checkUnrollResultCLMCDataFileValidity(dfilepath):
         id_candidate0 = np.where(prim_id == ip)[0]
         id_candidate1 = np.union1d(np.where(timeT[:,0] > 0)[0], np.array([0]))
         id_candidate = np.sort(np.intersect1d(id_candidate0, id_candidate1))
-        assert ((id_candidate[1:] - id_candidate[:-1]) == 1).all()
+        assert ((id_candidate[1:] - id_candidate[:-1]) == 1).all(), "id_candidate should all be consecutive and has NO jumps!!!"
         prim_indices = copy.deepcopy(id_candidate)
         prim_timeT_unsubtracted = timeT[prim_indices,:]
         prim_timeT = prim_timeT_unsubtracted - prim_timeT_unsubtracted[0,0]
