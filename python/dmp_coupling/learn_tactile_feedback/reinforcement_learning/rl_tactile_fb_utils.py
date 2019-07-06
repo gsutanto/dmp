@@ -371,6 +371,31 @@ def plotUnrollPI2ParamSampleVsParamMean(k, prim_to_be_improved, cart_types_to_be
                                        many_traj_label="pi2_sample # %d/%d" % (k+1, len(pi2_unroll_samples[cart_type_tbi])), one_traj_label="pi2_mean")
     return None
 
+def checkUnrollPI2ParamSampleSupervisionRequirement(k, cart_types_to_be_improved, cart_dim_tbi_supervision_threshold_dict, pi2_unroll_samples):
+    for cart_type_tbi in cart_types_to_be_improved:
+        for comp in cart_dim_tbi_supervision_threshold_dict[cart_type_tbi].keys():
+            if (comp == "X"):
+                if ((np.fabs(pi2_unroll_samples[cart_type_tbi][k].X) > cart_dim_tbi_supervision_threshold_dict[cart_type_tbi][comp]).any()):
+                    return True
+            elif (comp == "Xd"):
+                if ((np.fabs(pi2_unroll_samples[cart_type_tbi][k].Xd) > cart_dim_tbi_supervision_threshold_dict[cart_type_tbi][comp]).any()):
+                    return True
+            elif (comp == "Xdd"):
+                if ((np.fabs(pi2_unroll_samples[cart_type_tbi][k].Xdd) > cart_dim_tbi_supervision_threshold_dict[cart_type_tbi][comp]).any()):
+                    return True
+            elif (comp == "Q"):
+                if ((np.fabs(pi2_unroll_samples[cart_type_tbi][k].X) > cart_dim_tbi_supervision_threshold_dict[cart_type_tbi][comp]).any()):
+                    return True
+            elif (comp == "omega"):
+                if ((np.fabs(pi2_unroll_samples[cart_type_tbi][k].omega) > cart_dim_tbi_supervision_threshold_dict[cart_type_tbi][comp]).any()):
+                    return True
+            elif (comp == "omegad"):
+                if ((np.fabs(pi2_unroll_samples[cart_type_tbi][k].omegad) > cart_dim_tbi_supervision_threshold_dict[cart_type_tbi][comp]).any()):
+                    return True
+            else:
+                assert False, "Trajectory component named %s is un-defined!"%comp
+    return False
+
 def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath=None):
     it = 0
     J_list = list()

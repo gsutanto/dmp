@@ -147,6 +147,10 @@ class RLTactileFeedback:
         self.cart_dim_tbi_dict["Quaternion"] = np.array([1]) # to-be-improved (tbi): Quaternion DMP, 2nd dimension
         self.cart_types_tbi_list = self.cart_dim_tbi_dict.keys()
         
+        self.cart_dim_tbi_supervision_threshold_dict = {}
+        self.cart_dim_tbi_supervision_threshold_dict["Quaternion"] = {}
+        self.cart_dim_tbi_supervision_threshold_dict["Quaternion"]["omegad"] = 3.0
+        
         self.cost_threshold = [0.0, 18928850.8053, 11066375.797]
         
         self.pi2_opt = Pi2(kl_threshold = 1.0, covariance_damping = 2.0, 
@@ -290,13 +294,17 @@ class RLTactileFeedback:
                 
                 for self.k in range(self.K_PI2_samples):
                     if (self.is_plotting_pi2_sample_before_robot_exec or self.is_plotting):
-                        rl_util.plotUnrollPI2ParamSampleVsParamMean(self.k, 
+                        rl_util.plotUnrollPI2ParamSampleVsParamMean(k=self.k, 
                                                                     prim_to_be_improved=self.prim_tbi, 
                                                                     cart_types_to_be_improved=self.cart_types_tbi_list, 
                                                                     pi2_unroll_samples=self.rl_data[self.prim_tbi][self.it]["PI2_unroll_samples"], 
                                                                     pi2_unroll_mean=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_unroll_all_dim_learned"])
                     
-                    if (self.is_pausing):
+                    if (self.is_pausing and 
+                        rl_util.checkUnrollPI2ParamSampleSupervisionRequirement(k=self.k, 
+                                                                                cart_types_to_be_improved=self.cart_types_tbi_list, 
+                                                                                cart_dim_tbi_supervision_threshold_dict=self.cart_dim_tbi_supervision_threshold_dict, 
+                                                                                pi2_unroll_samples=self.rl_data[self.prim_tbi][self.it]["PI2_unroll_samples"])):
                         raw_input("Press [ENTER] to continue...")
                     
                     self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_per_PI2_sample, 
@@ -368,8 +376,7 @@ class RLTactileFeedback:
                 
                 py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
                 
-                # TODO: automate PI2 sample surveillance by omegad threshold checking?
-                # TODO: increase number of samples for PI2
+                # TODO: increase number of samples for PI2?
                 # TODO: fix per-trial-inconsistency in start and goal of each primitive (especially primitive 1)
 
 if __name__ == '__main__':
