@@ -376,8 +376,11 @@ class RLTactileFeedback:
                 
                 py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
                 
+                # TODO: setup Vicon to measure pose difference between scraping tool and the tilt-board as cost function (Sunday)
+                # TODO: setup Vicon hardware and test PI2 with the new cost function to see if it's really getting better now (Monday)
+                # TODO: implement supervised learning of PMNN after PI2 is done (Monday/Tuesday)
+                # TODO: test full pipeline, including PMNN learning (Wednesday)
                 # TODO: increase number of samples for PI2?
-                # TODO: fix per-trial-inconsistency in start and goal of each primitive (especially primitive 1)
 
 if __name__ == '__main__':
     rl_tactile_fb = RLTactileFeedback(is_unrolling_pi2_samples=True, 
