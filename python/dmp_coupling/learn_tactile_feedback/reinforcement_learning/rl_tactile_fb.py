@@ -376,7 +376,7 @@ class RLTactileFeedback:
                 
                 py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
                 
-                # TODO: setup Vicon to measure pose difference between scraping tool and the tilt-board as cost function (Sunday)
+                # TODO: log Vicon rotation difference between scraping tool and the tilt-board into SL data files and oscilloscope; use the norm of it later as the cost function (Monday)
                 # TODO: setup Vicon hardware and test PI2 with the new cost function to see if it's really getting better now (Monday)
                 # TODO: implement supervised learning of PMNN after PI2 is done (Monday/Tuesday)
                 # TODO: test full pipeline, including PMNN learning (Wednesday)
