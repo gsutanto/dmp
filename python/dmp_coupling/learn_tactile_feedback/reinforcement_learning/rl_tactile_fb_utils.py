@@ -51,8 +51,13 @@ MAX_NUM_CONSECUTIVE_INVALID_VICON_DATA = 6
 IS_USING_X_VECTOR_SQUARED_NORM_AS_COST = 0
 IS_USING_ROT_DIFF_ERR_SQUARED_NORM_AS_COST = 1
 
-cost_mode = IS_USING_X_VECTOR_SQUARED_NORM_AS_COST
-#cost_mode = IS_USING_ROT_DIFF_ERR_SQUARED_NORM_AS_COST
+IS_USING_ROT_DIFF_ERR_B_SQUARED_ONLY_AS_COST = 101
+
+#cost_mode = IS_USING_X_VECTOR_SQUARED_NORM_AS_COST
+cost_mode = IS_USING_ROT_DIFF_ERR_SQUARED_NORM_AS_COST
+
+#cost_mode_detail = None
+cost_mode_detail = IS_USING_ROT_DIFF_ERR_B_SQUARED_ONLY_AS_COST
 
 def computeNPrimitives(prim_id_list):
     prim_ids = list(set(prim_id_list))
@@ -228,8 +233,12 @@ def extractUnrollResultFromCLMCDataFile(dfilepath, N_cost_components, N_supposed
             unroll_trajectory["cost_per_timestep"][ip] = py_util.computeSumSquaredL2Norm(unroll_trajectory["DeltaST"][ip],
                                                                                          axis=1).reshape((1,len(unroll_trajectory["id"][ip])))
         elif (cost_mode == IS_USING_ROT_DIFF_ERR_SQUARED_NORM_AS_COST):
-            unroll_trajectory["cost_per_timestep"][ip] = py_util.computeSumSquaredL2Norm(unroll_trajectory["RotDiffErrT"][ip],
-                                                                                         axis=1).reshape((1,len(unroll_trajectory["id"][ip])))
+            if (cost_mode_detail == IS_USING_ROT_DIFF_ERR_B_SQUARED_ONLY_AS_COST):
+                unroll_trajectory["cost_per_timestep"][ip] = py_util.computeSumSquaredL2Norm(unroll_trajectory["RotDiffErrT"][ip][:,1].reshape((len(unroll_trajectory["id"][ip]),1)),
+                                                                                             axis=1).reshape((1,len(unroll_trajectory["id"][ip])))
+            else:
+                unroll_trajectory["cost_per_timestep"][ip] = py_util.computeSumSquaredL2Norm(unroll_trajectory["RotDiffErrT"][ip],
+                                                                                             axis=1).reshape((1,len(unroll_trajectory["id"][ip])))
         unroll_cost[ip] = np.sum(unroll_trajectory["cost_per_timestep"][ip])
     return unroll_trajectory, unroll_cost
 
