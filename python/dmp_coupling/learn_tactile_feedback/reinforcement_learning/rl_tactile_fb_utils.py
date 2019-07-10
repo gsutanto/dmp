@@ -8,6 +8,7 @@ Created on Fri May 10 17:00:00 2019
 
 import os
 import sys
+import copy
 import numpy as np
 import numpy.linalg as npla
 import matplotlib.pyplot as plt
@@ -44,7 +45,15 @@ tau_sys = TauSystem(dt, tau)
 canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
 ccdmp = CartesianCoordDMP(model_size, canonical_sys_discr, SCHAAL_LOCAL_COORD_FRAME)
 qdmp = QuaternionDMP(model_size, canonical_sys_discr)
-    
+
+MAX_NUM_CONSECUTIVE_INVALID_VICON_DATA = 6
+
+IS_USING_X_VECTOR_SQUARED_NORM_AS_COST = 0
+IS_USING_ROT_DIFF_ERR_SQUARED_NORM_AS_COST = 1
+
+cost_mode = IS_USING_X_VECTOR_SQUARED_NORM_AS_COST
+#cost_mode = IS_USING_ROT_DIFF_ERR_SQUARED_NORM_AS_COST
+
 def computeNPrimitives(prim_id_list):
     prim_ids = list(set(prim_id_list))
     prim_ids.sort()
@@ -52,6 +61,33 @@ def computeNPrimitives(prim_id_list):
     N_prim = len(valid_prim_ids)
     assert(max(valid_prim_ids) == N_prim - 1)
     return N_prim
+
+def computeValidPrimitiveIDAddresses(prim_id, timeT, N_primitives):
+    valid_prim_id_addresses = list()
+    for ip in range(N_primitives):
+        id_candidate0 = np.where(prim_id == ip)[0]
+        id_candidate1 = np.union1d(np.where(timeT[:,0] > 0)[0], np.array([0]))
+        id_candidate = np.sort(np.intersect1d(id_candidate0, id_candidate1))
+        assert ((id_candidate[1:] - id_candidate[:-1]) == 1).all(), "id_candidate should all be consecutive and has NO jumps!!!"
+        valid_prim_id_addresses.append(id_candidate)
+        if (ip > 0):
+            assert (np.intersect1d(valid_prim_id_addresses[ip], valid_prim_id_addresses[ip-1]).size == 0), "Two Different Primitive ID Address Groups cannot intersect!!!"
+    return valid_prim_id_addresses
+
+def computeNumConsecutiveInvalidsAndLastValidAddress(is_vicon_det_valid):
+    prev_count_consecutive_invalids = 0
+    last_valid_address = -1
+    num_consecutive_invalids_array = np.zeros(is_vicon_det_valid.shape[0])
+    last_valid_address_array = np.zeros(is_vicon_det_valid.shape[0])
+    for aidx in range(is_vicon_det_valid.shape[0]):
+        if (is_vicon_det_valid[aidx] == 0):
+            prev_count_consecutive_invalids += 1
+        elif (is_vicon_det_valid[aidx] == 1):
+            prev_count_consecutive_invalids = 0
+            last_valid_address = aidx
+        num_consecutive_invalids_array[aidx] = prev_count_consecutive_invalids
+        last_valid_address_array[aidx] = last_valid_address
+    return num_consecutive_invalids_array, last_valid_address_array
 
 def checkUnrollResultCLMCDataFileValidity(dfilepath):
     clmcfile = clmcplot_util.ClmcFile(dfilepath)
@@ -63,12 +99,10 @@ def checkUnrollResultCLMCDataFileValidity(dfilepath):
     assert(timeT.shape[0] == prim_id.shape[0])
     assert(timeT.shape[1] == 1)
     
+    valid_prim_id_addresses = computeValidPrimitiveIDAddresses(prim_id, timeT, N_primitives)
+    
     for ip in range(N_primitives):
-        id_candidate0 = np.where(prim_id == ip)[0]
-        id_candidate1 = np.union1d(np.where(timeT[:,0] > 0)[0], np.array([0]))
-        id_candidate = np.sort(np.intersect1d(id_candidate0, id_candidate1))
-        assert ((id_candidate[1:] - id_candidate[:-1]) == 1).all(), "id_candidate should all be consecutive and has NO jumps!!!"
-        prim_indices = copy.deepcopy(id_candidate)
+        prim_indices = copy.deepcopy(valid_prim_id_addresses[ip])
         prim_timeT_unsubtracted = timeT[prim_indices,:]
         prim_timeT = prim_timeT_unsubtracted - prim_timeT_unsubtracted[0,0]
         if (np.amin(prim_timeT) < 0.0):
@@ -76,7 +110,32 @@ def checkUnrollResultCLMCDataFileValidity(dfilepath):
             if ((row_min_prim_timeT > 0) and (row_min_prim_timeT < prim_timeT.shape[0]-1)):
                 for row_idx_offset_plus_1 in range(3):
                     print ("prim # %d/%d: prim_timeT_unsubtracted[%d,%d] = %f" % (ip+1, N_primitives, row_min_prim_timeT+row_idx_offset_plus_1-1, col_min_prim_timeT, prim_timeT_unsubtracted[row_min_prim_timeT+row_idx_offset_plus_1-1, col_min_prim_timeT]))
+            print ("Datafile %s is invalid because of condition (np.amin(prim_timeT) < 0.0) at primitive %d!" % (dfilepath, ip+1))
             return False # invalid!
+    
+    if (cost_mode == IS_USING_ROT_DIFF_ERR_SQUARED_NORM_AS_COST):
+        # (binary) trajectory of is_vicon_detection_valid:
+        is_vicon_det_valid = clmcfile.get_variables(["is_vicon_det_valid"])[0].T
+        assert (is_vicon_det_valid.shape[0] == prim_id.shape[0])
+        assert ((is_vicon_det_valid >= 0) and (is_vicon_det_valid <= 1)).all()
+        
+        all_valid_addresses = np.concatenate(valid_prim_id_addresses)
+        assert ((all_valid_addresses[1:] - all_valid_addresses[:-1]) == 1).all(), "all_valid_addresses should all be consecutive and has NO jumps!!!"
+        
+        [num_consecutive_invalids_array, last_valid_address_array
+         ] = computeNumConsecutiveInvalidsAndLastValidAddress(is_vicon_det_valid)
+        
+        if (num_consecutive_invalids_array[all_valid_addresses] > MAX_NUM_CONSECUTIVE_INVALID_VICON_DATA).any():
+            actual_max_num_consecutive_invalids = np.amax(num_consecutive_invalids_array[all_valid_addresses])
+            arg_actual_max_num_consecutive_invalids = np.argmax(num_consecutive_invalids_array[all_valid_addresses])
+            print ("Datafile %s is invalid because of condition (num_consecutive_invalids_array[%d] = %d > %d = MAX_NUM_CONSECUTIVE_INVALID_VICON_DATA)!" % (dfilepath, arg_actual_max_num_consecutive_invalids, actual_max_num_consecutive_invalids, MAX_NUM_CONSECUTIVE_INVALID_VICON_DATA))
+            return False # invalid!
+        
+        if (last_valid_address_array[all_valid_addresses] < 0).any():
+            invalid_last_valid_address_address = np.where(last_valid_address_array[all_valid_addresses] < 0)[0][0]
+            print ("Datafile %s is invalid because of condition (last_valid_address_array[%d] = %d < 0)!" % (dfilepath, all_valid_addresses[invalid_last_valid_address_address], last_valid_address_array[all_valid_addresses[invalid_last_valid_address_address]]))
+            return False # invalid!
+    
     return True # valid!
 
 def extractUnrollResultFromCLMCDataFile(dfilepath, N_cost_components, N_supposed_primitives=None):
@@ -118,6 +177,28 @@ def extractUnrollResultFromCLMCDataFile(dfilepath, N_cost_components, N_supposed
     assert(DeltaST.shape[0] == prim_id.shape[0])
     assert(DeltaST.shape[1] == N_cost_components)
     
+    # (binary) trajectory of is_vicon_detection_valid:
+    is_vicon_det_valid = clmcfile.get_variables(["is_vicon_det_valid"])[0].T
+    assert(is_vicon_det_valid.shape[0] == prim_id.shape[0])
+    
+    # trajectory of Rotation Difference Error:
+    RotDiffErrT = np.vstack([clmcfile.get_variables(['rot_diff_err_a','rot_diff_err_b','rot_diff_err_g'])]).T
+    assert(RotDiffErrT.shape[0] == prim_id.shape[0])
+    assert(RotDiffErrT.shape[1] == dim_cart)
+    
+    valid_prim_id_addresses = computeValidPrimitiveIDAddresses(prim_id, timeT, N_primitives)
+    
+    if (cost_mode == IS_USING_ROT_DIFF_ERR_SQUARED_NORM_AS_COST):
+        all_valid_addresses = np.concatenate(valid_prim_id_addresses)
+        assert ((all_valid_addresses[1:] - all_valid_addresses[:-1]) == 1).all(), "all_valid_addresses should all be consecutive and has NO jumps!!!"
+        
+        [_, last_valid_address_array
+         ] = computeNumConsecutiveInvalidsAndLastValidAddress(is_vicon_det_valid)
+        assert(last_valid_address_array.shape[0] == prim_id.shape[0])
+        
+        copyRotDiffErrT = copy.deepcopy(RotDiffErrT)
+        RotDiffErrT[all_valid_addresses,:] = copyRotDiffErrT[last_valid_address_array[all_valid_addresses],:]
+    
     unroll_trajectory = {}
     unroll_trajectory["filepath"] = dfilepath
     unroll_trajectory["id"] = [None] * N_primitives
@@ -129,14 +210,11 @@ def extractUnrollResultFromCLMCDataFile(dfilepath, N_cost_components, N_supposed
     unroll_trajectory["omegaT"] = [None] * N_primitives
     unroll_trajectory["omegadT"] = [None] * N_primitives
     unroll_trajectory["DeltaST"] = [None] * N_primitives
+    unroll_trajectory["RotDiffErrT"] = [None] * N_primitives
     unroll_trajectory["cost_per_timestep"] = [None] * N_primitives
     unroll_cost = [None] * N_primitives
     for ip in range(N_primitives):
-        id_candidate0 = np.where(prim_id == ip)[0]
-        id_candidate1 = np.union1d(np.where(timeT[:,0] > 0)[0], np.array([0]))
-        id_candidate = np.sort(np.intersect1d(id_candidate0, id_candidate1))
-        assert ((id_candidate[1:] - id_candidate[:-1]) == 1).all()
-        unroll_trajectory["id"][ip] = copy.deepcopy(id_candidate)
+        unroll_trajectory["id"][ip] = copy.deepcopy(valid_prim_id_addresses[ip])
         unroll_trajectory["timeT"][ip] = timeT[unroll_trajectory["id"][ip],:]
         unroll_trajectory["XT"][ip] = XT[unroll_trajectory["id"][ip],:]
         unroll_trajectory["XdT"][ip] = XdT[unroll_trajectory["id"][ip],:]
@@ -145,8 +223,13 @@ def extractUnrollResultFromCLMCDataFile(dfilepath, N_cost_components, N_supposed
         unroll_trajectory["omegaT"][ip] = omegaT[unroll_trajectory["id"][ip],:]
         unroll_trajectory["omegadT"][ip] = omegadT[unroll_trajectory["id"][ip],:]
         unroll_trajectory["DeltaST"][ip] = DeltaST[unroll_trajectory["id"][ip],:]
-        unroll_trajectory["cost_per_timestep"][ip] = py_util.computeSumSquaredL2Norm(unroll_trajectory["DeltaST"][ip],
-                                                                                     axis=1).reshape((1,len(unroll_trajectory["id"][ip])))
+        unroll_trajectory["RotDiffErrT"][ip] = RotDiffErrT[unroll_trajectory["id"][ip],:]
+        if (cost_mode == IS_USING_X_VECTOR_SQUARED_NORM_AS_COST):
+            unroll_trajectory["cost_per_timestep"][ip] = py_util.computeSumSquaredL2Norm(unroll_trajectory["DeltaST"][ip],
+                                                                                         axis=1).reshape((1,len(unroll_trajectory["id"][ip])))
+        elif (cost_mode == IS_USING_ROT_DIFF_ERR_SQUARED_NORM_AS_COST):
+            unroll_trajectory["cost_per_timestep"][ip] = py_util.computeSumSquaredL2Norm(unroll_trajectory["RotDiffErrT"][ip],
+                                                                                         axis=1).reshape((1,len(unroll_trajectory["id"][ip])))
         unroll_cost[ip] = np.sum(unroll_trajectory["cost_per_timestep"][ip])
     return unroll_trajectory, unroll_cost
 
