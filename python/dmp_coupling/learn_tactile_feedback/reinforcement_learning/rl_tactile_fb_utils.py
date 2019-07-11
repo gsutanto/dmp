@@ -82,8 +82,8 @@ def computeValidPrimitiveIDAddresses(prim_id, timeT, N_primitives):
 def computeNumConsecutiveInvalidsAndLastValidAddress(is_vicon_det_valid):
     prev_count_consecutive_invalids = 0
     last_valid_address = -1
-    num_consecutive_invalids_array = np.zeros(is_vicon_det_valid.shape[0])
-    last_valid_address_array = np.zeros(is_vicon_det_valid.shape[0])
+    num_consecutive_invalids_array = np.zeros(is_vicon_det_valid.shape[0], dtype=int)
+    last_valid_address_array = np.zeros(is_vicon_det_valid.shape[0], dtype=int)
     for aidx in range(is_vicon_det_valid.shape[0]):
         if (is_vicon_det_valid[aidx] == 0):
             prev_count_consecutive_invalids += 1
@@ -122,7 +122,7 @@ def checkUnrollResultCLMCDataFileValidity(dfilepath):
         # (binary) trajectory of is_vicon_detection_valid:
         is_vicon_det_valid = clmcfile.get_variables(["is_vicon_det_valid"])[0].T
         assert (is_vicon_det_valid.shape[0] == prim_id.shape[0])
-        assert ((is_vicon_det_valid >= 0) and (is_vicon_det_valid <= 1)).all()
+        assert ((is_vicon_det_valid >= 0).all() and (is_vicon_det_valid <= 1).all())
         
         all_valid_addresses = np.concatenate(valid_prim_id_addresses)
         assert ((all_valid_addresses[1:] - all_valid_addresses[:-1]) == 1).all(), "all_valid_addresses should all be consecutive and has NO jumps!!!"
