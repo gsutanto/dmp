@@ -38,9 +38,14 @@ def plot_3D(X_list, Y_list, Z_list, title,
     fig = plt.figure(fig_num)
     ax = fig.add_subplot(111, projection='3d')
     for d in range(N_dataset):
-        X = X_list[d][:N_data_display]
-        Y = Y_list[d][:N_data_display]
-        Z = Z_list[d][:N_data_display]
+        if (N_data_display < 0):
+            X = X_list[d]
+            Y = Y_list[d]
+            Z = Z_list[d]
+        else:
+            X = X_list[d][:N_data_display]
+            Y = Y_list[d][:N_data_display]
+            Z = Z_list[d][:N_data_display]
         color = color_style_list[d][0]
         linestyle = color_style_list[d][1]
         labl = label_list[d]
@@ -78,8 +83,12 @@ def plot_2D(X_list, Y_list, title,
     fig = plt.figure(fig_num)
     ax = fig.add_subplot(111)
     for d in range(N_dataset):
-        X = X_list[d][:N_data_display]
-        Y = Y_list[d][:N_data_display]
+        if (N_data_display < 0):
+            X = X_list[d]
+            Y = Y_list[d]
+        else:
+            X = X_list[d][:N_data_display]
+            Y = Y_list[d][:N_data_display]
         color = color_style_list[d][0]
         linestyle = color_style_list[d][1]
         labl = label_list[d]
