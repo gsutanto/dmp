@@ -157,8 +157,12 @@ class RLTactileFeedback:
         self.pi2_opt = Pi2(kl_threshold = 1.0, covariance_damping = 2.0, 
                            is_computing_eta_per_timestep = True)
         
+        self.prims_to_be_learned = [1,2]
+        
         #starting_prims_tbi = [1,2] # TODO (un-comment): 2nd and 3rd primitives are to-be-improved (tbi)
         starting_prims_tbi = [1] # TODO (comment): for testing purpose we work on 2nd primitive only as the one to-be-improved (tbi)
+        
+        self.nominal_cdmp_params = rl_util.loadPrimsParamsAsDictFromDirPath(self.nominal_prims_params_dirpath, self.N_primitives)
         
         assert (len(starting_prims_tbi) <= self.N_primitives)
         assert ((np.array(starting_prims_tbi) >= 0).all() and (np.array(starting_prims_tbi) < self.N_primitives).all())
@@ -183,9 +187,6 @@ class RLTactileFeedback:
         else:
             self.rl_data = {}
             
-            # not sure if the nominal (original) primitives below is needed or not...:
-            #nominal_cdmp_params = rl_util.loadPrimsParamsAsDictFromDirPath(nominal_prims_params_dirpath, N_primitives)
-                     
             self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_general, 
                                               exec_behavior_until_prim_no=self.N_primitives - 1, 
                                               behavior_params=None, 
@@ -224,27 +225,28 @@ class RLTactileFeedback:
                 print ("*********************************************************")
                 self.cdmp_trajs = rl_util.extractCartDMPTrajectoriesFromUnrollResults(self.rl_data[self.prim_tbi][self.it]["unroll_results"])
                 [
-                 self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params_all_dim_learned"], 
-                 self.rl_data[self.prim_tbi][self.it]["ole_cdmp_unroll_all_dim_learned"]
+                 self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params"], 
+                 self.rl_data[self.prim_tbi][self.it]["ole_cdmp_unroll"]
                 ] = rl_util.learnCartDMPUnrollParams(self.cdmp_trajs, 
-                                                     prim_to_be_learned="All", 
+                                                     prims_to_be_learned=self.prims_to_be_learned, #"All", 
                                                      is_smoothing_training_traj_before_learning=self.is_smoothing_training_traj_before_learning, 
-                                                     is_plotting=self.is_plotting)
+                                                     is_plotting=self.is_plotting, 
+                                                     default_cdmp_params=self.nominal_cdmp_params)
                 
                 plt.close('all')
                 
                 self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_general, 
                                                   exec_behavior_until_prim_no=self.prim_tbi, 
-                                                  behavior_params=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params_all_dim_learned"], 
+                                                  behavior_params=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params"], 
                                                   feedback_model_params=None, 
                                                   exec_mode="EXEC_OPENLOOPEQUIV_DMP_ONLY", 
                                                   suffix_exec_description=" RL Iter. %d" % (self.it))
                 
                 # evaluate the cost of the open-loop-equivalent primitive
-                self.rl_data[self.prim_tbi][self.it]["ole_cdmp_evals_all_dim_learned"] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(self.sl_data_dirpath, 
-                                                                                                                                                  N_primitives=self.prim_tbi+1, 
-                                                                                                                                                  N_cost_components=self.N_total_sense_dimensionality)
-                self.J_prime = self.rl_data[self.prim_tbi][self.it]["ole_cdmp_evals_all_dim_learned"]["mean_accum_cost"][self.prim_tbi]
+                self.rl_data[self.prim_tbi][self.it]["ole_cdmp_evals"] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(self.sl_data_dirpath, 
+                                                                                                                                  N_primitives=self.prim_tbi+1, 
+                                                                                                                                  N_cost_components=self.N_total_sense_dimensionality)
+                self.J_prime = self.rl_data[self.prim_tbi][self.it]["ole_cdmp_evals"]["mean_accum_cost"][self.prim_tbi]
                 self.abs_diff_J_and_J_prime = np.fabs(self.J - self.J_prime)
                 
                 print ("prim_tbi # %d RL iter # %03d : J = %f ; J_prime = %f ; abs_diff_J_and_J_prime = %f" % (self.prim_tbi+1, self.it, self.J, self.J_prime, self.abs_diff_J_and_J_prime))
@@ -254,7 +256,7 @@ class RLTactileFeedback:
                 
                 # set to-be-perturbed DMP params as mean, and define the initial covariance matrix
                 [self.rl_data[self.prim_tbi][self.it]["PI2_param_mean"], self.rl_data[self.prim_tbi][self.it]["PI2_param_dim_list"]
-                 ] = rl_util.extractParamsToBeImproved(self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params_all_dim_learned"], 
+                 ] = rl_util.extractParamsToBeImproved(self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params"], 
                                                        self.cart_dim_tbi_dict, self.cart_types_tbi_list, self.prim_tbi)
                 if (self.it == 0):
                     self.rl_data[self.prim_tbi][self.it]["PI2_param_init_std"] = rl_util.computeParamInitStdHeuristic(self.rl_data[self.prim_tbi][self.it]["PI2_param_mean"], 
@@ -278,19 +280,19 @@ class RLTactileFeedback:
                 for self.k in range(self.K_PI2_samples):
                     self.param_sample = self.param_samples[self.k,:]
                     self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k] = {}
-                    self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_params_all_dim_learned"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params_all_dim_learned"])
-                    self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_params_all_dim_learned"] = rl_util.updateParamsToBeImproved(self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_params_all_dim_learned"], 
-                                                                                                                                                             self.cart_dim_tbi_dict, 
-                                                                                                                                                             self.cart_types_tbi_list, 
-                                                                                                                                                             self.prim_tbi, 
-                                                                                                                                                             self.param_sample, 
-                                                                                                                                                             self.rl_data[self.prim_tbi][self.it]["PI2_param_dim_list"])
+                    self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_params"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params"])
+                    self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_params"] = rl_util.updateParamsToBeImproved(self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_params"], 
+                                                                                                                                             self.cart_dim_tbi_dict, 
+                                                                                                                                             self.cart_types_tbi_list, 
+                                                                                                                                             self.prim_tbi, 
+                                                                                                                                             self.param_sample, 
+                                                                                                                                             self.rl_data[self.prim_tbi][self.it]["PI2_param_dim_list"])
                 
                 if (self.is_unrolling_pi2_samples):
                     self.rl_data[self.prim_tbi][self.it]["PI2_unroll_samples"] = rl_util.unrollPI2ParamsSamples(pi2_params_samples=self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"], 
                                                                                                                 prim_to_be_improved=self.prim_tbi, 
                                                                                                                 cart_types_to_be_improved=self.cart_types_tbi_list, 
-                                                                                                                pi2_unroll_mean=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_unroll_all_dim_learned"], 
+                                                                                                                pi2_unroll_mean=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_unroll"], 
                                                                                                                 is_plotting=self.is_plotting)
                 
                 for self.k in range(self.K_PI2_samples):
@@ -299,7 +301,7 @@ class RLTactileFeedback:
                                                                     prim_to_be_improved=self.prim_tbi, 
                                                                     cart_types_to_be_improved=self.cart_types_tbi_list, 
                                                                     pi2_unroll_samples=self.rl_data[self.prim_tbi][self.it]["PI2_unroll_samples"], 
-                                                                    pi2_unroll_mean=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_unroll_all_dim_learned"])
+                                                                    pi2_unroll_mean=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_unroll"])
                     
                     if (self.is_pausing and 
                         rl_util.checkUnrollPI2ParamSampleSupervisionRequirement(k=self.k, 
@@ -310,16 +312,16 @@ class RLTactileFeedback:
                     
                     self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_per_PI2_sample, 
                                                       exec_behavior_until_prim_no=self.prim_tbi, 
-                                                      behavior_params=self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_params_all_dim_learned"], 
+                                                      behavior_params=self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_params"], 
                                                       feedback_model_params=None, 
                                                       exec_mode="EXEC_OPENLOOPEQUIV_DMP_ONLY", 
                                                       suffix_exec_description=" RL Iter. %d PI2 Sample # %d/%d" % (self.it, self.k+1, self.K_PI2_samples))
                     
                     # evaluate the k-th sample's cost
-                    self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_evals_all_dim_learned"] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(self.sl_data_dirpath, 
-                                                                                                                                                                                    N_primitives=self.prim_tbi+1, 
-                                                                                                                                                                                    N_cost_components=self.N_total_sense_dimensionality)
-                    self.param_sample_cost_per_time_step_list.append(self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_evals_all_dim_learned"]["trajectory"][0]["cost_per_timestep"][self.prim_tbi])
+                    self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_evals"] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(self.sl_data_dirpath, 
+                                                                                                                                                                    N_primitives=self.prim_tbi+1, 
+                                                                                                                                                                    N_cost_components=self.N_total_sense_dimensionality)
+                    self.param_sample_cost_per_time_step_list.append(self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_evals"]["trajectory"][0]["cost_per_timestep"][self.prim_tbi])
                 
                 self.rl_data[self.prim_tbi][self.it]["PI2_param_sample_cost_per_time_step"] = np.vstack(self.param_sample_cost_per_time_step_list)
                 
@@ -334,7 +336,7 @@ class RLTactileFeedback:
                  ] = self.pi2_opt.update(self.param_samples, self.rl_data[self.prim_tbi][self.it]["PI2_param_sample_cost_per_time_step"], 
                                          self.rl_data[self.prim_tbi][self.it]["PI2_param_mean"], self.rl_data[self.prim_tbi][self.it]["PI2_param_cov"])
                 
-                self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_params"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params_all_dim_learned"])
+                self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_params"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params"])
                 self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_params"] = rl_util.updateParamsToBeImproved(self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_params"], 
                                                                                                                self.cart_dim_tbi_dict, 
                                                                                                                self.cart_types_tbi_list, 
@@ -343,7 +345,7 @@ class RLTactileFeedback:
                                                                                                                self.rl_data[self.prim_tbi][self.it]["PI2_param_dim_list"])
                 
                 self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_general, 
-                                                  exec_behavior_until_prim_no=self.prim_tbi, 
+                                                  exec_behavior_until_prim_no=self.N_primitives - 1, 
                                                   behavior_params=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_params"], 
                                                   feedback_model_params=None, 
                                                   exec_mode="EXEC_OPENLOOPEQUIV_DMP_ONLY", 
@@ -351,7 +353,7 @@ class RLTactileFeedback:
                 
                 # evaluate the new sample mean's cost
                 self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_evals"] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(self.sl_data_dirpath, 
-                                                                                                                                      N_primitives=self.prim_tbi+1, 
+                                                                                                                                      N_primitives=self.N_primitives, 
                                                                                                                                       N_cost_components=self.N_total_sense_dimensionality)
                 
                 self.J_prime_new = self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_evals"]["mean_accum_cost"][self.prim_tbi]
@@ -377,10 +379,8 @@ class RLTactileFeedback:
                 
                 py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
                 
-                # TODO: log Vicon rotation difference between scraping tool and the tilt-board into SL data files and oscilloscope; use the norm of it later as the cost function (Monday)
-                # TODO: setup Vicon hardware and test PI2 with the new cost function to see if it's really getting better now (Monday)
-                # TODO: implement supervised learning of PMNN after PI2 is done (Monday/Tuesday)
-                # TODO: test full pipeline, including PMNN learning (Wednesday)
+                # TODO: implement supervised learning of PMNN after PI2 is done (Friday)
+                # TODO: test full pipeline, including PMNN learning (Sunday)
                 # TODO: increase number of samples for PI2?
 
 if __name__ == '__main__':
