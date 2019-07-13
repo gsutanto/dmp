@@ -379,6 +379,7 @@ class RLTactileFeedback:
                 
                 py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
                 
+                # TODO: add filtering/smoothing on both DeltaS and Ct_target extracted from supervised dataset (Sunday)?
                 # TODO: implement supervised learning of PMNN after PI2 is done (Friday)
                 # TODO: test full pipeline, including PMNN learning (Sunday)
                 # TODO: increase number of samples for PI2?

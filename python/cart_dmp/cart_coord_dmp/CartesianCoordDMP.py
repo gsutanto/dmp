@@ -243,6 +243,15 @@ class CartesianCoordDMP(DMPDiscrete, object):
         return self.cart_coord_transformer.convertCTrajAtOldToNewCoordSys(dmp_state_global,
                                                                           self.ctraj_hmg_transform_global_to_local_matrix)
     
+    def convertGlobalTrajToLocalTraj(self, global_traj, dmp_params_dict=None):
+        assert (dmp_params_dict is not None), "For CartesianCoordDMP, dmp_params_dict must be specified!"
+        local_traj = self.cart_coord_transformer.computeCTrajAtNewCoordSys(global_traj,
+                                                                           dmp_params_dict['T_global_to_local_H'])
+        return local_traj
+    
+    def getMeanLocalGoalPosition(self, dmp_params_dict):
+        return dmp_params_dict['mean_goal_local_position']
+    
     def extractSetTrajectories(self, training_data_dir_or_file_path, start_column_idx=1, time_column_idx=0):
         return extractSetCartCoordTrajectories(training_data_dir_or_file_path, start_column_idx, time_column_idx)
     

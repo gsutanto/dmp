@@ -136,21 +136,14 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         else:
             is_good_demo = True
         
-        cart_coord_dmp.setParams(cart_coord_dmp_baseline_params['W'], cart_coord_dmp_baseline_params['A_learn'])
-        
-        demo_obs_avoid_traj_local = self.cart_coord_transformer.computeCTrajAtNewCoordSys(demo_obs_avoid_traj_global,
-                                                                                          cart_coord_dmp_baseline_params['T_global_to_local_H'])
+        [sub_Ct_target, sub_phase_PSI, sub_phase_V, sub_phase_X, demo_obs_avoid_traj_local
+         ] = cart_coord_dmp.getTargetCouplingTermTraj(demo_adapted_traj_global=demo_obs_avoid_traj_global, 
+                                                      dt=dt, 
+                                                      dmp_params_dict=cart_coord_dmp_baseline_params)
         
         point_obstacles_cart_position_local = self.cart_coord_transformer.computeCPosAtNewCoordSys(point_obstacles_cart_position_global.T,
                                                                                                    cart_coord_dmp_baseline_params['T_global_to_local_H'])
         point_obstacles_cart_position_local = point_obstacles_cart_position_local.T
-        
-        [sub_Ct_target, _, 
-         sub_phase_PSI, sub_phase_X, sub_phase_V, 
-         _, _, 
-         _] = cart_coord_dmp.transform_sys_discrete.getTargetCouplingTermTraj(demo_obs_avoid_traj_local, 
-                                                                              1.0/traj_dt,
-                                                                              cart_coord_dmp_baseline_params['mean_goal_local_position'])
         
         sub_X = self.constructObsAvoidViconFeatMat(demo_obs_avoid_traj_local,
                                                    point_obstacles_cart_position_local,

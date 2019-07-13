@@ -106,6 +106,42 @@ class DMPDiscrete(DMP, object):
     def setScalingUsage(self, is_using_scaling_init):
         return self.transform_sys_discrete.setScalingUsage(is_using_scaling_init)
     
+    def convertGlobalTrajToLocalTraj(self, global_traj, dmp_params_dict=None):
+        local_traj = global_traj # in general the global trajectory is also (or equal to) the local trajectory
+        return local_traj
+    
+    def getMeanLocalGoalPosition(self, dmp_params_dict):
+        return dmp_params_dict['mean_goal_position']
+    
+    def getTargetCouplingTermTraj(self, demo_adapted_traj_global, 
+                                  dt, 
+                                  dmp_params_dict):
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPDiscrete is invalid!"
+        
+        traj_length = demo_adapted_traj_global.getLength()
+        
+        start_state_global_adapted_demo = demo_adapted_traj_global.getDMPStateAtIndex(0)
+        goal_state_global_adapted_demo = demo_adapted_traj_global.getDMPStateAtIndex(traj_length-1)
+        
+        traj_dt = (goal_state_global_adapted_demo.time[0,0] - start_state_global_adapted_demo.time[0,0])/(traj_length - 1.0)
+        if (traj_dt <= 0.0):
+            traj_dt = dt
+        
+        self.setParams(dmp_params_dict['W'], dmp_params_dict['A_learn'])
+        
+        demo_adapted_traj_local = self.convertGlobalTrajToLocalTraj(global_traj=demo_adapted_traj_global, 
+                                                                    dmp_params_dict=dmp_params_dict)
+        
+        [sub_Ct_target, _, 
+         sub_phase_PSI, sub_phase_X, sub_phase_V, 
+         _, _, 
+         _] = self.transform_sys_discrete.getTargetCouplingTermTraj(demo_adapted_traj_local, 
+                                                                    1.0/traj_dt,
+                                                                    self.getMeanLocalGoalPosition(dmp_params_dict))
+        
+        assert (self.isValid()), "Post-condition(s) checking is failed: this DMPDiscrete became invalid!"
+        return sub_Ct_target, sub_phase_PSI, sub_phase_V, sub_phase_X, demo_adapted_traj_local
+    
     def getParams(self):
         weights = self.func_approx_discrete.getWeights()
         A_learn = self.transform_sys_discrete.getLearningAmplitude()
