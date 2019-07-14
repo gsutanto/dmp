@@ -249,7 +249,7 @@ class CartesianCoordDMP(DMPDiscrete, object):
                                                                            dmp_params_dict['T_global_to_local_H'])
         return local_traj
     
-    def getMeanLocalGoalPosition(self, dmp_params_dict):
+    def getMeanLocalGoalPositionFromDict(self, dmp_params_dict):
         return dmp_params_dict['mean_goal_local_position']
     
     def extractSetTrajectories(self, training_data_dir_or_file_path, start_column_idx=1, time_column_idx=0):

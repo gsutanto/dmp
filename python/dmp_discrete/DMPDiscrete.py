@@ -44,17 +44,6 @@ class DMPDiscrete(DMP, object):
         assert (self.learning_sys_discrete.isValid())
         return True
     
-    def learn(self, list_dmptrajectory_demo_global, robot_task_servo_rate):
-        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPDiscrete is invalid!"
-        assert (robot_task_servo_rate > 0.0)
-        
-        list_dmptrajectory_demo_local = self.preprocess(list_dmptrajectory_demo_global)
-        W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI = self.learning_sys_discrete.learnApproximator(list_dmptrajectory_demo_local, robot_task_servo_rate)
-        self.mean_tau = mean_tau
-        assert (self.mean_tau >= MIN_TAU)
-        assert (self.isValid()), "Post-condition(s) checking is failed: this DMPDiscrete became invalid!"
-        return W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI
-    
     def start(self, critical_states, tau_init):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPDiscrete is invalid!"
         
@@ -88,30 +77,79 @@ class DMPDiscrete(DMP, object):
         assert (self.isValid()), "Post-condition(s) checking is failed: this DMPDiscrete became invalid!"
         return next_state, forcing_term, ct_acc, ct_vel, basis_function_vector
     
-    def getCurrentState(self):
-        return self.transform_sys_discrete.getCurrentState()
+    def preprocess(self, list_dmp_trajectory):
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMP is invalid!"
+        N_traj = len(list_dmp_trajectory)
+        
+        self.mean_start_position = np.zeros((self.dmp_num_dimensions,1))
+        self.mean_goal_position = np.zeros((self.dmp_num_dimensions,1))
+        for dmp_trajectory in list_dmp_trajectory:
+            self.mean_start_position = self.mean_start_position + dmp_trajectory.X[:,[0]]
+            self.mean_goal_position = self.mean_goal_position + dmp_trajectory.X[:,[-1]]
+        self.mean_start_position = self.mean_start_position * 1.0 / N_traj
+        self.mean_goal_position = self.mean_goal_position * 1.0 / N_traj
+        preprocessed_list_dmp_trajectory = list_dmp_trajectory
+        assert (self.isValid()), "Post-condition(s) checking is failed: this DMP became invalid!"
+        return preprocessed_list_dmp_trajectory
     
-    def getCurrentGoalPosition(self):
+    def smoothStartEndTrajectoryBasedOnPosition(self, traj, percentage_padding, percentage_smoothing_points, mode, dt, smoothing_cutoff_frequency):
+        if (dt is None):
+            traj_length = traj.time.shape[1]
+            assert (traj_length > 1)
+            dt = (traj.time[0, traj_length-1] - traj.time[0, 0])/(1.0 * (traj_length-1))
+            assert (dt > 0.0)
+        return smoothStartEndNDTrajectoryBasedOnPosition(ND_traj=traj, 
+                                                         percentage_padding=percentage_padding, 
+                                                         percentage_smoothing_points=percentage_smoothing_points, 
+                                                         mode=mode, dt=dt, 
+                                                         fc=smoothing_cutoff_frequency)
+    
+    def learnFromPath(self, training_data_dir_or_file_path, robot_task_servo_rate, start_column_idx=1, time_column_idx=0, 
+                      is_smoothing_training_traj_before_learning=False, 
+                      percentage_padding=None, percentage_smoothing_points=None, smoothing_mode=None, smoothing_cutoff_frequency=None):
+        set_traj_input = self.extractSetTrajectories(training_data_dir_or_file_path, start_column_idx, time_column_idx)
+        return self.learnFromSetTrajectories(set_traj_input, robot_task_servo_rate, 
+                                             is_smoothing_training_traj_before_learning, 
+                                             percentage_padding, percentage_smoothing_points, smoothing_mode, smoothing_cutoff_frequency)
+    
+    def learnFromSetTrajectories(self, set_traj_input, robot_task_servo_rate, 
+                                 is_smoothing_training_traj_before_learning=False, 
+                                 percentage_padding=None, percentage_smoothing_points=None, smoothing_mode=None, smoothing_cutoff_frequency=None, 
+                                 is_returning_smoothened_training_traj=False):
+        if (is_smoothing_training_traj_before_learning):
+            processed_set_traj_input = list()
+            for traj_input in set_traj_input:
+                processed_set_traj_input.append(self.smoothStartEndTrajectoryBasedOnPosition(traj=traj_input, 
+                                                                                             percentage_padding=percentage_padding, 
+                                                                                             percentage_smoothing_points=percentage_smoothing_points, 
+                                                                                             mode=smoothing_mode, 
+                                                                                             dt=(1.0/robot_task_servo_rate), 
+                                                                                             smoothing_cutoff_frequency=smoothing_cutoff_frequency))
+        else:
+            processed_set_traj_input = set_traj_input
+        if (not is_returning_smoothened_training_traj):
+            return self.learnGetDefaultUnrollParams(processed_set_traj_input, robot_task_servo_rate)
+        else:
+            return self.learnGetDefaultUnrollParams(processed_set_traj_input, robot_task_servo_rate), processed_set_traj_input
+    
+    def learnGetDefaultUnrollParams(self, set_traj_input, robot_task_servo_rate):
+        W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI = self.learn(set_traj_input, robot_task_servo_rate)
+        critical_states_list_learn = [None] * 2
+        critical_states_list_learn[0] = DMPState(self.mean_start_position)
+        critical_states_list_learn[-1] = DMPState(self.mean_goal_position)
+        critical_states_learn = convertDMPStatesListIntoDMPTrajectory(critical_states_list_learn)
+        return critical_states_learn, W, mean_A_learn, self.mean_tau, Ft, Fp, G, cX, cV, PSI
+    
+    def learn(self, list_dmptrajectory_demo_global, robot_task_servo_rate):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPDiscrete is invalid!"
-        return self.transform_sys_discrete.getCurrentGoalState().getX()
-    
-    def getSteadyStateGoalPosition(self):
-        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPDiscrete is invalid!"
-        return self.transform_sys_discrete.getSteadyStateGoalPosition()
-    
-    def setNewSteadyStateGoalPosition(self, new_G):
-        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPDiscrete is invalid!"
-        return self.transform_sys_discrete.setSteadyStateGoalPosition(new_G)
-    
-    def setScalingUsage(self, is_using_scaling_init):
-        return self.transform_sys_discrete.setScalingUsage(is_using_scaling_init)
-    
-    def convertGlobalTrajToLocalTraj(self, global_traj, dmp_params_dict=None):
-        local_traj = global_traj # in general the global trajectory is also (or equal to) the local trajectory
-        return local_traj
-    
-    def getMeanLocalGoalPosition(self, dmp_params_dict):
-        return dmp_params_dict['mean_goal_position']
+        assert (robot_task_servo_rate > 0.0)
+        
+        list_dmptrajectory_demo_local = self.preprocess(list_dmptrajectory_demo_global)
+        W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI = self.learning_sys_discrete.learnApproximator(list_dmptrajectory_demo_local, robot_task_servo_rate)
+        self.mean_tau = mean_tau
+        assert (self.mean_tau >= MIN_TAU)
+        assert (self.isValid()), "Post-condition(s) checking is failed: this DMPDiscrete became invalid!"
+        return W, mean_A_learn, mean_tau, Ft, Fp, G, cX, cV, PSI
     
     def getTargetCouplingTermTraj(self, demo_adapted_traj_global, 
                                   dt, 
@@ -135,12 +173,73 @@ class DMPDiscrete(DMP, object):
         [sub_Ct_target, _, 
          sub_phase_PSI, sub_phase_X, sub_phase_V, 
          _, _, 
-         _] = self.transform_sys_discrete.getTargetCouplingTermTraj(demo_adapted_traj_local, 
-                                                                    1.0/traj_dt,
-                                                                    self.getMeanLocalGoalPosition(dmp_params_dict))
+         _] = self.transform_sys.getTargetCouplingTermTraj(demo_adapted_traj_local, 
+                                                           1.0/traj_dt,
+                                                           self.getMeanLocalGoalPositionFromDict(dmp_params_dict))
         
         assert (self.isValid()), "Post-condition(s) checking is failed: this DMPDiscrete became invalid!"
         return sub_Ct_target, sub_phase_PSI, sub_phase_V, sub_phase_X, demo_adapted_traj_local
+    
+    def getDMPUnrollInitParams(self, critical_states_learn, tau):
+        return DMPUnrollInitParams(critical_states_learn, tau)
+    
+    def startWithUnrollParams(self, dmp_unroll_init_parameters):
+        assert (dmp_unroll_init_parameters.isValid())
+        return (self.start(dmp_unroll_init_parameters.critical_states, dmp_unroll_init_parameters.tau))
+    
+    def unroll(self, critical_states_unroll, tau_unroll, time_unroll_max, dt):
+        dmp_unroll_init_params = self.getDMPUnrollInitParams(critical_states_unroll, tau_unroll)
+        
+        self.startWithUnrollParams(dmp_unroll_init_params)
+        
+        dmpstate_list = list()
+        for i in range(int(np.round(time_unroll_max/dt) + 1)):
+            [current_dmpstate, 
+             _, 
+             _, 
+             _, 
+             _
+             ] = self.getNextState(dt, True)
+            dmpstate_list.append(current_dmpstate)
+        return self.convertDMPStatesListIntoDMPTrajectory(dmpstate_list)
+    
+    def plotDemosVsUnroll(self, set_demo_trajs, unroll_traj, 
+                          title_suffix="", fig_num_offset=0):
+        return py_util.plotManyTrajsVsOneTraj(set_many_trajs=set_demo_trajs, one_traj=unroll_traj, 
+                                              title_suffix=title_suffix, fig_num_offset=fig_num_offset, 
+                                              components_to_be_plotted=["X", "Xd", "Xdd"], 
+                                              many_traj_label="demo", one_traj_label="unroll")
+    
+    def setScalingUsage(self, is_using_scaling_init):
+        return self.transform_sys_discrete.setScalingUsage(is_using_scaling_init)
+    
+    def getCurrentState(self):
+        return self.transform_sys_discrete.getCurrentState()
+    
+    def convertGlobalTrajToLocalTraj(self, global_traj, dmp_params_dict=None):
+        local_traj = global_traj # in general the global trajectory is also (or equal to) the local trajectory
+        return local_traj
+    
+    def getMeanStartPosition(self):
+        return copy.copy(self.mean_start_position)
+    
+    def getMeanGoalPosition(self):
+        return copy.copy(self.mean_goal_position)
+    
+    def getMeanLocalGoalPositionFromDict(self, dmp_params_dict):
+        return dmp_params_dict['mean_goal_position']
+    
+    def getCurrentGoalPosition(self):
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPDiscrete is invalid!"
+        return self.transform_sys_discrete.getCurrentGoalState().getX()
+    
+    def getSteadyStateGoalPosition(self):
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPDiscrete is invalid!"
+        return self.transform_sys_discrete.getSteadyStateGoalPosition()
+    
+    def setNewSteadyStateGoalPosition(self, new_G):
+        assert (self.isValid()), "Pre-condition(s) checking is failed: this DMPDiscrete is invalid!"
+        return self.transform_sys_discrete.setSteadyStateGoalPosition(new_G)
     
     def getParams(self):
         weights = self.func_approx_discrete.getWeights()
