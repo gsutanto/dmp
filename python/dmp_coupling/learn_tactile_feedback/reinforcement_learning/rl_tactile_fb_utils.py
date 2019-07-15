@@ -11,7 +11,9 @@ import sys
 import copy
 import numpy as np
 import numpy.linalg as npla
+import numpy.matlib as npma
 import matplotlib.pyplot as plt
+from scipy import signal
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_state/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_param/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../dmp_base/'))
@@ -30,6 +32,10 @@ import QuaternionDMPTrajectory as qdmp_traj
 import utilities as py_util
 import pyplot_util as pypl_util
 import clmcplot_utils as clmcplot_util
+
+percentage_padding_default = 1.5
+percentage_smoothing_points_default = 3.0
+smoothing_cutoff_frequency_default = 5.0
 
 dim_cart = 3
 dim_Q = 4
@@ -305,70 +311,97 @@ def extractCartDMPTrajectoriesFromUnrollResults(unroll_results,
     cdmp_trajs["Quaternion"] = qdmp_trajs
     return cdmp_trajs
 
-def loadPrimsParamsAsDictFromDirPath(prims_params_dirpath, N_primitives):
-    cdmp_params = {}
-    cdmp_params["CartCoord"] = [None] * N_primitives
-    cdmp_params["Quaternion"] = [None] * N_primitives
+def extractAdditionalBehaviorFeedbackModelDataset(unroll_results, 
+                                                  cdmp_params, 
+                                                  is_smoothing_training_traj_before_learning=False):
+    adapted_cdmp_trajs = extractCartDMPTrajectoriesFromUnrollResults(unroll_results)
+    
+    N_trials = len(unroll_results["trajectory"])
+    N_primitives = len(unroll_results["trajectory"][0]["id"])
+    
+    if (is_smoothing_training_traj_before_learning):
+        percentage_padding = percentage_padding_default
+        percentage_smoothing_points = percentage_smoothing_points_default
+        smoothing_cutoff_frequency = smoothing_cutoff_frequency_default
+    else:
+        percentage_padding = None
+        percentage_smoothing_points = None
+        smoothing_cutoff_frequency = None
+    
+    additional_fb_dataset = [None] * N_primitives
     for n_prim in range(N_primitives):
-        cdmp_params["CartCoord"][n_prim] = ccdmp.loadParamsAsDict(prims_params_dirpath+"/position/prim%d/"%(n_prim+1), 
-                                                                  file_name_weights="w", 
-                                                                  file_name_A_learn="A_learn", 
-                                                                  file_name_mean_start_position="start_global", 
-                                                                  file_name_mean_goal_position="goal_global", 
-                                                                  file_name_mean_tau="tau", 
-                                                                  file_name_canonical_system_order="canonical_sys_order", 
-                                                                  file_name_mean_start_position_global="start_global", 
-                                                                  file_name_mean_goal_position_global="goal_global", 
-                                                                  file_name_mean_start_position_local="start_local", 
-                                                                  file_name_mean_goal_position_local="goal_local", 
-                                                                  file_name_ctraj_local_coordinate_frame_selection="ctraj_local_coordinate_frame_selection", 
-                                                                  file_name_ctraj_hmg_transform_local_to_global_matrix="T_local_to_global_H", 
-                                                                  file_name_ctraj_hmg_transform_global_to_local_matrix="T_global_to_local_H")
-        cdmp_params["Quaternion"][n_prim] = qdmp.loadParamsAsDict(prims_params_dirpath+"/orientation/prim%d/"%(n_prim+1), 
-                                                                  file_name_weights="w", 
-                                                                  file_name_A_learn="A_learn", 
-                                                                  file_name_mean_start_position="start", 
-                                                                  file_name_mean_goal_position="goal", 
-                                                                  file_name_mean_tau="tau", 
-                                                                  file_name_canonical_system_order="canonical_sys_order")
-    return cdmp_params
+        print("Extracting Additional Behavior Feedback Model Dataset for Primitive # %d/%d" % (n_prim+1, N_primitives))
+        if (is_smoothing_training_traj_before_learning):
+            if (n_prim == 0):
+                smoothing_mode = 1 # smooth start only
+            elif (n_prim == N_primitives - 1):
+                smoothing_mode = 2 # smooth end only
+            else:
+                smoothing_mode = 0 # do not smooth
+        else:
+            smoothing_mode = None
+        
+        additional_fb_dataset[n_prim] = [None] * N_trials
+        for n_trial in range(N_trials):
+            additional_fb_dataset[n_prim][n_trial] = {}
+            
+            [sub_ccdmp_Ct_target, _, _, _, _
+             ] = ccdmp.getTargetCouplingTermTraj(demo_adapted_traj_global=adapted_cdmp_trajs["CartCoord"][n_prim][n_trial], 
+                                                 dt=dt, 
+                                                 dmp_params_dict=cdmp_params["CartCoord"][n_prim], 
+                                                 is_smoothing_training_traj_before_learning=is_smoothing_training_traj_before_learning, 
+                                                 percentage_padding=percentage_padding, percentage_smoothing_points=percentage_smoothing_points, 
+                                                 smoothing_mode=smoothing_mode, smoothing_cutoff_frequency=smoothing_cutoff_frequency)
+            [sub_qdmp_Ct_target, sub_phase_PSI, sub_phase_V, sub_phase_X, _
+             ] = qdmp.getTargetCouplingTermTraj(demo_adapted_traj_global=adapted_cdmp_trajs["Quaternion"][n_prim][n_trial], 
+                                                dt=dt, 
+                                                dmp_params_dict=cdmp_params["Quaternion"][n_prim], 
+                                                is_smoothing_training_traj_before_learning=is_smoothing_training_traj_before_learning, 
+                                                percentage_padding=percentage_padding, percentage_smoothing_points=percentage_smoothing_points, 
+                                                smoothing_mode=smoothing_mode, smoothing_cutoff_frequency=smoothing_cutoff_frequency)
+            assert (sub_ccdmp_Ct_target.shape[0] == dim_cart)
+            assert (sub_qdmp_Ct_target.shape[0]  == dim_omega)
+            assert (sub_phase_PSI.shape[0]       == model_size)
+            assert (sub_phase_V.shape[0]         == 1)
+            assert (sub_phase_X.shape[0]         == 1)
+            traj_length = sub_qdmp_Ct_target.shape[1]
+            assert (sub_ccdmp_Ct_target.shape[1] == traj_length)
+            assert (sub_phase_PSI.shape[1]       == traj_length)
+            assert (sub_phase_V.shape[1]         == traj_length)
+            assert (sub_phase_X.shape[1]         == traj_length)
+            sub_DeltaS = unroll_results["trajectory"][n_trial]["DeltaST"][n_prim]
+            assert (sub_DeltaS.shape[0]          == traj_length)
+            
+            additional_fb_dataset[n_prim][n_trial]['Ct_target'] = np.vstack([sub_ccdmp_Ct_target, sub_qdmp_Ct_target]).T
+            additional_fb_dataset[n_prim][n_trial]['phase_X'] = sub_phase_X.T
+            additional_fb_dataset[n_prim][n_trial]['phase_V'] = sub_phase_V.T
+            additional_fb_dataset[n_prim][n_trial]['phase_PSI'] = sub_phase_PSI.T
+            additional_fb_dataset[n_prim][n_trial]['normalized_phase_PSI_mult_phase_V'] = (sub_phase_PSI * 
+                                                                                           npma.repmat(sub_phase_V / (np.sum(sub_phase_PSI+1e-10, axis=0).reshape((1, traj_length))), 
+                                                                                                       model_size, 1)).T
+            if (n_prim == 0): # for primitive 1 (because impact with the board is at the end, so the priority is growing/increasing...)
+                sub_data_point_priority = np.array(range(traj_length))+1
+            else:
+                sub_data_point_priority = np.array(range(traj_length, 0, -1))
+            sub_data_point_priority = ((1.0/traj_length) * sub_data_point_priority).reshape((traj_length, 1))
+            additional_fb_dataset[n_prim][n_trial]['data_point_priority'] = sub_data_point_priority
+            if (is_smoothing_training_traj_before_learning):
+                N_filter_order = 2
+                fs = task_servo_rate # sampling frequency
+                fc = smoothing_cutoff_frequency
+                Wn = fc/(fs/2)
+                b, a = signal.butter(N_filter_order, Wn)
+                additional_fb_dataset[n_prim][n_trial]['DeltaS'] = signal.filtfilt(b, a, sub_DeltaS, axis=0, padlen=3*(max(len(a), len(b))-1)) # padlen here is adapted to follow what MATLAB's filtfilt() does (for code synchronization)
+            else:
+                additional_fb_dataset[n_prim][n_trial]['DeltaS'] = sub_DeltaS
+    return adapted_cdmp_trajs, additional_fb_dataset
 
-def savePrimsParamsFromDictAtDirPath(prims_params_dirpath, cdmp_params):
-    N_primitives = len(cdmp_params["CartCoord"])
-    py_util.createDirIfNotExist(prims_params_dirpath)
-    for n_prim in range(N_primitives):
-        ccdmp_prim_param_dirpath = prims_params_dirpath+"/position/prim%d/"%(n_prim+1)
-        py_util.recreateDir(ccdmp_prim_param_dirpath)
-        ccdmp.saveParamsFromDict(dir_path=ccdmp_prim_param_dirpath, cart_coord_dmp_params=cdmp_params["CartCoord"][n_prim], 
-                                 file_name_weights="w", 
-                                 file_name_A_learn="A_learn", 
-                                 file_name_mean_start_position="start_global", 
-                                 file_name_mean_goal_position="goal_global", 
-                                 file_name_mean_tau="tau", 
-                                 file_name_canonical_system_order="canonical_sys_order", 
-                                 file_name_mean_start_position_global="start_global", 
-                                 file_name_mean_goal_position_global="goal_global", 
-                                 file_name_mean_start_position_local="start_local", 
-                                 file_name_mean_goal_position_local="goal_local", 
-                                 file_name_ctraj_local_coordinate_frame_selection="ctraj_local_coordinate_frame_selection", 
-                                 file_name_ctraj_hmg_transform_local_to_global_matrix="T_local_to_global_H", 
-                                 file_name_ctraj_hmg_transform_global_to_local_matrix="T_global_to_local_H")
-        qdmp_prim_param_dirpath = prims_params_dirpath+"/orientation/prim%d/"%(n_prim+1)
-        py_util.recreateDir(qdmp_prim_param_dirpath)
-        qdmp.saveParamsFromDict(dir_path=qdmp_prim_param_dirpath, dmp_params=cdmp_params["Quaternion"][n_prim], 
-                                file_name_weights="w", 
-                                file_name_A_learn="A_learn", 
-                                file_name_mean_start_position="start", 
-                                file_name_mean_goal_position="goal", 
-                                file_name_mean_tau="tau", 
-                                file_name_canonical_system_order="canonical_sys_order")
-    return None
-
-def learnCartDMPUnrollParams(cdmp_trajs, prims_to_be_learned="All", 
+def learnCartDMPUnrollParams(unroll_results, prims_to_be_learned="All", 
                              is_smoothing_training_traj_before_learning=True, 
                              is_plotting=False, 
                              threshold_var_ground_truth_Q= 5.0e-4, 
                              default_cdmp_params=None):
+    cdmp_trajs = extractCartDMPTrajectoriesFromUnrollResults(unroll_results)
     N_primitives = len(cdmp_trajs["Quaternion"])
     all_prims = range(N_primitives)
     if (prims_to_be_learned is "All"):
@@ -379,9 +412,9 @@ def learnCartDMPUnrollParams(cdmp_trajs, prims_to_be_learned="All",
     prims_not_to_be_learned = list(np.sort(np.setdiff1d(np.array(all_prims), np.array(prims_to_be_learned))))
     
     if (is_smoothing_training_traj_before_learning):
-        percentage_padding = 1.5
-        percentage_smoothing_points = 3.0
-        smoothing_cutoff_frequency = 5.0
+        percentage_padding = percentage_padding_default
+        percentage_smoothing_points = percentage_smoothing_points_default
+        smoothing_cutoff_frequency = smoothing_cutoff_frequency_default
     else:
         percentage_padding = None
         percentage_smoothing_points = None
@@ -404,7 +437,7 @@ def learnCartDMPUnrollParams(cdmp_trajs, prims_to_be_learned="All",
         cdmp_params["Quaternion"][n_prim_ntbl] = copy.deepcopy(default_cdmp_params["Quaternion"][n_prim_ntbl])
     
     for n_prim in prims_to_be_learned:
-        print("Learning (Modified) Open-Loop Primitive #%d" % (n_prim+1))
+        print("Learning (Modified) Open-Loop Primitive # %d/%d" % (n_prim+1, N_primitives))
         if (is_smoothing_training_traj_before_learning):
             if (n_prim == 0):
                 smoothing_mode = 1 # smooth start only
@@ -481,7 +514,7 @@ def learnCartDMPUnrollParams(cdmp_trajs, prims_to_be_learned="All",
             assert ((nmse_smoothened_X < 1.0).all())
         assert (np.bitwise_or(nmse_smoothened_Q < 1.0, vargt_smoothened_Q < threshold_var_ground_truth_Q).all())
         
-    return cdmp_params, cdmp_unroll
+    return cdmp_trajs, cdmp_params, cdmp_unroll
 
 def unrollPI2ParamsSamples(pi2_params_samples, prim_to_be_improved, cart_types_to_be_improved, pi2_unroll_mean=None, is_plotting=False):
     K_PI2_samples = len(pi2_params_samples.keys())
@@ -625,3 +658,62 @@ def computeParamInitStdHeuristic(param_mean, params_mean_extrema_to_init_std_fac
     param_init_std = params_mean_extrema_to_init_std_factor * (0.5 * (np.max(np.fabs(param_mean)) + 
                                                                       np.min(np.fabs(param_mean))))
     return param_init_std
+
+def loadPrimsParamsAsDictFromDirPath(prims_params_dirpath, N_primitives):
+    cdmp_params = {}
+    cdmp_params["CartCoord"] = [None] * N_primitives
+    cdmp_params["Quaternion"] = [None] * N_primitives
+    for n_prim in range(N_primitives):
+        cdmp_params["CartCoord"][n_prim] = ccdmp.loadParamsAsDict(prims_params_dirpath+"/position/prim%d/"%(n_prim+1), 
+                                                                  file_name_weights="w", 
+                                                                  file_name_A_learn="A_learn", 
+                                                                  file_name_mean_start_position="start_global", 
+                                                                  file_name_mean_goal_position="goal_global", 
+                                                                  file_name_mean_tau="tau", 
+                                                                  file_name_canonical_system_order="canonical_sys_order", 
+                                                                  file_name_mean_start_position_global="start_global", 
+                                                                  file_name_mean_goal_position_global="goal_global", 
+                                                                  file_name_mean_start_position_local="start_local", 
+                                                                  file_name_mean_goal_position_local="goal_local", 
+                                                                  file_name_ctraj_local_coordinate_frame_selection="ctraj_local_coordinate_frame_selection", 
+                                                                  file_name_ctraj_hmg_transform_local_to_global_matrix="T_local_to_global_H", 
+                                                                  file_name_ctraj_hmg_transform_global_to_local_matrix="T_global_to_local_H")
+        cdmp_params["Quaternion"][n_prim] = qdmp.loadParamsAsDict(prims_params_dirpath+"/orientation/prim%d/"%(n_prim+1), 
+                                                                  file_name_weights="w", 
+                                                                  file_name_A_learn="A_learn", 
+                                                                  file_name_mean_start_position="start", 
+                                                                  file_name_mean_goal_position="goal", 
+                                                                  file_name_mean_tau="tau", 
+                                                                  file_name_canonical_system_order="canonical_sys_order")
+    return cdmp_params
+
+def savePrimsParamsFromDictAtDirPath(prims_params_dirpath, cdmp_params):
+    N_primitives = len(cdmp_params["CartCoord"])
+    py_util.createDirIfNotExist(prims_params_dirpath)
+    for n_prim in range(N_primitives):
+        ccdmp_prim_param_dirpath = prims_params_dirpath+"/position/prim%d/"%(n_prim+1)
+        py_util.recreateDir(ccdmp_prim_param_dirpath)
+        ccdmp.saveParamsFromDict(dir_path=ccdmp_prim_param_dirpath, cart_coord_dmp_params=cdmp_params["CartCoord"][n_prim], 
+                                 file_name_weights="w", 
+                                 file_name_A_learn="A_learn", 
+                                 file_name_mean_start_position="start_global", 
+                                 file_name_mean_goal_position="goal_global", 
+                                 file_name_mean_tau="tau", 
+                                 file_name_canonical_system_order="canonical_sys_order", 
+                                 file_name_mean_start_position_global="start_global", 
+                                 file_name_mean_goal_position_global="goal_global", 
+                                 file_name_mean_start_position_local="start_local", 
+                                 file_name_mean_goal_position_local="goal_local", 
+                                 file_name_ctraj_local_coordinate_frame_selection="ctraj_local_coordinate_frame_selection", 
+                                 file_name_ctraj_hmg_transform_local_to_global_matrix="T_local_to_global_H", 
+                                 file_name_ctraj_hmg_transform_global_to_local_matrix="T_global_to_local_H")
+        qdmp_prim_param_dirpath = prims_params_dirpath+"/orientation/prim%d/"%(n_prim+1)
+        py_util.recreateDir(qdmp_prim_param_dirpath)
+        qdmp.saveParamsFromDict(dir_path=qdmp_prim_param_dirpath, dmp_params=cdmp_params["Quaternion"][n_prim], 
+                                file_name_weights="w", 
+                                file_name_A_learn="A_learn", 
+                                file_name_mean_start_position="start", 
+                                file_name_mean_goal_position="goal", 
+                                file_name_mean_tau="tau", 
+                                file_name_canonical_system_order="canonical_sys_order")
+    return None

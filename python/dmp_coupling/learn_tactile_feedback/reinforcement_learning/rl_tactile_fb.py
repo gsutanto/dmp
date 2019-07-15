@@ -131,6 +131,7 @@ class RLTactileFeedback:
         self.iter_pmnn_params_dirpath           = "../../../../data/dmp_coupling/learn_tactile_feedback/scraping/reinforcement_learning/neural_nets/pmnn/cpp_models/"
         self.outdata_dirpath = './'
         
+        self.is_pipeline_executed_only_up_to_pi2 = False
         self.is_smoothing_training_traj_before_learning = True
         self.is_unrolling_pi2_samples = is_unrolling_pi2_samples
         self.is_plotting = is_plotting
@@ -223,11 +224,11 @@ class RLTactileFeedback:
                 print ("** and evaluate the OLE behavior on the robot          **")
                 print ("*********************************************************")
                 print ("*********************************************************")
-                self.cdmp_trajs = rl_util.extractCartDMPTrajectoriesFromUnrollResults(self.rl_data[self.prim_tbi][self.it]["unroll_results"])
                 [
+                 self.rl_data[self.prim_tbi][self.it]["ole_cdmp_trajs"], 
                  self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params"], 
                  self.rl_data[self.prim_tbi][self.it]["ole_cdmp_unroll"]
-                ] = rl_util.learnCartDMPUnrollParams(self.cdmp_trajs, 
+                ] = rl_util.learnCartDMPUnrollParams(self.rl_data[self.prim_tbi][self.it]["unroll_results"], 
                                                      prims_to_be_learned=self.prims_to_be_learned, #"All", 
                                                      is_smoothing_training_traj_before_learning=self.is_smoothing_training_traj_before_learning, 
                                                      is_plotting=self.is_plotting, 
@@ -367,21 +368,30 @@ class RLTactileFeedback:
                 
                 rl_util.plotLearningCurve(rl_data=self.rl_data, prim_to_be_improved=self.prim_tbi, end_plot_iter=self.it, save_filepath=self.outdata_dirpath+'learning_curve.png')
                 
+                if (not self.is_pipeline_executed_only_up_to_pi2): # execute the entire pipeline
+                    [
+                     self.rl_data[self.prim_tbi][self.it]["adapted_cdmp_trajs"], 
+                     self.rl_data[self.prim_tbi][self.it]["additional_fb_dataset"]
+                     ] = rl_util.extractAdditionalBehaviorFeedbackModelDataset(unroll_results=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_evals"], 
+                                                                               cdmp_params=self.nominal_cdmp_params, 
+                                                                               is_smoothing_training_traj_before_learning=True)
+                
                 if (self.is_pausing):
                     raw_input("Press [ENTER] to continue...")
                 
                 self.it += 1
                 self.rl_data[self.prim_tbi][self.it] = {}
                 
-                # extract unrolling results: trajectories, sensor trace deviations, cost
-                # TODO: change the line below (this one is temporary, just to test that the PI2 algorithm is working fine in the experiment...)
-                self.rl_data[self.prim_tbi][self.it]["unroll_results"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it-1]["ole_cdmp_new_evals"])
+                if (self.is_pipeline_executed_only_up_to_pi2):
+                    # extract unrolling results: trajectories, sensor trace deviations, cost
+                    # TODO: change the line below (this one is temporary, just to test that the PI2 algorithm is working fine in the experiment...)
+                    self.rl_data[self.prim_tbi][self.it]["unroll_results"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it-1]["ole_cdmp_new_evals"])
                 
                 py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
                 
-                # TODO: add filtering/smoothing on both DeltaS and Ct_target extracted from supervised dataset (Sunday)?
-                # TODO: implement supervised learning of PMNN after PI2 is done (Friday)
-                # TODO: test full pipeline, including PMNN learning (Sunday)
+                # TODO: add filtering/smoothing on both DeltaS extracted from supervised dataset (Sunday)?
+                # TODO: implement supervised learning of PMNN after PI2 is done, using data at the current iteration and the previous iteration (Monday)
+                # TODO: test full pipeline, including PMNN learning (Monday)
                 # TODO: increase number of samples for PI2?
 
 if __name__ == '__main__':
