@@ -21,6 +21,7 @@ class PMNN(FeedForwardNeuralNetwork):
     Class for special feed-forward neural network,
     the final hidden layer is gated/modulated by phase-LWR.
     For each dimension of the output, there is one dedicated neural network.
+    In other words, there are D_output separate networks in this model.
     All neural networks (i.e. for all output dimensions) are optimized together.
     """
     

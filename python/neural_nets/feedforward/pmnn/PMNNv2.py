@@ -18,8 +18,9 @@ from copy import deepcopy
 
 class PMNNv2(PMNN, object):
     """
-    Same as the original PMNN, except that each output dimension has a separate
-    network.
+    Same as the original PMNN, except that each output dimension AND 
+    each phase node has a separate network.
+    In other words, there are D_output * N_phases separate networks in this model.
     """
     
     def __init__(self, name, D_input, 
