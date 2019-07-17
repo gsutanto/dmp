@@ -15,6 +15,7 @@ import numpy.linalg as npla
 import scipy.io as sio
 import matplotlib.pyplot as plt
 import rospy
+from distutils import dir_util
 from std_msgs.msg import Bool
 from amd_clmc_ros_messages.msg import DMPRLTactileFeedbackRobotExecMode
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../reinforcement_learning/'))
@@ -24,6 +25,7 @@ from pi2 import Pi2
 import utilities as py_util
 import clmcplot_utils as clmcplot_util
 import rl_tactile_fb_utils as rl_util
+import rl_tactile_fb_pmnn_supervised_training as rl_pmnn_tr
 
 class RLTactileFeedback:
     def updateRobotReadyStatusCallback(self, robot_ready_notification_msg):
@@ -60,8 +62,9 @@ class RLTactileFeedback:
                                                          cdmp_params=behavior_params)
             elif (exec_mode == "EXEC_NOMINAL_DMP_AND_ITERATION_PMNN"):
                 assert (feedback_model_params is not None)
-                # TODO: save feedback model (PMNN) parameters into text files
-                assert (False), "Not implemented yet!!!"
+                # actually the (Iteration) PMNN parameters (C++ text files) have been updated when
+                # the execution of trainPMNNWithAdditionalRLIterDatasetInitializedAtPath(...) is finished, 
+                # so we do nothing here with the feedback_model_params ...
             
             # command the C++ side to load the text files containing the saved parameters and execute it on the robot
             self.dmp_rl_tactile_fb_robot_exec_mode_msg = DMPRLTactileFeedbackRobotExecMode()
@@ -163,7 +166,13 @@ class RLTactileFeedback:
         #starting_prims_tbi = [1,2] # TODO (un-comment): 2nd and 3rd primitives are to-be-improved (tbi)
         starting_prims_tbi = [1] # TODO (comment): for testing purpose we work on 2nd primitive only as the one to-be-improved (tbi)
         
+        py_util.createDirIfNotExist(self.iter_pmnn_params_dirpath)
+        dir_util.copy_tree(src=self.initial_pmnn_params_dirpath, dst=self.iter_pmnn_params_dirpath)
+        
         self.nominal_cdmp_params = rl_util.loadPrimsParamsAsDictFromDirPath(self.nominal_prims_params_dirpath, self.N_primitives)
+        
+        if (not self.is_pipeline_executed_only_up_to_pi2):
+            self.rl_tactile_fb_pmnn_supervised_training = rl_pmnn_tr.RLTactileFbPMNNSupervisedTraining()
         
         assert (len(starting_prims_tbi) <= self.N_primitives)
         assert ((np.array(starting_prims_tbi) >= 0).all() and (np.array(starting_prims_tbi) < self.N_primitives).all())
@@ -251,7 +260,9 @@ class RLTactileFeedback:
                 self.abs_diff_J_and_J_prime = np.fabs(self.J - self.J_prime)
                 
                 print ("prim_tbi # %d RL iter # %03d : J = %f ; J_prime = %f ; abs_diff_J_and_J_prime = %f" % (self.prim_tbi+1, self.it, self.J, self.J_prime, self.abs_diff_J_and_J_prime))
+                print ("(should be roughly equivalent/close, which is indicative of equivalence between OLE behavior and the closed-loop behavior...)")
                 # TODO: check (assert?) if J' is closely similar to J?
+                
                 if (self.is_pausing):
                     raw_input("Press [ENTER] to continue...")
                 
@@ -364,9 +375,11 @@ class RLTactileFeedback:
                 print ("prim_tbi # %d RL iter # %03d : J = %f ; J_prime = %f ; J_prime_new = %f" % (self.prim_tbi+1, self.it, self.J, self.J_prime, self.J_prime_new))
                 print ("                             J_prime_new_minus_J_prime = %f" % self.J_prime_new_minus_J_prime)
                 print ("                             J_prime_new_minus_J       = %f" % self.J_prime_new_minus_J)
+                print ("(should all be negative (-), which is indicative of reinforcement learning progress...)")
                 # TODO: check (assert?) if (J'new < J') and (J'new < J)?
                 
-                rl_util.plotLearningCurve(rl_data=self.rl_data, prim_to_be_improved=self.prim_tbi, end_plot_iter=self.it, save_filepath=self.outdata_dirpath+'learning_curve.png')
+                if (self.is_pausing):
+                    raw_input("Press [ENTER] to continue...")
                 
                 if (not self.is_pipeline_executed_only_up_to_pi2): # execute the entire pipeline
                     [
@@ -375,6 +388,20 @@ class RLTactileFeedback:
                      ] = rl_util.extractAdditionalBehaviorFeedbackModelDataset(unroll_results=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_evals"], 
                                                                                cdmp_params=self.nominal_cdmp_params, 
                                                                                is_smoothing_training_traj_before_learning=True)
+                    
+                    assert (self.it >= 0)
+                    if (self.it == 0):
+                        self.iterations_list = [0]
+                    else:
+                        self.iterations_list = [self.it-1, self.it]
+                    
+                    [
+                     self.rl_data[self.prim_tbi][self.it]["updated_pmnn_params"]
+                     ] = self.rl_tactile_fb_pmnn_supervised_training.trainPMNNWithAdditionalRLIterDatasetInitializedAtPath(rl_data=self.rl_data, 
+                                                                                                                           prim_tbi=self.prim_tbi, # prim-to-be-improved
+                                                                                                                           iterations_list=self.iterations_list, 
+                                                                                                                           initial_pmnn_params_dirpath=self.iter_pmnn_params_dirpath # should be cpp_models dirpath
+                                                                                                                           )
                 
                 if (self.is_pausing):
                     raw_input("Press [ENTER] to continue...")
@@ -384,12 +411,45 @@ class RLTactileFeedback:
                 
                 if (self.is_pipeline_executed_only_up_to_pi2):
                     # extract unrolling results: trajectories, sensor trace deviations, cost
-                    # TODO: change the line below (this one is temporary, just to test that the PI2 algorithm is working fine in the experiment...)
                     self.rl_data[self.prim_tbi][self.it]["unroll_results"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it-1]["ole_cdmp_new_evals"])
+                else:
+                    # robot execution of the new/updated (PMNN) behavior feedback model
+                    self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_general, 
+                                                      exec_behavior_until_prim_no=self.N_primitives - 1, 
+                                                      behavior_params=None, 
+                                                      feedback_model_params=self.rl_data[self.prim_tbi][self.it]["updated_pmnn_params"], 
+                                                      exec_mode="EXEC_NOMINAL_DMP_AND_ITERATION_PMNN")
+                    
+                    # extract unrolling results: trajectories, sensor trace deviations, cost
+                    self.rl_data[self.prim_tbi][self.it]["unroll_results"] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(self.sl_data_dirpath, 
+                                                                                                                                      N_primitives=self.N_primitives, 
+                                                                                                                                      N_cost_components=self.N_total_sense_dimensionality)
+                
+                self.rl_data[self.prim_tbi][self.it-1]["new_unroll_results"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it]["unroll_results"])
+                
+                self.J_new = self.rl_data[self.prim_tbi][self.it-1]["new_unroll_results"]["mean_accum_cost"][self.prim_tbi]
+                self.J_new_minus_J_prime = self.J_new - self.J_prime
+                self.J_new_minus_J = self.J_new - self.J
+                self.abs_diff_J_new_and_J_prime_new = np.fabs(self.J_new - self.J_prime_new)
+                
+                print ("prim_tbi # %d RL iter # %03d : J_new = %f ; J_prime_new = %f ; abs_diff_J_new_and_J_prime_new = %f" % (self.prim_tbi+1, self.it-1, self.J_new, self.J_prime_new, self.abs_diff_J_new_and_J_prime_new))
+                print ("(should be roughly equivalent/close, which is indicative of equivalence between the improved OLE behavior and the new closed-loop behavior...)")
+                
+                print ("prim_tbi # %d RL iter # %03d : J = %f ; J_new = %f ; J_prime = %f ; J_prime_new = %f" % (self.prim_tbi+1, self.it-1, self.J, self.J_new, self.J_prime, self.J_prime_new))
+                print ("                             J_prime_new_minus_J_prime = %f" % self.J_prime_new_minus_J_prime)
+                print ("                             J_prime_new_minus_J       = %f" % self.J_prime_new_minus_J)
+                print ("                             J_new_minus_J_prime       = %f" % self.J_new_minus_J_prime)
+                print ("                             J_new_minus_J             = %f" % self.J_new_minus_J)
+                print ("(should all be negative (-), which is indicative of reinforcement learning progress...)")
+                # TODO: check (assert?) if (Jnew < J)?
+                
+                rl_util.plotLearningCurve(rl_data=self.rl_data, prim_to_be_improved=self.prim_tbi, end_plot_iter=self.it-1, save_filepath=self.outdata_dirpath+'learning_curve.png')
                 
                 py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
                 
-                # TODO: implement supervised learning of PMNN after PI2 is done, using data at the current iteration and the previous iteration (Monday)
+                if (self.is_pausing):
+                    raw_input("Press [ENTER] to continue...")
+                
                 # TODO: test full pipeline, including PMNN learning (Monday)
                 # TODO: increase number of samples for PI2?
 

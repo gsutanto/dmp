@@ -111,7 +111,7 @@ class RLTactileFbPMNNSupervisedTraining:
              self.DeltaS_demo_test[n_prim],  self.nPSI_demo_test[n_prim],  self.Ctt_demo_test[n_prim],  self.W_demo_test[n_prim]
              ] = rl_util.splitDatasetIntoTrainValidTestSubDataset(self.DeltaS_demo[n_prim], self.Ct_target_demo[n_prim], 
                                                                   self.normalized_phase_kernels_demo[n_prim], self.data_point_priority_demo[n_prim], 
-                                                                  dataset_suffix="_demo", n_prim, 
+                                                                  "_demo", n_prim, 
                                                                   self.expected_D_input, self.expected_D_output, self.expected_N_phaseLWR_kernels, self.chunk_size, 
                                                                   self.fraction_train_dataset, self.fraction_test_dataset)
     
@@ -139,9 +139,9 @@ class RLTactileFbPMNNSupervisedTraining:
         [self.DeltaS_rlit_train[prim_tbi], self.nPSI_rlit_train[prim_tbi], self.Ctt_rlit_train[prim_tbi], self.W_rlit_train[prim_tbi], 
          self.DeltaS_rlit_valid[prim_tbi], self.nPSI_rlit_valid[prim_tbi], self.Ctt_rlit_valid[prim_tbi], self.W_rlit_valid[prim_tbi], 
          self.DeltaS_rlit_test[prim_tbi],  self.nPSI_rlit_test[prim_tbi],  self.Ctt_rlit_test[prim_tbi],  self.W_rlit_test[prim_tbi]
-         ] = rl_util.splitDatasetIntoTrainValidTestSubDataset(self.DeltaS_rlit[n_prim], self.Ct_target_rlit[n_prim], 
-                                                              self.normalized_phase_kernels_rlit[n_prim], self.data_point_priority_rlit[n_prim], 
-                                                              dataset_suffix="_rlit", prim_tbi, 
+         ] = rl_util.splitDatasetIntoTrainValidTestSubDataset(self.DeltaS_rlit[prim_tbi], self.Ct_target_rlit[prim_tbi], 
+                                                              self.normalized_phase_kernels_rlit[prim_tbi], self.data_point_priority_rlit[prim_tbi], 
+                                                              "_rlit", prim_tbi, 
                                                               self.expected_D_input, self.expected_D_output, self.expected_N_phaseLWR_kernels, self.chunk_size, 
                                                               self.fraction_train_dataset, self.fraction_test_dataset)
         
@@ -174,6 +174,8 @@ class RLTactileFbPMNNSupervisedTraining:
         print('N_train_dataset = %d' % N_train_dataset)
         print('N_valid_dataset = %d' % N_valid_dataset)
         print('N_test_dataset  = %d' % N_test_dataset)
+        
+        self.prim_pmnn_params_dirpath = initial_pmnn_params_dirpath + "/prim%d/" % (prim_tbi+1)
             
         # Build the complete graph for feeding inputs, training, and saving checkpoints.
         self.pmnn_graph = tf.Graph()
@@ -191,12 +193,13 @@ class RLTactileFbPMNNSupervisedTraining:
             self.tf_test_DeltaS_ph = tf.placeholder(tf.float32, shape=[None, self.expected_D_input], name="tf_test_DeltaS_placeholder")
             self.tf_test_nPSI_ph = tf.placeholder(tf.float32, shape=[None, self.expected_N_phaseLWR_kernels], name="tf_test_nPSI_placeholder")
             
+            # load (initial) PMNN params from self.prim_pmnn_params_dirpath
             self.pmnn = PMNN(name=self.NN_name, D_input=self.expected_D_input, 
                              regular_hidden_layer_topology=self.regular_NN_hidden_layer_topology, 
                              regular_hidden_layer_activation_func_list=self.regular_NN_hidden_layer_activation_func_list, 
                              N_phaseLWR_kernels=self.expected_N_phaseLWR_kernels, 
                              D_output=self.expected_D_output, 
-                             path=initial_pmnn_params_dirpath + "/prim%d/" % prim_tbi, 
+                             path=self.prim_pmnn_params_dirpath, 
                              is_using_phase_kernel_modulation=True)
         
             # Build the Prediction Graph (that computes predictions from the inference model).
@@ -314,25 +317,25 @@ class RLTactileFbPMNNSupervisedTraining:
                     print("")
                     
                     [rlit_wnmse_train, rlit_wnmse_valid, rlit_wnmse_test, rlit_nmse_train, rlit_nmse_valid, rlit_nmse_test, rlit_var_ground_truth_Ctt_train
-                     ] = displayLearningEvaluation(tf_dict, 
-                                                   self.DeltaS_rlit_train[prim_tbi], self.nPSI_rlit_train[prim_tbi], self.Ctt_rlit_train[prim_tbi], self.W_rlit_train[prim_tbi], 
-                                                   self.DeltaS_rlit_valid[prim_tbi], self.nPSI_rlit_valid[prim_tbi], self.Ctt_rlit_valid[prim_tbi], self.W_rlit_valid[prim_tbi], 
-                                                   self.DeltaS_rlit_test[prim_tbi],  self.nPSI_rlit_test[prim_tbi],  self.Ctt_rlit_test[prim_tbi],  self.W_rlit_test[prim_tbi], 
-                                                   step=step, is_performing_weighted_training=self.is_performing_weighted_training, print_prefix="RLit ", disp_dim=opt_dim)
+                     ] = rl_util.displayLearningEvaluation(tf_dict, 
+                                                           self.DeltaS_rlit_train[prim_tbi], self.nPSI_rlit_train[prim_tbi], self.Ctt_rlit_train[prim_tbi], self.W_rlit_train[prim_tbi], 
+                                                           self.DeltaS_rlit_valid[prim_tbi], self.nPSI_rlit_valid[prim_tbi], self.Ctt_rlit_valid[prim_tbi], self.W_rlit_valid[prim_tbi], 
+                                                           self.DeltaS_rlit_test[prim_tbi],  self.nPSI_rlit_test[prim_tbi],  self.Ctt_rlit_test[prim_tbi],  self.W_rlit_test[prim_tbi], 
+                                                           step=step, is_performing_weighted_training=self.is_performing_weighted_training, print_prefix="RLit ", disp_dim=opt_dim)
                     
                     [demo_wnmse_train, demo_wnmse_valid, demo_wnmse_test, demo_nmse_train, demo_nmse_valid, demo_nmse_test, demo_var_ground_truth_Ctt_train
-                     ] = displayLearningEvaluation(tf_dict, 
-                                                   self.DeltaS_demo_train[prim_tbi], self.nPSI_demo_train[prim_tbi], self.Ctt_demo_train[prim_tbi], self.W_demo_train[prim_tbi], 
-                                                   self.DeltaS_demo_valid[prim_tbi], self.nPSI_demo_valid[prim_tbi], self.Ctt_demo_valid[prim_tbi], self.W_demo_valid[prim_tbi], 
-                                                   self.DeltaS_demo_test[prim_tbi],  self.nPSI_demo_test[prim_tbi],  self.Ctt_demo_test[prim_tbi],  self.W_demo_test[prim_tbi], 
-                                                   step=step, is_performing_weighted_training=self.is_performing_weighted_training, print_prefix="Demo ", disp_dim=opt_dim)
+                     ] = rl_util.displayLearningEvaluation(tf_dict, 
+                                                           self.DeltaS_demo_train[prim_tbi], self.nPSI_demo_train[prim_tbi], self.Ctt_demo_train[prim_tbi], self.W_demo_train[prim_tbi], 
+                                                           self.DeltaS_demo_valid[prim_tbi], self.nPSI_demo_valid[prim_tbi], self.Ctt_demo_valid[prim_tbi], self.W_demo_valid[prim_tbi], 
+                                                           self.DeltaS_demo_test[prim_tbi],  self.nPSI_demo_test[prim_tbi],  self.Ctt_demo_test[prim_tbi],  self.W_demo_test[prim_tbi], 
+                                                           step=step, is_performing_weighted_training=self.is_performing_weighted_training, print_prefix="Demo ", disp_dim=opt_dim)
                     
                     [wnmse_train, wnmse_valid, wnmse_test, nmse_train, nmse_valid, nmse_test, var_ground_truth_Ctt_train
-                     ] = displayLearningEvaluation(tf_dict, 
-                                                   self.DeltaS_train, self.nPSI_train, self.Ctt_train, self.W_train, 
-                                                   self.DeltaS_valid, self.nPSI_valid, self.Ctt_valid, self.W_valid, 
-                                                   self.DeltaS_test,  self.nPSI_test,  self.Ctt_test,  self.W_test, 
-                                                   step=step, is_performing_weighted_training=self.is_performing_weighted_training, print_prefix="", disp_dim=opt_dim)
+                     ] = rl_util.displayLearningEvaluation(tf_dict, 
+                                                           self.DeltaS_train, self.nPSI_train, self.Ctt_train, self.W_train, 
+                                                           self.DeltaS_valid, self.nPSI_valid, self.Ctt_valid, self.W_valid, 
+                                                           self.DeltaS_test,  self.nPSI_test,  self.Ctt_test,  self.W_test, 
+                                                           step=step, is_performing_weighted_training=self.is_performing_weighted_training, print_prefix="", disp_dim=opt_dim)
                     
                     if (self.is_performing_weighted_training):
                         eval_info["rlit_wnmse_train"] = rlit_wnmse_train
@@ -396,3 +399,8 @@ class RLTactileFbPMNNSupervisedTraining:
             print("Final Validation           NMSE: " + str(nmse_valid))
             print("Final Test                 NMSE: " + str(nmse_test))
             print("")
+            
+            # update optimized/trained PMNN params to self.prim_pmnn_params_dirpath
+            self.pmnn.saveNeuralNetworkToTextFiles(self.prim_pmnn_params_dirpath)
+        
+        return NN_model_params

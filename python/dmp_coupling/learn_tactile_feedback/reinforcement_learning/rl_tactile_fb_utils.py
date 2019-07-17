@@ -596,17 +596,20 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
     J_list = list()
     J_prime_list = list()
     J_prime_new_list = list()
+    J_new_list() = list()
     it_list = list()
     while ((it in rl_data[prim_to_be_improved].keys()) and (it <= end_plot_iter)):
         J_list.append(rl_data[prim_to_be_improved][it]["unroll_results"]["mean_accum_cost"][prim_to_be_improved])
         J_prime_list.append(rl_data[prim_to_be_improved][it]["ole_cdmp_evals"]["mean_accum_cost"][prim_to_be_improved])
         J_prime_new_list.append(rl_data[prim_to_be_improved][it]["ole_cdmp_new_evals"]["mean_accum_cost"][prim_to_be_improved])
+        J_new_list.append(rl_data[prim_to_be_improved][it]["new_unroll_results"]["mean_accum_cost"][prim_to_be_improved])
         it_list.append(it)
         it += 1
     Y_list = list()
     Y_list.append(np.array(J_list))
     Y_list.append(np.array(J_prime_list))
     Y_list.append(np.array(J_prime_new_list))
+    Y_list.append(np.array(J_new_list))
     X_list = [np.array(it_list).astype(int)] * len(Y_list)
     plt.close('all')
     pypl_util.plot_2D(X_list=X_list, 
@@ -615,8 +618,8 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
                       X_label='Iteration', 
                       Y_label='Total Cost', 
                       fig_num=0, 
-                      label_list=['J',"J_prime", "J_prime_new"], 
-                      color_style_list=[['r','-'],['g','-.'],['b',':']], 
+                      label_list=['J',"J_prime", "J_prime_new", "J_new"], 
+                      color_style_list=[['m','-'],['g','-.'],['b',':'],['r','--']], 
                       save_filepath=save_filepath)
     plt.close('all')
     pypl_util.plot_2D(X_list=X_list, 
@@ -625,8 +628,8 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
                       X_label='Iteration', 
                       Y_label='Total Cost', 
                       fig_num=0, 
-                      label_list=['J',"J_prime", "J_prime_new"], 
-                      color_style_list=[['r','-'],['g','-.'],['b',':']], 
+                      label_list=['J',"J_prime", "J_prime_new", "J_new"], 
+                      color_style_list=[['m','-'],['g','-.'],['b',':'],['r','--']], 
                       save_filepath=None)
     return None
 
@@ -718,7 +721,7 @@ def savePrimsParamsFromDictAtDirPath(prims_params_dirpath, cdmp_params):
                                 file_name_canonical_system_order="canonical_sys_order")
     return None
 
-def splitDatasetIntoTrainValidTestSubDataset(DeltaS, Ct_target, normalized_phase_kernels, data_point_priority, dataset_suffix="", n_prim, 
+def splitDatasetIntoTrainValidTestSubDataset(DeltaS, Ct_target, normalized_phase_kernels, data_point_priority, dataset_suffix, n_prim, 
                                              expected_D_input, expected_D_output, expected_N_phaseLWR_kernels, chunk_size, 
                                              fraction_train_dataset, fraction_test_dataset):
     print('DeltaS%s[%d].shape                   = ' % (dataset_suffix, n_prim) + str(DeltaS.shape))
@@ -780,8 +783,8 @@ def displayLearningEvaluation(tf_dict,
                       tf_dict['tf_test_DeltaS_ph'] : DeltaS_test[prim_tbi], 
                       tf_dict['tf_test_nPSI_ph'] : nPSI_test[prim_tbi]}
     [train_pred, valid_pred, test_pred
-     ] = session.run([tf_dict['train_prediction'], tf_dict['valid_prediction'], tf_dict['test_prediction']
-                      ], feed_dict=feed_dict_eval)
+     ] = tf_dict['session'].run([tf_dict['train_prediction'], tf_dict['valid_prediction'], tf_dict['test_prediction']
+                                 ], feed_dict=feed_dict_eval)
     
     if ((is_performing_weighted_training) and (step % 5000 == 0) and (step > 0)):
         wnmse_train = py_util.computeWNMSE(train_pred, Ctt_train, W_train)
