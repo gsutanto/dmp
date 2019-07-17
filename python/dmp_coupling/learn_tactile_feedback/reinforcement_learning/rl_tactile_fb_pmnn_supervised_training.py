@@ -9,6 +9,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../neural_nets/feedforward/pmnn/'))
 import utilities as py_util
 from PMNN import PMNN
+import rl_tactile_fb_utils as rl_util
 
 class RLTactileFbPMNNSupervisedTraining:
     def __init__(self):
@@ -105,52 +106,14 @@ class RLTactileFbPMNNSupervisedTraining:
             self.normalized_phase_kernels_demo[n_prim] = sio.loadmat('../scraping/prim_'+str(n_prim+1)+'_normalized_phase_PSI_mult_phase_V_scraping.mat', struct_as_record=True)['normalized_phase_PSI_mult_phase_V'].astype(np.float32)
             self.data_point_priority_demo[n_prim] = sio.loadmat('../scraping/prim_'+str(n_prim+1)+'_data_point_priority_scraping.mat', struct_as_record=True)['data_point_priority'].astype(np.float32)
             
-            print('DeltaS_demo[%d].shape                   = ' % (n_prim) + str(self.DeltaS_demo[n_prim].shape))
-            print('Ct_target_demo[%d].shape                = ' % (n_prim) + str(self.Ct_target_demo[n_prim].shape))
-            print('normalized_phase_kernels_demo[%d].shape = ' % (n_prim) + str(self.normalized_phase_kernels_demo[n_prim].shape))
-            print('data_point_priority_demo[%d].shape      = ' % (n_prim) + str(self.data_point_priority_demo[n_prim].shape))
-            
-            self.N_data_demo[n_prim] = self.Ct_target_demo[n_prim].shape[0]
-            print('N_data_demo[%d]   = ' % (n_prim) + str(self.N_data_demo[n_prim]))
-            print('D_input_demo[%d]  = ' % (n_prim) + str(self.DeltaS_demo[n_prim].shape[1]))
-            print('D_output_demo[%d] = ' % (n_prim) + str(self.Ct_target_demo[n_prim].shape[1]))
-            assert (self.DeltaS_demo[n_prim].shape[1]    == self.expected_D_input)
-            assert (self.Ct_target_demo[n_prim].shape[1] == self.expected_D_output)
-            assert (self.normalized_phase_kernels_demo[n_prim].shape[1] == self.expected_N_phaseLWR_kernels)
-            
-            # Permutation with Chunks (for Stochastic Gradient Descent (SGD))
-            demo_data_idx_chunks = list(py_util.chunks(range(self.N_data_demo[n_prim]), self.chunk_size))
-            N_demo_chunks = len(demo_data_idx_chunks)
-            
-            N_demo_train_chunks = np.round(self.fraction_train_dataset * N_demo_chunks).astype(int)
-            N_demo_test_chunks  = np.round(self.fraction_test_dataset * N_demo_chunks).astype(int)
-            N_demo_valid_chunks = N_demo_chunks - N_demo_train_chunks - N_demo_test_chunks
-            assert(N_demo_train_chunks >  0)
-            assert(N_demo_test_chunks  >= 0)
-            assert(N_demo_valid_chunks >= 0)
-            
-            demo_chunk_permutation = np.random.permutation(N_demo_chunks)
-            demo_chunk_idx_train = np.sort(demo_chunk_permutation[0:N_demo_train_chunks], 0)
-            demo_chunk_idx_valid = np.sort(demo_chunk_permutation[N_demo_train_chunks:(N_demo_train_chunks+N_demo_valid_chunks)], 0)
-            demo_chunk_idx_test  = np.sort(demo_chunk_permutation[(N_demo_train_chunks+N_demo_valid_chunks):N_demo_chunks], 0)
-            idx_train_demo_dataset = np.concatenate([demo_data_idx_chunks[i] for i in demo_chunk_idx_train])
-            idx_valid_demo_dataset = np.concatenate([demo_data_idx_chunks[i] for i in demo_chunk_idx_valid])
-            idx_test_demo_dataset  = np.concatenate([demo_data_idx_chunks[i] for i in demo_chunk_idx_test])
-            
-            self.DeltaS_demo_train[n_prim] = self.DeltaS_demo[n_prim][idx_train_demo_dataset,:]
-            self.nPSI_demo_train[n_prim] = self.normalized_phase_kernels_demo[n_prim][idx_train_demo_dataset,:]
-            self.Ctt_demo_train[n_prim] = self.Ct_target_demo[n_prim][idx_train_demo_dataset,:]
-            self.W_demo_train[n_prim] = self.data_point_priority_demo[n_prim][idx_train_demo_dataset,:]
-            
-            self.DeltaS_demo_valid[n_prim] = self.DeltaS_demo[n_prim][idx_valid_demo_dataset,:]
-            self.nPSI_demo_valid[n_prim] = self.normalized_phase_kernels_demo[n_prim][idx_valid_demo_dataset,:]
-            self.Ctt_demo_valid[n_prim] = self.Ct_target_demo[n_prim][idx_valid_demo_dataset,:]
-            self.W_demo_valid[n_prim] = self.data_point_priority_demo[n_prim][idx_valid_demo_dataset,:]
-            
-            self.DeltaS_demo_test[n_prim] = self.DeltaS_demo[n_prim][idx_test_demo_dataset,:]
-            self.nPSI_demo_test[n_prim] = self.normalized_phase_kernels_demo[n_prim][idx_test_demo_dataset,:]
-            self.Ctt_demo_test[n_prim] = self.Ct_target_demo[n_prim][idx_test_demo_dataset,:]
-            self.W_demo_test[n_prim] = self.data_point_priority_demo[n_prim][idx_test_demo_dataset,:]
+            [self.DeltaS_demo_train[n_prim], self.nPSI_demo_train[n_prim], self.Ctt_demo_train[n_prim], self.W_demo_train[n_prim], 
+             self.DeltaS_demo_valid[n_prim], self.nPSI_demo_valid[n_prim], self.Ctt_demo_valid[n_prim], self.W_demo_valid[n_prim], 
+             self.DeltaS_demo_test[n_prim],  self.nPSI_demo_test[n_prim],  self.Ctt_demo_test[n_prim],  self.W_demo_test[n_prim]
+             ] = rl_util.splitDatasetIntoTrainValidTestSubDataset(self.DeltaS_demo[n_prim], self.Ct_target_demo[n_prim], 
+                                                                  self.normalized_phase_kernels_demo[n_prim], self.data_point_priority_demo[n_prim], 
+                                                                  dataset_suffix="_demo", n_prim, 
+                                                                  self.expected_D_input, self.expected_D_output, self.expected_N_phaseLWR_kernels, self.chunk_size, 
+                                                                  self.fraction_train_dataset, self.fraction_test_dataset)
     
     def trainPMNNWithAdditionalRLIterDatasetInitializedAtPath(self, rl_data, 
                                                               prim_tbi, # prim-to-be-improved
@@ -173,50 +136,14 @@ class RLTactileFbPMNNSupervisedTraining:
         self.Ctt_rlit[prim_tbi] = np.vstack(Ctt_rlit_list)
         self.W_rlit[prim_tbi] = np.vstack(W_rlit_list)
         
-        print('DeltaS_rlit[%d].shape                   = ' % (prim_tbi) + str(self.DeltaS_rlit[prim_tbi].shape))
-        print('Ct_target_rlit[%d].shape                = ' % (prim_tbi) + str(self.Ct_target_rlit[prim_tbi].shape))
-        print('normalized_phase_kernels_rlit[%d].shape = ' % (prim_tbi) + str(self.normalized_phase_kernels_rlit[prim_tbi].shape))
-        print('data_point_priority_rlit[%d].shape      = ' % (prim_tbi) + str(self.data_point_priority_rlit[prim_tbi].shape))
-        
-        self.N_data_rlit[prim_tbi] = self.Ct_target_rlit[prim_tbi].shape[0]
-        print('N_data_rlit[%d]   = ' % (prim_tbi) + str(self.N_data_rlit[prim_tbi]))
-        assert (self.DeltaS_rlit[prim_tbi].shape[1]    == self.expected_D_input)
-        assert (self.Ct_target_rlit[prim_tbi].shape[1] == self.expected_D_output)
-        assert (self.normalized_phase_kernels_rlit[prim_tbi].shape[1] == self.expected_N_phaseLWR_kernels)
-        
-        # Permutation with Chunks (for Stochastic Gradient Descent (SGD))
-        rlit_data_idx_chunks = list(py_util.chunks(range(self.N_data_rlit[prim_tbi]), self.chunk_size))
-        N_rlit_chunks = len(rlit_data_idx_chunks)
-        
-        N_rlit_train_chunks = np.round(self.fraction_train_dataset * N_rlit_chunks).astype(int)
-        N_rlit_test_chunks  = np.round(self.fraction_test_dataset * N_rlit_chunks).astype(int)
-        N_rlit_valid_chunks = N_rlit_chunks - N_rlit_train_chunks - N_rlit_test_chunks
-        assert(N_rlit_train_chunks >  0)
-        assert(N_rlit_test_chunks  >= 0)
-        assert(N_rlit_valid_chunks >= 0)
-        
-        rlit_chunk_permutation = np.random.permutation(N_rlit_chunks)
-        rlit_chunk_idx_train = np.sort(rlit_chunk_permutation[0:N_rlit_train_chunks], 0)
-        rlit_chunk_idx_valid = np.sort(rlit_chunk_permutation[N_rlit_train_chunks:(N_rlit_train_chunks+N_rlit_valid_chunks)], 0)
-        rlit_chunk_idx_test  = np.sort(rlit_chunk_permutation[(N_rlit_train_chunks+N_rlit_valid_chunks):N_rlit_chunks], 0)
-        idx_train_rlit_dataset = np.concatenate([rlit_data_idx_chunks[i] for i in rlit_chunk_idx_train])
-        idx_valid_rlit_dataset = np.concatenate([rlit_data_idx_chunks[i] for i in rlit_chunk_idx_valid])
-        idx_test_rlit_dataset  = np.concatenate([rlit_data_idx_chunks[i] for i in rlit_chunk_idx_test])
-        
-        self.DeltaS_rlit_train[prim_tbi] = self.DeltaS_rlit[prim_tbi][idx_train_rlit_dataset,:]
-        self.nPSI_rlit_train[prim_tbi] = self.normalized_phase_kernels_rlit[prim_tbi][idx_train_rlit_dataset,:]
-        self.Ctt_rlit_train[prim_tbi] = self.Ct_target_rlit[prim_tbi][idx_train_rlit_dataset,:]
-        self.W_rlit_train[prim_tbi] = self.data_point_priority_rlit[prim_tbi][idx_train_rlit_dataset,:]
-        
-        self.DeltaS_rlit_valid[prim_tbi] = self.DeltaS_rlit[prim_tbi][idx_valid_rlit_dataset,:]
-        self.nPSI_rlit_valid[prim_tbi] = self.normalized_phase_kernels_rlit[prim_tbi][idx_valid_rlit_dataset,:]
-        self.Ctt_rlit_valid[prim_tbi] = self.Ct_target_rlit[prim_tbi][idx_valid_rlit_dataset,:]
-        self.W_rlit_valid[prim_tbi] = self.data_point_priority_rlit[prim_tbi][idx_valid_rlit_dataset,:]
-        
-        self.DeltaS_rlit_test[prim_tbi] = self.DeltaS_rlit[prim_tbi][idx_test_rlit_dataset,:]
-        self.nPSI_rlit_test[prim_tbi] = self.normalized_phase_kernels_rlit[prim_tbi][idx_test_rlit_dataset,:]
-        self.Ctt_rlit_test[prim_tbi] = self.Ct_target_rlit[prim_tbi][idx_test_rlit_dataset,:]
-        self.W_rlit_test[prim_tbi] = self.data_point_priority_rlit[prim_tbi][idx_test_rlit_dataset,:]
+        [self.DeltaS_rlit_train[prim_tbi], self.nPSI_rlit_train[prim_tbi], self.Ctt_rlit_train[prim_tbi], self.W_rlit_train[prim_tbi], 
+         self.DeltaS_rlit_valid[prim_tbi], self.nPSI_rlit_valid[prim_tbi], self.Ctt_rlit_valid[prim_tbi], self.W_rlit_valid[prim_tbi], 
+         self.DeltaS_rlit_test[prim_tbi],  self.nPSI_rlit_test[prim_tbi],  self.Ctt_rlit_test[prim_tbi],  self.W_rlit_test[prim_tbi]
+         ] = rl_util.splitDatasetIntoTrainValidTestSubDataset(self.DeltaS_rlit[n_prim], self.Ct_target_rlit[n_prim], 
+                                                              self.normalized_phase_kernels_rlit[n_prim], self.data_point_priority_rlit[n_prim], 
+                                                              dataset_suffix="_rlit", prim_tbi, 
+                                                              self.expected_D_input, self.expected_D_output, self.expected_N_phaseLWR_kernels, self.chunk_size, 
+                                                              self.fraction_train_dataset, self.fraction_test_dataset)
         
         # combine demo and rlit dataset:
         self.DeltaS_train = np.vstack([self.DeltaS_demo_train[prim_tbi], self.DeltaS_rlit_train[prim_tbi]])
@@ -253,16 +180,16 @@ class RLTactileFbPMNNSupervisedTraining:
         with self.pmnn_graph.as_default():
             # Input data. For the training data, we use a placeholder that will be fed
             # at run time with a training minibatch.
-            self.tf_train_DeltaS_batch = tf.placeholder(tf.float32, shape=[self.batch_size, self.expected_D_input], name="tf_train_DeltaS_batch_placeholder")
-            self.tf_train_nPSI_batch = tf.placeholder(tf.float32, shape=[self.batch_size, self.expected_N_phaseLWR_kernels], name="tf_train_nPSI_batch_placeholder")
-            self.tf_train_W_batch = tf.placeholder(tf.float32, shape=[self.batch_size, 1], name="tf_train_W_batch_placeholder")
-            self.tf_train_Ctt_batch = tf.placeholder(tf.float32, shape=[self.batch_size, self.expected_D_output], name="tf_train_Ctt_batch_placeholder")
-            self.tf_train_DeltaS = tf.placeholder(tf.float32, shape=[None, self.expected_D_input], name="tf_train_DeltaS_placeholder")
-            self.tf_train_nPSI = tf.placeholder(tf.float32, shape=[None, self.expected_N_phaseLWR_kernels], name="tf_train_nPSI_placeholder")
-            self.tf_valid_DeltaS = tf.placeholder(tf.float32, shape=[None, self.expected_D_input], name="tf_valid_DeltaS_placeholder")
-            self.tf_valid_nPSI = tf.placeholder(tf.float32, shape=[None, self.expected_N_phaseLWR_kernels], name="tf_valid_nPSI_placeholder")
-            self.tf_test_DeltaS = tf.placeholder(tf.float32, shape=[None, self.expected_D_input], name="tf_test_DeltaS_placeholder")
-            self.tf_test_nPSI = tf.placeholder(tf.float32, shape=[None, self.expected_N_phaseLWR_kernels], name="tf_test_nPSI_placeholder")
+            self.tf_train_DeltaS_batch_ph = tf.placeholder(tf.float32, shape=[self.batch_size, self.expected_D_input], name="tf_train_DeltaS_batch_placeholder")
+            self.tf_train_nPSI_batch_ph = tf.placeholder(tf.float32, shape=[self.batch_size, self.expected_N_phaseLWR_kernels], name="tf_train_nPSI_batch_placeholder")
+            self.tf_train_W_batch_ph = tf.placeholder(tf.float32, shape=[self.batch_size, 1], name="tf_train_W_batch_placeholder")
+            self.tf_train_Ctt_batch_ph = tf.placeholder(tf.float32, shape=[self.batch_size, self.expected_D_output], name="tf_train_Ctt_batch_placeholder")
+            self.tf_train_DeltaS_ph = tf.placeholder(tf.float32, shape=[None, self.expected_D_input], name="tf_train_DeltaS_placeholder")
+            self.tf_train_nPSI_ph = tf.placeholder(tf.float32, shape=[None, self.expected_N_phaseLWR_kernels], name="tf_train_nPSI_placeholder")
+            self.tf_valid_DeltaS_ph = tf.placeholder(tf.float32, shape=[None, self.expected_D_input], name="tf_valid_DeltaS_placeholder")
+            self.tf_valid_nPSI_ph = tf.placeholder(tf.float32, shape=[None, self.expected_N_phaseLWR_kernels], name="tf_valid_nPSI_placeholder")
+            self.tf_test_DeltaS_ph = tf.placeholder(tf.float32, shape=[None, self.expected_D_input], name="tf_test_DeltaS_placeholder")
+            self.tf_test_nPSI_ph = tf.placeholder(tf.float32, shape=[None, self.expected_N_phaseLWR_kernels], name="tf_test_nPSI_placeholder")
             
             self.pmnn = PMNN(name=self.NN_name, D_input=self.expected_D_input, 
                              regular_hidden_layer_topology=self.regular_NN_hidden_layer_topology, 
@@ -273,8 +200,8 @@ class RLTactileFbPMNNSupervisedTraining:
                              is_using_phase_kernel_modulation=True)
         
             # Build the Prediction Graph (that computes predictions from the inference model).
-            self.train_batch_prediction = self.pmnn.performNeuralNetworkPrediction(self.tf_train_DeltaS_batch, 
-                                                                                   self.tf_train_nPSI_batch, 
+            self.train_batch_prediction = self.pmnn.performNeuralNetworkPrediction(self.tf_train_DeltaS_batch_ph, 
+                                                                                   self.tf_train_nPSI_batch_ph, 
                                                                                    self.tf_train_dropout_keep_prob)
             
             self.train_op_dim = [None] * self.expected_D_output
@@ -285,15 +212,15 @@ class RLTactileFbPMNNSupervisedTraining:
                     [self.train_op_dim[self.d_output], 
                      self.loss_dim[self.d_output]
                      ] = self.pmnn.performNeuralNetworkWeightedTrainingPerDimOut(self.train_batch_prediction, 
-                                                                                 self.tf_train_Ctt_batch, 
+                                                                                 self.tf_train_Ctt_batch_ph, 
                                                                                  self.init_learning_rate, 
                                                                                  self.beta, self.d_output, 
-                                                                                 self.tf_train_W_batch)
+                                                                                 self.tf_train_W_batch_ph)
                 else:
                     [self.train_op_dim[self.d_output], 
                      self.loss_dim[self.d_output]
                      ]= self.pmnn.performNeuralNetworkTrainingPerDimOut(self.train_batch_prediction, 
-                                                                        self.tf_train_Ctt_batch, 
+                                                                        self.tf_train_Ctt_batch_ph, 
                                                                         self.init_learning_rate, 
                                                                         self.beta, self.d_output)
                 
@@ -304,12 +231,24 @@ class RLTactileFbPMNNSupervisedTraining:
             self.summary_op = tf.summary.merge_all()
         
             # Predictions for the training, validation, and test data.
-            self.train_prediction = self.pmnn.performNeuralNetworkPrediction(self.tf_train_DeltaS, self.tf_train_nPSI, 1.0)
-            self.valid_prediction = self.pmnn.performNeuralNetworkPrediction(self.tf_valid_DeltaS, self.tf_valid_nPSI, 1.0)
-            self.test_prediction  = self.pmnn.performNeuralNetworkPrediction(self.tf_test_DeltaS, self.tf_test_nPSI, 1.0)
+            self.train_prediction = self.pmnn.performNeuralNetworkPrediction(self.tf_train_DeltaS_ph, self.tf_train_nPSI_ph, 1.0)
+            self.valid_prediction = self.pmnn.performNeuralNetworkPrediction(self.tf_valid_DeltaS_ph, self.tf_valid_nPSI_ph, 1.0)
+            self.test_prediction  = self.pmnn.performNeuralNetworkPrediction(self.tf_test_DeltaS_ph, self.tf_test_nPSI_ph, 1.0)
         
         # Run training for TF_max_train_iters and save checkpoint at the end.
-        with tf.Session(graph=self.pmnn_graph) as session:
+        with tf.Session(graph=self.pmnn_graph) as self.session:
+            tf_dict = dict()
+            tf_dict['session'] = self.session
+            tf_dict['tf_train_DeltaS_ph'] = self.tf_train_DeltaS_ph
+            tf_dict['tf_train_nPSI_ph'] = self.tf_train_nPSI_ph
+            tf_dict['tf_valid_DeltaS_ph'] = self.tf_valid_DeltaS_ph
+            tf_dict['tf_valid_nPSI_ph'] = self.tf_valid_nPSI_ph
+            tf_dict['tf_test_DeltaS_ph'] = self.tf_test_DeltaS_ph
+            tf_dict['tf_test_nPSI_ph'] = self.tf_test_nPSI_ph
+            tf_dict['train_prediction'] = self.train_prediction
+            tf_dict['valid_prediction'] = self.valid_prediction
+            tf_dict['test_prediction'] = self.test_prediction
+            
             # Run the Op to initialize the variables.
             tf.global_variables_initializer().run()
             print("Initialized")
@@ -336,10 +275,10 @@ class RLTactileFbPMNNSupervisedTraining:
                 # Prepare a dictionary telling the session where to feed the minibatch.
                 # The key of the dictionary is the placeholder node of the graph to be fed,
                 # and the value is the numpy array to feed to it.
-                feed_dict_train = {self.tf_train_DeltaS_batch : batch_X, 
-                                   self.tf_train_nPSI_batch : batch_nPSI, 
-                                   self.tf_train_W_batch : batch_W, 
-                                   self.tf_train_Ctt_batch : batch_Ctt}
+                feed_dict_train = {self.tf_train_DeltaS_batch_ph : batch_X, 
+                                   self.tf_train_nPSI_batch_ph : batch_nPSI, 
+                                   self.tf_train_W_batch_ph : batch_W, 
+                                   self.tf_train_Ctt_batch_ph : batch_Ctt}
         
                 # Run one step of the model.  The return values are the activations
                 # from the `train_op` (which is discarded) and the `loss` Op.  To
@@ -347,161 +286,113 @@ class RLTactileFbPMNNSupervisedTraining:
                 # in the list passed to sess.run() and the value tensors will be
                 # returned in the tuple from the call.
                 if (self.is_only_optimizing_roll_Ct):
+                    opt_dim = 4
                     [_, 
                      tr_batch_prediction, summary
-                     ] = session.run([self.train_op_dim[4], 
-                                      self.train_batch_prediction, self.summary_op
-                                      ], feed_dict=feed_dict_train)
+                     ] = self.session.run([self.train_op_dim[opt_dim], 
+                                           self.train_batch_prediction, self.summary_op
+                                           ], feed_dict=feed_dict_train)
                 else:
+                    opt_dim = None
                     [_, _, _, _, _, _, 
                      tr_batch_prediction, summary
-                     ] = session.run([self.train_op_dim[0], self.train_op_dim[1], self.train_op_dim[2], 
-                                      self.train_op_dim[3], self.train_op_dim[4], self.train_op_dim[5], 
-                                      self.train_batch_prediction, self.summary_op
-                                      ], feed_dict=feed_dict_train)
+                     ] = self.session.run([self.train_op_dim[0], self.train_op_dim[1], self.train_op_dim[2], 
+                                           self.train_op_dim[3], self.train_op_dim[4], self.train_op_dim[5], 
+                                           self.train_batch_prediction, self.summary_op
+                                           ], feed_dict=feed_dict_train)
                 
                 # write log
                 self.writer.add_summary(summary, step)
                 
                 if (step % 1000 == 0):
-                    print("Minibatch NMSE at step %d:" % (step), py_util.computeNMSE(tr_batch_prediction, batch_Ctt))
+                    batch_nmse_train = py_util.computeNMSE(tr_batch_prediction, batch_Ctt)
+                    if (self.is_only_optimizing_roll_Ct):
+                        batch_nmse_train = batch_nmse_train[opt_dim]
+                    print("Minibatch NMSE at step %d: " % (step) + str(batch_nmse_train))
                 if ((step % 5000 == 0) or ((step > 0) and ((step == np.power(10,(np.floor(np.log10(step)))).astype(np.int32)) or (step == 5 * np.power(10,(np.floor(np.log10(step/5)))).astype(np.int32))))):
-                    nmse = {}
+                    eval_info = {}
                     print("")
                     
-                    feed_dict_eval_rlit = {self.tf_train_DeltaS : self.DeltaS_rlit_train[prim_tbi], 
-                                           self.tf_train_nPSI : self.nPSI_rlit_train[prim_tbi], 
-                                           self.tf_valid_DeltaS : self.DeltaS_rlit_valid[prim_tbi], 
-                                           self.tf_valid_nPSI : self.nPSI_rlit_valid[prim_tbi], 
-                                           self.tf_test_DeltaS : self.DeltaS_rlit_test[prim_tbi], 
-                                           self.tf_test_nPSI : self.nPSI_rlit_test[prim_tbi]}
-                    [rlit_train_prediction, rlit_valid_prediction, rlit_test_prediction
-                     ] = session.run([self.train_prediction, self.valid_prediction, self.test_prediction
-                                      ], feed_dict=feed_dict_eval_rlit)
+                    [rlit_wnmse_train, rlit_wnmse_valid, rlit_wnmse_test, rlit_nmse_train, rlit_nmse_valid, rlit_nmse_test, rlit_var_ground_truth_Ctt_train
+                     ] = displayLearningEvaluation(tf_dict, 
+                                                   self.DeltaS_rlit_train[prim_tbi], self.nPSI_rlit_train[prim_tbi], self.Ctt_rlit_train[prim_tbi], self.W_rlit_train[prim_tbi], 
+                                                   self.DeltaS_rlit_valid[prim_tbi], self.nPSI_rlit_valid[prim_tbi], self.Ctt_rlit_valid[prim_tbi], self.W_rlit_valid[prim_tbi], 
+                                                   self.DeltaS_rlit_test[prim_tbi],  self.nPSI_rlit_test[prim_tbi],  self.Ctt_rlit_test[prim_tbi],  self.W_rlit_test[prim_tbi], 
+                                                   step=step, is_performing_weighted_training=self.is_performing_weighted_training, print_prefix="RLit ", disp_dim=opt_dim)
                     
-                    feed_dict_eval_demo = {self.tf_train_DeltaS : self.DeltaS_demo_train[prim_tbi], 
-                                           self.tf_train_nPSI : self.nPSI_demo_train[prim_tbi], 
-                                           self.tf_valid_DeltaS : self.DeltaS_demo_valid[prim_tbi], 
-                                           self.tf_valid_nPSI : self.nPSI_demo_valid[prim_tbi], 
-                                           self.tf_test_DeltaS : self.DeltaS_demo_test[prim_tbi], 
-                                           self.tf_test_nPSI : self.nPSI_demo_test[prim_tbi]}
-                    [demo_train_prediction, demo_valid_prediction, demo_test_prediction
-                     ] = session.run([self.train_prediction, self.valid_prediction, self.test_prediction
-                                      ], feed_dict=feed_dict_eval_demo)
+                    [demo_wnmse_train, demo_wnmse_valid, demo_wnmse_test, demo_nmse_train, demo_nmse_valid, demo_nmse_test, demo_var_ground_truth_Ctt_train
+                     ] = displayLearningEvaluation(tf_dict, 
+                                                   self.DeltaS_demo_train[prim_tbi], self.nPSI_demo_train[prim_tbi], self.Ctt_demo_train[prim_tbi], self.W_demo_train[prim_tbi], 
+                                                   self.DeltaS_demo_valid[prim_tbi], self.nPSI_demo_valid[prim_tbi], self.Ctt_demo_valid[prim_tbi], self.W_demo_valid[prim_tbi], 
+                                                   self.DeltaS_demo_test[prim_tbi],  self.nPSI_demo_test[prim_tbi],  self.Ctt_demo_test[prim_tbi],  self.W_demo_test[prim_tbi], 
+                                                   step=step, is_performing_weighted_training=self.is_performing_weighted_training, print_prefix="Demo ", disp_dim=opt_dim)
                     
-                    feed_dict_eval = {self.tf_train_DeltaS : self.DeltaS_train, 
-                                      self.tf_train_nPSI : self.nPSI_train, 
-                                      self.tf_valid_DeltaS : self.DeltaS_valid, 
-                                      self.tf_valid_nPSI : self.nPSI_valid, 
-                                      self.tf_test_DeltaS : self.DeltaS_test, 
-                                      self.tf_test_nPSI : self.nPSI_test}
-                    [train_prediction, valid_prediction, test_prediction
-                     ] = session.run([self.train_prediction, self.valid_prediction, self.test_prediction
-                                      ], feed_dict=feed_dict_eval)
+                    [wnmse_train, wnmse_valid, wnmse_test, nmse_train, nmse_valid, nmse_test, var_ground_truth_Ctt_train
+                     ] = displayLearningEvaluation(tf_dict, 
+                                                   self.DeltaS_train, self.nPSI_train, self.Ctt_train, self.W_train, 
+                                                   self.DeltaS_valid, self.nPSI_valid, self.Ctt_valid, self.W_valid, 
+                                                   self.DeltaS_test,  self.nPSI_test,  self.Ctt_test,  self.W_test, 
+                                                   step=step, is_performing_weighted_training=self.is_performing_weighted_training, print_prefix="", disp_dim=opt_dim)
                     
-                    if ((self.is_performing_weighted_training) and (step % 5000 == 0) and (step > 0)):
-                        rlit_wnmse_train = py_util.computeWNMSE(rlit_train_prediction, self.Ctt_rlit_train[prim_tbi], self.W_rlit_train[prim_tbi])
-                        rlit_wnmse_valid = py_util.computeWNMSE(rlit_valid_prediction, self.Ctt_rlit_valid[prim_tbi], self.W_rlit_valid[prim_tbi])
-                        rlit_wnmse_test = py_util.computeWNMSE(rlit_test_prediction, self.Ctt_rlit_test[prim_tbi], self.W_rlit_test[prim_tbi])
-                        print("RLit Training       WNMSE: ", rlit_wnmse_train)
-                        print("RLit Validation     WNMSE: ", rlit_wnmse_valid)
-                        print("RLit Test           WNMSE: ", rlit_wnmse_test)
-                        print("")
-                        nmse["rlit_wnmse_train"] = rlit_wnmse_train
-                        nmse["rlit_wnmse_valid"] = rlit_wnmse_valid
-                        nmse["rlit_wnmse_test"] = rlit_wnmse_test
+                    if (self.is_performing_weighted_training):
+                        eval_info["rlit_wnmse_train"] = rlit_wnmse_train
+                        eval_info["rlit_wnmse_valid"] = rlit_wnmse_valid
+                        eval_info["rlit_wnmse_test"] = rlit_wnmse_test
                         
-                        demo_wnmse_train = py_util.computeWNMSE(demo_train_prediction, self.Ctt_demo_train[prim_tbi], self.W_demo_train[prim_tbi])
-                        demo_wnmse_valid = py_util.computeWNMSE(demo_valid_prediction, self.Ctt_demo_valid[prim_tbi], self.W_demo_valid[prim_tbi])
-                        demo_wnmse_test = py_util.computeWNMSE(demo_test_prediction, self.Ctt_demo_test[prim_tbi], self.W_demo_test[prim_tbi])
-                        print("Demo Training       WNMSE: ", demo_wnmse_train)
-                        print("Demo Validation     WNMSE: ", demo_wnmse_valid)
-                        print("Demo Test           WNMSE: ", demo_wnmse_test)
-                        print("")
-                        nmse["demo_wnmse_train"] = demo_wnmse_train
-                        nmse["demo_wnmse_valid"] = demo_wnmse_valid
-                        nmse["demo_wnmse_test"] = demo_wnmse_test
+                        eval_info["demo_wnmse_train"] = demo_wnmse_train
+                        eval_info["demo_wnmse_valid"] = demo_wnmse_valid
+                        eval_info["demo_wnmse_test"] = demo_wnmse_test
                         
-                        wnmse_train = py_util.computeWNMSE(train_prediction, self.Ctt_train, self.W_train)
-                        wnmse_valid = py_util.computeWNMSE(valid_prediction, self.Ctt_valid, self.W_valid)
-                        wnmse_test = py_util.computeWNMSE(test_prediction, self.Ctt_test, self.W_test)
-                        print("Training            WNMSE: ", wnmse_train)
-                        print("Validation          WNMSE: ", wnmse_valid)
-                        print("Test                WNMSE: ", wnmse_test)
-                        print("")
-                        nmse["wnmse_train"] = wnmse_train
-                        nmse["wnmse_valid"] = wnmse_valid
-                        nmse["wnmse_test"] = wnmse_test
-                        
-                        print("")
+                        eval_info["wnmse_train"] = wnmse_train
+                        eval_info["wnmse_valid"] = wnmse_valid
+                        eval_info["wnmse_test"] = wnmse_test
                     
-                    rlit_nmse_train = py_util.computeNMSE(rlit_train_prediction, self.Ctt_rlit_train[prim_tbi])
-                    rlit_nmse_valid = py_util.computeNMSE(rlit_valid_prediction, self.Ctt_rlit_valid[prim_tbi])
-                    rlit_nmse_test = py_util.computeNMSE(rlit_test_prediction, self.Ctt_rlit_test[prim_tbi])
-                    rlit_var_ground_truth_Ctt_train = np.var(self.Ctt_rlit_train[prim_tbi], axis=0)
-                    print("RLit Training        NMSE: ", rlit_nmse_train)
-                    print("RLit Validation      NMSE: ", rlit_nmse_valid)
-                    print("RLit Test            NMSE: ", rlit_nmse_test)
-                    print("RLit Training    Variance: ", rlit_var_ground_truth_Ctt_train)
-                    print("")
+                    eval_info["rlit_nmse_train"] = rlit_nmse_train
+                    eval_info["rlit_nmse_valid"] = rlit_nmse_valid
+                    eval_info["rlit_nmse_test"] = rlit_nmse_test
+                    eval_info["rlit_var_ground_truth_Ctt_train"] = rlit_var_ground_truth_Ctt_train
                     
-                    demo_nmse_train = py_util.computeNMSE(demo_train_prediction, self.Ctt_demo_train[prim_tbi])
-                    demo_nmse_valid = py_util.computeNMSE(demo_valid_prediction, self.Ctt_demo_valid[prim_tbi])
-                    demo_nmse_test = py_util.computeNMSE(demo_test_prediction, self.Ctt_demo_test[prim_tbi])
-                    demo_var_ground_truth_Ctt_train = np.var(self.Ctt_demo_train[prim_tbi], axis=0)
-                    print("Demo Training        NMSE: ", demo_nmse_train)
-                    print("Demo Validation      NMSE: ", demo_nmse_valid)
-                    print("Demo Test            NMSE: ", demo_nmse_test)
-                    print("Demo Training    Variance: ", demo_var_ground_truth_Ctt_train)
-                    print("")
+                    eval_info["demo_nmse_train"] = demo_nmse_train
+                    eval_info["demo_nmse_valid"] = demo_nmse_valid
+                    eval_info["demo_nmse_test"] = demo_nmse_test
+                    eval_info["demo_var_ground_truth_Ctt_train"] = demo_var_ground_truth_Ctt_train
                     
-                    nmse_train = py_util.computeNMSE(train_prediction, self.Ctt_train)
-                    nmse_valid = py_util.computeNMSE(valid_prediction, self.Ctt_valid)
-                    nmse_test = py_util.computeNMSE(test_prediction, self.Ctt_test)
-                    var_ground_truth_Ctt_train = np.var(self.Ctt_train, axis=0)
-                    print("Training             NMSE: ", nmse_train)
-                    print("Validation           NMSE: ", nmse_valid)
-                    print("Test                 NMSE: ", nmse_test)
-                    print("Training         Variance: ", var_ground_truth_Ctt_train)
-                    print("")
+                    eval_info["nmse_train"] = nmse_train
+                    eval_info["nmse_valid"] = nmse_valid
+                    eval_info["nmse_test"] = nmse_test
+                    eval_info["var_ground_truth_Ctt_train"] = var_ground_truth_Ctt_train
                     
                     NN_model_params = self.pmnn.saveNeuralNetworkToMATLABMatFile()
                     sio.savemat((self.rl_model_output_dir_path+'prim_'+str(prim_tbi+1)+'_params_step_%07d'%step+'.mat'), NN_model_params)
-                    nmse["nmse_train"] = nmse_train
-                    nmse["nmse_valid"] = nmse_valid
-                    nmse["nmse_test"] = nmse_test
-                    sio.savemat((self.rl_model_output_dir_path+'prim_'+str(prim_tbi+1)+'_nmse_step_%07d'%step+'.mat'), nmse)
-                    var_ground_truth = {}
-                    var_ground_truth["var_ground_truth_Ctt_train"] = var_ground_truth_Ctt_train
-                    sio.savemat((self.rl_model_output_dir_path+'prim_'+str(prim_tbi+1)+'_var_ground_truth.mat'), var_ground_truth)
+                    sio.savemat((self.rl_model_output_dir_path+'prim_'+str(prim_tbi+1)+'_eval_info_step_%07d'%step+'.mat'), eval_info)
             print("")
             if (self.is_performing_weighted_training):
-                print("Final RLit Training       WNMSE: ", rlit_wnmse_train)
-                print("Final RLit Validation     WNMSE: ", rlit_wnmse_valid)
-                print("Final RLit Test           WNMSE: ", rlit_wnmse_test)
+                print("Final RLit Training       WNMSE: " + str(rlit_wnmse_train))
+                print("Final RLit Validation     WNMSE: " + str(rlit_wnmse_valid))
+                print("Final RLit Test           WNMSE: " + str(rlit_wnmse_test))
                 print("")
                 
-                print("Final Demo Training       WNMSE: ", demo_wnmse_train)
-                print("Final Demo Validation     WNMSE: ", demo_wnmse_valid)
-                print("Final Demo Test           WNMSE: ", demo_wnmse_test)
+                print("Final Demo Training       WNMSE: " + str(demo_wnmse_train))
+                print("Final Demo Validation     WNMSE: " + str(demo_wnmse_valid))
+                print("Final Demo Test           WNMSE: " + str(demo_wnmse_test))
                 print("")
                 
-                print("Final Training            WNMSE: ", wnmse_train)
-                print("Final Validation          WNMSE: ", wnmse_valid)
-                print("Final Test                WNMSE: ", wnmse_test)
+                print("Final Training            WNMSE: " + str(wnmse_train))
+                print("Final Validation          WNMSE: " + str(wnmse_valid))
+                print("Final Test                WNMSE: " + str(wnmse_test))
                 print("")
             
-            print("Final RLit Training        NMSE: ", rlit_nmse_train)
-            print("Final RLit Validation      NMSE: ", rlit_nmse_valid)
-            print("Final RLit Test            NMSE: ", rlit_nmse_test)
+            print("Final RLit Training        NMSE: " + str(rlit_nmse_train))
+            print("Final RLit Validation      NMSE: " + str(rlit_nmse_valid))
+            print("Final RLit Test            NMSE: " + str(rlit_nmse_test))
             print("")
             
-            print("Final Demo Training        NMSE: ", demo_nmse_train)
-            print("Final Demo Validation      NMSE: ", demo_nmse_valid)
-            print("Final Demo Test            NMSE: ", demo_nmse_test)
+            print("Final Demo Training        NMSE: " + str(demo_nmse_train))
+            print("Final Demo Validation      NMSE: " + str(demo_nmse_valid))
+            print("Final Demo Test            NMSE: " + str(demo_nmse_test))
             print("")
             
-            print("Final Training             NMSE: ", nmse_train)
-            print("Final Validation           NMSE: ", nmse_valid)
-            print("Final Test                 NMSE: ", nmse_test)
+            print("Final Training             NMSE: " + str(nmse_train))
+            print("Final Validation           NMSE: " + str(nmse_valid))
+            print("Final Test                 NMSE: " + str(nmse_test))
             print("")

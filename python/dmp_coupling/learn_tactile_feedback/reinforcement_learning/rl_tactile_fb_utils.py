@@ -717,3 +717,102 @@ def savePrimsParamsFromDictAtDirPath(prims_params_dirpath, cdmp_params):
                                 file_name_mean_tau="tau", 
                                 file_name_canonical_system_order="canonical_sys_order")
     return None
+
+def splitDatasetIntoTrainValidTestSubDataset(DeltaS, Ct_target, normalized_phase_kernels, data_point_priority, dataset_suffix="", n_prim, 
+                                             expected_D_input, expected_D_output, expected_N_phaseLWR_kernels, chunk_size, 
+                                             fraction_train_dataset, fraction_test_dataset):
+    print('DeltaS%s[%d].shape                   = ' % (dataset_suffix, n_prim) + str(DeltaS.shape))
+    print('Ct_target%s[%d].shape                = ' % (dataset_suffix, n_prim) + str(Ct_target.shape))
+    print('normalized_phase_kernels%s[%d].shape = ' % (dataset_suffix, n_prim) + str(normalized_phase_kernels.shape))
+    print('data_point_priority%s[%d].shape      = ' % (dataset_suffix, n_prim) + str(data_point_priority.shape))
+    
+    N_data = Ct_target.shape[0]
+    print('N_data%s[%d]   = ' % (dataset_suffix, n_prim) + str(N_data))
+    assert (DeltaS.shape[1]    == expected_D_input)
+    assert (Ct_target.shape[1] == expected_D_output)
+    assert (normalized_phase_kernels.shape[1] == expected_N_phaseLWR_kernels)
+    
+    # Permutation with Chunks (for Stochastic Gradient Descent (SGD))
+    data_idx_chunks = list(py_util.chunks(range(N_data), chunk_size))
+    N_chunks = len(data_idx_chunks)
+    
+    N_train_chunks = np.round(fraction_train_dataset * N_chunks).astype(int)
+    N_test_chunks  = np.round(fraction_test_dataset * N_chunks).astype(int)
+    N_valid_chunks = N_chunks - N_train_chunks - N_test_chunks
+    assert(N_train_chunks >  0)
+    assert(N_test_chunks  >= 0)
+    assert(N_valid_chunks >= 0)
+    
+    chunk_permutation = np.random.permutation(N_chunks)
+    chunk_idx_train = np.sort(chunk_permutation[0:N_train_chunks], 0)
+    chunk_idx_valid = np.sort(chunk_permutation[N_train_chunks:(N_train_chunks+N_valid_chunks)], 0)
+    chunk_idx_test  = np.sort(chunk_permutation[(N_train_chunks+N_valid_chunks):N_chunks], 0)
+    idx_train_dataset = np.concatenate([data_idx_chunks[i] for i in chunk_idx_train])
+    idx_valid_dataset = np.concatenate([data_idx_chunks[i] for i in chunk_idx_valid])
+    idx_test_dataset  = np.concatenate([data_idx_chunks[i] for i in chunk_idx_test])
+    
+    DeltaS_train = DeltaS[idx_train_dataset,:]
+    nPSI_train = normalized_phase_kernels[idx_train_dataset,:]
+    Ctt_train = Ct_target[idx_train_dataset,:]
+    W_train = data_point_priority[idx_train_dataset,:]
+    
+    DeltaS_valid = DeltaS[idx_valid_dataset,:]
+    nPSI_valid = normalized_phase_kernels[idx_valid_dataset,:]
+    Ctt_valid = Ct_target[idx_valid_dataset,:]
+    W_valid = data_point_priority[idx_valid_dataset,:]
+    
+    DeltaS_test = DeltaS[idx_test_dataset,:]
+    nPSI_test = normalized_phase_kernels[idx_test_dataset,:]
+    Ctt_test = Ct_target[idx_test_dataset,:]
+    W_test = data_point_priority[idx_test_dataset,:]
+    
+    return DeltaS_train, nPSI_train, Ctt_train, W_train, DeltaS_valid, nPSI_valid, Ctt_valid, W_valid, DeltaS_test, nPSI_test, Ctt_test, W_test
+
+def displayLearningEvaluation(tf_dict, 
+                              DeltaS_train, nPSI_train, Ctt_train, W_train, 
+                              DeltaS_valid, nPSI_valid, Ctt_valid, W_valid, 
+                              DeltaS_test,  nPSI_test,  Ctt_test,  W_test, 
+                              step, is_performing_weighted_training, print_prefix, disp_dim=None):
+    feed_dict_eval = {tf_dict['tf_train_DeltaS_ph'] : DeltaS_train[prim_tbi], 
+                      tf_dict['tf_train_nPSI_ph'] : nPSI_train[prim_tbi], 
+                      tf_dict['tf_valid_DeltaS_ph'] : DeltaS_valid[prim_tbi], 
+                      tf_dict['tf_valid_nPSI_ph'] : nPSI_valid[prim_tbi], 
+                      tf_dict['tf_test_DeltaS_ph'] : DeltaS_test[prim_tbi], 
+                      tf_dict['tf_test_nPSI_ph'] : nPSI_test[prim_tbi]}
+    [train_pred, valid_pred, test_pred
+     ] = session.run([tf_dict['train_prediction'], tf_dict['valid_prediction'], tf_dict['test_prediction']
+                      ], feed_dict=feed_dict_eval)
+    
+    if ((is_performing_weighted_training) and (step % 5000 == 0) and (step > 0)):
+        wnmse_train = py_util.computeWNMSE(train_pred, Ctt_train, W_train)
+        wnmse_valid = py_util.computeWNMSE(valid_pred, Ctt_valid, W_valid)
+        wnmse_test  = py_util.computeWNMSE(test_pred,  Ctt_test,  W_test)
+        if (disp_dim is not None):
+            wnmse_train = wnmse_train[disp_dim]
+            wnmse_valid = wnmse_valid[disp_dim]
+            wnmse_test  = wnmse_test[disp_dim]
+        print("%s Training       WNMSE: " % print_prefix + str(wnmse_train))
+        print("%s Validation     WNMSE: " % print_prefix + str(wnmse_valid))
+        print("%s Test           WNMSE: " % print_prefix + str(wnmse_test))
+        print("")
+    else:
+        wnmse_train = None
+        wnmse_valid = None
+        wnmse_test  = None
+    
+    nmse_train = py_util.computeNMSE(train_pred, Ctt_train)
+    nmse_valid = py_util.computeNMSE(valid_pred, Ctt_valid)
+    nmse_test  = py_util.computeNMSE(test_pred,  Ctt_test)
+    var_ground_truth_Ctt_train = np.var(Ctt_train, axis=0)
+    if (disp_dim is not None):
+        nmse_train = nmse_train[disp_dim]
+        nmse_valid = nmse_valid[disp_dim]
+        nmse_test  = nmse_test[disp_dim]
+        var_ground_truth_Ctt_train = var_ground_truth_Ctt_train[disp_dim]
+    print("%s Training        NMSE: " % print_prefix + str(nmse_train))
+    print("%s Validation      NMSE: " % print_prefix + str(nmse_valid))
+    print("%s Test            NMSE: " % print_prefix + str(nmse_test))
+    print("%s Training    Variance: " % print_prefix + str(var_ground_truth_Ctt_train))
+    print("")
+    
+    return wnmse_train, wnmse_valid, wnmse_test, nmse_train, nmse_valid, nmse_test, var_ground_truth_Ctt_train
