@@ -143,7 +143,7 @@ class RLTactileFeedback:
         
         self.N_total_sense_dimensionality = 45
         self.N_primitives = 3
-        self.K_PI2_samples = 5#38#75 # K
+        self.K_PI2_samples = 38#75 # K
         self.N_cost_evaluation_general = 3
         self.N_cost_evaluation_per_PI2_sample = 1
         
@@ -361,7 +361,7 @@ class RLTactileFeedback:
                                                   behavior_params=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_params"], 
                                                   feedback_model_params=None, 
                                                   exec_mode="EXEC_OPENLOOPEQUIV_DMP_ONLY", 
-                                                  suffix_exec_description=" RL Iter. %d" % (self.it))
+                                                  suffix_exec_description=" (after PI2 Update) RL Iter. %d" % (self.it))
                 
                 # evaluate the new sample mean's cost
                 self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_evals"] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(self.sl_data_dirpath, 
@@ -404,7 +404,8 @@ class RLTactileFeedback:
                         self.iterations_list = [self.it-1, self.it]
                     
                     [
-                     self.rl_data[self.prim_tbi][self.it]["updated_pmnn_params"]
+                     self.rl_data[self.prim_tbi][self.it]["updated_pmnn_params"], 
+                     self.rl_data[self.prim_tbi][self.it]["updated_pmnn_eval_info"]
                      ] = self.rl_tactile_fb_pmnn_supervised_training.trainPMNNWithAdditionalRLIterDatasetInitializedAtPath(rl_data=self.rl_data, 
                                                                                                                            prim_tbi=self.prim_tbi, # prim-to-be-improved
                                                                                                                            iterations_list=self.iterations_list, 
@@ -425,7 +426,7 @@ class RLTactileFeedback:
                     self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_general, 
                                                       exec_behavior_until_prim_no=self.N_primitives - 1, 
                                                       behavior_params=None, 
-                                                      feedback_model_params=self.rl_data[self.prim_tbi][self.it]["updated_pmnn_params"], 
+                                                      feedback_model_params=self.rl_data[self.prim_tbi][self.it-1]["updated_pmnn_params"], 
                                                       exec_mode="EXEC_NOMINAL_DMP_AND_ITERATION_PMNN")
                     
                     # extract unrolling results: trajectories, sensor trace deviations, cost

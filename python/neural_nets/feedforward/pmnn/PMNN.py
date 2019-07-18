@@ -448,6 +448,7 @@ class PMNN(FeedForwardNeuralNetwork):
                         if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
                             biases_tf = tf.get_variable('biases', [current_layer_dim_size])
                             biases = biases_tf.eval()
+                            biases = biases.reshape((1, len(biases)))
                 else:
                     weights = self.model_params[self.name+'_'+layer_dim_ID+"_weights"]
                     if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!

@@ -26,7 +26,7 @@ class RLTactileFbPMNNSupervisedTraining:
         self.N_primitives = 3
         self.batch_size = 64
         
-        self.TF_max_train_iters = np.loadtxt(self.initial_model_parent_dir_path+'TF_max_train_iters.txt', dtype=np.int, ndmin=0) + 1
+        self.TF_max_train_iters = 25001 # np.loadtxt(self.initial_model_parent_dir_path+'TF_max_train_iters.txt', dtype=np.int, ndmin=0) + 1
         self.regular_NN_hidden_layer_topology = list(np.loadtxt(self.initial_model_parent_dir_path+'regular_NN_hidden_layer_topology.txt', dtype=np.int, ndmin=1))
         self.regular_NN_hidden_layer_activation_func_list = list(np.loadtxt(self.initial_model_parent_dir_path+'regular_NN_hidden_layer_activation_func_list.txt', dtype=np.str, ndmin=1)) * len(self.regular_NN_hidden_layer_topology)
         
@@ -338,17 +338,20 @@ class RLTactileFbPMNNSupervisedTraining:
                                                            step=step, is_performing_weighted_training=self.is_performing_weighted_training, print_prefix="", disp_dim=opt_dim)
                     
                     if (self.is_performing_weighted_training):
-                        eval_info["rlit_wnmse_train"] = rlit_wnmse_train
-                        eval_info["rlit_wnmse_valid"] = rlit_wnmse_valid
-                        eval_info["rlit_wnmse_test"] = rlit_wnmse_test
+                        if ((rlit_wnmse_train is not None) and (rlit_wnmse_valid is not None) and (rlit_wnmse_test is not None)):
+                            eval_info["rlit_wnmse_train"] = rlit_wnmse_train
+                            eval_info["rlit_wnmse_valid"] = rlit_wnmse_valid
+                            eval_info["rlit_wnmse_test"] = rlit_wnmse_test
                         
-                        eval_info["demo_wnmse_train"] = demo_wnmse_train
-                        eval_info["demo_wnmse_valid"] = demo_wnmse_valid
-                        eval_info["demo_wnmse_test"] = demo_wnmse_test
+                        if ((demo_wnmse_train is not None) and (demo_wnmse_valid is not None) and (demo_wnmse_test is not None)):
+                            eval_info["demo_wnmse_train"] = demo_wnmse_train
+                            eval_info["demo_wnmse_valid"] = demo_wnmse_valid
+                            eval_info["demo_wnmse_test"] = demo_wnmse_test
                         
-                        eval_info["wnmse_train"] = wnmse_train
-                        eval_info["wnmse_valid"] = wnmse_valid
-                        eval_info["wnmse_test"] = wnmse_test
+                        if ((wnmse_train is not None) and (wnmse_valid is not None) and (wnmse_test is not None)):
+                            eval_info["wnmse_train"] = wnmse_train
+                            eval_info["wnmse_valid"] = wnmse_valid
+                            eval_info["wnmse_test"] = wnmse_test
                     
                     eval_info["rlit_nmse_train"] = rlit_nmse_train
                     eval_info["rlit_nmse_valid"] = rlit_nmse_valid
@@ -403,4 +406,4 @@ class RLTactileFbPMNNSupervisedTraining:
             # update optimized/trained PMNN params to self.prim_pmnn_params_dirpath
             self.pmnn.saveNeuralNetworkToTextFiles(self.prim_pmnn_params_dirpath)
         
-        return NN_model_params
+        return NN_model_params, eval_info
