@@ -59,8 +59,8 @@ IS_USING_ROT_DIFF_ERR_SQUARED_NORM_AS_COST = 1
 
 IS_USING_ROT_DIFF_ERR_B_SQUARED_ONLY_AS_COST = 101
 
-#cost_mode = IS_USING_X_VECTOR_SQUARED_NORM_AS_COST
-cost_mode = IS_USING_ROT_DIFF_ERR_SQUARED_NORM_AS_COST
+cost_mode = IS_USING_X_VECTOR_SQUARED_NORM_AS_COST
+#cost_mode = IS_USING_ROT_DIFF_ERR_SQUARED_NORM_AS_COST
 
 #cost_mode_detail = None
 cost_mode_detail = IS_USING_ROT_DIFF_ERR_B_SQUARED_ONLY_AS_COST
@@ -596,7 +596,7 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
     J_list = list()
     J_prime_list = list()
     J_prime_new_list = list()
-    J_new_list() = list()
+    J_new_list = list()
     it_list = list()
     while ((it in rl_data[prim_to_be_improved].keys()) and (it <= end_plot_iter)):
         J_list.append(rl_data[prim_to_be_improved][it]["unroll_results"]["mean_accum_cost"][prim_to_be_improved])
@@ -776,12 +776,12 @@ def displayLearningEvaluation(tf_dict,
                               DeltaS_valid, nPSI_valid, Ctt_valid, W_valid, 
                               DeltaS_test,  nPSI_test,  Ctt_test,  W_test, 
                               step, is_performing_weighted_training, print_prefix, disp_dim=None):
-    feed_dict_eval = {tf_dict['tf_train_DeltaS_ph'] : DeltaS_train[prim_tbi], 
-                      tf_dict['tf_train_nPSI_ph'] : nPSI_train[prim_tbi], 
-                      tf_dict['tf_valid_DeltaS_ph'] : DeltaS_valid[prim_tbi], 
-                      tf_dict['tf_valid_nPSI_ph'] : nPSI_valid[prim_tbi], 
-                      tf_dict['tf_test_DeltaS_ph'] : DeltaS_test[prim_tbi], 
-                      tf_dict['tf_test_nPSI_ph'] : nPSI_test[prim_tbi]}
+    feed_dict_eval = {tf_dict['tf_train_DeltaS_ph'] : DeltaS_train, 
+                      tf_dict['tf_train_nPSI_ph'] : nPSI_train, 
+                      tf_dict['tf_valid_DeltaS_ph'] : DeltaS_valid, 
+                      tf_dict['tf_valid_nPSI_ph'] : nPSI_valid, 
+                      tf_dict['tf_test_DeltaS_ph'] : DeltaS_test, 
+                      tf_dict['tf_test_nPSI_ph'] : nPSI_test}
     [train_pred, valid_pred, test_pred
      ] = tf_dict['session'].run([tf_dict['train_prediction'], tf_dict['valid_prediction'], tf_dict['test_prediction']
                                  ], feed_dict=feed_dict_eval)

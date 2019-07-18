@@ -20,6 +20,9 @@ class QuaternionDMPTrajectory(QuaternionDMPState, object):
         assert (self.X.shape[1] == self.time.shape[1])
         return True
         
+    def getDMPStateAtIndex(self, i):
+        return self.getQuaternionDMPStateAtIndex(i)
+        
     def getQuaternionDMPStateAtIndex(self, i):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this QuaternionDMPTrajectory is invalid!"
         assert ((i >= 0) and (i < self.time.shape[1])), "Index i=" + str(i) + " is out-of-range (TrajectoryLength=" + str(self.time.shape[1]) + ")!"
@@ -29,6 +32,9 @@ class QuaternionDMPTrajectory(QuaternionDMPState, object):
                                   self.omega[:,i].reshape(self.dmp_num_dimensions,1), 
                                   self.omegad[:,i].reshape(self.dmp_num_dimensions,1), 
                                   self.time[:,i].reshape(1,1))
+    
+    def setDMPStateAtIndex(self, i, quatdmpstate):
+        return self.setQuaternionDMPStateAtIndex(i, quatdmpstate)
     
     def setQuaternionDMPStateAtIndex(self, i, quatdmpstate):
         assert (self.isValid()), "Pre-condition(s) checking is failed: this QuaternionDMPTrajectory is invalid!"

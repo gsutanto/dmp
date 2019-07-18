@@ -60,9 +60,9 @@ class RLTactileFbPMNNSupervisedTraining:
         
         # demonstration (demo) dataset
         self.DeltaS_demo = [None] * self.N_primitives
-        self.Ct_target_demo = [None] * self.N_primitives
-        self.normalized_phase_kernels_demo = [None] * self.N_primitives
-        self.data_point_priority_demo = [None] * self.N_primitives
+        self.nPSI_demo = [None] * self.N_primitives
+        self.Ctt_demo = [None] * self.N_primitives
+        self.W_demo = [None] * self.N_primitives
         
         self.DeltaS_demo_train = [None] * self.N_primitives
         self.nPSI_demo_train = [None] * self.N_primitives
@@ -102,15 +102,15 @@ class RLTactileFbPMNNSupervisedTraining:
         for n_prim in range(1, self.N_primitives):
             # load dataset:
             self.DeltaS_demo[n_prim] = sio.loadmat('../scraping/prim_'+str(n_prim+1)+'_X_raw_scraping.mat', struct_as_record=True)['X'].astype(np.float32)
-            self.Ct_target_demo[n_prim] = sio.loadmat('../scraping/prim_'+str(n_prim+1)+'_Ct_target_scraping.mat', struct_as_record=True)['Ct_target'].astype(np.float32)
-            self.normalized_phase_kernels_demo[n_prim] = sio.loadmat('../scraping/prim_'+str(n_prim+1)+'_normalized_phase_PSI_mult_phase_V_scraping.mat', struct_as_record=True)['normalized_phase_PSI_mult_phase_V'].astype(np.float32)
-            self.data_point_priority_demo[n_prim] = sio.loadmat('../scraping/prim_'+str(n_prim+1)+'_data_point_priority_scraping.mat', struct_as_record=True)['data_point_priority'].astype(np.float32)
+            self.Ctt_demo[n_prim] = sio.loadmat('../scraping/prim_'+str(n_prim+1)+'_Ct_target_scraping.mat', struct_as_record=True)['Ct_target'].astype(np.float32)
+            self.nPSI_demo[n_prim] = sio.loadmat('../scraping/prim_'+str(n_prim+1)+'_normalized_phase_PSI_mult_phase_V_scraping.mat', struct_as_record=True)['normalized_phase_PSI_mult_phase_V'].astype(np.float32)
+            self.W_demo[n_prim] = sio.loadmat('../scraping/prim_'+str(n_prim+1)+'_data_point_priority_scraping.mat', struct_as_record=True)['data_point_priority'].astype(np.float32)
             
             [self.DeltaS_demo_train[n_prim], self.nPSI_demo_train[n_prim], self.Ctt_demo_train[n_prim], self.W_demo_train[n_prim], 
              self.DeltaS_demo_valid[n_prim], self.nPSI_demo_valid[n_prim], self.Ctt_demo_valid[n_prim], self.W_demo_valid[n_prim], 
              self.DeltaS_demo_test[n_prim],  self.nPSI_demo_test[n_prim],  self.Ctt_demo_test[n_prim],  self.W_demo_test[n_prim]
-             ] = rl_util.splitDatasetIntoTrainValidTestSubDataset(self.DeltaS_demo[n_prim], self.Ct_target_demo[n_prim], 
-                                                                  self.normalized_phase_kernels_demo[n_prim], self.data_point_priority_demo[n_prim], 
+             ] = rl_util.splitDatasetIntoTrainValidTestSubDataset(self.DeltaS_demo[n_prim], self.Ctt_demo[n_prim], 
+                                                                  self.nPSI_demo[n_prim], self.W_demo[n_prim], 
                                                                   "_demo", n_prim, 
                                                                   self.expected_D_input, self.expected_D_output, self.expected_N_phaseLWR_kernels, self.chunk_size, 
                                                                   self.fraction_train_dataset, self.fraction_test_dataset)
@@ -125,11 +125,11 @@ class RLTactileFbPMNNSupervisedTraining:
         Ctt_rlit_list = list()
         W_rlit_list = list()
         for it in iterations_list:
-            for n_trial in range(len(rl_data[prim_tbi][it][prim_tbi])):
-                DeltaS_rlit_list.append(rl_data[prim_tbi][it][prim_tbi][n_trial]['DeltaS'])
-                nPSI_rlit_list.append(rl_data[prim_tbi][it][prim_tbi][n_trial]['normalized_phase_PSI_mult_phase_V'])
-                Ctt_rlit_list.append(rl_data[prim_tbi][it][prim_tbi][n_trial]['Ct_target'])
-                W_rlit_list.append(rl_data[prim_tbi][it][prim_tbi][n_trial]['data_point_priority'])
+            for n_trial in range(len(rl_data[prim_tbi][it]["additional_fb_dataset"][prim_tbi])):
+                DeltaS_rlit_list.append(rl_data[prim_tbi][it]["additional_fb_dataset"][prim_tbi][n_trial]['DeltaS'])
+                nPSI_rlit_list.append(rl_data[prim_tbi][it]["additional_fb_dataset"][prim_tbi][n_trial]['normalized_phase_PSI_mult_phase_V'])
+                Ctt_rlit_list.append(rl_data[prim_tbi][it]["additional_fb_dataset"][prim_tbi][n_trial]['Ct_target'])
+                W_rlit_list.append(rl_data[prim_tbi][it]["additional_fb_dataset"][prim_tbi][n_trial]['data_point_priority'])
         
         self.DeltaS_rlit[prim_tbi] = np.vstack(DeltaS_rlit_list)
         self.nPSI_rlit[prim_tbi] = np.vstack(nPSI_rlit_list)
@@ -139,8 +139,8 @@ class RLTactileFbPMNNSupervisedTraining:
         [self.DeltaS_rlit_train[prim_tbi], self.nPSI_rlit_train[prim_tbi], self.Ctt_rlit_train[prim_tbi], self.W_rlit_train[prim_tbi], 
          self.DeltaS_rlit_valid[prim_tbi], self.nPSI_rlit_valid[prim_tbi], self.Ctt_rlit_valid[prim_tbi], self.W_rlit_valid[prim_tbi], 
          self.DeltaS_rlit_test[prim_tbi],  self.nPSI_rlit_test[prim_tbi],  self.Ctt_rlit_test[prim_tbi],  self.W_rlit_test[prim_tbi]
-         ] = rl_util.splitDatasetIntoTrainValidTestSubDataset(self.DeltaS_rlit[prim_tbi], self.Ct_target_rlit[prim_tbi], 
-                                                              self.normalized_phase_kernels_rlit[prim_tbi], self.data_point_priority_rlit[prim_tbi], 
+         ] = rl_util.splitDatasetIntoTrainValidTestSubDataset(self.DeltaS_rlit[prim_tbi], self.Ctt_rlit[prim_tbi], 
+                                                              self.nPSI_rlit[prim_tbi], self.W_rlit[prim_tbi], 
                                                               "_rlit", prim_tbi, 
                                                               self.expected_D_input, self.expected_D_output, self.expected_N_phaseLWR_kernels, self.chunk_size, 
                                                               self.fraction_train_dataset, self.fraction_test_dataset)
@@ -271,14 +271,14 @@ class RLTactileFbPMNNSupervisedTraining:
                 # Note: we could use better randomization across epochs.
                 offset = (step * self.batch_size) % (N_train_dataset - self.batch_size)
                 # Generate a minibatch.
-                batch_X = self.X_train[offset:(offset + self.batch_size), :]
+                batch_DeltaS = self.DeltaS_train[offset:(offset + self.batch_size), :]
                 batch_nPSI = self.nPSI_train[offset:(offset + self.batch_size), :]
                 batch_W = self.W_train[offset:(offset + self.batch_size), :]
                 batch_Ctt = self.Ctt_train[offset:(offset + self.batch_size), :]
                 # Prepare a dictionary telling the session where to feed the minibatch.
                 # The key of the dictionary is the placeholder node of the graph to be fed,
                 # and the value is the numpy array to feed to it.
-                feed_dict_train = {self.tf_train_DeltaS_batch_ph : batch_X, 
+                feed_dict_train = {self.tf_train_DeltaS_batch_ph : batch_DeltaS, 
                                    self.tf_train_nPSI_batch_ph : batch_nPSI, 
                                    self.tf_train_W_batch_ph : batch_W, 
                                    self.tf_train_Ctt_batch_ph : batch_Ctt}

@@ -143,7 +143,7 @@ class RLTactileFeedback:
         
         self.N_total_sense_dimensionality = 45
         self.N_primitives = 3
-        self.K_PI2_samples = 38#75 # K
+        self.K_PI2_samples = 5#38#75 # K
         self.N_cost_evaluation_general = 3
         self.N_cost_evaluation_per_PI2_sample = 1
         
@@ -382,6 +382,14 @@ class RLTactileFeedback:
                     raw_input("Press [ENTER] to continue...")
                 
                 if (not self.is_pipeline_executed_only_up_to_pi2): # execute the entire pipeline
+                    print ("*********************************************************")
+                    print ("*********************************************************")
+                    print ("** Conversion of the improved OLE behavior             **")
+                    print ("** into an improved closed-loop behavior               **")
+                    print ("** in the current (assumed-static) environment setting **")
+                    print ("** and evaluate the closed-loop behavior on the robot  **")
+                    print ("*********************************************************")
+                    print ("*********************************************************")
                     [
                      self.rl_data[self.prim_tbi][self.it]["adapted_cdmp_trajs"], 
                      self.rl_data[self.prim_tbi][self.it]["additional_fb_dataset"]
