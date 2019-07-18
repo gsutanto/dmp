@@ -476,12 +476,12 @@ class PMNN(FeedForwardNeuralNetwork):
                     current_layer_dim_size = self.neural_net_topology[i]
                 else: # Output Layer
                     current_layer_dim_size = 1
-                weights_temp = np.loadtxt(dirpath + "/" + str(dim_out) + "/w" + str(i-1))
+                weights_temp = np.loadtxt(dirpath + "/" + str(dim_out) + "/w" + str(i-1)).astype(np.float32)
                 if (len(weights_temp.shape) == 1):
                     weights_temp = weights_temp.reshape(weights_temp.shape[0], 1)
                 self.model_params[self.name+'_'+layer_dim_ID+"_weights"] = weights_temp
                 if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
-                    biases_temp = np.loadtxt(dirpath + "/" + str(dim_out) + "/b" + str(i-1))
+                    biases_temp = np.loadtxt(dirpath + "/" + str(dim_out) + "/b" + str(i-1)).astype(np.float32)
                     self.model_params[self.name+'_'+layer_dim_ID+"_biases"] = biases_temp
                 if (self.is_predicting_only == False):
                     with tf.variable_scope(self.name+'_'+layer_dim_ID, reuse=False):
