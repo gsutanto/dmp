@@ -26,7 +26,7 @@ class RLTactileFbPMNNSupervisedTraining:
         self.N_primitives = 3
         self.batch_size = 64
         
-        self.TF_max_train_iters = 25001 # np.loadtxt(self.initial_model_parent_dir_path+'TF_max_train_iters.txt', dtype=np.int, ndmin=0) + 1
+        self.TF_max_train_iters = np.loadtxt(self.initial_model_parent_dir_path+'TF_max_train_iters.txt', dtype=np.int, ndmin=0) + 1
         self.regular_NN_hidden_layer_topology = list(np.loadtxt(self.initial_model_parent_dir_path+'regular_NN_hidden_layer_topology.txt', dtype=np.int, ndmin=1))
         self.regular_NN_hidden_layer_activation_func_list = list(np.loadtxt(self.initial_model_parent_dir_path+'regular_NN_hidden_layer_activation_func_list.txt', dtype=np.str, ndmin=1)) * len(self.regular_NN_hidden_layer_topology)
         
