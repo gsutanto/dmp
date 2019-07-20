@@ -105,8 +105,7 @@ def plot_2D(X_list, Y_list, title,
     ax.set_title(title)
     if (save_filepath is not None):
         assert (os.path.isdir(os.path.abspath(os.path.join(save_filepath, os.pardir)))), "Parent directory of %s does not exist!" % save_filepath
-        assert (save_filepath[-4:] == '.png'), "Only supports *.png extension!!!"
-        plt.savefig(save_filepath, bbox_inches='tight')
+        plt.savefig(save_filepath + '.png', bbox_inches='tight')
     else:
         plt.pause(plt_pause_time_secs)
         plt.show()

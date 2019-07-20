@@ -597,40 +597,59 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
     J_prime_list = list()
     J_prime_new_list = list()
     J_new_list = list()
-    it_list = list()
+    iter_J_list = list()
+    iter_J_prime_list = list()
+    iter_J_prime_new_list = list()
+    iter_J_new_list = list()
     while ((it in rl_data[prim_to_be_improved].keys()) and (it <= end_plot_iter)):
-        J_list.append(rl_data[prim_to_be_improved][it]["unroll_results"]["mean_accum_cost"][prim_to_be_improved])
-        J_prime_list.append(rl_data[prim_to_be_improved][it]["ole_cdmp_evals"]["mean_accum_cost"][prim_to_be_improved])
-        J_prime_new_list.append(rl_data[prim_to_be_improved][it]["ole_cdmp_new_evals"]["mean_accum_cost"][prim_to_be_improved])
-        J_new_list.append(rl_data[prim_to_be_improved][it]["new_unroll_results"]["mean_accum_cost"][prim_to_be_improved])
-        it_list.append(it)
+        if ("cl_cdmp_evals" in rl_data[prim_to_be_improved][it].keys()):
+            J_list.append(rl_data[prim_to_be_improved][it]["cl_cdmp_evals"]["mean_accum_cost"][prim_to_be_improved])
+            iter_J_list.append(it)
+        if ("ole_cdmp_evals" in rl_data[prim_to_be_improved][it].keys()):
+            J_prime_list.append(rl_data[prim_to_be_improved][it]["ole_cdmp_evals"]["mean_accum_cost"][prim_to_be_improved])
+            iter_J_prime_list.append(it)
+        if ("ole_cdmp_new_evals" in rl_data[prim_to_be_improved][it].keys()):
+            J_prime_new_list.append(rl_data[prim_to_be_improved][it]["ole_cdmp_new_evals"]["mean_accum_cost"][prim_to_be_improved])
+            iter_J_prime_new_list.append(it)
+        if ("cl_cdmp_new_evals" in rl_data[prim_to_be_improved][it].keys()):
+            J_new_list.append(rl_data[prim_to_be_improved][it]["cl_cdmp_new_evals"]["mean_accum_cost"][prim_to_be_improved])
+            iter_J_new_list.append(it)
         it += 1
     Y_list = list()
     Y_list.append(np.array(J_list))
     Y_list.append(np.array(J_prime_list))
     Y_list.append(np.array(J_prime_new_list))
+    X_list = list()
+    X_list.append(np.array(iter_J_list))
+    X_list.append(np.array(iter_J_prime_list))
+    X_list.append(np.array(iter_J_prime_new_list))
+    # Plotting all except J_new
+    for save_fpath in [save_filepath+'_no_J_new_plotting', None]: # 1st one (save_filepath) is to log to a file, 2nd one (None) is to display it.
+        plt.close('all')
+        pypl_util.plot_2D(X_list=X_list, 
+                          Y_list=Y_list, 
+                          title='Total Cost per Iteration', 
+                          X_label='Iteration', 
+                          Y_label='Total Cost', 
+                          fig_num=0, 
+                          label_list=['J',"J_prime", "J_prime_new"], 
+                          color_style_list=[['m','-'],['g','-.'],['b',':']], 
+                          save_filepath=save_fpath)
+    
     Y_list.append(np.array(J_new_list))
-    X_list = [np.array(it_list).astype(int)] * len(Y_list)
-    plt.close('all')
-    pypl_util.plot_2D(X_list=X_list, 
-                      Y_list=Y_list, 
-                      title='Total Cost per Iteration', 
-                      X_label='Iteration', 
-                      Y_label='Total Cost', 
-                      fig_num=0, 
-                      label_list=['J',"J_prime", "J_prime_new", "J_new"], 
-                      color_style_list=[['m','-'],['g','-.'],['b',':'],['r','--']], 
-                      save_filepath=save_filepath)
-    plt.close('all')
-    pypl_util.plot_2D(X_list=X_list, 
-                      Y_list=Y_list, 
-                      title='Total Cost per Iteration', 
-                      X_label='Iteration', 
-                      Y_label='Total Cost', 
-                      fig_num=0, 
-                      label_list=['J',"J_prime", "J_prime_new", "J_new"], 
-                      color_style_list=[['m','-'],['g','-.'],['b',':'],['r','--']], 
-                      save_filepath=None)
+    X_list.append(np.array(iter_J_new_list))
+    # Plotting all (including J_new)
+    for save_fpath in [save_filepath, None]: # 1st one (save_filepath) is to log to a file, 2nd one (None) is to display it.
+        plt.close('all')
+        pypl_util.plot_2D(X_list=X_list, 
+                          Y_list=Y_list, 
+                          title='Total Cost per Iteration', 
+                          X_label='Iteration', 
+                          Y_label='Total Cost', 
+                          fig_num=0, 
+                          label_list=['J',"J_prime", "J_prime_new", "J_new"], 
+                          color_style_list=[['m','-'],['g','-.'],['b',':'],['r','--']], 
+                          save_filepath=save_fpath)
     return None
 
 def extractParamsToBeImproved(params_dict, type_dim_tbi_dict, types_tbi_list, prim_tbi):
