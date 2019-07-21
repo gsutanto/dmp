@@ -624,11 +624,11 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
     X_list.append(np.array(iter_J_prime_list))
     X_list.append(np.array(iter_J_prime_new_list))
     # Plotting all except J_new
-    for save_fpath in [save_filepath+'_no_J_new_plotting', None]: # 1st one (save_filepath) is to log to a file, 2nd one (None) is to display it.
+    for save_fpath in [save_filepath+'_prim_%d_no_J_new_plotting' % (prim_to_be_improved+1), None]: # 1st one (save_filepath) is to log to a file, 2nd one (None) is to display it.
         plt.close('all')
         pypl_util.plot_2D(X_list=X_list, 
                           Y_list=Y_list, 
-                          title='Total Cost per Iteration', 
+                          title='Total Cost per Iteration Prim. # %d' % (prim_to_be_improved+1), 
                           X_label='Iteration', 
                           Y_label='Total Cost', 
                           fig_num=0, 
@@ -639,11 +639,11 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
     Y_list.append(np.array(J_new_list))
     X_list.append(np.array(iter_J_new_list))
     # Plotting all (including J_new)
-    for save_fpath in [save_filepath, None]: # 1st one (save_filepath) is to log to a file, 2nd one (None) is to display it.
+    for save_fpath in [save_filepath+'_prim_%d' % (prim_to_be_improved+1), None]: # 1st one (save_filepath) is to log to a file, 2nd one (None) is to display it.
         plt.close('all')
         pypl_util.plot_2D(X_list=X_list, 
                           Y_list=Y_list, 
-                          title='Total Cost per Iteration', 
+                          title='Total Cost per Iteration Prim. # %d' % (prim_to_be_improved+1), 
                           X_label='Iteration', 
                           Y_label='Total Cost', 
                           fig_num=0, 

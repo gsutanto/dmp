@@ -160,8 +160,7 @@ class RLTactileFeedback:
         
         self.prims_to_be_learned = [1,2]
         
-        #starting_prims_tbi = [1,2] # TODO (un-comment): 2nd and 3rd primitives are to-be-improved (tbi)
-        starting_prims_tbi = [1] # TODO (comment): for testing purpose we work on 2nd primitive only as the one to-be-improved (tbi)
+        starting_prims_tbi = [1,2] # 2nd and 3rd primitives are to-be-improved (tbi)
         
         py_util.createDirIfNotExist(self.iter_pmnn_params_dirpath)
         dir_util.copy_tree(src=self.initial_pmnn_params_dirpath, dst=self.iter_pmnn_params_dirpath)
@@ -202,6 +201,9 @@ class RLTactileFeedback:
         
         self.count_pmnn_param_reuse = 0
         for self.prim_tbi in self.prims_tbi:
+            print ("**********************************************************")
+            print ("**  Improving the feedback model of primitive # %d/%d...  **" % (self.prim_tbi+1, self.N_primitives))
+            print ("**********************************************************")
             self.is_continuing_rl_iters = True
             
             if ((starting_rl_iter <= 0) or (self.prim_tbi != self.prims_tbi[0])):
@@ -358,6 +360,9 @@ class RLTactileFeedback:
                                                                                                                self.rl_data[self.prim_tbi][self.it]["PI2_param_new_mean"], 
                                                                                                                self.rl_data[self.prim_tbi][self.it]["PI2_param_dim_list"])
                 
+                if (self.is_pausing):
+                    raw_input("About to execute PI2-updated open-loop-equivalent (OLE) behavior on the robot. Press [ENTER] to continue...")
+                
                 self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_general, 
                                                   exec_behavior_until_prim_no=self.N_primitives - 1, 
                                                   behavior_params=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_params"], 
@@ -422,7 +427,7 @@ class RLTactileFeedback:
                                                                                                                            )
                     
                     if (self.is_pausing):
-                        raw_input("Press [ENTER] to continue...")
+                        raw_input("About to execute updated closed-loop (CL) behavior on the robot. Press [ENTER] to continue...")
                     
                     # robot execution of the new/updated (PMNN) behavior feedback model
                     self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_general, 
