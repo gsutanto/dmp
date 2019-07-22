@@ -19,14 +19,14 @@ Execution Order for Reproducing Experimental Results:
  [5] Making sure that 'prims_param_root_dir_path' string is set correctly,
      i.e. including the correct sub-string component (e.g. 'scraping_w_tool') as specific task type identifier,
      collect baseline/nominal sensory traces by letting the robot unroll the learned baseline/nominal primitives under baseline/nominal environment setting.
-     This is done for example by turning OFF force control for compliance (such that correction demonstration is possible) 
+     This is done for example by turning OFF force control for compliance (because we are NOT going to provide correction demonstration here) 
      in one/several control dimension(s) during RightArmDMPScrapingCorrectableBaselineUnrollingController execution, by setting the flag:
        is_allowing_correction: 0
      in controller_manager_arm catkin package, 
      file controller_manager_arm/controller_manager_task_arm/config/controller_manager/controllers/RightArmDMPScrapingCorrectableBaselineUnrollingController.yaml ;
      and then executing the client program from controller_manager_examples_arm catkin package:
      $ ./test_dmp_learn_tactile_feedback_scraping_controller right
-     and then select option 'u' (unroll baseline/nominal primitive, uncorrectable because force control is turned OFF, so only position control is performed).
+     and then select option 'b' (unroll baseline/nominal primitive, uncorrectable because force control is turned OFF, so only position control is performed).
      Save the dataset/data files for example inside the folder ~/Desktop/dmp_demos/scraping_w_tool/baseline/ .
  [6] Collect corrected sensorimotor demonstrations (believed to contain the coupling terms),
      by letting the robot unroll the learned baseline/nominal primitives under various environment settings,
@@ -38,7 +38,7 @@ Execution Order for Reproducing Experimental Results:
      file controller_manager_arm/controller_manager_task_arm/config/controller_manager/controllers/RightArmDMPScrapingCorrectableBaselineUnrollingController.yaml ;
      and then executing the client program from controller_manager_examples_arm catkin package:
      $ ./test_dmp_learn_tactile_feedback_scraping_controller right
-     and then select option 'u' (unroll baseline/nominal primitive, correctable by humans because force control is turned ON, so both position and force controls are performed).
+     and then select option 'b' (unroll baseline/nominal primitive, correctable by humans because force control is turned ON, so both position and force controls are performed).
      Save the dataset/data files for example inside the folder ~/Desktop/dmp_demos/scraping_w_tool/<setting_number>/ .
  [7] Making sure that 'specific_task_type' variable is set correctly,
      segment the corrected sensorimotor demonstrations into primitives, 
@@ -77,7 +77,7 @@ Execution Order for Reproducing Experimental Results:
      under a variety of environment settings (especially non-nominal/non-baseline settings).
      This is done for example by executing the client program from controller_manager_examples_arm catkin package:
      $ ./test_dmp_learn_tactile_feedback_scraping_controller right
-     and then select option 'c' (unroll primitive and learned coupling term).
+     and then select option 'c' (unroll ONLY the primitive) or 'd' (unroll the primitive and the learned coupling term).
      Save the dataset/data files for example inside the folder 
      ~/Desktop/dmp_robot_unroll_results/scraping/<date_and_description>/robot/
      <p (positive tiltboard angle) or n (negative tiltboard angle)><tiltboard angle>/
