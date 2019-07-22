@@ -34,7 +34,8 @@ is_evaluating_autoencoder   = 0;
 % subset_settings_indices     = [1:4,9];
 subset_settings_indices     = [1:5];
 
-considered_subset_outlier_ranked_demo_indices       = [1:15];
+% considered_subset_outlier_ranked_demo_indices       = [1:15]; % for ICRA'18 Paper
+considered_subset_outlier_ranked_demo_indices       = [1:5]; % for IJRR'19 Paper
 generalization_subset_outlier_ranked_demo_indices   = [];
 post_filename_stacked_data                          = '';
 
