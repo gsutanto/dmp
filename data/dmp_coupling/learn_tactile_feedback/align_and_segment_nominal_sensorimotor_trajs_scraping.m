@@ -20,6 +20,18 @@ out_data_dir_path   = [pwd, '/../../../../amd_clmc_dmp_data/dmp_coupling/learn_t
 % end-effector is the tip of the transformation chain   (is_tool_adaptor_tip_of_transform_chain == 0)
 is_tool_adaptor_tip_of_transform_chain  = 0;
 
+% at the beginning please set is_doing_speedy_traj_alignment_test == 1 for
+% a quick check to prune faulty data files; 
+% after pruning faulty data files, change this to
+% is_doing_speedy_traj_alignment_test == 0 for the "REAL" segmentation
+is_doing_speedy_traj_alignment_test     = 0;
+
+if (is_doing_speedy_traj_alignment_test == 1)
+    max_dtw_input_traj_length           = 770;
+else
+    max_dtw_input_traj_length           = -1;
+end
+
 is_plotting_zero_crossing               = 0;
 is_plotting_alignment_matching          = 0;
 is_visualizing_traj_alignment           = 0;
@@ -33,8 +45,6 @@ N_primitive                         = 3;
 max_num_coupled_settings_considered = 16;
 
 extra_align_check_length_proportion = 1.25; % (relative to the given/original length)
-max_dtw_input_traj_length           = -1;
-% max_dtw_input_traj_length           = 770;
 
 % low-pass filter parameters:
 fc          = 1.0;
