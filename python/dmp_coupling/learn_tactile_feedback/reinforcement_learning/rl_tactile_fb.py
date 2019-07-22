@@ -141,8 +141,9 @@ class RLTactileFeedback:
         self.N_total_sense_dimensionality = 45
         self.N_primitives = 3
         self.K_PI2_samples = 38#75 # K
-        self.N_cost_evaluation_general = 3
-        self.N_cost_evaluation_per_PI2_sample = 1
+        self.N_cost_evaluation_cl_behavior = 5
+        self.N_cost_evaluation_ole_behavior_general = 3
+        self.N_cost_evaluation_ole_behavior_per_PI2_sample = 1
         
         self.cart_dim_tbi_dict = {}
         self.cart_dim_tbi_dict["Quaternion"] = np.array([1]) # to-be-improved (tbi): Quaternion DMP, 2nd dimension
@@ -193,7 +194,7 @@ class RLTactileFeedback:
         else:
             self.rl_data = {}
             
-            self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_general, 
+            self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_cl_behavior, 
                                               exec_behavior_until_prim_no=self.N_primitives - 1, 
                                               behavior_params=None, 
                                               feedback_model_params=None, 
@@ -249,7 +250,7 @@ class RLTactileFeedback:
                 
                 plt.close('all')
                 
-                self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_general, 
+                self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_ole_behavior_general, 
                                                   exec_behavior_until_prim_no=self.prim_tbi, 
                                                   behavior_params=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params"], 
                                                   feedback_model_params=None, 
@@ -326,7 +327,7 @@ class RLTactileFeedback:
                                                                                 pi2_unroll_samples=self.rl_data[self.prim_tbi][self.it]["PI2_unroll_samples"])):
                         raw_input("Press [ENTER] to continue...")
                     
-                    self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_per_PI2_sample, 
+                    self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_ole_behavior_per_PI2_sample, 
                                                       exec_behavior_until_prim_no=self.prim_tbi, 
                                                       behavior_params=self.rl_data[self.prim_tbi][self.it]["PI2_params_samples"][self.k]["ole_cdmp_params"], 
                                                       feedback_model_params=None, 
@@ -363,7 +364,7 @@ class RLTactileFeedback:
                 if (self.is_pausing):
                     raw_input("About to execute PI2-updated open-loop-equivalent (OLE) behavior on the robot. Press [ENTER] to continue...")
                 
-                self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_general, 
+                self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_ole_behavior_general, 
                                                   exec_behavior_until_prim_no=self.N_primitives - 1, 
                                                   behavior_params=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_params"], 
                                                   feedback_model_params=None, 
@@ -430,7 +431,7 @@ class RLTactileFeedback:
                         raw_input("About to execute updated closed-loop (CL) behavior on the robot. Press [ENTER] to continue...")
                     
                     # robot execution of the new/updated (PMNN) behavior feedback model
-                    self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_general, 
+                    self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_cl_behavior, 
                                                       exec_behavior_until_prim_no=self.N_primitives - 1, 
                                                       behavior_params=None, 
                                                       feedback_model_params=self.rl_data[self.prim_tbi][self.it]["updated_pmnn_params"], 
