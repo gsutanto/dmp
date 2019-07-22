@@ -409,14 +409,14 @@ class PMNN(FeedForwardNeuralNetwork):
                         weights_dim = weights.get_shape().as_list()
                         num_params += weights_dim[0] * weights_dim[1]
                         if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
-                            biases = tf.get_variable('biases', initializer=self.model_params[self.name+'_'+layer_dim_ID+"_biases"])
+                            biases = tf.get_variable('biases', initializer=self.model_params[self.name+'_'+layer_dim_ID+"_biases"].reshape((max(self.model_params[self.name+'_'+layer_dim_ID+"_biases"].shape),)))
                             num_params += biases.get_shape().as_list()[0]
                 else:
                     weights = self.model_params[self.name+'_'+layer_dim_ID+"_weights"]
                     weights_dim = list(weights.shape)
                     num_params += weights_dim[0] * weights_dim[1]
                     if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
-                        biases = self.model_params[self.name+'_'+layer_dim_ID+"_biases"]
+                        biases = self.model_params[self.name+'_'+layer_dim_ID+"_biases"].reshape((max(self.model_params[self.name+'_'+layer_dim_ID+"_biases"].shape),))
                         num_params += list(biases.shape)[0]
         num_params /= self.D_output
         print("Total # of Parameters = %d" % num_params)
