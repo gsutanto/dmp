@@ -99,11 +99,11 @@ dataset_Ct_tactile_asm.trial_idx_ranked_by_outlier_metric_w_exclusion   = cell(N
 %  e.g. due to Inconsistencies, etc.)
 
 for np=1:1:N_primitive
-    dataset_Ct_tactile_asm.exclude{np, 1}   = [1,7,11,6,15];
-    dataset_Ct_tactile_asm.exclude{np, 2}   = [1,2,3,10,5];
-    dataset_Ct_tactile_asm.exclude{np, 3}   = [1,4,3,7,2];
-    dataset_Ct_tactile_asm.exclude{np, 4}   = [10,14,5,1,11];
-    dataset_Ct_tactile_asm.exclude{np, 5}   = [1,2,5,13,15];
+    dataset_Ct_tactile_asm.exclude{np, 1}   = [];
+    dataset_Ct_tactile_asm.exclude{np, 2}   = [];
+    dataset_Ct_tactile_asm.exclude{np, 3}   = [];
+    dataset_Ct_tactile_asm.exclude{np, 4}   = [];
+    dataset_Ct_tactile_asm.exclude{np, 5}   = [];
     dataset_Ct_tactile_asm.exclude{np, 6}   = [];
     dataset_Ct_tactile_asm.exclude{np, 7}   = [];
     dataset_Ct_tactile_asm.exclude{np, 8}   = [];
