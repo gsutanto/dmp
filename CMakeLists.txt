@@ -33,11 +33,13 @@ include_directories(
 
 get_filename_component(DATA_DIR data ABSOLUTE)
 get_filename_component(MATLAB_DIR matlab ABSOLUTE)
+get_filename_component(PYTHON_DIR python ABSOLUTE)
 get_filename_component(PLOT_DIR plot ABSOLUTE)
 get_filename_component(RT_ERRORS_DIR rt_errors ABSOLUTE)
 
 set(COMPILE_DEFS DMP_DATA_DIR=\"${DATA_DIR}\"
   DMP_MATLAB_DIR=\"${MATLAB_DIR}\"
+  DMP_PYTHON_DIR=\"${PYTHON_DIR}\"
   DMP_PLOT_DIR=\"${PLOT_DIR}\"
   DMP_RT_ERRORS_DIR=\"${RT_ERRORS_DIR}\"
 )
