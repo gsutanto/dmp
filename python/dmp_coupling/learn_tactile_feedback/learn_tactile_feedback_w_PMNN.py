@@ -123,6 +123,7 @@ for input_selector in input_selector_list:
             print('Perform NON-generalization test training...')
         
         for prim_no in range(1, 4):
+#        for prim_no in range(2, 4):
             print ("prim_no = ", prim_no)
             
             # load dataset:
