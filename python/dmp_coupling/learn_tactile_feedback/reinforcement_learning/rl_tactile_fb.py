@@ -142,8 +142,9 @@ class RLTactileFeedback:
         self.N_primitives = 3
         self.K_PI2_samples = 38#75 # K
         self.N_cost_evaluation_cl_behavior = 8
-        self.N_cost_evaluation_ole_behavior_general = 3
+        self.N_cost_evaluation_ole_behavior_initial = 3
         self.N_cost_evaluation_ole_behavior_per_PI2_sample = 1
+        self.N_cost_evaluation_ole_behavior_PI2_updated = 8
         
         self.cart_dim_tbi_dict = {}
         self.cart_dim_tbi_dict["Quaternion"] = np.array([1]) # to-be-improved (tbi): Quaternion DMP, 2nd dimension
@@ -151,7 +152,7 @@ class RLTactileFeedback:
         
         self.cart_dim_tbi_supervision_threshold_dict = {}
         self.cart_dim_tbi_supervision_threshold_dict["Quaternion"] = {}
-        self.cart_dim_tbi_supervision_threshold_dict["Quaternion"]["omegad"] = 3.0
+        self.cart_dim_tbi_supervision_threshold_dict["Quaternion"]["omegad"] = 5.0
         
 #        self.cost_threshold = [0.0, 18928850.8053, 11066375.797] # X_vector squared norm as cost
         self.cost_threshold = [0.0, 0.05, 0.05] # rot_diff_err_b squared norm as cost
@@ -250,8 +251,8 @@ class RLTactileFeedback:
                 
                 plt.close('all')
                 
-                self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_ole_behavior_general, 
-                                                  exec_behavior_until_prim_no=self.prim_tbi, 
+                self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_ole_behavior_initial, 
+                                                  exec_behavior_until_prim_no=self.N_primitives - 1, 
                                                   behavior_params=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params"], 
                                                   feedback_model_params=None, 
                                                   exec_mode="EXEC_OPENLOOPEQUIV_DMP_ONLY", 
@@ -276,8 +277,7 @@ class RLTactileFeedback:
                  ] = rl_util.extractParamsToBeImproved(self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params"], 
                                                        self.cart_dim_tbi_dict, self.cart_types_tbi_list, self.prim_tbi)
                 if (self.it == 0):
-                    self.rl_data[self.prim_tbi][self.it]["PI2_param_init_std"] = rl_util.computeParamInitStdHeuristic(self.rl_data[self.prim_tbi][self.it]["PI2_param_mean"], 
-                                                                                                                      params_mean_extrema_to_init_std_factor=5.0)
+                    self.rl_data[self.prim_tbi][self.it]["PI2_param_init_std"] = 10.0 # rl_util.computeParamInitStdHeuristic(self.rl_data[self.prim_tbi][self.it]["PI2_param_mean"], params_mean_extrema_to_init_std_factor=5.0)
                     self.rl_data[self.prim_tbi][self.it]["PI2_param_cov"] = np.diag(np.ones(len(self.rl_data[self.prim_tbi][self.it]["PI2_param_mean"])) * (self.rl_data[self.prim_tbi][self.it]["PI2_param_init_std"] * self.rl_data[self.prim_tbi][self.it]["PI2_param_init_std"]))
                 else:
                     self.rl_data[self.prim_tbi][self.it]["PI2_param_cov"] = self.rl_data[self.prim_tbi][self.it-1]["PI2_param_new_cov"]
@@ -364,7 +364,7 @@ class RLTactileFeedback:
                 if (self.is_pausing):
                     raw_input("About to execute PI2-updated open-loop-equivalent (OLE) behavior on the robot. Press [ENTER] to continue...")
                 
-                self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_ole_behavior_general, 
+                self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_ole_behavior_PI2_updated, 
                                                   exec_behavior_until_prim_no=self.N_primitives - 1, 
                                                   behavior_params=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_new_params"], 
                                                   feedback_model_params=None, 
