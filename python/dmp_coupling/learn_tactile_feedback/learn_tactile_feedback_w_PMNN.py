@@ -26,7 +26,7 @@ model_parent_dir_path = './models/'
 if not os.path.isdir(model_parent_dir_path):
     os.makedirs(model_parent_dir_path)
 
-N_NN_reinit_trials = 3
+N_NN_reinit_trials = 1 # 3
 batch_size = 64
 TF_max_train_iters = np.loadtxt(model_parent_dir_path+'TF_max_train_iters.txt', dtype=np.int, ndmin=0) + 1
 
@@ -43,7 +43,7 @@ NN_name = 'my_ffNNphaseLWR'
 fraction_train_dataset = 0.85
 fraction_test_dataset  = 0.075
 
-chunk_size = 1
+chunk_size = 38
 
 is_performing_weighted_training = 1
 is_performing_generalization_test = 0
@@ -122,7 +122,7 @@ for input_selector in input_selector_list:
         else:
             print('Perform NON-generalization test training...')
         
-        for prim_no in range(2, 4):
+        for prim_no in range(1, 4):
             print ("prim_no = ", prim_no)
             
             # load dataset:

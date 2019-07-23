@@ -141,7 +141,7 @@ class RLTactileFeedback:
         self.N_total_sense_dimensionality = 45
         self.N_primitives = 3
         self.K_PI2_samples = 38#75 # K
-        self.N_cost_evaluation_cl_behavior = 5
+        self.N_cost_evaluation_cl_behavior = 8
         self.N_cost_evaluation_ole_behavior_general = 3
         self.N_cost_evaluation_ole_behavior_per_PI2_sample = 1
         
