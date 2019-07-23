@@ -24,6 +24,16 @@ void get_matlab_path(char * get, const char* relative_path){
 }
 
 
+std::string get_python_path(const char* relative_path){
+  return std::string(DMP_PYTHON_DIR+std::string(relative_path));
+}
+
+void get_python_path(char * get, const char* relative_path){
+  const char*  abs_path = get_python_path(relative_path).c_str();
+  strcpy(get,abs_path);
+}
+
+
 std::string get_plot_path(const char* relative_path){
   return std::string(DMP_PLOT_DIR+std::string(relative_path));
 }

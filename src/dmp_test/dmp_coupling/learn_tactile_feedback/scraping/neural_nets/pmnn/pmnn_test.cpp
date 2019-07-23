@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 
     std::vector< uint > topology(4);
     topology[0]         = 45;
-    topology[1]         = 100;
+    topology[1]         = 100; // just an initialization, may be changed later by loading from a file
     topology[2]         = 25;
     topology[3]         = 1;
 
@@ -63,6 +63,15 @@ int main(int argc, char** argv)
     rt_assertor.clear_rt_err_file();
 
     DataIO                          data_io(&rt_assertor);
+
+    int regular_NN_hidden_layer_topology    = 0;
+    if (rt_assert_main(data_io.readMatrixFromFile(get_python_path("/dmp_coupling/learn_tactile_feedback/models/").c_str(),
+                                                  "regular_NN_hidden_layer_topology.txt", regular_NN_hidden_layer_topology)) == false)
+    {
+        printf("Failed reading PMNN topology specification\n");
+        return (-1);
+    }
+    topology[1] = (uint) regular_NN_hidden_layer_topology;
 
     PMNN                            pmnn(6, topology, activation_functions, &rt_assertor);
 

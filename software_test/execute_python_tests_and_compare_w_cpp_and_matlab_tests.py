@@ -69,7 +69,7 @@ quat_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_abs_path, 2, 1.9976, 1.9
 compareTwoNumericFiles(devel_software_test_dir_abs_path+'/test_matlab_quat_dmp_multi_traj_training_test_0_2.txt', 
                        devel_software_test_dir_abs_path+'/test_python_quat_dmp_multi_traj_training_test_0_2.txt', 1.251e-5)
 compareTwoNumericFiles(devel_software_test_dir_abs_path+'/test_matlab_quat_dmp_multi_traj_training_test_0_2_learned_params.txt', 
-                       devel_software_test_dir_abs_path+'/test_python_quat_dmp_multi_traj_training_test_0_2_learned_params.txt', 1.001e-5, 8.75e-4, True)
+                       devel_software_test_dir_abs_path+'/test_python_quat_dmp_multi_traj_training_test_0_2_learned_params.txt', 7.501e-5, 1.5e-3, True)
 
 print("Testing Learning QuaternionDMP from Smoothed Quaternion Trajectory...")
 quat_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_abs_path, 2, 1.9976, 1.9976, devel_software_test_dir_abs_path, 'test_python_quat_dmp_multi_smoothed_traj_training_test_0_2.txt', 

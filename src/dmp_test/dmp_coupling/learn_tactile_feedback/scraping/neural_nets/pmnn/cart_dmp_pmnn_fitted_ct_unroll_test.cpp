@@ -46,7 +46,7 @@ int main(int argc, char** argv)
 
     std::vector< uint > topology(4);
     topology[0]         = NN_input_size;
-    topology[1]         = 100;
+    topology[1]         = 100; // just an initialization, may be changed later by loading from a file
     topology[2]         = model_size;
     topology[3]         = 1;
 
@@ -328,7 +328,16 @@ int main(int argc, char** argv)
 
     VectorNN_N  X_vector(N_total_sense_dimensionality);
 
-    char pmnn_model_path[1000]    = "";
+    int regular_NN_hidden_layer_topology    = 0;
+    if (rt_assert_main(data_io.readMatrixFromFile(get_python_path("/dmp_coupling/learn_tactile_feedback/models/").c_str(),
+                                                  "regular_NN_hidden_layer_topology.txt", regular_NN_hidden_layer_topology)) == false)
+    {
+        printf("Failed reading PMNN topology specification\n");
+        return (-1);
+    }
+    topology[1] = (uint) regular_NN_hidden_layer_topology;
+
+    char pmnn_model_path[1000]              = "";
     for (uint np=0; np<N_prims; ++np)
     {
         // Initialize Phase-Modulated Neural Network (PMNN):
