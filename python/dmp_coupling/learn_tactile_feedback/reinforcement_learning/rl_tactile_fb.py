@@ -471,6 +471,7 @@ class RLTactileFeedback:
                     
                     if (self.is_current_iter_converting_new_ole_into_new_cl):
                         self.rl_data[self.prim_tbi][self.it]["unroll_results"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it-1]["cl_cdmp_new_evals"])
+                        self.rl_data[self.prim_tbi][self.it]["cl_cdmp_evals"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it]["unroll_results"])
                     else:
                         # extract unrolling results: trajectories, sensor trace deviations, cost
                         self.rl_data[self.prim_tbi][self.it]["unroll_results"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it-1]["ole_cdmp_new_evals"])
