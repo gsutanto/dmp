@@ -43,7 +43,7 @@ NN_name = 'my_ffNNphaseLWR'
 fraction_train_dataset = 0.85
 fraction_test_dataset  = 0.075
 
-chunk_size = 38
+chunk_size = np.loadtxt(model_parent_dir_path+'chunk_size.txt', dtype=np.int, ndmin=0) + 0
 
 is_performing_weighted_training = 1
 is_performing_generalization_test = 0

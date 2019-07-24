@@ -47,7 +47,7 @@ class RLTactileFbPMNNSupervisedTraining:
         self.expected_N_phaseLWR_kernels = 25
         self.expected_D_output = 6
         
-        self.chunk_size = 1
+        self.chunk_size = np.loadtxt(self.initial_model_parent_dir_path+'chunk_size.txt', dtype=np.int, ndmin=0) + 0
         
         self.is_performing_weighted_training = True
         self.is_only_optimizing_roll_Ct = True
@@ -160,6 +160,14 @@ class RLTactileFbPMNNSupervisedTraining:
         self.nPSI_test = np.vstack([self.nPSI_demo_test[prim_tbi], self.nPSI_rlit_test[prim_tbi]])
         self.Ctt_test = np.vstack([self.Ctt_demo_test[prim_tbi], self.Ctt_rlit_test[prim_tbi]])
         self.W_test = np.vstack([self.W_demo_test[prim_tbi], self.W_rlit_test[prim_tbi]])
+        
+        # Measure proportion of rlit and demo dataset:
+        self.percentage_proportion_rlit_train = self.DeltaS_rlit_train[prim_tbi].shape[0] * 100.0 / self.DeltaS_train.shape[0]
+        self.percentage_proportion_rlit_valid = self.DeltaS_rlit_valid[prim_tbi].shape[0] * 100.0 / self.DeltaS_valid.shape[0]
+        self.percentage_proportion_rlit_test  = self.DeltaS_rlit_test[prim_tbi].shape[0]  * 100.0 / self.DeltaS_test.shape[0]
+        print('percentage_proportion_rlit_train = %f%%' % self.percentage_proportion_rlit_train)
+        print('percentage_proportion_rlit_valid = %f%%' % self.percentage_proportion_rlit_valid)
+        print('percentage_proportion_rlit_test  = %f%%' % self.percentage_proportion_rlit_test)
         
         # Training Dataset Index is Permuted for Stochastic Gradient Descent (SGD)
         permuted_idx_train_dataset = np.random.permutation(self.DeltaS_train.shape[0])
