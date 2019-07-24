@@ -260,7 +260,7 @@ class RLTactileFeedback:
                 
                 # evaluate the cost of the open-loop-equivalent primitive
                 self.rl_data[self.prim_tbi][self.it]["ole_cdmp_evals"] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(self.sl_data_dirpath, 
-                                                                                                                                  N_primitives=self.prim_tbi+1, 
+                                                                                                                                  N_primitives=self.N_primitives, 
                                                                                                                                   N_cost_components=self.N_total_sense_dimensionality)
                 self.J_prime = self.rl_data[self.prim_tbi][self.it]["ole_cdmp_evals"]["mean_accum_cost"][self.prim_tbi]
                 self.abs_diff_J_and_J_prime = np.fabs(self.J - self.J_prime)
