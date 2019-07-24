@@ -475,7 +475,7 @@ class RLTactileFeedback:
                         # extract unrolling results: trajectories, sensor trace deviations, cost
                         self.rl_data[self.prim_tbi][self.it]["unroll_results"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it-1]["ole_cdmp_new_evals"])
                 
-                # TODO: In simulation: test 4 different combinations of self.is_pipeline_executed_only_up_to_pi2 and self.is_always_converting_new_ole_into_new_cl_every_rl_iters until switching to the next primitive; all must be working successfully as expected (Saturday, July 20, 2019)
+                py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
 
 if __name__ == '__main__':
     rl_tactile_fb = RLTactileFeedback(is_unrolling_pi2_samples=True, 

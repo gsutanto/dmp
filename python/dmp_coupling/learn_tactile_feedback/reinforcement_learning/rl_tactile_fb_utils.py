@@ -511,8 +511,10 @@ def learnCartDMPUnrollParams(unroll_results, prims_to_be_learned="All",
                                    title_suffix=" Prim. #%d" % (n_prim+1), fig_num_offset=(6*n_prim)+3)
         
         if (n_prim != 1): # 2nd primitive's position DMP fitting maybe bad because there's no change in position (no position movement)
-            assert ((nmse_smoothened_X < 1.0).all())
-        assert (np.bitwise_or(nmse_smoothened_Q < 1.0, vargt_smoothened_Q < threshold_var_ground_truth_Q).all())
+            if (not (nmse_smoothened_X < 1.0).all()):
+                raw_input("Condition (not (nmse_smoothened_X < 1.0).all()) is triggered. Press [ENTER] to continue (ONLY if it is considered safe to do so)...")
+        if (not (np.bitwise_or(nmse_smoothened_Q < 1.0, vargt_smoothened_Q < threshold_var_ground_truth_Q).all())):
+            raw_input("Condition (not (np.bitwise_or(nmse_smoothened_Q < 1.0, vargt_smoothened_Q < threshold_var_ground_truth_Q).all())) is triggered. Press [ENTER] to continue (ONLY if it is considered safe to do so)...")
         
     return cdmp_trajs, cdmp_params, cdmp_unroll
 
