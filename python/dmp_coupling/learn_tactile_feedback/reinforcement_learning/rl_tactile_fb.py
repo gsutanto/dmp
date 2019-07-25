@@ -152,7 +152,7 @@ class RLTactileFeedback:
         
         self.cart_dim_tbi_supervision_threshold_dict = {}
         self.cart_dim_tbi_supervision_threshold_dict["Quaternion"] = {}
-        self.cart_dim_tbi_supervision_threshold_dict["Quaternion"]["omegad"] = 5.0
+        self.cart_dim_tbi_supervision_threshold_dict["Quaternion"]["omegad"] = 8.0
         
 #        self.cost_threshold = [0.0, 18928850.8053, 11066375.797] # X_vector squared norm as cost
         self.cost_threshold = [0.0, 0.05, 0.05] # rot_diff_err_b squared norm as cost
