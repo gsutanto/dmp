@@ -28,7 +28,8 @@ class PMNN(FeedForwardNeuralNetwork):
     def __init__(self, name, D_input, 
                  regular_hidden_layer_topology, regular_hidden_layer_activation_func_list, 
                  N_phaseLWR_kernels, D_output, 
-                 path="", is_using_phase_kernel_modulation=True, is_predicting_only=False):
+                 path="", is_using_phase_kernel_modulation=True, is_predicting_only=False, 
+                 model_params_dict=None):
         self.name = name
         
         self.neural_net_topology = [D_input] + regular_hidden_layer_topology + [N_phaseLWR_kernels, D_output]
@@ -51,13 +52,16 @@ class PMNN(FeedForwardNeuralNetwork):
         self.model_params = {}
         
         self.is_predicting_only = is_predicting_only
-        if (self.is_predicting_only == False): # means both predicting and learning, i.e. this requires to be called from inside a TensorFlow session.
-            if (path == ""):
-                self.num_params = self.defineNeuralNetworkModel()
-            else:
+        if (model_params_dict is not None):
+            self.num_params = self.loadNeuralNetworkFromDict(model_params_dict)
+        else:
+            if (self.is_predicting_only == False): # means both predicting and learning, i.e. this requires to be called from inside a TensorFlow session.
+                if (path == ""):
+                    self.num_params = self.defineNeuralNetworkModel()
+                else:
+                    self.num_params = self.loadNeuralNetworkFromPath(path)
+            else: # only doing predictions, do NOT need to be called from inside a TensorFlow session
                 self.num_params = self.loadNeuralNetworkFromPath(path)
-        else: # only doing predictions, do NOT need to be called from inside a TensorFlow session
-            self.num_params = self.loadNeuralNetworkFromPath(path)
         
         self.is_using_phase_kernel_modulation = is_using_phase_kernel_modulation
     
@@ -359,12 +363,8 @@ class PMNN(FeedForwardNeuralNetwork):
             train_op_dim = opt_dim.minimize(loss_dim, global_step=global_step_dim)
         
         return train_op_dim, loss_dim
-
-    # Save model in MATLAB format.
-    def saveNeuralNetworkToMATLABMatFile(self):
-        """
-        Save the Neural Network model into a MATLAB *.m file.
-        """
+    
+    def saveNeuralNetworkToDict(self):
         assert (self.is_predicting_only == False), 'Needs to be inside a TensorFlow session, therefore self.is_predicting_only must be False!'
         
         self.model_params={}
@@ -383,17 +383,13 @@ class PMNN(FeedForwardNeuralNetwork):
                     if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
                         biases = tf.get_variable('biases', [current_layer_dim_size])
                         self.model_params[self.name+'_'+layer_dim_ID+"_biases"] = biases.eval()
+                        self.model_params[self.name+'_'+layer_dim_ID+"_biases"] = self.model_params[self.name+'_'+layer_dim_ID+"_biases"].reshape((1, current_layer_dim_size))
     
         return self.model_params
-
-    # Load model from MATLAB format.
-    def loadNeuralNetworkFromMATLABMatFile(self, filepath):
-        """
-        Load a Neural Network model from a MATLAB *.mat file. Functionally comparable to the defineNeuralNetworkModel() function.
-        :param filepath: (relative) path in the directory structure specifying the location of the file to be loaded.
-        """
+    
+    def loadNeuralNetworkFromDict(self, model_params_dict):
         num_params = 0
-        self.model_params = sio.loadmat(filepath, struct_as_record=True)
+        self.model_params = model_params_dict
         for i in range(1, self.N_layers):
             layer_name = self.getLayerName(i)
     
@@ -421,6 +417,25 @@ class PMNN(FeedForwardNeuralNetwork):
         num_params /= self.D_output
         print("Total # of Parameters = %d" % num_params)
         return num_params
+
+    # Save model in MATLAB format.
+    def saveNeuralNetworkToMATLABMatFile(self, filepath=None):
+        """
+        Save the Neural Network model into a MATLAB *.m file.
+        """
+        self.model_params = self.saveNeuralNetworkToDict()
+        if (filepath is not None):
+            sio.savemat(filepath, self.model_params)
+        return self.model_params
+
+    # Load model from MATLAB format.
+    def loadNeuralNetworkFromMATLABMatFile(self, filepath):
+        """
+        Load a Neural Network model from a MATLAB *.mat file. Functionally comparable to the defineNeuralNetworkModel() function.
+        :param filepath: (relative) path in the directory structure specifying the location of the file to be loaded.
+        """
+        self.model_params = sio.loadmat(filepath, struct_as_record=True)
+        return self.loadNeuralNetworkFromDict(self.model_params)
 
     # Save model in *.txt format.
     def saveNeuralNetworkToTextFiles(self, dirpath):
@@ -452,7 +467,7 @@ class PMNN(FeedForwardNeuralNetwork):
                 else:
                     weights = self.model_params[self.name+'_'+layer_dim_ID+"_weights"]
                     if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
-                        biases = self.model_params[self.name+'_'+layer_dim_ID+"_biases"]
+                        biases = self.model_params[self.name+'_'+layer_dim_ID+"_biases"].reshape((1, max(self.model_params[self.name+'_'+layer_dim_ID+"_biases"].shape)))
                 np.savetxt(dirpath + "/" + str(dim_out) + "/w" + str(i-1), weights)
                 if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
                     np.savetxt(dirpath + "/" + str(dim_out) + "/b" + str(i-1), biases)
@@ -483,14 +498,14 @@ class PMNN(FeedForwardNeuralNetwork):
                 self.model_params[self.name+'_'+layer_dim_ID+"_weights"] = weights_temp
                 if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
                     biases_temp = np.loadtxt(dirpath + "/" + str(dim_out) + "/b" + str(i-1)).astype(np.float32)
-                    self.model_params[self.name+'_'+layer_dim_ID+"_biases"] = biases_temp
+                    self.model_params[self.name+'_'+layer_dim_ID+"_biases"] = biases_temp.reshape((1, max(biases_temp.shape)))
                 if (self.is_predicting_only == False):
                     with tf.variable_scope(self.name+'_'+layer_dim_ID, reuse=False):
                         weights = tf.get_variable('weights', initializer=self.model_params[self.name+'_'+layer_dim_ID+"_weights"])
                         weights_dim = weights.get_shape().as_list()
                         num_params += weights_dim[0] * weights_dim[1]
                         if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
-                            biases = tf.get_variable('biases', initializer=self.model_params[self.name+'_'+layer_dim_ID+"_biases"])
+                            biases = tf.get_variable('biases', initializer=self.model_params[self.name+'_'+layer_dim_ID+"_biases"].reshape((max(self.model_params[self.name+'_'+layer_dim_ID+"_biases"].shape),)))
                             num_params += biases.get_shape().as_list()[0]
                 else:
                     weights = self.model_params[self.name+'_'+layer_dim_ID+"_weights"]
@@ -498,7 +513,7 @@ class PMNN(FeedForwardNeuralNetwork):
                     num_params += weights_dim[0] * weights_dim[1]
                     if (i < self.N_layers - 1): # Hidden Layers (including the Final Hidden Layer with Phase LWR Gating/Modulation); Output Layer does NOT have biases!!!
                         biases = self.model_params[self.name+'_'+layer_dim_ID+"_biases"]
-                        num_params += list(biases.shape)[0]
+                        num_params += max(list(biases.shape))
         num_params /= self.D_output
         print("Total # of Parameters = %d" % num_params)
         return num_params

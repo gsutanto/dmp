@@ -683,34 +683,6 @@ def computeParamInitStdHeuristic(param_mean, params_mean_extrema_to_init_std_fac
                                                                       np.min(np.fabs(param_mean))))
     return param_init_std
 
-def loadPrimsParamsAsDictFromDirPath(prims_params_dirpath, N_primitives):
-    cdmp_params = {}
-    cdmp_params["CartCoord"] = [None] * N_primitives
-    cdmp_params["Quaternion"] = [None] * N_primitives
-    for n_prim in range(N_primitives):
-        cdmp_params["CartCoord"][n_prim] = ccdmp.loadParamsAsDict(prims_params_dirpath+"/position/prim%d/"%(n_prim+1), 
-                                                                  file_name_weights="w", 
-                                                                  file_name_A_learn="A_learn", 
-                                                                  file_name_mean_start_position="start_global", 
-                                                                  file_name_mean_goal_position="goal_global", 
-                                                                  file_name_mean_tau="tau", 
-                                                                  file_name_canonical_system_order="canonical_sys_order", 
-                                                                  file_name_mean_start_position_global="start_global", 
-                                                                  file_name_mean_goal_position_global="goal_global", 
-                                                                  file_name_mean_start_position_local="start_local", 
-                                                                  file_name_mean_goal_position_local="goal_local", 
-                                                                  file_name_ctraj_local_coordinate_frame_selection="ctraj_local_coordinate_frame_selection", 
-                                                                  file_name_ctraj_hmg_transform_local_to_global_matrix="T_local_to_global_H", 
-                                                                  file_name_ctraj_hmg_transform_global_to_local_matrix="T_global_to_local_H")
-        cdmp_params["Quaternion"][n_prim] = qdmp.loadParamsAsDict(prims_params_dirpath+"/orientation/prim%d/"%(n_prim+1), 
-                                                                  file_name_weights="w", 
-                                                                  file_name_A_learn="A_learn", 
-                                                                  file_name_mean_start_position="start", 
-                                                                  file_name_mean_goal_position="goal", 
-                                                                  file_name_mean_tau="tau", 
-                                                                  file_name_canonical_system_order="canonical_sys_order")
-    return cdmp_params
-
 def savePrimsParamsFromDictAtDirPath(prims_params_dirpath, cdmp_params):
     N_primitives = len(cdmp_params["CartCoord"])
     py_util.createDirIfNotExist(prims_params_dirpath)
@@ -741,6 +713,34 @@ def savePrimsParamsFromDictAtDirPath(prims_params_dirpath, cdmp_params):
                                 file_name_mean_tau="tau", 
                                 file_name_canonical_system_order="canonical_sys_order")
     return None
+
+def loadPrimsParamsAsDictFromDirPath(prims_params_dirpath, N_primitives):
+    cdmp_params = {}
+    cdmp_params["CartCoord"] = [None] * N_primitives
+    cdmp_params["Quaternion"] = [None] * N_primitives
+    for n_prim in range(N_primitives):
+        cdmp_params["CartCoord"][n_prim] = ccdmp.loadParamsAsDict(prims_params_dirpath+"/position/prim%d/"%(n_prim+1), 
+                                                                  file_name_weights="w", 
+                                                                  file_name_A_learn="A_learn", 
+                                                                  file_name_mean_start_position="start_global", 
+                                                                  file_name_mean_goal_position="goal_global", 
+                                                                  file_name_mean_tau="tau", 
+                                                                  file_name_canonical_system_order="canonical_sys_order", 
+                                                                  file_name_mean_start_position_global="start_global", 
+                                                                  file_name_mean_goal_position_global="goal_global", 
+                                                                  file_name_mean_start_position_local="start_local", 
+                                                                  file_name_mean_goal_position_local="goal_local", 
+                                                                  file_name_ctraj_local_coordinate_frame_selection="ctraj_local_coordinate_frame_selection", 
+                                                                  file_name_ctraj_hmg_transform_local_to_global_matrix="T_local_to_global_H", 
+                                                                  file_name_ctraj_hmg_transform_global_to_local_matrix="T_global_to_local_H")
+        cdmp_params["Quaternion"][n_prim] = qdmp.loadParamsAsDict(prims_params_dirpath+"/orientation/prim%d/"%(n_prim+1), 
+                                                                  file_name_weights="w", 
+                                                                  file_name_A_learn="A_learn", 
+                                                                  file_name_mean_start_position="start", 
+                                                                  file_name_mean_goal_position="goal", 
+                                                                  file_name_mean_tau="tau", 
+                                                                  file_name_canonical_system_order="canonical_sys_order")
+    return cdmp_params
 
 def splitDatasetIntoTrainValidTestSubDataset(DeltaS, Ct_target, normalized_phase_kernels, data_point_priority, dataset_suffix, n_prim, 
                                              expected_D_input, expected_D_output, expected_N_phaseLWR_kernels, chunk_size, 

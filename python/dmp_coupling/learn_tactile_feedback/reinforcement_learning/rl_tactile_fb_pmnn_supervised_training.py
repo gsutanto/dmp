@@ -115,6 +115,42 @@ class RLTactileFbPMNNSupervisedTraining:
                                                                   self.expected_D_input, self.expected_D_output, self.expected_N_phaseLWR_kernels, self.chunk_size, 
                                                                   self.fraction_train_dataset, self.fraction_test_dataset)
     
+    def savePMNNParamsFromDictAtDirPath(self, pmnn_params_dirpath, pmnn_params):
+        N_primitives = len(pmnn_params.keys())
+        py_util.createDirIfNotExist(pmnn_params_dirpath)
+        for n_prim in range(N_primitives):
+            pmnn_prim_param_dirpath = pmnn_params_dirpath+"/prim%d/"%(n_prim+1)
+            
+            self.pmnn = PMNN(name=self.NN_name, D_input=self.expected_D_input, 
+                             regular_hidden_layer_topology=self.regular_NN_hidden_layer_topology, 
+                             regular_hidden_layer_activation_func_list=self.regular_NN_hidden_layer_activation_func_list, 
+                             N_phaseLWR_kernels=self.expected_N_phaseLWR_kernels, 
+                             D_output=self.expected_D_output, 
+                             path="", 
+                             is_using_phase_kernel_modulation=True, 
+                             is_predicting_only=True, 
+                             model_params_dict=pmnn_params[n_prim])
+            
+            self.pmnn.saveNeuralNetworkToTextFiles(pmnn_prim_param_dirpath)
+        return None
+    
+    def loadPMNNParamsAsDictFromDirPath(self, pmnn_params_dirpath, N_primitives):
+        pmnn_params = {}
+        for n_prim in range(N_primitives):
+            pmnn_prim_param_dirpath = pmnn_params_dirpath+"/prim%d/"%(n_prim+1)
+            
+            self.pmnn = PMNN(name=self.NN_name, D_input=self.expected_D_input, 
+                             regular_hidden_layer_topology=self.regular_NN_hidden_layer_topology, 
+                             regular_hidden_layer_activation_func_list=self.regular_NN_hidden_layer_activation_func_list, 
+                             N_phaseLWR_kernels=self.expected_N_phaseLWR_kernels, 
+                             D_output=self.expected_D_output, 
+                             path=pmnn_prim_param_dirpath, 
+                             is_using_phase_kernel_modulation=True, 
+                             is_predicting_only=True)
+            
+            pmnn_params[n_prim] = self.pmnn.saveNeuralNetworkToDict()
+        return pmnn_params
+        
     def trainPMNNWithAdditionalRLIterDatasetInitializedAtPath(self, rl_data, 
                                                               prim_tbi, # prim-to-be-improved
                                                               iterations_list, 
@@ -376,8 +412,7 @@ class RLTactileFbPMNNSupervisedTraining:
                     eval_info["nmse_test"] = nmse_test
                     eval_info["var_ground_truth_Ctt_train"] = var_ground_truth_Ctt_train
                     
-                    NN_model_params = self.pmnn.saveNeuralNetworkToMATLABMatFile()
-                    sio.savemat((self.rl_model_output_dir_path+'prim_'+str(prim_tbi+1)+'_params_step_%07d'%step+'.mat'), NN_model_params)
+                    NN_model_params = self.pmnn.saveNeuralNetworkToMATLABMatFile(self.rl_model_output_dir_path+'prim_'+str(prim_tbi+1)+'_params_step_%07d'%step+'.mat')
                     sio.savemat((self.rl_model_output_dir_path+'prim_'+str(prim_tbi+1)+'_eval_info_step_%07d'%step+'.mat'), eval_info)
             print("")
             if (self.is_performing_weighted_training):

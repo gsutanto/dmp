@@ -60,7 +60,9 @@ class RLTactileFeedback:
                 assert (feedback_model_params is not None)
                 # actually the (Iteration) PMNN parameters (C++ text files) have been updated when
                 # the execution of trainPMNNWithAdditionalRLIterDatasetInitializedAtPath(...) is finished, 
-                # so we do nothing here with the feedback_model_params ...
+                # but just to be safe ...
+                self.rl_tactile_fb_pmnn_supervised_training.savePMNNParamsFromDictAtDirPath(pmnn_params_dirpath=self.iter_pmnn_params_dirpath, 
+                                                                                            pmnn_params=feedback_model_params)
             
             # command the C++ side to load the text files containing the saved parameters and execute it on the robot
             self.dmp_rl_tactile_fb_robot_exec_mode_msg = DMPRLTactileFeedbackRobotExecMode()
@@ -111,8 +113,8 @@ class RLTactileFeedback:
     def __init__(self, node_name="rl_tactile_feedback", loop_rate=100, 
                  is_unrolling_pi2_samples=True, 
                  is_plotting=True, 
-                 starting_prim_tbi=-1, 
-                 starting_rl_iter=-1):
+                 starting_prim_tbi, 
+                 starting_rl_iter):
         self.is_robot_ready = False
         
         rospy.init_node(node_name)
@@ -169,8 +171,9 @@ class RLTactileFeedback:
         
         self.nominal_cdmp_params = rl_util.loadPrimsParamsAsDictFromDirPath(self.nominal_prims_params_dirpath, self.N_primitives)
         
-        if (not self.is_pipeline_executed_only_up_to_pi2):
-            self.rl_tactile_fb_pmnn_supervised_training = rl_pmnn_tr.RLTactileFbPMNNSupervisedTraining()
+        self.rl_tactile_fb_pmnn_supervised_training = rl_pmnn_tr.RLTactileFbPMNNSupervisedTraining()
+        self.initial_pmnn_params = self.rl_tactile_fb_pmnn_supervised_training.loadPMNNParamsAsDictFromDirPath(self.initial_pmnn_params_dirpath, self.N_primitives)
+        self.current_pmnn_params = copy.deepcopy(self.initial_pmnn_params)
         
         assert (len(starting_prims_tbi) <= self.N_primitives)
         assert ((np.array(starting_prims_tbi) >= 0).all() and (np.array(starting_prims_tbi) < self.N_primitives).all())
@@ -192,6 +195,21 @@ class RLTactileFeedback:
         print ("**********************************************************")
         if ((self.starting_prims_tbi_idx > 0) or (starting_rl_iter > 0)):
             self.rl_data = py_util.loadObj(self.outdata_dirpath+'rl_data.pkl')
+            
+            if (starting_rl_iter > 0):
+                self.current_pmnn_params = copy.deepcopy(self.rl_data[starting_prim_tbi][starting_rl_iter-1]["new_pmnn_params"])
+            else:
+                prev_prim_tbi = starting_prims_tbi[self.starting_prims_tbi_idx-1]
+                prev_prim_tbi_it = 0
+                while (prev_prim_tbi_it in self.rl_data[prev_prim_tbi].keys()):
+                    prev_prim_tbi_it += 1
+                prev_prim_tbi_it -= 1
+                self.current_pmnn_params = copy.deepcopy(self.rl_data[prev_prim_tbi][prev_prim_tbi_it]["new_pmnn_params"])
+            self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_cl_behavior, 
+                                              exec_behavior_until_prim_no=self.N_primitives - 1, 
+                                              behavior_params=None, 
+                                              feedback_model_params=self.current_pmnn_params, 
+                                              exec_mode="EXEC_NOMINAL_DMP_AND_ITERATION_PMNN")
         else:
             self.rl_data = {}
             
@@ -201,7 +219,6 @@ class RLTactileFeedback:
                                               feedback_model_params=None, 
                                               exec_mode="EXEC_NOMINAL_DMP_AND_INITIAL_PMNN")
         
-        self.count_pmnn_param_reuse = 0
         for self.prim_tbi in self.prims_tbi:
             print ("**********************************************************")
             print ("**  Improving the feedback model of primitive # %d/%d...  **" % (self.prim_tbi+1, self.N_primitives))
@@ -221,6 +238,8 @@ class RLTactileFeedback:
                                                                                                                                  N_cost_components=self.N_total_sense_dimensionality)
                 
                 self.rl_data[self.prim_tbi][self.it]["unroll_results"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it]["cl_cdmp_evals"])
+                
+                self.rl_data[self.prim_tbi][self.it]["pmnn_params"] = copy.deepcopy(self.current_pmnn_params)
                 
                 py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
             else:
@@ -419,13 +438,18 @@ class RLTactileFeedback:
                     self.iterations_list = [self.it]
                     
                     [
-                     self.rl_data[self.prim_tbi][self.it]["updated_pmnn_params"], 
-                     self.rl_data[self.prim_tbi][self.it]["updated_pmnn_eval_info"]
+                     self.rl_data[self.prim_tbi][self.it]["updated_pmnn_prim_params"], 
+                     self.rl_data[self.prim_tbi][self.it]["updated_pmnn_prim_eval_info"]
                      ] = self.rl_tactile_fb_pmnn_supervised_training.trainPMNNWithAdditionalRLIterDatasetInitializedAtPath(rl_data=self.rl_data, 
                                                                                                                            prim_tbi=self.prim_tbi, # prim-to-be-improved
                                                                                                                            iterations_list=self.iterations_list, 
                                                                                                                            initial_pmnn_params_dirpath=self.iter_pmnn_params_dirpath # should be cpp_models dirpath
                                                                                                                            )
+                    
+                    self.rl_data[self.prim_tbi][self.it]["new_pmnn_params"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it]["pmnn_params"])
+                    self.rl_data[self.prim_tbi][self.it]["new_pmnn_params"][self.prim_tbi] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it]["updated_pmnn_prim_params"])
+                    
+                    self.current_pmnn_params = copy.deepcopy(self.rl_data[self.prim_tbi][self.it]["new_pmnn_params"])
                     
                     if (self.is_pausing):
                         raw_input("About to execute updated closed-loop (CL) behavior on the robot. Press [ENTER] to continue...")
@@ -434,7 +458,7 @@ class RLTactileFeedback:
                     self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_cl_behavior, 
                                                       exec_behavior_until_prim_no=self.N_primitives - 1, 
                                                       behavior_params=None, 
-                                                      feedback_model_params=self.rl_data[self.prim_tbi][self.it]["updated_pmnn_params"], 
+                                                      feedback_model_params=self.rl_data[self.prim_tbi][self.it]["new_pmnn_params"], 
                                                       exec_mode="EXEC_NOMINAL_DMP_AND_ITERATION_PMNN")
                     
                     # extract unrolling results: trajectories, sensor trace deviations, cost
@@ -472,6 +496,7 @@ class RLTactileFeedback:
                     if (self.is_current_iter_converting_new_ole_into_new_cl):
                         self.rl_data[self.prim_tbi][self.it]["unroll_results"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it-1]["cl_cdmp_new_evals"])
                         self.rl_data[self.prim_tbi][self.it]["cl_cdmp_evals"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it]["unroll_results"])
+                        self.rl_data[self.prim_tbi][self.it]["pmnn_params"] = copy.deepcopy(self.current_pmnn_params)
                     else:
                         # extract unrolling results: trajectories, sensor trace deviations, cost
                         self.rl_data[self.prim_tbi][self.it]["unroll_results"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it-1]["ole_cdmp_new_evals"])
