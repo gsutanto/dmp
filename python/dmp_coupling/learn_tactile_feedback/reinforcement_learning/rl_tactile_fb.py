@@ -201,7 +201,7 @@ class RLTactileFeedback:
             else:
                 prev_prim_tbi = starting_prims_tbi[self.starting_prims_tbi_idx-1]
                 prev_prim_tbi_it = 0
-                while (prev_prim_tbi_it in self.rl_data[prev_prim_tbi].keys()):
+                while ((prev_prim_tbi_it in self.rl_data[prev_prim_tbi].keys()) and ("new_pmnn_params" in self.rl_data[prev_prim_tbi][prev_prim_tbi_it].keys())):
                     prev_prim_tbi_it += 1
                 prev_prim_tbi_it -= 1
                 self.current_pmnn_params = copy.deepcopy(self.rl_data[prev_prim_tbi][prev_prim_tbi_it]["new_pmnn_params"])
