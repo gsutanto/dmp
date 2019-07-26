@@ -113,8 +113,8 @@ class RLTactileFeedback:
     def __init__(self, node_name="rl_tactile_feedback", loop_rate=100, 
                  is_unrolling_pi2_samples=True, 
                  is_plotting=True, 
-                 starting_prim_tbi, 
-                 starting_rl_iter):
+                 starting_prim_tbi=-1, 
+                 starting_rl_iter=-1):
         self.is_robot_ready = False
         
         rospy.init_node(node_name)
