@@ -128,7 +128,8 @@ class RLTactileFeedback:
         self.sl_data_dirpath = self.catkin_ws_path + "/install/bin/arm"
         self.nominal_prims_params_dirpath       = "../../../../data/dmp_coupling/learn_tactile_feedback/scraping/learned_prims_params/"
         self.openloopequiv_prims_params_dirpath = "../../../../data/dmp_coupling/learn_tactile_feedback/scraping/reinforcement_learning/learned_prims_params/"
-        self.initial_pmnn_params_dirpath        = "../../../../data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/cpp_models/"
+#        self.initial_pmnn_params_dirpath        = "../../../../data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/cpp_models/"
+        self.initial_pmnn_params_dirpath        = "../../../../data/dmp_coupling/learn_tactile_feedback/scraping/reinforcement_learning/initial_neural_nets/pmnn/cpp_models/"
         self.iter_pmnn_params_dirpath           = "../../../../data/dmp_coupling/learn_tactile_feedback/scraping/reinforcement_learning/neural_nets/pmnn/cpp_models/"
         self.outdata_dirpath = './'
         

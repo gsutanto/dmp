@@ -5,6 +5,7 @@ import scipy.io as sio
 import tensorflow as tf
 import os
 import sys
+import copy
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../neural_nets/feedforward/pmnn/'))
 import utilities as py_util
@@ -99,7 +100,7 @@ class RLTactileFbPMNNSupervisedTraining:
         self.nPSI_rlit_test = [None] * self.N_primitives
         self.Ctt_rlit_test = [None] * self.N_primitives
         self.W_rlit_test = [None] * self.N_primitives
-        for n_prim in range(1, self.N_primitives):
+        for n_prim in range(self.N_primitives):
             # load dataset:
             self.DeltaS_demo[n_prim] = sio.loadmat('../scraping/prim_'+str(n_prim+1)+'_X_raw_scraping.mat', struct_as_record=True)['X'].astype(np.float32)
             self.Ctt_demo[n_prim] = sio.loadmat('../scraping/prim_'+str(n_prim+1)+'_Ct_target_scraping.mat', struct_as_record=True)['Ct_target'].astype(np.float32)
@@ -151,59 +152,77 @@ class RLTactileFbPMNNSupervisedTraining:
             pmnn_params[n_prim] = self.pmnn.model_params
         return pmnn_params
         
-    def trainPMNNWithAdditionalRLIterDatasetInitializedAtPath(self, rl_data, 
-                                                              prim_tbi, # prim-to-be-improved
-                                                              iterations_list, 
-                                                              initial_pmnn_params_dirpath # should be cpp_models dirpath
+    def trainPMNNWithAdditionalRLIterDatasetInitializedAtPath(self, rl_data=None, 
+                                                              prim_tbi=-1, # prim-to-be-improved
+                                                              iterations_list=None, 
+                                                              initial_pmnn_params_dirpath="" # should be cpp_models dirpath
                                                               ):
-        DeltaS_rlit_list = list()
-        nPSI_rlit_list = list()
-        Ctt_rlit_list = list()
-        W_rlit_list = list()
-        for it in iterations_list:
-            for n_trial in range(len(rl_data[prim_tbi][it]["additional_fb_dataset"][prim_tbi])):
-                DeltaS_rlit_list.append(rl_data[prim_tbi][it]["additional_fb_dataset"][prim_tbi][n_trial]['DeltaS'])
-                nPSI_rlit_list.append(rl_data[prim_tbi][it]["additional_fb_dataset"][prim_tbi][n_trial]['normalized_phase_PSI_mult_phase_V'])
-                Ctt_rlit_list.append(rl_data[prim_tbi][it]["additional_fb_dataset"][prim_tbi][n_trial]['Ct_target'])
-                W_rlit_list.append(rl_data[prim_tbi][it]["additional_fb_dataset"][prim_tbi][n_trial]['data_point_priority'])
+        assert ((prim_tbi >= 0) and (prim_tbi < self.N_primitives))
         
-        self.DeltaS_rlit[prim_tbi] = np.vstack(DeltaS_rlit_list)
-        self.nPSI_rlit[prim_tbi] = np.vstack(nPSI_rlit_list)
-        self.Ctt_rlit[prim_tbi] = np.vstack(Ctt_rlit_list)
-        self.W_rlit[prim_tbi] = np.vstack(W_rlit_list)
-        
-        [self.DeltaS_rlit_train[prim_tbi], self.nPSI_rlit_train[prim_tbi], self.Ctt_rlit_train[prim_tbi], self.W_rlit_train[prim_tbi], 
-         self.DeltaS_rlit_valid[prim_tbi], self.nPSI_rlit_valid[prim_tbi], self.Ctt_rlit_valid[prim_tbi], self.W_rlit_valid[prim_tbi], 
-         self.DeltaS_rlit_test[prim_tbi],  self.nPSI_rlit_test[prim_tbi],  self.Ctt_rlit_test[prim_tbi],  self.W_rlit_test[prim_tbi]
-         ] = rl_util.splitDatasetIntoTrainValidTestSubDataset(self.DeltaS_rlit[prim_tbi], self.Ctt_rlit[prim_tbi], 
-                                                              self.nPSI_rlit[prim_tbi], self.W_rlit[prim_tbi], 
-                                                              "_rlit", prim_tbi, 
-                                                              self.expected_D_input, self.expected_D_output, self.expected_N_phaseLWR_kernels, self.chunk_size, 
-                                                              self.fraction_train_dataset, self.fraction_test_dataset)
-        
-        # combine demo and rlit dataset:
-        self.DeltaS_train = np.vstack([self.DeltaS_demo_train[prim_tbi], self.DeltaS_rlit_train[prim_tbi]])
-        self.nPSI_train = np.vstack([self.nPSI_demo_train[prim_tbi], self.nPSI_rlit_train[prim_tbi]])
-        self.Ctt_train = np.vstack([self.Ctt_demo_train[prim_tbi], self.Ctt_rlit_train[prim_tbi]])
-        self.W_train = np.vstack([self.W_demo_train[prim_tbi], self.W_rlit_train[prim_tbi]])
-        
-        self.DeltaS_valid = np.vstack([self.DeltaS_demo_valid[prim_tbi], self.DeltaS_rlit_valid[prim_tbi]])
-        self.nPSI_valid = np.vstack([self.nPSI_demo_valid[prim_tbi], self.nPSI_rlit_valid[prim_tbi]])
-        self.Ctt_valid = np.vstack([self.Ctt_demo_valid[prim_tbi], self.Ctt_rlit_valid[prim_tbi]])
-        self.W_valid = np.vstack([self.W_demo_valid[prim_tbi], self.W_rlit_valid[prim_tbi]])
-        
-        self.DeltaS_test = np.vstack([self.DeltaS_demo_test[prim_tbi], self.DeltaS_rlit_test[prim_tbi]])
-        self.nPSI_test = np.vstack([self.nPSI_demo_test[prim_tbi], self.nPSI_rlit_test[prim_tbi]])
-        self.Ctt_test = np.vstack([self.Ctt_demo_test[prim_tbi], self.Ctt_rlit_test[prim_tbi]])
-        self.W_test = np.vstack([self.W_demo_test[prim_tbi], self.W_rlit_test[prim_tbi]])
-        
-        # Measure proportion of rlit and demo dataset:
-        self.percentage_proportion_rlit_train = self.DeltaS_rlit_train[prim_tbi].shape[0] * 100.0 / self.DeltaS_train.shape[0]
-        self.percentage_proportion_rlit_valid = self.DeltaS_rlit_valid[prim_tbi].shape[0] * 100.0 / self.DeltaS_valid.shape[0]
-        self.percentage_proportion_rlit_test  = self.DeltaS_rlit_test[prim_tbi].shape[0]  * 100.0 / self.DeltaS_test.shape[0]
-        print('percentage_proportion_rlit_train = %f%%' % self.percentage_proportion_rlit_train)
-        print('percentage_proportion_rlit_valid = %f%%' % self.percentage_proportion_rlit_valid)
-        print('percentage_proportion_rlit_test  = %f%%' % self.percentage_proportion_rlit_test)
+        if (rl_data is not None):
+            DeltaS_rlit_list = list()
+            nPSI_rlit_list = list()
+            Ctt_rlit_list = list()
+            W_rlit_list = list()
+            for it in iterations_list:
+                for n_trial in range(len(rl_data[prim_tbi][it]["additional_fb_dataset"][prim_tbi])):
+                    DeltaS_rlit_list.append(rl_data[prim_tbi][it]["additional_fb_dataset"][prim_tbi][n_trial]['DeltaS'])
+                    nPSI_rlit_list.append(rl_data[prim_tbi][it]["additional_fb_dataset"][prim_tbi][n_trial]['normalized_phase_PSI_mult_phase_V'])
+                    Ctt_rlit_list.append(rl_data[prim_tbi][it]["additional_fb_dataset"][prim_tbi][n_trial]['Ct_target'])
+                    W_rlit_list.append(rl_data[prim_tbi][it]["additional_fb_dataset"][prim_tbi][n_trial]['data_point_priority'])
+            
+            self.DeltaS_rlit[prim_tbi] = np.vstack(DeltaS_rlit_list)
+            self.nPSI_rlit[prim_tbi] = np.vstack(nPSI_rlit_list)
+            self.Ctt_rlit[prim_tbi] = np.vstack(Ctt_rlit_list)
+            self.W_rlit[prim_tbi] = np.vstack(W_rlit_list)
+            
+            [self.DeltaS_rlit_train[prim_tbi], self.nPSI_rlit_train[prim_tbi], self.Ctt_rlit_train[prim_tbi], self.W_rlit_train[prim_tbi], 
+             self.DeltaS_rlit_valid[prim_tbi], self.nPSI_rlit_valid[prim_tbi], self.Ctt_rlit_valid[prim_tbi], self.W_rlit_valid[prim_tbi], 
+             self.DeltaS_rlit_test[prim_tbi],  self.nPSI_rlit_test[prim_tbi],  self.Ctt_rlit_test[prim_tbi],  self.W_rlit_test[prim_tbi]
+             ] = rl_util.splitDatasetIntoTrainValidTestSubDataset(self.DeltaS_rlit[prim_tbi], self.Ctt_rlit[prim_tbi], 
+                                                                  self.nPSI_rlit[prim_tbi], self.W_rlit[prim_tbi], 
+                                                                  "_rlit", prim_tbi, 
+                                                                  self.expected_D_input, self.expected_D_output, self.expected_N_phaseLWR_kernels, self.chunk_size, 
+                                                                  self.fraction_train_dataset, self.fraction_test_dataset)
+            
+            # combine demo and rlit dataset:
+            self.DeltaS_train = np.vstack([self.DeltaS_demo_train[prim_tbi], self.DeltaS_rlit_train[prim_tbi]])
+            self.nPSI_train = np.vstack([self.nPSI_demo_train[prim_tbi], self.nPSI_rlit_train[prim_tbi]])
+            self.Ctt_train = np.vstack([self.Ctt_demo_train[prim_tbi], self.Ctt_rlit_train[prim_tbi]])
+            self.W_train = np.vstack([self.W_demo_train[prim_tbi], self.W_rlit_train[prim_tbi]])
+            
+            self.DeltaS_valid = np.vstack([self.DeltaS_demo_valid[prim_tbi], self.DeltaS_rlit_valid[prim_tbi]])
+            self.nPSI_valid = np.vstack([self.nPSI_demo_valid[prim_tbi], self.nPSI_rlit_valid[prim_tbi]])
+            self.Ctt_valid = np.vstack([self.Ctt_demo_valid[prim_tbi], self.Ctt_rlit_valid[prim_tbi]])
+            self.W_valid = np.vstack([self.W_demo_valid[prim_tbi], self.W_rlit_valid[prim_tbi]])
+            
+            self.DeltaS_test = np.vstack([self.DeltaS_demo_test[prim_tbi], self.DeltaS_rlit_test[prim_tbi]])
+            self.nPSI_test = np.vstack([self.nPSI_demo_test[prim_tbi], self.nPSI_rlit_test[prim_tbi]])
+            self.Ctt_test = np.vstack([self.Ctt_demo_test[prim_tbi], self.Ctt_rlit_test[prim_tbi]])
+            self.W_test = np.vstack([self.W_demo_test[prim_tbi], self.W_rlit_test[prim_tbi]])
+            
+            # Measure proportion of rlit and demo dataset:
+            self.percentage_proportion_rlit_train = self.DeltaS_rlit_train[prim_tbi].shape[0] * 100.0 / self.DeltaS_train.shape[0]
+            self.percentage_proportion_rlit_valid = self.DeltaS_rlit_valid[prim_tbi].shape[0] * 100.0 / self.DeltaS_valid.shape[0]
+            self.percentage_proportion_rlit_test  = self.DeltaS_rlit_test[prim_tbi].shape[0]  * 100.0 / self.DeltaS_test.shape[0]
+            print('percentage_proportion_rlit_train = %f%%' % self.percentage_proportion_rlit_train)
+            print('percentage_proportion_rlit_valid = %f%%' % self.percentage_proportion_rlit_valid)
+            print('percentage_proportion_rlit_test  = %f%%' % self.percentage_proportion_rlit_test)
+        else:
+            self.DeltaS_train = copy.deepcopy(self.DeltaS_demo_train[prim_tbi])
+            self.nPSI_train = copy.deepcopy(self.nPSI_demo_train[prim_tbi])
+            self.Ctt_train = copy.deepcopy(self.Ctt_demo_train[prim_tbi])
+            self.W_train = copy.deepcopy(self.W_demo_train[prim_tbi])
+            
+            self.DeltaS_valid = copy.deepcopy(self.DeltaS_demo_valid[prim_tbi])
+            self.nPSI_valid = copy.deepcopy(self.nPSI_demo_valid[prim_tbi])
+            self.Ctt_valid = copy.deepcopy(self.Ctt_demo_valid[prim_tbi])
+            self.W_valid = copy.deepcopy(self.W_demo_valid[prim_tbi])
+            
+            self.DeltaS_test = copy.deepcopy(self.DeltaS_demo_test[prim_tbi])
+            self.nPSI_test = copy.deepcopy(self.nPSI_demo_test[prim_tbi])
+            self.Ctt_test = copy.deepcopy(self.Ctt_demo_test[prim_tbi])
+            self.W_test = copy.deepcopy(self.W_demo_test[prim_tbi])
         
         # Training Dataset Index is Permuted for Stochastic Gradient Descent (SGD)
         permuted_idx_train_dataset = np.random.permutation(self.DeltaS_train.shape[0])
@@ -219,7 +238,10 @@ class RLTactileFbPMNNSupervisedTraining:
         print('N_valid_dataset = %d' % N_valid_dataset)
         print('N_test_dataset  = %d' % N_test_dataset)
         
-        self.prim_pmnn_params_dirpath = initial_pmnn_params_dirpath + "/prim%d/" % (prim_tbi+1)
+        if (initial_pmnn_params_dirpath != ""):
+            self.prim_pmnn_params_dirpath = initial_pmnn_params_dirpath + "/prim%d/" % (prim_tbi+1)
+        else:
+            self.prim_pmnn_params_dirpath = ""
             
         # Build the complete graph for feeding inputs, training, and saving checkpoints.
         self.pmnn_graph = tf.Graph()
@@ -360,12 +382,13 @@ class RLTactileFbPMNNSupervisedTraining:
                     eval_info = {}
                     print("")
                     
-                    [rlit_wnmse_train, rlit_wnmse_valid, rlit_wnmse_test, rlit_nmse_train, rlit_nmse_valid, rlit_nmse_test, rlit_var_ground_truth_Ctt_train
-                     ] = rl_util.displayLearningEvaluation(tf_dict, 
-                                                           self.DeltaS_rlit_train[prim_tbi], self.nPSI_rlit_train[prim_tbi], self.Ctt_rlit_train[prim_tbi], self.W_rlit_train[prim_tbi], 
-                                                           self.DeltaS_rlit_valid[prim_tbi], self.nPSI_rlit_valid[prim_tbi], self.Ctt_rlit_valid[prim_tbi], self.W_rlit_valid[prim_tbi], 
-                                                           self.DeltaS_rlit_test[prim_tbi],  self.nPSI_rlit_test[prim_tbi],  self.Ctt_rlit_test[prim_tbi],  self.W_rlit_test[prim_tbi], 
-                                                           step=step, is_performing_weighted_training=self.is_performing_weighted_training, print_prefix="RLit ", disp_dim=opt_dim)
+                    if (rl_data is not None):
+                        [rlit_wnmse_train, rlit_wnmse_valid, rlit_wnmse_test, rlit_nmse_train, rlit_nmse_valid, rlit_nmse_test, rlit_var_ground_truth_Ctt_train
+                         ] = rl_util.displayLearningEvaluation(tf_dict, 
+                                                               self.DeltaS_rlit_train[prim_tbi], self.nPSI_rlit_train[prim_tbi], self.Ctt_rlit_train[prim_tbi], self.W_rlit_train[prim_tbi], 
+                                                               self.DeltaS_rlit_valid[prim_tbi], self.nPSI_rlit_valid[prim_tbi], self.Ctt_rlit_valid[prim_tbi], self.W_rlit_valid[prim_tbi], 
+                                                               self.DeltaS_rlit_test[prim_tbi],  self.nPSI_rlit_test[prim_tbi],  self.Ctt_rlit_test[prim_tbi],  self.W_rlit_test[prim_tbi], 
+                                                               step=step, is_performing_weighted_training=self.is_performing_weighted_training, print_prefix="RLit ", disp_dim=opt_dim)
                     
                     [demo_wnmse_train, demo_wnmse_valid, demo_wnmse_test, demo_nmse_train, demo_nmse_valid, demo_nmse_test, demo_var_ground_truth_Ctt_train
                      ] = rl_util.displayLearningEvaluation(tf_dict, 
@@ -382,10 +405,11 @@ class RLTactileFbPMNNSupervisedTraining:
                                                            step=step, is_performing_weighted_training=self.is_performing_weighted_training, print_prefix="", disp_dim=opt_dim)
                     
                     if (self.is_performing_weighted_training):
-                        if ((rlit_wnmse_train is not None) and (rlit_wnmse_valid is not None) and (rlit_wnmse_test is not None)):
-                            eval_info["rlit_wnmse_train"] = rlit_wnmse_train
-                            eval_info["rlit_wnmse_valid"] = rlit_wnmse_valid
-                            eval_info["rlit_wnmse_test"] = rlit_wnmse_test
+                        if (rl_data is not None):
+                            if ((rlit_wnmse_train is not None) and (rlit_wnmse_valid is not None) and (rlit_wnmse_test is not None)):
+                                eval_info["rlit_wnmse_train"] = rlit_wnmse_train
+                                eval_info["rlit_wnmse_valid"] = rlit_wnmse_valid
+                                eval_info["rlit_wnmse_test"] = rlit_wnmse_test
                         
                         if ((demo_wnmse_train is not None) and (demo_wnmse_valid is not None) and (demo_wnmse_test is not None)):
                             eval_info["demo_wnmse_train"] = demo_wnmse_train
@@ -397,10 +421,11 @@ class RLTactileFbPMNNSupervisedTraining:
                             eval_info["wnmse_valid"] = wnmse_valid
                             eval_info["wnmse_test"] = wnmse_test
                     
-                    eval_info["rlit_nmse_train"] = rlit_nmse_train
-                    eval_info["rlit_nmse_valid"] = rlit_nmse_valid
-                    eval_info["rlit_nmse_test"] = rlit_nmse_test
-                    eval_info["rlit_var_ground_truth_Ctt_train"] = rlit_var_ground_truth_Ctt_train
+                    if (rl_data is not None):
+                        eval_info["rlit_nmse_train"] = rlit_nmse_train
+                        eval_info["rlit_nmse_valid"] = rlit_nmse_valid
+                        eval_info["rlit_nmse_test"] = rlit_nmse_test
+                        eval_info["rlit_var_ground_truth_Ctt_train"] = rlit_var_ground_truth_Ctt_train
                     
                     eval_info["demo_nmse_train"] = demo_nmse_train
                     eval_info["demo_nmse_valid"] = demo_nmse_valid
@@ -416,10 +441,11 @@ class RLTactileFbPMNNSupervisedTraining:
                     sio.savemat((self.rl_model_output_dir_path+'prim_'+str(prim_tbi+1)+'_eval_info_step_%07d'%step+'.mat'), eval_info)
             print("")
             if (self.is_performing_weighted_training):
-                print("Final RLit Training       WNMSE: " + str(rlit_wnmse_train))
-                print("Final RLit Validation     WNMSE: " + str(rlit_wnmse_valid))
-                print("Final RLit Test           WNMSE: " + str(rlit_wnmse_test))
-                print("")
+                if (rl_data is not None):
+                    print("Final RLit Training       WNMSE: " + str(rlit_wnmse_train))
+                    print("Final RLit Validation     WNMSE: " + str(rlit_wnmse_valid))
+                    print("Final RLit Test           WNMSE: " + str(rlit_wnmse_test))
+                    print("")
                 
                 print("Final Demo Training       WNMSE: " + str(demo_wnmse_train))
                 print("Final Demo Validation     WNMSE: " + str(demo_wnmse_valid))
@@ -431,10 +457,11 @@ class RLTactileFbPMNNSupervisedTraining:
                 print("Final Test                WNMSE: " + str(wnmse_test))
                 print("")
             
-            print("Final RLit Training        NMSE: " + str(rlit_nmse_train))
-            print("Final RLit Validation      NMSE: " + str(rlit_nmse_valid))
-            print("Final RLit Test            NMSE: " + str(rlit_nmse_test))
-            print("")
+            if (rl_data is not None):
+                print("Final RLit Training        NMSE: " + str(rlit_nmse_train))
+                print("Final RLit Validation      NMSE: " + str(rlit_nmse_valid))
+                print("Final RLit Test            NMSE: " + str(rlit_nmse_test))
+                print("")
             
             print("Final Demo Training        NMSE: " + str(demo_nmse_train))
             print("Final Demo Validation      NMSE: " + str(demo_nmse_valid))
@@ -450,3 +477,23 @@ class RLTactileFbPMNNSupervisedTraining:
             self.pmnn.saveNeuralNetworkToTextFiles(self.prim_pmnn_params_dirpath)
         
         return NN_model_params, eval_info
+
+if __name__ == '__main__':
+    # this main program is to learn PMNN parameters ONLY from demo dataset
+    # (can be considered as initial PMNN parameters in RL setup)
+    rl_tactile_fb_pmnn_supervised_training = RLTactileFbPMNNSupervisedTraining()
+    
+    demo_pmnn_params = {}
+    for n_prim in range(rl_tactile_fb_pmnn_supervised_training.N_primitives):
+        [demo_pmnn_params[n_prim], _
+         ] = rl_tactile_fb_pmnn_supervised_training.trainPMNNWithAdditionalRLIterDatasetInitializedAtPath(rl_data=None, 
+                                                                                                          prim_tbi=n_prim, 
+                                                                                                          iterations_list=None, 
+                                                                                                          initial_pmnn_params_dirpath="")
+    
+    output_initial_pmnn_params_dirpath = "../../../../data/dmp_coupling/learn_tactile_feedback/scraping/reinforcement_learning/initial_neural_nets/pmnn/cpp_models/"
+    
+    py_util.createDirIfNotExist(output_initial_pmnn_params_dirpath)
+    
+    rl_tactile_fb_pmnn_supervised_training.savePMNNParamsFromDictAtDirPath(pmnn_params_dirpath=output_initial_pmnn_params_dirpath, 
+                                                                           pmnn_params=demo_pmnn_params)
