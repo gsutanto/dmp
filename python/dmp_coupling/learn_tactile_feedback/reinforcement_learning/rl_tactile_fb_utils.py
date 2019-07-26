@@ -752,6 +752,7 @@ def splitDatasetIntoTrainValidTestSubDataset(DeltaS, Ct_target, normalized_phase
     
     N_data = Ct_target.shape[0]
     print('N_data%s[%d]   = ' % (dataset_suffix, n_prim) + str(N_data))
+    print('')
     assert (DeltaS.shape[1]    == expected_D_input)
     assert (Ct_target.shape[1] == expected_D_output)
     assert (normalized_phase_kernels.shape[1] == expected_N_phaseLWR_kernels)

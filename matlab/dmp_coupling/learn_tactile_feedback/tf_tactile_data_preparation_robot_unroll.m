@@ -32,7 +32,8 @@ is_evaluating_autoencoder   = 0;
 % subset_settings_indices     = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];   % roll-variation-only of the tiltboard, with equal # of settings between positive-roll-angles and negative-roll-angles
 % subset_settings_indices     = [1:9];   % new dataset (correctable baseline unrolling on robot): roll-variation-only of the tiltboard, with equal # of settings between positive-roll-angles and negative-roll-angles
 % subset_settings_indices     = [1:4,9];
-subset_settings_indices     = [1:4];
+% subset_settings_indices     = [1:4];
+subset_settings_indices     = [1:3]; % for IJRR'19 Paper
 
 % considered_subset_outlier_ranked_demo_indices       = [1:15]; % for ICRA'18 Paper
 considered_subset_outlier_ranked_demo_indices       = [3:10]; % for IJRR'19 Paper

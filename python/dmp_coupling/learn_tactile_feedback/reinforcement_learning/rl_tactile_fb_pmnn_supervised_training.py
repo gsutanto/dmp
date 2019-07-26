@@ -158,6 +158,7 @@ class RLTactileFbPMNNSupervisedTraining:
                                                               initial_pmnn_params_dirpath="" # should be cpp_models dirpath
                                                               ):
         assert ((prim_tbi >= 0) and (prim_tbi < self.N_primitives))
+        print('PMNN of primitive-to-be-improved # %d' % (prim_tbi+1))
         
         if (rl_data is not None):
             DeltaS_rlit_list = list()
@@ -267,7 +268,7 @@ class RLTactileFbPMNNSupervisedTraining:
                              D_output=self.expected_D_output, 
                              path=self.prim_pmnn_params_dirpath, 
                              is_using_phase_kernel_modulation=True)
-        
+            
             # Build the Prediction Graph (that computes predictions from the inference model).
             self.train_batch_prediction = self.pmnn.performNeuralNetworkPrediction(self.tf_train_DeltaS_batch_ph, 
                                                                                    self.tf_train_nPSI_batch_ph, 
@@ -472,9 +473,6 @@ class RLTactileFbPMNNSupervisedTraining:
             print("Final Validation           NMSE: " + str(nmse_valid))
             print("Final Test                 NMSE: " + str(nmse_test))
             print("")
-            
-            # update optimized/trained PMNN params to self.prim_pmnn_params_dirpath
-            self.pmnn.saveNeuralNetworkToTextFiles(self.prim_pmnn_params_dirpath)
         
         return NN_model_params, eval_info
 

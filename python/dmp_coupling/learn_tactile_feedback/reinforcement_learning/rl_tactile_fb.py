@@ -58,9 +58,7 @@ class RLTactileFeedback:
                                                          cdmp_params=behavior_params)
             elif (exec_mode == "EXEC_NOMINAL_DMP_AND_ITERATION_PMNN"):
                 assert (feedback_model_params is not None)
-                # actually the (Iteration) PMNN parameters (C++ text files) have been updated when
-                # the execution of trainPMNNWithAdditionalRLIterDatasetInitializedAtPath(...) is finished, 
-                # but just to be safe ...
+                # save PMNN parameters into text files (for loading by C++ counterparts)
                 self.rl_tactile_fb_pmnn_supervised_training.savePMNNParamsFromDictAtDirPath(pmnn_params_dirpath=self.iter_pmnn_params_dirpath, 
                                                                                             pmnn_params=feedback_model_params)
             
