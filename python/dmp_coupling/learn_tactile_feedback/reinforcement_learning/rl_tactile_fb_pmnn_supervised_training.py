@@ -148,7 +148,7 @@ class RLTactileFbPMNNSupervisedTraining:
                              is_using_phase_kernel_modulation=True, 
                              is_predicting_only=True)
             
-            pmnn_params[n_prim] = self.pmnn.saveNeuralNetworkToDict()
+            pmnn_params[n_prim] = self.pmnn.model_params
         return pmnn_params
         
     def trainPMNNWithAdditionalRLIterDatasetInitializedAtPath(self, rl_data, 
