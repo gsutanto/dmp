@@ -219,6 +219,9 @@ class RLTactileFeedback:
                                               feedback_model_params=None, 
                                               exec_mode="EXEC_NOMINAL_DMP_AND_INITIAL_PMNN")
         
+        if (self.is_pausing):
+            raw_input("Press [ENTER] to continue...")
+        
         for self.prim_tbi in self.prims_tbi:
             print ("**********************************************************")
             print ("**  Improving the feedback model of primitive # %d/%d...  **" % (self.prim_tbi+1, self.N_primitives))
