@@ -14,6 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import rospy
 from distutils import dir_util
+from shutil import copyfile
 from std_msgs.msg import Bool
 from amd_clmc_ros_messages.msg import DMPRLTactileFeedbackRobotExecMode
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../../reinforcement_learning/'))
@@ -129,7 +130,8 @@ class RLTactileFeedback:
 #        self.initial_pmnn_params_dirpath        = "../../../../data/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/cpp_models/"
         self.initial_pmnn_params_dirpath        = "../../../../data/dmp_coupling/learn_tactile_feedback/scraping/reinforcement_learning/initial_neural_nets/pmnn/cpp_models/"
         self.iter_pmnn_params_dirpath           = "../../../../data/dmp_coupling/learn_tactile_feedback/scraping/reinforcement_learning/neural_nets/pmnn/cpp_models/"
-        self.outdata_dirpath = './'
+        self.outdata_dirpath        = './'
+        self.rl_data_backup_dirpath = './backup_rl_data/'
         
         self.is_pipeline_executed_only_up_to_pi2 = False
         self.is_always_converting_new_ole_into_new_cl_every_rl_iters = True
@@ -153,7 +155,7 @@ class RLTactileFeedback:
         
         self.cart_dim_tbi_supervision_threshold_dict = {}
         self.cart_dim_tbi_supervision_threshold_dict["Quaternion"] = {}
-        self.cart_dim_tbi_supervision_threshold_dict["Quaternion"]["omegad"] = 8.0
+        self.cart_dim_tbi_supervision_threshold_dict["Quaternion"]["omegad"] = 12.0
         
 #        self.cost_threshold = [0.0, 18928850.8053, 11066375.797] # X_vector squared norm as cost
         self.cost_threshold = [0.0, 0.05, 0.05] # rot_diff_err_b squared norm as cost
@@ -212,16 +214,17 @@ class RLTactileFeedback:
         else:
             self.rl_data = {}
             
+            py_util.recreateDir(self.rl_data_backup_dirpath)
+            
             self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_cl_behavior, 
                                               exec_behavior_until_prim_no=self.N_primitives - 1, 
                                               behavior_params=None, 
                                               feedback_model_params=None, 
                                               exec_mode="EXEC_NOMINAL_DMP_AND_INITIAL_PMNN")
         
-        if (self.is_pausing):
-            raw_input("Press [ENTER] to continue...")
-        
         for self.prim_tbi in self.prims_tbi:
+            py_util.createDirIfNotExist(self.rl_data_backup_dirpath + '/prim%d/' % (self.prim_tbi+1))
+            
             print ("**********************************************************")
             print ("**  Improving the feedback model of primitive # %d/%d...  **" % (self.prim_tbi+1, self.N_primitives))
             print ("**********************************************************")
@@ -233,6 +236,8 @@ class RLTactileFeedback:
                 self.it = 0
                 
                 self.rl_data[self.prim_tbi][self.it] = {}
+                
+                py_util.createDirIfNotExist(self.rl_data_backup_dirpath + '/prim%d/iter%d/' % (self.prim_tbi+1, self.it))
                 
                 # extract initial unrolling results: trajectories, sensor trace deviations, cost
                 self.rl_data[self.prim_tbi][self.it]["cl_cdmp_evals"] = rl_util.extractUnrollResultsFromCLMCDataFilesInDirectory(self.sl_data_dirpath, 
@@ -272,6 +277,9 @@ class RLTactileFeedback:
                 
                 plt.close('all')
                 
+                if (self.is_pausing):
+                    raw_input("Press [ENTER] to continue...")
+                
                 self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_ole_behavior_initial, 
                                                   exec_behavior_until_prim_no=self.N_primitives - 1, 
                                                   behavior_params=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params"], 
@@ -298,7 +306,7 @@ class RLTactileFeedback:
                  ] = rl_util.extractParamsToBeImproved(self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params"], 
                                                        self.cart_dim_tbi_dict, self.cart_types_tbi_list, self.prim_tbi)
                 if (self.it == 0):
-                    self.rl_data[self.prim_tbi][self.it]["PI2_param_init_std"] = 10.0 # rl_util.computeParamInitStdHeuristic(self.rl_data[self.prim_tbi][self.it]["PI2_param_mean"], params_mean_extrema_to_init_std_factor=5.0)
+                    self.rl_data[self.prim_tbi][self.it]["PI2_param_init_std"] = 15.0 # 10.0 # rl_util.computeParamInitStdHeuristic(self.rl_data[self.prim_tbi][self.it]["PI2_param_mean"], params_mean_extrema_to_init_std_factor=5.0)
                     self.rl_data[self.prim_tbi][self.it]["PI2_param_cov"] = np.diag(np.ones(len(self.rl_data[self.prim_tbi][self.it]["PI2_param_mean"])) * (self.rl_data[self.prim_tbi][self.it]["PI2_param_init_std"] * self.rl_data[self.prim_tbi][self.it]["PI2_param_init_std"]))
                 else:
                     self.rl_data[self.prim_tbi][self.it]["PI2_param_cov"] = self.rl_data[self.prim_tbi][self.it-1]["PI2_param_new_cov"]
@@ -332,6 +340,9 @@ class RLTactileFeedback:
                                                                                                                 cart_types_to_be_improved=self.cart_types_tbi_list, 
                                                                                                                 pi2_unroll_mean=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_unroll"], 
                                                                                                                 is_plotting=self.is_plotting)
+                
+                if (self.is_pausing):
+                    raw_input("Press [ENTER] to continue...")
                 
                 for self.k in range(self.K_PI2_samples):
                     if (self.is_plotting_pi2_sample_before_robot_exec or self.is_plotting):
@@ -487,6 +498,7 @@ class RLTactileFeedback:
                 rl_util.plotLearningCurve(rl_data=self.rl_data, prim_to_be_improved=self.prim_tbi, end_plot_iter=self.it, save_filepath=self.outdata_dirpath+'learning_curve')
                 
                 py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
+                copyfile(src=self.outdata_dirpath+'rl_data.pkl', dst=self.rl_data_backup_dirpath + '/prim%d/iter%d/' % (self.prim_tbi+1, self.it) + 'rl_data.pkl')
                 
                 if (self.is_pausing):
                     raw_input("Press [ENTER] to continue...")
@@ -494,6 +506,8 @@ class RLTactileFeedback:
                 if (self.is_continuing_rl_iters):
                     self.it += 1
                     self.rl_data[self.prim_tbi][self.it] = {}
+                    
+                    py_util.createDirIfNotExist(self.rl_data_backup_dirpath + '/prim%d/iter%d/' % (self.prim_tbi+1, self.it))
                     
                     if (self.is_current_iter_converting_new_ole_into_new_cl):
                         self.rl_data[self.prim_tbi][self.it]["unroll_results"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it-1]["cl_cdmp_new_evals"])
