@@ -456,7 +456,8 @@ class RLTactileFeedback:
                      ] = self.rl_tactile_fb_pmnn_supervised_training.trainPMNNWithAdditionalRLIterDatasetInitializedAtPath(rl_data=self.rl_data, 
                                                                                                                            prim_tbi=self.prim_tbi, # prim-to-be-improved
                                                                                                                            iterations_list=self.iterations_list, 
-                                                                                                                           initial_pmnn_params_dirpath=self.iter_pmnn_params_dirpath # should be cpp_models dirpath
+                                                                                                                           initial_pmnn_params_dirpath=self.initial_pmnn_params_dirpath # should be cpp_models dirpath
+#                                                                                                                           initial_pmnn_params_dirpath=self.iter_pmnn_params_dirpath # should be cpp_models dirpath
                                                                                                                            )
                     
                     self.rl_data[self.prim_tbi][self.it]["new_pmnn_params"] = copy.deepcopy(self.rl_data[self.prim_tbi][self.it]["pmnn_params"])
