@@ -62,10 +62,10 @@ p2_and_p3_orientation_ct_beta_polarity  = [0; ...  % setting  1
                                            0; ...  % setting  3
                                            0; ...  % setting  4
                                            0; ...  % setting  5
-%                                            0; ...  % setting  6
-%                                            0; ...  % setting  7
-%                                            0; ...  % setting  8
-%                                            0; ...  % setting  9
+                                           0; ...  % setting  6
+                                           0; ...  % setting  7
+                                           0; ...  % setting  8
+                                           0; ...  % setting  9
                                           ];
 abs_max_prim2_orientation_ct_beta_fraction_retain   = 0.75;
 
