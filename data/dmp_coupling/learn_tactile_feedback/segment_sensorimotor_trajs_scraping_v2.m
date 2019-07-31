@@ -112,6 +112,7 @@ for iter_obj = contents'
                                                                 {'SFE_', 'SAA_', 'HR_', 'EB_', 'WR_', 'WFE_', 'WAA_'}, ...
                                                                 {'th'}));
         	current_prim_no = clmcplot_getvariables(D, vars, {'current_prim_no'});
+            ul_curr_prim_no = clmcplot_getvariables(D, vars, {'ul_curr_prim_no'});
             
             dt  = 1.0/freq;
             
@@ -177,8 +178,13 @@ for iter_obj = contents'
             
             %% Segmentation of the Primitives
             
-            valid_current_prim_no_idx       = find(current_prim_no == -1);
-            current_prim_no                 = current_prim_no(valid_current_prim_no_idx(1):valid_current_prim_no_idx(end),:);
+            if (size(find(current_prim_no ~= -1),1) == 0)
+                valid_current_prim_no_idx       = [1; find(time > 0.0)];
+                current_prim_no                 = ul_curr_prim_no(valid_current_prim_no_idx(1):valid_current_prim_no_idx(end),:);
+            elseif (size(find(current_prim_no ~= -1),1) > 0)
+                valid_current_prim_no_idx       = find(current_prim_no == -1);
+                current_prim_no                 = current_prim_no(valid_current_prim_no_idx(1):valid_current_prim_no_idx(end),:);
+            end
             
             for np = 1:N_primitive
                 out_iter_obj_prim_dir_path  = [out_iter_obj_path,'/prim',...
