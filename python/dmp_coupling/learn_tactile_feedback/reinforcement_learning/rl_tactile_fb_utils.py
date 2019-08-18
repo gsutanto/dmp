@@ -268,6 +268,7 @@ def extractUnrollResultsFromCLMCDataFilesInDirectory(directory_path,
         unroll_results["accum_cost_per_trial"].append(np.array(trial_unroll_cost).reshape((1,N_primitives)))
     all_trial_prim_costs = np.vstack(unroll_results["accum_cost_per_trial"])
     unroll_results["mean_accum_cost"] = np.mean(all_trial_prim_costs, axis=0)
+    unroll_results["std_accum_cost"] = np.std(all_trial_prim_costs, axis=0)
     assert (len(unroll_results["mean_accum_cost"]) == N_primitives)
     return unroll_results
 

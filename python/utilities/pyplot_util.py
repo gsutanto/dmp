@@ -111,6 +111,51 @@ def plot_2D(X_list, Y_list, title,
         plt.show()
     return None
 
+def errorbar_2D(X_list, Y_list, E_list, title, 
+                X_label, Y_label, fig_num=1, 
+                label_list=[''], color_style_list=[['b',None]], 
+                N_data_display=-1,
+                is_auto_line_coloring_and_styling=False, 
+                is_showing_grid=True, 
+                X_lim=None, 
+                save_filepath=None):
+    N_dataset = len(X_list)
+    assert (N_dataset == len(Y_list))
+    assert (N_dataset == len(E_list))
+    assert (N_dataset == len(label_list))
+    if (is_auto_line_coloring_and_styling):
+        all_style_list = ['-','--','-.',':']
+        color_style_list = [[c,s] for s in all_style_list for c in all_color_list]
+        assert (N_dataset <= len(color_style_list))
+    fig = plt.figure(fig_num)
+    ax = fig.add_subplot(111)
+    for d in range(N_dataset):
+        if (N_data_display < 0):
+            X = X_list[d]
+            Y = Y_list[d]
+            E = E_list[d]
+        else:
+            X = X_list[d][:N_data_display]
+            Y = Y_list[d][:N_data_display]
+            E = E_list[d][:N_data_display]
+        color = color_style_list[d][0]
+        labl = label_list[d]
+        ax.errorbar(x=X, y=Y, yerr=E, c=color, ls='None', label=labl, fmt='o')
+    ax.set_xlabel(X_label)
+    ax.set_ylabel(Y_label)
+    if (X_lim is not None):
+        ax.set_xlim(X_lim)
+    ax.legend()
+    ax.grid(is_showing_grid)
+    ax.set_title(title)
+    if (save_filepath is not None):
+        assert (os.path.isdir(os.path.abspath(os.path.join(save_filepath, os.pardir)))), "Parent directory of %s does not exist!" % save_filepath
+        plt.savefig(save_filepath + '.png', bbox_inches='tight')
+    else:
+        plt.pause(plt_pause_time_secs)
+        plt.show()
+    return None
+
 def scatter_3D(X_list, Y_list, Z_list, title, 
                X_label, Y_label, Z_label, fig_num=1, 
                label_list=[''], color_style_list=[['b','o']],
@@ -260,6 +305,34 @@ if __name__ == '__main__':
             save_filepath=None
             )
     
+    x_pow_1_e = 0.05 * x
+    x_pow_8_e = 0.05 * 8 * x
+    D_display = 3
+    data_dim_list = [None] * D_display
+    for i in range(D_display):
+        data_dim_list[i] = list()
+        if (i == 0):
+            for j in range(2):
+                data_dim_list[i].append(x)
+        elif (i == 1):
+            data_dim_list[i].append(x_pow_1)
+            data_dim_list[i].append(x_pow_8)
+        elif (i == 2):
+            data_dim_list[i].append(x_pow_1_e)
+            data_dim_list[i].append(x_pow_8_e)
+    errorbar_2D(X_list=data_dim_list[0], 
+                Y_list=data_dim_list[1], 
+                E_list=data_dim_list[2], 
+                title='Error Bars of x', 
+                X_label='x', 
+                Y_label='Value', 
+                fig_num=3, 
+                label_list=['x','x^8'], 
+                color_style_list=[['b',None],['r',None]], 
+                N_data_display=10, 
+                save_filepath=None
+                )
+    
     x_pow_2 = np.power(x,2)
     x_pow_3 = np.power(x,3)
     x_pow_4 = np.power(x,4)
@@ -270,6 +343,6 @@ if __name__ == '__main__':
     subplot_ND(NDtraj_list=TwoDtraj_list, 
                title='SubPlot Test', 
                Y_label_list=['x','y','z'], 
-               fig_num=3, 
+               fig_num=4, 
                label_list=['pow 1 vs pow 8 vs pow 4', 'pow 2 vs pow 3 vs pow 5'], 
                is_auto_line_coloring_and_styling=True)
