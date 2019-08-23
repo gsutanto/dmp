@@ -34,7 +34,8 @@ is_evaluating_autoencoder   = 0;
 % subset_settings_indices     = [1:4,9];
 % subset_settings_indices     = [1:4];
 % subset_settings_indices     = [4:8]; % for IJRR'19 Paper (v1)
-subset_settings_indices     = [4,5,6]; % for IJRR'19 Paper (v2)
+% subset_settings_indices     = [4,5,6]; % for IJRR'19 Paper (v2)
+subset_settings_indices     = [3,4,5,6]; % for IJRR'19 Paper (v3)
 
 % considered_subset_outlier_ranked_demo_indices       = [1:15]; % for ICRA'18 Paper
 considered_subset_outlier_ranked_demo_indices       = [3:10]; % for IJRR'19 Paper
