@@ -22,8 +22,8 @@ import rl_tactile_fb_utils as rl_util
 
 generic_task_type = 'scraping'
 specific_task_type = 'scraping_w_tool'
-date = '20190730'
-additional_description = '_on_barrett_hand_208_trained_on_settings_4RLto6RL_rl_on_setting_8_reg_hidden_layer_100'
+date = '20190823'
+additional_description = '_on_barrett_hand_208_trained_on_settings_3RLto6RL_rl_on_setting_8_reg_hidden_layer_100'
 experiment_name = date + '_' + specific_task_type + '_correctable' + additional_description
 
 user_home_dir_path = os.path.expanduser('~')
@@ -31,10 +31,11 @@ in_data_root_dir_path = user_home_dir_path + '/Desktop/dmp_robot_unroll_results/
 
 assert (os.path.isdir(in_data_root_dir_path)), '%s directory is not exist!' % in_data_root_dir_path
 
-settings = ['p5', 'p6_25', 'p7_5', 'p8_75', 'p10']
+settings = ['p3_75', 'p5', 'p6_25', 'p7_5', 'p8_75', 'p10']
 unroll_types = ['bsln', 'cpld_before_rl', 'cpld_after_rl'] # 'bsln' = baseline; 'cpld_before_rl' = coupled before RL; 'cpld_after_rl' = coupled after RL
 
 setting_to_roll_angle_mapping_dict = {}
+setting_to_roll_angle_mapping_dict['p3_75'] = 3.75
 setting_to_roll_angle_mapping_dict['p5'] = 5.0
 setting_to_roll_angle_mapping_dict['p6_25'] = 6.25
 setting_to_roll_angle_mapping_dict['p7_5'] = 7.5
