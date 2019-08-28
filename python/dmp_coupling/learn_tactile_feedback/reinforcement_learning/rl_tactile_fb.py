@@ -340,24 +340,25 @@ class RLTactileFeedback:
                                                                                                                 cart_types_to_be_improved=self.cart_types_tbi_list, 
                                                                                                                 pi2_unroll_mean=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_unroll"], 
                                                                                                                 is_plotting=self.is_plotting)
-                
-                if (self.is_pausing):
-                    raw_input("Press [ENTER] to continue...")
+                    
+                    if (self.is_pausing):
+                        raw_input("Press [ENTER] to continue...")
                 
                 for self.k in range(self.K_PI2_samples):
-                    if (self.is_plotting_pi2_sample_before_robot_exec or self.is_plotting):
-                        rl_util.plotUnrollPI2ParamSampleVsParamMean(k=self.k, 
-                                                                    prim_to_be_improved=self.prim_tbi, 
-                                                                    cart_types_to_be_improved=self.cart_types_tbi_list, 
-                                                                    pi2_unroll_samples=self.rl_data[self.prim_tbi][self.it]["PI2_unroll_samples"], 
-                                                                    pi2_unroll_mean=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_unroll"])
-                    
-                    if (self.is_pausing and 
-                        rl_util.checkUnrollPI2ParamSampleSupervisionRequirement(k=self.k, 
-                                                                                cart_types_to_be_improved=self.cart_types_tbi_list, 
-                                                                                cart_dim_tbi_supervision_threshold_dict=self.cart_dim_tbi_supervision_threshold_dict, 
-                                                                                pi2_unroll_samples=self.rl_data[self.prim_tbi][self.it]["PI2_unroll_samples"])):
-                        raw_input("Press [ENTER] to continue...")
+                    if (self.is_unrolling_pi2_samples):
+                        if (self.is_plotting_pi2_sample_before_robot_exec or self.is_plotting):
+                            rl_util.plotUnrollPI2ParamSampleVsParamMean(k=self.k, 
+                                                                        prim_to_be_improved=self.prim_tbi, 
+                                                                        cart_types_to_be_improved=self.cart_types_tbi_list, 
+                                                                        pi2_unroll_samples=self.rl_data[self.prim_tbi][self.it]["PI2_unroll_samples"], 
+                                                                        pi2_unroll_mean=self.rl_data[self.prim_tbi][self.it]["ole_cdmp_unroll"])
+                        
+                        if (self.is_pausing and 
+                            rl_util.checkUnrollPI2ParamSampleSupervisionRequirement(k=self.k, 
+                                                                                    cart_types_to_be_improved=self.cart_types_tbi_list, 
+                                                                                    cart_dim_tbi_supervision_threshold_dict=self.cart_dim_tbi_supervision_threshold_dict, 
+                                                                                    pi2_unroll_samples=self.rl_data[self.prim_tbi][self.it]["PI2_unroll_samples"])):
+                            raw_input("Press [ENTER] to continue...")
                     
                     self.executeBehaviorOnRobotNTimes(N_unroll=self.N_cost_evaluation_ole_behavior_per_PI2_sample, 
                                                       exec_behavior_until_prim_no=self.prim_tbi, 
@@ -521,7 +522,7 @@ class RLTactileFeedback:
                 py_util.saveObj(self.rl_data, self.outdata_dirpath+'rl_data.pkl')
 
 if __name__ == '__main__':
-    rl_tactile_fb = RLTactileFeedback(is_unrolling_pi2_samples=True, 
+    rl_tactile_fb = RLTactileFeedback(is_unrolling_pi2_samples=False, 
                                       is_plotting=False, 
                                       starting_prim_tbi=1, 
                                       starting_rl_iter=0)

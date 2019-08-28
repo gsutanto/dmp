@@ -87,5 +87,5 @@ for prim in prims_learned:
                           label_list=eval_descriptions, 
                           color_style_list=[['r',None],['g',None],['b',None]], 
                           X_lim=X_lim, 
-                          save_filepath=None
+                          save_filepath='%s/plot_performance_before_vs_after_rl_of_primitive%d_%s' % (in_data_root_dir_path, prim+1, experiment_name)
                           )
