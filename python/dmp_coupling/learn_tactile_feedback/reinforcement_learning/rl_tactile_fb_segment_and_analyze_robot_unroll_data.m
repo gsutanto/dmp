@@ -25,6 +25,7 @@ end
 matlab_ltacfb_path  = [root_dmp_path, 'matlab/dmp_coupling/learn_tactile_feedback/'];
 python_ltacfb_path  = [root_dmp_path, 'python/dmp_coupling/learn_tactile_feedback/'];
 
+addpath(matlab_ltacfb_path);
 addpath([matlab_ltacfb_path, '../../utilities/']);
 addpath([matlab_ltacfb_path, '../../utilities/clmcplot/']);
 addpath([matlab_ltacfb_path, '../../utilities/quaternion/']);
@@ -249,8 +250,6 @@ for nut = 1:size(unroll_types, 2)
     end
 end
 
-is_plotting_other_sensings         	= 0;
-other_sense_strings                 = {'global force'};
 dict                                = containers.Map;
 dict('position')                    = 2;
 dict('local force')                 = 4;
@@ -271,6 +270,7 @@ elseif (strcmp(specific_task_type, 'scraping_wo_tool') == 1)
 else
 	error('Unknown specific_task_type specification!');
 end
+max_generalization_test_demo_trial_rank_no  = 2;
 
 N_plots                     = 0;
 X_plot_group                = cell(0);
@@ -291,10 +291,9 @@ end
 
 is_plotting_select_modalities_for_publication   = 1;
 select_prim                                     = 2;
-select_X_plot_group                             = {[1],[25]};
+select_X_plot_group                             = {}; % {[1],[25]};
 select_plot_titles                              = {'Left BioTac Finger electrode', 'Right BioTac Finger electrode'};
-select_robot_unroll_trial_no                    = 3;
-select_font_size                                = 50;
+select_font_size                                = 10; % 30; % 50;
 select_line_width                               = 5;
 
 %% Data Loading
@@ -349,8 +348,6 @@ for n_unrolled_settings=1:N_unrolled_settings
         N_robot_unroll_trials 	= size(data_robot_unroll.cpld_before_rl{np,setting_no}, 1);
         traj_length           	= size(data_robot_unroll.cpld_before_rl{np,setting_no}{1,23}, 1);
         
-        generalization_test_demo_trial_no   = dataset_Ct_tactile_asm.trial_idx_ranked_by_outlier_metric_w_exclusion{np,setting_no}(generalization_test_demo_trial_rank_no,1);
-        
         D_input             = size(dataset_Ct_tactile_asm.sub_X{np,1}{1,1}, 2);
         regular_NN_hidden_layer_topology = dlmread([python_learn_tactile_fb_models_dir_path, 'regular_NN_hidden_layer_topology.txt']);
         N_phaseLWR_kernels  = size(dataset_Ct_tactile_asm.sub_normalized_phase_PSI_mult_phase_V{np,1}{1,1}, 2);
@@ -358,59 +355,6 @@ for n_unrolled_settings=1:N_unrolled_settings
         
         regular_NN_hidden_layer_activation_func_list = readStringsToCell([python_learn_tactile_fb_models_dir_path, 'regular_NN_hidden_layer_activation_func_list.txt']);
 
-        NN_info.name        = 'my_ffNNphaseLWR';
-        NN_info.topology    = [D_input, regular_NN_hidden_layer_topology, N_phaseLWR_kernels, D_output];
-        NN_info.activation_func_list= {'identity', regular_NN_hidden_layer_activation_func_list{:}, 'identity', 'identity'};
-        NN_info.filepath    = [model_path, 'prim_', num2str(np), '_params_reinit_', num2str(reinit_selection_idx(1, np)), '_step_',num2str(TF_max_train_iters,'%07d'),'.mat'];
-
-        % Perform PMNN Coupling Term Prediction
-        [ Ct_prediction, ~ ]= performPMNNPrediction( NN_info, ...
-                                                     dataset_Ct_tactile_asm.sub_X{np,setting_no}{generalization_test_demo_trial_no,1}, ...
-                                                     dataset_Ct_tactile_asm.sub_normalized_phase_PSI_mult_phase_V{np,setting_no}{generalization_test_demo_trial_no,1} );
-
-        for nxplot=1:size(X_plot_group, 2)
-            figure;
-            X_plot_indices  = X_plot_group{1, nxplot};
-            D               = length(X_plot_indices);
-            for d=1:D
-                data_idx    = X_plot_indices(d);
-                N_plot_cols = ceil(D/5);
-                subplot(ceil(D/N_plot_cols),N_plot_cols,d);
-                hold on;
-                    for nd=1:size(dataset_Ct_tactile_asm.trial_idx_ranked_by_outlier_metric_w_exclusion{np,setting_no}, 1)
-                        demo_idx                    = dataset_Ct_tactile_asm.trial_idx_ranked_by_outlier_metric_w_exclusion{np,setting_no}(nd,1);
-                        X_dim_demo_traj         	= dataset_Ct_tactile_asm.sub_X{np,setting_no}{demo_idx,1}(:,data_idx);
-                        stretched_X_dim_demo_traj   = stretchTrajectory( X_dim_demo_traj', traj_length )';
-                        if (demo_idx == generalization_test_demo_trial_no)
-                            p_gen_test_demo_X       = plot(stretched_X_dim_demo_traj, 'c','LineWidth',3);
-                        else
-                            p_training_demos_X 	    = plot(stretched_X_dim_demo_traj, 'b');
-                        end
-                    end
-                    
-                    for robot_unroll_trial_no=1:N_robot_unroll_trials
-                        if (robot_unroll_trial_no <= 3)
-                            p_robot_unroll_baseline_robot_X = plot(data_robot_unroll.bsln{np,setting_no}{robot_unroll_trial_no,25}(:,data_idx),'g','LineWidth',1);
-                        end
-                        p_robot_unroll_coupled_robot_X  = plot(data_robot_unroll.cpld_before_rl{np,setting_no}{robot_unroll_trial_no,25}(:,data_idx),'r','LineWidth',1);
-                    end
-                    
-                    if (d==1)
-                        legend([p_training_demos_X, p_gen_test_demo_X, ...
-                                p_robot_unroll_baseline_robot_X, p_robot_unroll_coupled_robot_X], ...
-                               'training demos sensor trace', 'generalization test demo sensor trace', ...
-                               'robot unroll without ct (baseline) sensor trace', 'robot unroll with ct robot-computed sensor trace');
-                    end
-                    xlabel(['data\_idx=', num2str(d)]);
-                hold off;
-            end
-            set(gcf,'NextPlot','add');
-            axes;
-            h   = title([plot_titles{1,nxplot},', prim #',num2str(np), ', setting #', num2str(setting_no)]);
-            set(gca,'Visible','off');
-            set(h,'Visible','on');
-        end
-        
         % Sensor Traces Deviation Plot for Publication/Paper
         if ((is_plotting_select_modalities_for_publication) && (np == select_prim))
             for nxplot=1:size(select_X_plot_group, 2)
@@ -438,76 +382,36 @@ for n_unrolled_settings=1:N_unrolled_settings
                         plot(upper_std_DS,'k','LineWidth',select_line_width);
                         plot(lower_std_DS,'k','LineWidth',select_line_width);
 
-                        for robot_unroll_trial_no=select_robot_unroll_trial_no
+                        for robot_unroll_trial_no=1:size(data_robot_unroll.cpld_before_rl{np,setting_no}, 1)
                             if (robot_unroll_trial_no <= 3)
-                                p_robot_unroll_baseline_robot_X = plot(data_robot_unroll.bsln{np,setting_no}{robot_unroll_trial_no,25}(:,data_idx),'g','LineWidth',select_line_width);
+                                p_robot_unroll_baseline_robot_X = plot(data_robot_unroll.bsln{np,setting_no}{robot_unroll_trial_no,25}(:,data_idx),'g');
                             end
-                            p_robot_unroll_coupled_robot_X  = plot(data_robot_unroll.cpld_before_rl{np,setting_no}{robot_unroll_trial_no,25}(:,data_idx),'r','LineWidth',select_line_width);
+                            p_robot_unroll_coupled_before_rl_robot_X  = plot(data_robot_unroll.cpld_before_rl{np,setting_no}{robot_unroll_trial_no,25}(:,data_idx),'r');
+                            p_robot_unroll_coupled_after_rl_robot_X  = plot(data_robot_unroll.cpld_after_rl{np,setting_no}{robot_unroll_trial_no,25}(:,data_idx),'m');
                         end
                         
-%                         lgd =   legend([p_training_demos_X, ...
-%                                         p_robot_unroll_baseline_robot_X, p_robot_unroll_coupled_robot_X], ...
-%                                        'training demos sensor trace', ...
-%                                        'robot unroll without ct (baseline) sensor trace', 'robot unroll with ct robot-computed sensor trace');
-%                         lgd.FontSize    = 30;
-%                         title(['Sensor Trace Deviation or Delta X of ',select_plot_titles{1,nxplot},' #',num2str(data_idx),', prim #',num2str(np), ', setting ', select_angle]);
-%                         xlabel('time');
-%                         ylabel('Sensor Trace Deviation or Delta X');
+                        lgd =   legend([p_training_demos_X, ...
+                                        p_robot_unroll_baseline_robot_X, ...
+                                        p_robot_unroll_coupled_before_rl_robot_X, ...
+                                        p_robot_unroll_coupled_after_rl_robot_X], ...
+                                       'training demos sensor trace', ...
+                                       'robot unroll without ct (baseline) sensor trace', ...
+                                       'robot unroll with ct robot-computed sensor trace, before RL', ...
+                                       'robot unroll with ct robot-computed sensor trace, after RL');
+                        lgd.FontSize    = 30;
+                        title(['Sensor Trace Deviation or Delta X of ',select_plot_titles{1,nxplot},' #',num2str(data_idx),', prim #',num2str(np), ', setting #', num2str(setting_no)]);
+                        xlabel('time');
+                        ylabel('Sensor Trace Deviation or Delta X');
                         ylim([-200, 500]);
                         set(gca, 'FontSize', select_font_size);
                     hold off;
-                    print(['~/AMD_CLMC/Publications/LearningCtASMPaper/figures/real_robot_experiment/unrolling/sensor_trace/sensor_trace_',...
-                           save_titles{1,nxplot},'_',num2str(data_idx),'_prim_',num2str(np),'_setting_',num2str(setting_no)],'-dpng','-r0');
                 end
             end
         end
 
         D                   = 3;
-        if (np == 1)
-            figure;
-            act_type_string     = 'position';
-            for d=1:D
-                subplot(D,1,d);
-                hold on;
-                    if (d == 1)
-                        dim_string  = 'x';
-                    elseif (d == 2)
-                        dim_string  = 'y';
-                    elseif (d == 3)
-                        dim_string  = 'z';
-                    end
-                    for nd=1:size(dataset_Ct_tactile_asm.trial_idx_ranked_by_outlier_metric_w_exclusion{np,setting_no}, 1)
-                        demo_idx            = dataset_Ct_tactile_asm.trial_idx_ranked_by_outlier_metric_w_exclusion{np,setting_no}(nd,1);
-                        demo_ct_target_dim  = dataset_Ct_tactile_asm.sub_Ct_target{np,setting_no}{demo_idx,1}(:,d);
-                        stretched_demo_ct_target_dim    = stretchTrajectory(demo_ct_target_dim.', traj_length).';
-                        if (demo_idx == generalization_test_demo_trial_no)
-                            p_gen_test_demo_ct_target   = plot(stretched_demo_ct_target_dim, 'c','LineWidth',3);
-                        else
-                            p_training_demos_ct_target  = plot(stretched_demo_ct_target_dim, 'b');
-                        end
-                    end
-                    demo_ct_unroll_dim                  = Ct_prediction(:,d);
-                    stretched_demo_ct_unroll_dim        = stretchTrajectory(demo_ct_unroll_dim.', traj_length).';
-                    p_gen_test_demo_ct_unroll           = plot(stretched_demo_ct_unroll_dim, 'm','LineWidth',3);
-                    for robot_unroll_trial_no=1:N_robot_unroll_trials
-                        if (robot_unroll_trial_no <= 3)
-                            p_robot_unroll_unapplied_coupled_ct = plot(data_robot_unroll.bsln{np,setting_no}{robot_unroll_trial_no,24}(:,d), 'g','LineWidth',1);
-                        end
-                        p_robot_unroll_coupled_ct    	= plot(data_robot_unroll.cpld_before_rl{np,setting_no}{robot_unroll_trial_no,23}(:,d), 'r','LineWidth',1);
-                    end
-                    
-                    if (d == 1)
-                        title([act_type_string, ' coupling term, prim #', num2str(np), ', setting #', num2str(setting_no)]);
-                        legend([p_training_demos_ct_target, p_gen_test_demo_ct_target, p_gen_test_demo_ct_unroll, ...
-                                p_robot_unroll_coupled_ct, p_robot_unroll_unapplied_coupled_ct], ...
-                               'training demos target ct', 'generalization test demo target ct', 'generalization test demo unroll ct', ...
-                               ['robot unroll ct ', act_type_string, ' ', dim_string, ' unroll ct'], ...
-                               ['robot unroll ct (computed but not applied) ', act_type_string, ' ', dim_string, ' unroll ct']);
-                    end
-                hold off;
-            end
-        else
-            % Coupling Terms
+        if (np > 1)
+            act_type_string     = 'orientation';
             if ((is_plotting_select_modalities_for_publication) && (np == select_prim))
                 figure('units','normalized','outerposition',[0 0 1 1]);
                 d   = 2;
@@ -537,98 +441,26 @@ for n_unrolled_settings=1:N_unrolled_settings
                     plot(upper_std_C,'k','LineWidth',select_line_width);
                     plot(lower_std_C,'k','LineWidth',select_line_width);
                     
-                    for robot_unroll_trial_no=select_robot_unroll_trial_no
-                        p_robot_unroll_coupled_ct     	= plot(data_robot_unroll.cpld_before_rl{np,setting_no}{robot_unroll_trial_no,23}(:,D+d), 'r','LineWidth',select_line_width);
+                    for robot_unroll_trial_no=1:size(data_robot_unroll.cpld_before_rl{np,setting_no}, 1)
+                        p_robot_unroll_coupled_before_rl_ct = plot(data_robot_unroll.cpld_before_rl{np,setting_no}{robot_unroll_trial_no,23}(:,D+d), 'r');
+                        p_robot_unroll_coupled_after_rl_ct = plot(data_robot_unroll.cpld_after_rl{np,setting_no}{robot_unroll_trial_no,23}(:,D+d), 'm');
                     end
-                    p_robot_unroll_baseline_ct          = plot(zeros(size(data_robot_unroll.cpld_before_rl{np,setting_no}{robot_unroll_trial_no,23}(:,D+d))), 'g','LineWidth',select_line_width);
-%                     title([act_type_string, ' coupling term, prim #', num2str(select_prim), ', setting ', select_angle]);
-%                     lgd     = legend([p_training_demos_ct_target, p_robot_unroll_coupled_ct], ...
-%                                       'training demos target ct', ['robot unroll ct ', act_type_string, ' ', dim_string, ' unroll ct']);
-%                     lgd.FontSize    = 30;
-%                     xlabel('time');
-%                     ylabel('Coupling Term');
-                    if (setting_no == 1)
-                        lgd     = legend([p_training_demos_ct_target, p_robot_unroll_coupled_ct, p_robot_unroll_baseline_ct], ...
-                                          'demos', 'robot unroll with learned coupling term', 'robot unroll without coupling term');
-                        lgd.FontSize    = select_font_size;
-                    end
+                    p_robot_unroll_baseline_ct  = plot(zeros(size(data_robot_unroll.cpld_before_rl{np,setting_no}{robot_unroll_trial_no,23}(:,D+d))), 'g');
+                    title([act_type_string, ' coupling term, prim #', num2str(select_prim), ', setting #', num2str(setting_no)]);
+                    lgd     = legend([p_training_demos_ct_target, ...
+                                      p_robot_unroll_baseline_ct, ...
+                                      p_robot_unroll_coupled_before_rl_ct, ...
+                                      p_robot_unroll_coupled_after_rl_ct], ...
+                                      'demos', ...
+                                      'robot unroll without ct', ...
+                                      ['robot unroll with learned ct (before RL) ', act_type_string, ' ', dim_string], ...
+                                      ['robot unroll with learned ct (after RL) ', act_type_string, ' ', dim_string]);
+                    lgd.FontSize    = select_font_size;
+                    xlabel('time');
+                    ylabel('Coupling Term');
                     ylim([-20, 100]);
                     set(gca, 'FontSize', select_font_size);
                 hold off;
-                print(['~/AMD_CLMC/Publications/LearningCtASMPaper/figures/real_robot_experiment/unrolling/coupling_term_demo_vs_robot_unroll_plot',...
-                       '_prim_',num2str(np),'_setting_',num2str(setting_no)],'-dpng','-r0');
-            else
-                figure;
-                act_type_string     = 'orientation';
-                for d=1:D
-                    subplot(D,1,d);
-                    hold on;
-                        if (d == 1)
-                            dim_string  = 'alpha';
-                        elseif (d == 2)
-                            dim_string  = 'beta';
-                        elseif (d == 3)
-                            dim_string  = 'gamma';
-                        end
-                        for nd=1:size(dataset_Ct_tactile_asm.trial_idx_ranked_by_outlier_metric_w_exclusion{np,setting_no}, 1)
-                            demo_idx            = dataset_Ct_tactile_asm.trial_idx_ranked_by_outlier_metric_w_exclusion{np,setting_no}(nd,1);
-                            demo_ct_target_dim  = dataset_Ct_tactile_asm.sub_Ct_target{np,setting_no}{demo_idx,1}(:,D+d);
-                            stretched_demo_ct_target_dim    = stretchTrajectory(demo_ct_target_dim.', traj_length).';
-                            if (demo_idx == generalization_test_demo_trial_no)
-                                p_gen_test_demo_ct_target   = plot(stretched_demo_ct_target_dim, 'c','LineWidth',3);
-                            else
-                                p_training_demos_ct_target  = plot(stretched_demo_ct_target_dim, 'b');
-                            end
-                        end
-                        demo_ct_unroll_dim                  = Ct_prediction(:,D+d);
-                        stretched_demo_ct_unroll_dim        = stretchTrajectory(demo_ct_unroll_dim.', traj_length).';
-                        p_gen_test_demo_ct_unroll           = plot(stretched_demo_ct_unroll_dim, 'm','LineWidth',3);
-                        for robot_unroll_trial_no=1:N_robot_unroll_trials
-                            if (robot_unroll_trial_no <= 3)
-                                p_robot_unroll_unapplied_coupled_ct = plot(data_robot_unroll.bsln{np,setting_no}{robot_unroll_trial_no,24}(:,D+d), 'g','LineWidth',1);
-                            end
-                            p_robot_unroll_coupled_ct     	= plot(data_robot_unroll.cpld_before_rl{np,setting_no}{robot_unroll_trial_no,23}(:,D+d), 'r','LineWidth',1);
-                        end
-                        if (d == 1)
-                            title([act_type_string, ' coupling term, prim #', num2str(np), ', setting #', num2str(setting_no)]);
-                            legend([p_training_demos_ct_target, p_gen_test_demo_ct_target, p_gen_test_demo_ct_unroll, ...
-                                    p_robot_unroll_coupled_ct, p_robot_unroll_unapplied_coupled_ct], ...
-                                   'training demos target ct', 'generalization test demo target ct', 'generalization test demo unroll ct', ...
-                                   ['robot unroll ct ', act_type_string, ' ', dim_string, ' unroll ct'], ...
-                                   ['robot unroll ct (computed but not applied) ', act_type_string, ' ', dim_string, ' unroll ct']);
-                        end
-                    hold off;
-                end
-            end
-        end
-        
-        if (is_plotting_other_sensings)
-            for n_os = 1:length(other_sense_strings)
-                figure;
-                other_sense_string              = other_sense_strings{n_os};
-                for d=1:D
-                    subplot(D,1,d);
-                    hold on;
-                        for nd=1:size(data_demo.coupled{np,setting_no}, 1)
-                            demo_other_sense_dim            = data_demo.coupled{np,setting_no}{nd,dict(other_sense_string)}(:,d);
-                            stretched_demo_other_sense_dim  = stretchTrajectory(demo_other_sense_dim.', traj_length).';
-                            p_training_demos_other_sense    = plot(stretched_demo_other_sense_dim, 'b');
-                        end
-                        for nd=1:size(data_robot_unroll.bsln{np,setting_no}, 1)
-                            p_robot_unroll_baseline_other_sense = plot(data_robot_unroll.bsln{np,setting_no}{nd,dict(other_sense_string)}(:,d), 'g');
-                        end
-                        for nd=1:size(data_robot_unroll.cpld_before_rl{np,setting_no}, 1)
-                            p_robot_unroll_coupled_other_sense  = plot(data_robot_unroll.cpld_before_rl{np,setting_no}{nd,dict(other_sense_string)}(:,d), 'r');
-                        end
-                        if (d == 1)
-                            title([other_sense_string, ' sensing profile, prim #', num2str(np), ', setting #', num2str(setting_no)]);
-                            legend([p_training_demos_other_sense, ...
-                                    p_robot_unroll_baseline_other_sense, p_robot_unroll_coupled_other_sense], ...
-                                   'training demos sensor trace', ...
-                                   'robot unroll without ct (baseline) sensor trace', 'robot unroll with ct sensor trace');
-                        end
-                    hold off;
-                end
             end
         end
     end
