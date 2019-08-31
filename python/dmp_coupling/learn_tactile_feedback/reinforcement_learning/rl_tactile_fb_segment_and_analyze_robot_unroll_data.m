@@ -291,10 +291,10 @@ end
 
 is_plotting_select_modalities_for_publication   = 1;
 select_prim                                     = 2;
-select_X_plot_group                             = {}; % {[1],[25]};
+select_X_plot_group                             = {[],[]}; % {[1],[25]};
 select_plot_titles                              = {'Left BioTac Finger electrode', 'Right BioTac Finger electrode'};
 select_font_size                                = 10; % 30; % 50;
-select_line_width                               = 5;
+select_line_width                               = 3; % 5;
 
 %% Data Loading
 
@@ -355,7 +355,7 @@ for n_unrolled_settings=1:N_unrolled_settings
         
         regular_NN_hidden_layer_activation_func_list = readStringsToCell([python_learn_tactile_fb_models_dir_path, 'regular_NN_hidden_layer_activation_func_list.txt']);
 
-        % Sensor Traces Deviation Plot for Publication/Paper
+        % Sensor Traces Deviation Plot for Publication/Paper (Subset, Individual Plots)
         if ((is_plotting_select_modalities_for_publication) && (np == select_prim))
             for nxplot=1:size(select_X_plot_group, 2)
                 select_X_plot_indices   = select_X_plot_group{1, nxplot};
@@ -399,13 +399,62 @@ for n_unrolled_settings=1:N_unrolled_settings
                                        'robot unroll with ct robot-computed sensor trace, before RL', ...
                                        'robot unroll with ct robot-computed sensor trace, after RL');
                         lgd.FontSize    = 30;
-                        title(['Sensor Trace Deviation or Delta X of ',select_plot_titles{1,nxplot},' #',num2str(data_idx),', prim #',num2str(np), ', setting #', num2str(setting_no)]);
+                        title(['Sensor Trace Deviation or Delta S of ',select_plot_titles{1,nxplot},' #',num2str(data_idx),', prim #',num2str(np), ', setting #', num2str(setting_no)]);
                         xlabel('time');
-                        ylabel('Sensor Trace Deviation or Delta X');
+                        ylabel('Sensor Trace Deviation or Delta S');
                         ylim([-200, 500]);
                         set(gca, 'FontSize', select_font_size);
                     hold off;
                 end
+            end
+        end
+
+        % Sensor Traces Deviation Plot for Publication/Paper (All, as SubPlots)
+        if (np == select_prim)
+            for nxplot=1:size(X_plot_group, 2)
+                figure('units','normalized','outerposition',[0 0 1 1]);
+                
+                X_plot_indices          = X_plot_group{1, nxplot};
+                D                       = length(X_plot_indices);
+                for d=1:D
+                    dim_idx             = X_plot_indices(d);
+                    
+                    N_plot_cols         = ceil(D/5);
+                    subplot(ceil(D/N_plot_cols),N_plot_cols,d);
+                    
+                    hold on;
+                        N_demo_plots    = size(dataset_Ct_tactile_asm.trial_idx_ranked_by_outlier_metric_w_exclusion{np,setting_no}, 1);
+                        DS_demos        = zeros(traj_length, N_demo_plots);
+                        for nd=1:N_demo_plots
+                            demo_idx                    = dataset_Ct_tactile_asm.trial_idx_ranked_by_outlier_metric_w_exclusion{np,setting_no}(nd,1);
+                            X_dim_demo_traj         	= dataset_Ct_tactile_asm.sub_X{np,setting_no}{demo_idx,1}(:,dim_idx);
+                            stretched_X_dim_demo_traj   = stretchTrajectory( X_dim_demo_traj', traj_length )';
+                            p_training_demos_X          = plot(stretched_X_dim_demo_traj, 'b');
+                            DS_demos(:,nd)              = stretched_X_dim_demo_traj;
+                        end
+                        mean_DS                         = mean(DS_demos, 2);
+                        std_DS                          = std(DS_demos, 0, 2);
+                        upper_std_DS                    = mean_DS + std_DS;
+                        lower_std_DS                    = mean_DS - std_DS;
+                        
+                        plot(mean_DS,'k--','LineWidth',select_line_width);
+                        plot(upper_std_DS,'k','LineWidth',select_line_width);
+                        plot(lower_std_DS,'k','LineWidth',select_line_width);
+
+                        for robot_unroll_trial_no=1:size(data_robot_unroll.cpld_before_rl{np,setting_no}, 1)
+                            if (robot_unroll_trial_no <= 3)
+                                p_robot_unroll_baseline_robot_X = plot(data_robot_unroll.bsln{np,setting_no}{robot_unroll_trial_no,25}(:,dim_idx),'g');
+                            end
+                            p_robot_unroll_coupled_before_rl_robot_X  = plot(data_robot_unroll.cpld_before_rl{np,setting_no}{robot_unroll_trial_no,25}(:,dim_idx),'r');
+                            p_robot_unroll_coupled_after_rl_robot_X  = plot(data_robot_unroll.cpld_after_rl{np,setting_no}{robot_unroll_trial_no,25}(:,dim_idx),'m');
+                        end
+                        
+                        ylabel(['dim = ', num2str(dim_idx)]);
+                        set(gca, 'FontSize', select_font_size);
+                    hold off;
+                end
+                suptitle(['Sensor Trace Deviation or Delta S of ',plot_titles{1,nxplot},', prim #',num2str(np), ', setting #', num2str(setting_no)]);
+                
             end
         end
 
