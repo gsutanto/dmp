@@ -34,8 +34,8 @@ addpath([matlab_ltacfb_path, '../../cart_dmp/quat_dmp/']);
 addpath([matlab_ltacfb_path, '../../dmp_multi_dim/']);
 addpath([matlab_ltacfb_path, '../../neural_nets/feedforward/pmnn/']);
 
-date                = '20190730';
-addtnl_description 	= '_on_barrett_hand_208_trained_on_settings_4RLto6RL_rl_on_setting_8_reg_hidden_layer_100';
+date                = '20190902exp2';
+addtnl_description 	= '_on_barrett_hand_368_trained_on_settings_4RLto6RL_rl_on_setting_8_reg_hidden_layer_100';
 
 experiment_name     = [date,'_',specific_task_type,'_correctable',addtnl_description];
 

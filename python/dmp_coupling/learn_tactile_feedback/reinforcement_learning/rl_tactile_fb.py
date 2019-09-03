@@ -139,7 +139,15 @@ class RLTactileFeedback:
         self.is_unrolling_pi2_samples = is_unrolling_pi2_samples
         self.is_plotting = is_plotting
         self.is_plotting_pi2_sample_before_robot_exec = True
-        self.is_pausing = True#False
+        self.is_running_programmed_experiment = False
+        if (self.is_running_programmed_experiment):
+            self.is_pausing = False
+            self.programmed_exp_rl_num_iters_dict = {}
+            # enter your programmed experiment below for each primitive's RL's number of iterations:
+            self.programmed_exp_rl_num_iters_dict[1] = 5
+            self.programmed_exp_rl_num_iters_dict[2] = 5
+        else:
+            self.is_pausing = True
         
         self.N_total_sense_dimensionality = 45
         self.N_primitives = 3
@@ -306,7 +314,10 @@ class RLTactileFeedback:
                  ] = rl_util.extractParamsToBeImproved(self.rl_data[self.prim_tbi][self.it]["ole_cdmp_params"], 
                                                        self.cart_dim_tbi_dict, self.cart_types_tbi_list, self.prim_tbi)
                 if (self.it == 0):
-                    self.rl_data[self.prim_tbi][self.it]["PI2_param_init_std"] = 15.0 # 10.0 # rl_util.computeParamInitStdHeuristic(self.rl_data[self.prim_tbi][self.it]["PI2_param_mean"], params_mean_extrema_to_init_std_factor=5.0)
+                    if (self.prim_tbi == 1):
+                        self.rl_data[self.prim_tbi][self.it]["PI2_param_init_std"] = 15.0 # 10.0 # rl_util.computeParamInitStdHeuristic(self.rl_data[self.prim_tbi][self.it]["PI2_param_mean"], params_mean_extrema_to_init_std_factor=5.0)
+                    elif (self.prim_tbi == 2):
+                        self.rl_data[self.prim_tbi][self.it]["PI2_param_init_std"] = 10.0 # 10.0 # rl_util.computeParamInitStdHeuristic(self.rl_data[self.prim_tbi][self.it]["PI2_param_mean"], params_mean_extrema_to_init_std_factor=5.0)
                     self.rl_data[self.prim_tbi][self.it]["PI2_param_cov"] = np.diag(np.ones(len(self.rl_data[self.prim_tbi][self.it]["PI2_param_mean"])) * (self.rl_data[self.prim_tbi][self.it]["PI2_param_init_std"] * self.rl_data[self.prim_tbi][self.it]["PI2_param_init_std"]))
                 else:
                     self.rl_data[self.prim_tbi][self.it]["PI2_param_cov"] = self.rl_data[self.prim_tbi][self.it-1]["PI2_param_new_cov"]
@@ -419,9 +430,13 @@ class RLTactileFeedback:
                 print ("(should all be negative (-), which is indicative of reinforcement learning progress...)")
                 # TODO: check (assert?) if (J'new < J') and (J'new < J)?
                 
-                user_input = raw_input("Press n to stop current RL process (and continue to the RL process of the next primitive), or press anything else to continue current RL process...")
-                if (user_input == 'n'):
-                    self.is_continuing_rl_iters = False
+                if (self.is_running_programmed_experiment == False):
+                    user_input = raw_input("Press n to stop current RL process (and continue to the RL process of the next primitive), or press anything else to continue current RL process...")
+                    if (user_input == 'n'):
+                        self.is_continuing_rl_iters = False
+                else: # if (self.is_running_programmed_experiment == True):
+                    if (self.it+1 >= self.programmed_exp_rl_num_iters_dict[self.prim_tbi]):
+                        self.is_continuing_rl_iters = False
                 
                 self.is_current_iter_converting_new_ole_into_new_cl = ((not self.is_pipeline_executed_only_up_to_pi2) and 
                                                                        (self.is_always_converting_new_ole_into_new_cl_every_rl_iters or 
@@ -457,6 +472,7 @@ class RLTactileFeedback:
                      ] = self.rl_tactile_fb_pmnn_supervised_training.trainPMNNWithAdditionalRLIterDatasetInitializedAtPath(rl_data=self.rl_data, 
                                                                                                                            prim_tbi=self.prim_tbi, # prim-to-be-improved
                                                                                                                            iterations_list=self.iterations_list, 
+#                                                                                                                           initial_pmnn_params_dirpath="" # initialized with random parameters
                                                                                                                            initial_pmnn_params_dirpath=self.initial_pmnn_params_dirpath # should be cpp_models dirpath
 #                                                                                                                           initial_pmnn_params_dirpath=self.iter_pmnn_params_dirpath # should be cpp_models dirpath
                                                                                                                            )
