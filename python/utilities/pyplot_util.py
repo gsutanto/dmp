@@ -66,8 +66,9 @@ def plot_3D(X_list, Y_list, Z_list, title,
     return None
 
 def plot_2D(X_list, Y_list, title, 
-            X_label, Y_label, fig_num=1, 
+            X_label, Y_label, Y_ERR_list=None, fig_num=1, 
             label_list=[''], color_style_list=[['b','-']], 
+            err_color_style_list=None, 
             is_showing_start_and_goal=False,
             N_data_display=-1,
             is_auto_line_coloring_and_styling=False, 
@@ -75,6 +76,9 @@ def plot_2D(X_list, Y_list, title,
             save_filepath=None):
     N_dataset = len(X_list)
     assert (N_dataset == len(Y_list))
+    if (Y_ERR_list is not None) and (err_color_style_list is not None):
+        assert (N_dataset == len(Y_ERR_list))
+        assert (N_dataset == len(err_color_style_list))
     assert (N_dataset == len(label_list))
     if (is_auto_line_coloring_and_styling):
         all_style_list = ['-','--','-.',':']
@@ -86,13 +90,22 @@ def plot_2D(X_list, Y_list, title,
         if (N_data_display < 0):
             X = X_list[d]
             Y = Y_list[d]
+            if (Y_ERR_list is not None) and (err_color_style_list is not None):
+                Y_ERR = Y_ERR_list[d]
+                err_color = err_color_style_list[d]
         else:
             X = X_list[d][:N_data_display]
             Y = Y_list[d][:N_data_display]
+            if (Y_ERR_list is not None) and (err_color_style_list is not None):
+                Y_ERR = Y_ERR_list[d][:N_data_display]
+                err_color = err_color_style_list[d]
         color = color_style_list[d][0]
         linestyle = color_style_list[d][1]
         labl = label_list[d]
         ax.plot(X, Y, c=color, ls=linestyle, label=labl)
+        if (Y_ERR_list is not None):
+            ax.fill_between(X, Y-Y_ERR, Y+Y_ERR, 
+                            edgecolor=err_color, facecolor=err_color)
         if (is_showing_start_and_goal):
             ax.scatter(X_list[d][0], Y_list[d][0], 
                        c=color, label='start '+labl, marker='o')

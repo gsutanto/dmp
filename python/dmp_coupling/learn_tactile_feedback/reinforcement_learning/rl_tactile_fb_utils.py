@@ -600,6 +600,10 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
     J_prime_list = list()
     J_prime_new_list = list()
     J_new_list = list()
+    J_err_list = list()
+    J_prime_err_list = list()
+    J_prime_new_err_list = list()
+    J_new_err_list = list()
     iter_J_list = list()
     iter_J_prime_list = list()
     iter_J_prime_new_list = list()
@@ -607,21 +611,29 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
     while ((it in rl_data[prim_to_be_improved].keys()) and (it <= end_plot_iter)):
         if ("cl_cdmp_evals" in rl_data[prim_to_be_improved][it].keys()):
             J_list.append(rl_data[prim_to_be_improved][it]["cl_cdmp_evals"]["mean_accum_cost"][prim_to_be_improved])
+            J_err_list.append(rl_data[prim_to_be_improved][it]["cl_cdmp_evals"]["std_accum_cost"][prim_to_be_improved])
             iter_J_list.append(it)
         if ("ole_cdmp_evals" in rl_data[prim_to_be_improved][it].keys()):
             J_prime_list.append(rl_data[prim_to_be_improved][it]["ole_cdmp_evals"]["mean_accum_cost"][prim_to_be_improved])
+            J_prime_err_list.append(rl_data[prim_to_be_improved][it]["ole_cdmp_evals"]["std_accum_cost"][prim_to_be_improved])
             iter_J_prime_list.append(it)
         if ("ole_cdmp_new_evals" in rl_data[prim_to_be_improved][it].keys()):
             J_prime_new_list.append(rl_data[prim_to_be_improved][it]["ole_cdmp_new_evals"]["mean_accum_cost"][prim_to_be_improved])
+            J_prime_new_err_list.append(rl_data[prim_to_be_improved][it]["ole_cdmp_new_evals"]["std_accum_cost"][prim_to_be_improved])
             iter_J_prime_new_list.append(it)
         if ("cl_cdmp_new_evals" in rl_data[prim_to_be_improved][it].keys()):
             J_new_list.append(rl_data[prim_to_be_improved][it]["cl_cdmp_new_evals"]["mean_accum_cost"][prim_to_be_improved])
+            J_new_err_list.append(rl_data[prim_to_be_improved][it]["cl_cdmp_new_evals"]["std_accum_cost"][prim_to_be_improved])
             iter_J_new_list.append(it)
         it += 1
     Y_list = list()
     Y_list.append(np.array(J_list))
     Y_list.append(np.array(J_prime_list))
     Y_list.append(np.array(J_prime_new_list))
+    Y_ERR_list = list()
+    Y_ERR_list.append(np.array(J_err_list))
+    Y_ERR_list.append(np.array(J_prime_err_list))
+    Y_ERR_list.append(np.array(J_prime_new_err_list))
     X_list = list()
     X_list.append(np.array(iter_J_list))
     X_list.append(np.array(iter_J_prime_list))
@@ -634,12 +646,15 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
                           title='Total Cost per Iteration Prim. # %d' % (prim_to_be_improved+1), 
                           X_label='Iteration', 
                           Y_label='Total Cost', 
+                          Y_ERR_list=Y_ERR_list,
                           fig_num=0, 
                           label_list=['J',"J_prime", "J_prime_new"], 
-                          color_style_list=[['m','-'],['g','-.'],['b',':']], 
+                          color_style_list=[['#9467bd','-'],['#2ca02c','-.'],['#1f77b4',':']], 
+                          err_color_style_list=['#e377c2', '#bcbd22', '#17becf'],
                           save_filepath=save_fpath)
     
     Y_list.append(np.array(J_new_list))
+    Y_ERR_list.append(np.array(J_new_err_list))
     X_list.append(np.array(iter_J_new_list))
     # Plotting all (including J_new)
     for save_fpath in [save_filepath+'_prim_%d' % (prim_to_be_improved+1), None]: # 1st one (save_filepath) is to log to a file, 2nd one (None) is to display it.
@@ -649,9 +664,11 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
                           title='Total Cost per Iteration Prim. # %d' % (prim_to_be_improved+1), 
                           X_label='Iteration', 
                           Y_label='Total Cost', 
+                          Y_ERR_list=Y_ERR_list,
                           fig_num=0, 
                           label_list=['J',"J_prime", "J_prime_new", "J_new"], 
-                          color_style_list=[['m','-'],['g','-.'],['b',':'],['r','--']], 
+                          color_style_list=[['#9467bd','-'],['#2ca02c','-.'],['#1f77b4',':'],['#8c564b','--']], 
+                          err_color_style_list=['#e377c2', '#bcbd22', '#17becf', '#7f7f7f'],
                           save_filepath=save_fpath)
     return None
 
