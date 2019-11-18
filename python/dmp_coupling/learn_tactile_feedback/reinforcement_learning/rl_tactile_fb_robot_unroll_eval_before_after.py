@@ -43,7 +43,7 @@ setting_to_roll_angle_mapping_dict['p8_75'] = 8.75
 setting_to_roll_angle_mapping_dict['p10'] = 10.0
 
 unroll_type_to_eval_description_mapping_dict = {}
-unroll_type_to_eval_description_mapping_dict['bsln'] = 'baseline'
+unroll_type_to_eval_description_mapping_dict['bsln'] = 'without feedback model'
 unroll_type_to_eval_description_mapping_dict['cpld_before_rl'] = 'with feedback model before RL'
 unroll_type_to_eval_description_mapping_dict['cpld_after_rl'] = 'with feedback model after RL'
 
