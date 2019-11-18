@@ -81,7 +81,7 @@ for prim in prims_learned:
                           Y_list=Y_list, 
                           E_list=E_list, 
                           title='Performance at Primitive # %d : Cost for each considered Settings' % (prim+1), 
-                          X_label='Environment Setting Roll-Angle', 
+                          X_label='Environment Setting Roll-Angle (Degrees)', 
                           Y_label='Cost', 
                           fig_num=prim, 
                           label_list=eval_descriptions, 
