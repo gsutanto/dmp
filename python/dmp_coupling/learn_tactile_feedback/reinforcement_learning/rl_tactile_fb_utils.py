@@ -628,14 +628,28 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
         it += 1
     Y_list = list()
     Y_list.append(np.array(J_list))
-    Y_list.append(np.array(J_prime_list))
-    Y_list.append(np.array(J_prime_new_list))
     Y_ERR_list = list()
     Y_ERR_list.append(np.array(J_err_list))
-    Y_ERR_list.append(np.array(J_prime_err_list))
-    Y_ERR_list.append(np.array(J_prime_new_err_list))
     X_list = list()
     X_list.append(np.array(iter_J_list))
+    # Plotting only J
+    for save_fpath in [save_filepath+'_prim_%d_only_J' % (prim_to_be_improved+1), None]: # 1st one (save_filepath) is to log to a file, 2nd one (None) is to display it.
+        plt.close('all')
+        pypl_util.plot_2D(X_list=X_list, 
+                          Y_list=Y_list, 
+                          title='Total Cost per Iteration Prim. # %d' % (prim_to_be_improved+1), 
+                          X_label='RL Iteration #', 
+                          Y_label='Total Cost', 
+                          Y_ERR_list=Y_ERR_list,
+                          fig_num=0, 
+                          label_list=['J'], 
+                          color_style_list=[['#9467bd','-']], 
+                          err_color_style_list=['#e377c2'],
+                          save_filepath=save_fpath)
+    Y_list.append(np.array(J_prime_list))
+    Y_list.append(np.array(J_prime_new_list))
+    Y_ERR_list.append(np.array(J_prime_err_list))
+    Y_ERR_list.append(np.array(J_prime_new_err_list))
     X_list.append(np.array(iter_J_prime_list))
     X_list.append(np.array(iter_J_prime_new_list))
     # Plotting all except J_new
@@ -644,10 +658,10 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
         pypl_util.plot_2D(X_list=X_list, 
                           Y_list=Y_list, 
                           title='Total Cost per Iteration Prim. # %d' % (prim_to_be_improved+1), 
-                          X_label='Iteration', 
+                          X_label='RL Iteration #', 
                           Y_label='Total Cost', 
                           Y_ERR_list=Y_ERR_list,
-                          fig_num=0, 
+                          fig_num=1, 
                           label_list=['J',"J_prime", "J_prime_new"], 
                           color_style_list=[['#9467bd','-'],['#2ca02c','-.'],['#1f77b4',':']], 
                           err_color_style_list=['#e377c2', '#bcbd22', '#17becf'],
@@ -662,10 +676,10 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
         pypl_util.plot_2D(X_list=X_list, 
                           Y_list=Y_list, 
                           title='Total Cost per Iteration Prim. # %d' % (prim_to_be_improved+1), 
-                          X_label='Iteration', 
+                          X_label='RL Iteration #', 
                           Y_label='Total Cost', 
                           Y_ERR_list=Y_ERR_list,
-                          fig_num=0, 
+                          fig_num=2, 
                           label_list=['J',"J_prime", "J_prime_new", "J_new"], 
                           color_style_list=[['#9467bd','-'],['#2ca02c','-.'],['#1f77b4',':'],['#8c564b','--']], 
                           err_color_style_list=['#e377c2', '#bcbd22', '#17becf', '#7f7f7f'],
