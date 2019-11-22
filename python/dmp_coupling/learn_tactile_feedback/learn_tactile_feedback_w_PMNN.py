@@ -46,20 +46,21 @@ fraction_test_dataset  = 0.075
 chunk_size = np.loadtxt(model_parent_dir_path+'chunk_size.txt', dtype=np.int, ndmin=0) + 0
 
 is_performing_weighted_training = 1
-is_performing_generalization_test = 0
+is_performing_generalization_test = 1
 
 generalization_test_comparison_dimension = 4
 
-#input_selector = 1 # X_raw input, Phase-Modulated Neural Network      (PMNN) with  1 regular hidden layer only of 100 nodes and 25 nodes in the phase-modulated final hidden layer (regular execution)
-#input_selector = 2 # X_dim_reduced_pca input,                          PMNN  with NO regular hidden layer                   and 25 nodes in the phase-modulated final hidden layer (comparison: with [Chebotar & Kroemer]'s model)
-#input_selector = 3 # X_raw input,                                      PMNN  with  1 regular hidden layer only of 100 nodes and  8 nodes in the phase-modulated final hidden layer (comparison: between different number of nodes in the regular hidden layer)
-#input_selector = 4 # X_dim_reduced_autoencoder input,                  PMNN  with NO regular hidden layer                   and 25 nodes in the phase-modulated final hidden layer (comparison: with [Chebotar & Kroemer]'s model)
-#input_selector = 5 # X_raw input, regular Feed-Forward Neural Network (FFNN) with 100 and 25 nodes in the (regular) hidden layers,           NO phase modulation                   (comparison between different neural network structures)
-#input_selector = 6 # X_raw input,                                      PMNN  with NO regular hidden layer                   and 25 nodes in the phase-modulated final hidden layer (comparison between different neural network structures)
+#input_selector = 1 # X_raw input, Phase-Modulated Neural Network                      (PMNN) with  1 regular hidden layer only of 100 nodes and 25 nodes in the phase-modulated final hidden layer (regular execution)
+#input_selector = 2 # X_dim_reduced_pca input,                                          PMNN  with NO regular hidden layer                   and 25 nodes in the phase-modulated final hidden layer (comparison: with [Chebotar & Kroemer]'s model)
+#input_selector = 3 # X_raw input, Phase-Modulated Neural Network                      (PMNN) with  1 regular hidden layer only of   6 nodes and 25 nodes in the phase-modulated final hidden layer (comparison: between different number of nodes in the regular hidden layer)
+#input_selector = 4 # X_dim_reduced_autoencoder input,                                  PMNN  with NO regular hidden layer                   and 25 nodes in the phase-modulated final hidden layer (comparison: with [Chebotar & Kroemer]'s model)
+#input_selector = 5 # X_raw input, regular Feed-Forward Neural Network                 (FFNN) with 100 and 25 nodes in the (regular) hidden layers,           NO phase modulation                   (comparison between different neural network structures)
+#input_selector = 6 # X_raw input,                                                      PMNN  with NO regular hidden layer                   and 25 nodes in the phase-modulated final hidden layer (comparison between different neural network structures)
+#input_selector = 7 # X_raw_phase_X_phase_V input, regular Feed-Forward Neural Network (FFNN) with 100 and 25 nodes in the (regular) hidden layers,           NO phase modulation                   (comparison between different neural network structures)
 
 if (is_performing_generalization_test == 1):
-#    input_selector_list = [1,2,3,4,5,6]
-    input_selector_list = [4]
+    input_selector_list = [1,2,3,4,5,6,7]
+#    input_selector_list = [4]
 else:
     input_selector_list = [1]
 
@@ -85,7 +86,7 @@ for input_selector in input_selector_list:
         TF_max_train_iters = 3 * TF_max_train_iters # apparently PCA and AutoEncoder required 3 times other model's gradient descent iterations for achieving convergence ...
     
     # Phase Modulation Usage Flag
-    if (input_selector == 5):
+    if ((input_selector == 5) or (input_selector == 7)):
         is_using_phase_kernel_modulation = False
     else:
         is_using_phase_kernel_modulation = True
@@ -107,6 +108,9 @@ for input_selector in input_selector_list:
         model_output_dir_path = './models/'+generalization_test_sub_path+'comparison_vs_different_neural_net_structure/input_X_'+input_X_descriptor_string+'/'
     elif (input_selector == 6):
         input_X_descriptor_string = 'raw_no_reg_hidden_layer'
+        model_output_dir_path = './models/'+generalization_test_sub_path+'comparison_vs_different_neural_net_structure/input_X_'+input_X_descriptor_string+'/'
+    elif (input_selector == 7):
+        input_X_descriptor_string = 'raw_phase_X_phase_V_ffnn_hidden_layer_100_25'
         model_output_dir_path = './models/'+generalization_test_sub_path+'comparison_vs_different_neural_net_structure/input_X_'+input_X_descriptor_string+'/'
     print ("input_X_descriptor_string = ", input_X_descriptor_string)
     
@@ -130,6 +134,9 @@ for input_selector in input_selector_list:
             if ((input_selector == 1) or (input_selector == 3) or (input_selector == 5) or (input_selector == 6)):
                 X = sio.loadmat('scraping/'+generalization_test_sub_path+'prim_'+str(prim_no)+'_X_raw_scraping'+generalization_test_id_string+'.mat', struct_as_record=True)['X'].astype(np.float32)
                 X_generalization_test = sio.loadmat('scraping/'+generalization_test_sub_path+'test_unroll_prim_'+str(prim_no)+'_X_raw_scraping'+generalization_test_id_string+'.mat', struct_as_record=True)['X'].astype(np.float32)
+            elif (input_selector == 7):
+                X = sio.loadmat('scraping/'+generalization_test_sub_path+'prim_'+str(prim_no)+'_X_raw_phase_X_phase_V_scraping'+generalization_test_id_string+'.mat', struct_as_record=True)['X_phase_X_phase_V'].astype(np.float32)
+                X_generalization_test = sio.loadmat('scraping/'+generalization_test_sub_path+'test_unroll_prim_'+str(prim_no)+'_X_raw_phase_X_phase_V_scraping'+generalization_test_id_string+'.mat', struct_as_record=True)['X_phase_X_phase_V'].astype(np.float32)
             elif (input_selector == 2):
                 X = sio.loadmat('scraping/'+generalization_test_sub_path+'prim_'+str(prim_no)+'_X_dim_reduced_scraping'+generalization_test_id_string+'.mat', struct_as_record=True)['X_dim_reduced'].astype(np.float32)
                 X_generalization_test = sio.loadmat('scraping/'+generalization_test_sub_path+'test_unroll_prim_'+str(prim_no)+'_X_dim_reduced_scraping'+generalization_test_id_string+'.mat', struct_as_record=True)['X_dim_reduced'].astype(np.float32)
@@ -207,7 +214,7 @@ for input_selector in input_selector_list:
             print('D_output =', D_output)
             
             # Define Neural Network Topology
-            if ((input_selector == 1) or (input_selector == 5)):
+            if ((input_selector == 1) or (input_selector == 5) or (input_selector == 7)):
                 regular_NN_hidden_layer_topology = list(np.loadtxt(model_parent_dir_path+'regular_NN_hidden_layer_topology.txt', dtype=np.int, ndmin=1))
             elif ((input_selector == 2) or (input_selector == 4) or (input_selector == 6)):
                 regular_NN_hidden_layer_topology = []
