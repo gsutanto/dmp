@@ -13,7 +13,8 @@ python_learn_tactile_fb_dir_path            = [python_root_dir_path, 'dmp_coupli
 python_learn_tactile_fb_models_dir_path     = [python_learn_tactile_fb_dir_path, 'models/'];
 python_learn_tactile_fb_models_generalization_test_dir_path     = [python_learn_tactile_fb_models_dir_path, 'generalization_test/'];
 
-date                    = '20170908_1';
+% date                    = '20170908_1';
+date                    = '20170908_z';
 additional_description 	= '_after_pruning_inconsistent_demos_positive_side';
 result_log_path         = ['~/Desktop/archives_learn_tactile_fb/',date,'_',specific_task_type,'_correctable',additional_description,'/generalization_test/'];
 
@@ -25,14 +26,15 @@ precision_string     	= '%.20f';
 
 generalization_test_comparison_dimension    = 5;
     
-% input_selector = 1; % X_raw input, Phase-Modulated Neural Network      (PMNN) with  1 regular hidden layer only of 100 nodes and 25 nodes in the phase-modulated final hidden layer (regular execution)
-% input_selector = 2; % X_dim_reduced_pca input,                          PMNN  with NO regular hidden layer                   and 25 nodes in the phase-modulated final hidden layer (comparison: with [Chebotar & Kroemer]'s model)
-% input_selector = 3; % X_raw input,                                      PMNN  with  1 regular hidden layer only of 100 nodes and  6 nodes in the phase-modulated final hidden layer (comparison: between different number of nodes in the regular hidden layer)
-% input_selector = 4; % X_dim_reduced_autoencoder input,                  PMNN  with NO regular hidden layer                   and 25 nodes in the phase-modulated final hidden layer (comparison: with [Chebotar & Kroemer]'s model)
-% input_selector = 5; % X_raw input, regular Feed-Forward Neural Network (FFNN) with 100 and 25 nodes in the (regular) hidden layers,           NO phase modulation                   (comparison between different neural network structures)
-% input_selector = 6; % X_raw input,                                      PMNN  with NO regular hidden layer                   and 25 nodes in the phase-modulated final hidden layer (comparison between different neural network structures)
+% input_selector = 1; % X_raw input, Phase-Modulated Neural Network                      (PMNN) with  1 regular hidden layer only of 100 nodes and 25 nodes in the phase-modulated final hidden layer (regular execution)
+% input_selector = 2; % X_dim_reduced_pca input,                                          PMNN  with NO regular hidden layer                   and 25 nodes in the phase-modulated final hidden layer (comparison: with [Chebotar & Kroemer]'s model)
+% input_selector = 3; % X_raw input, Phase-Modulated Neural Network                      (PMNN) with  1 regular hidden layer only of   6 nodes and 25 nodes in the phase-modulated final hidden layer (comparison: between different number of nodes in the regular hidden layer)
+% input_selector = 4; % X_dim_reduced_autoencoder input,                                  PMNN  with NO regular hidden layer                   and 25 nodes in the phase-modulated final hidden layer (comparison: with [Chebotar & Kroemer]'s model)
+% input_selector = 5; % X_raw input, regular Feed-Forward Neural Network                 (FFNN) with 100 and 25 nodes in the (regular) hidden layers,           NO phase modulation                   (comparison between different neural network structures)
+% input_selector = 6; % X_raw input,                                                      PMNN  with NO regular hidden layer                   and 25 nodes in the phase-modulated final hidden layer (comparison between different neural network structures)
+% input_selector = 7; % X_raw_phase_X_phase_V input, regular Feed-Forward Neural Network (FFNN) with 100 and 25 nodes in the (regular) hidden layers,           NO phase modulation                   (comparison between different neural network structures)
 
-for input_selector = 1:6
+for input_selector = 1:7
     if (input_selector == 1)
         model_descriptor_sub_path   = '';
     elseif (input_selector == 2)
@@ -45,6 +47,8 @@ for input_selector = 1:6
         model_descriptor_sub_path   = 'comparison_vs_different_neural_net_structure/input_X_raw_ffnn_hidden_layer_100_25/';
     elseif (input_selector == 6)
         model_descriptor_sub_path   = 'comparison_vs_different_neural_net_structure/input_X_raw_no_reg_hidden_layer/';
+    elseif (input_selector == 7)
+        model_descriptor_sub_path   = 'comparison_vs_different_neural_net_structure/input_X_raw_phase_X_phase_V_ffnn_hidden_layer_100_25/';
     end
     
     python_learn_tactile_fb_models_gen_test_specific_model_dir_path = [python_learn_tactile_fb_models_generalization_test_dir_path, model_descriptor_sub_path];
