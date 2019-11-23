@@ -28,7 +28,7 @@ if not os.path.isdir(model_parent_dir_path):
 
 N_NN_reinit_trials = 1 # 3
 batch_size = 64
-TF_max_train_iters = np.loadtxt(model_parent_dir_path+'TF_max_train_iters.txt', dtype=np.int, ndmin=0) + 1
+TF_max_train_iters_orig = np.loadtxt(model_parent_dir_path+'TF_max_train_iters.txt', dtype=np.int, ndmin=0) + 1
 
 # Dropouts:
 tf_train_dropout_keep_prob = 0.5
@@ -83,7 +83,9 @@ for input_selector in input_selector_list:
         init_learning_rate = 0.001
     
     if ((input_selector == 2) or (input_selector == 4)):
-        TF_max_train_iters = 3 * TF_max_train_iters # apparently PCA and AutoEncoder required 3 times other model's gradient descent iterations for achieving convergence ...
+        TF_max_train_iters = 3 * TF_max_train_iters_orig # apparently PCA and AutoEncoder required 3 times other model's gradient descent iterations for achieving convergence ...
+    else:
+        TF_max_train_iters = TF_max_train_iters_orig
     
     # Phase Modulation Usage Flag
     if ((input_selector == 5) or (input_selector == 7)):
