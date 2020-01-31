@@ -73,7 +73,9 @@ def plot_2D(X_list, Y_list, title,
             N_data_display=-1,
             is_auto_line_coloring_and_styling=False, 
             is_showing_grid=True, 
-            save_filepath=None):
+            save_filepath=None,
+            xticks_step=None,
+            is_showing_legend=True):
     N_dataset = len(X_list)
     assert (N_dataset == len(Y_list))
     if (Y_ERR_list is not None) and (err_color_style_list is not None):
@@ -86,6 +88,8 @@ def plot_2D(X_list, Y_list, title,
         assert (N_dataset <= len(color_style_list))
     fig = plt.figure(fig_num)
     ax = fig.add_subplot(111)
+    min_x = None
+    max_x = None
     for d in range(N_dataset):
         if (N_data_display < 0):
             X = X_list[d]
@@ -102,6 +106,18 @@ def plot_2D(X_list, Y_list, title,
         color = color_style_list[d][0]
         linestyle = color_style_list[d][1]
         labl = label_list[d]
+        new_min_x = min(X)
+        new_max_x = max(X)
+        if min_x is None:
+            min_x = new_min_x
+        else:
+            if new_min_x < min_x:
+                min_x = new_min_x
+        if max_x is None:
+            max_x = new_max_x
+        else:
+            if new_max_x > max_x:
+                max_x = new_max_x
         ax.plot(X, Y, c=color, ls=linestyle, label=labl)
         if (Y_ERR_list is not None):
             ax.fill_between(X, Y-Y_ERR, Y+Y_ERR, 
@@ -111,9 +127,13 @@ def plot_2D(X_list, Y_list, title,
                        c=color, label='start '+labl, marker='o')
             ax.scatter(X_list[d][-1], Y_list[d][-1], 
                        c=color, label='end '+labl, marker='^', s=200)
+    if xticks_step is not None:
+        plt.xticks(np.arange(int(round(min_x)), int(round(max_x))+1, 
+                             step=xticks_step))
     ax.set_xlabel(X_label)
     ax.set_ylabel(Y_label)
-    ax.legend()
+    if is_showing_legend:
+        ax.legend()
     ax.grid(is_showing_grid)
     ax.set_title(title)
     if (save_filepath is not None):
