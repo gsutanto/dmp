@@ -75,7 +75,8 @@ def plot_2D(X_list, Y_list, title,
             is_showing_grid=True, 
             save_filepath=None,
             xticks_step=None,
-            is_showing_legend=True):
+            is_showing_legend=True,
+            options={}):
     N_dataset = len(X_list)
     assert (N_dataset == len(Y_list))
     if (Y_ERR_list is not None) and (err_color_style_list is not None):
@@ -86,6 +87,8 @@ def plot_2D(X_list, Y_list, title,
         all_style_list = ['-','--','-.',':']
         color_style_list = [[c,s] for s in all_style_list for c in all_color_list]
         assert (N_dataset <= len(color_style_list))
+    if 'font_size' in options:
+        plt.rcParams.update({'font.size': options['font_size']})
     fig = plt.figure(fig_num)
     ax = fig.add_subplot(111)
     min_x = None
@@ -146,20 +149,24 @@ def plot_2D(X_list, Y_list, title,
 
 def errorbar_2D(X_list, Y_list, E_list, title, 
                 X_label, Y_label, fig_num=1, 
-                label_list=[''], color_style_list=[['b',None]], 
+                label_list=None, color_style_list=[['b',None]], 
                 N_data_display=-1,
                 is_auto_line_coloring_and_styling=False, 
                 is_showing_grid=True, 
                 X_lim=None, 
-                save_filepath=None):
+                save_filepath=None,
+                options={}):
     N_dataset = len(X_list)
     assert (N_dataset == len(Y_list))
     assert (N_dataset == len(E_list))
-    assert (N_dataset == len(label_list))
+    if (label_list is not None):
+        assert (N_dataset == len(label_list))
     if (is_auto_line_coloring_and_styling):
         all_style_list = ['-','--','-.',':']
         color_style_list = [[c,s] for s in all_style_list for c in all_color_list]
         assert (N_dataset <= len(color_style_list))
+    if 'font_size' in options:
+        plt.rcParams.update({'font.size': options['font_size']})
     fig = plt.figure(fig_num)
     ax = fig.add_subplot(111)
     for d in range(N_dataset):
@@ -172,13 +179,17 @@ def errorbar_2D(X_list, Y_list, E_list, title,
             Y = Y_list[d][:N_data_display]
             E = E_list[d][:N_data_display]
         color = color_style_list[d][0]
-        labl = label_list[d]
-        ax.errorbar(x=X, y=Y, yerr=E, c=color, ls='None', label=labl, fmt='o')
+        if (label_list is not None):
+            labl = label_list[d]
+            ax.errorbar(x=X, y=Y, yerr=E, c=color, ls='None', label=labl, fmt='o')
+        else:
+            ax.errorbar(x=X, y=Y, yerr=E, c=color, ls='None', fmt='o')
     ax.set_xlabel(X_label)
     ax.set_ylabel(Y_label)
     if (X_lim is not None):
         ax.set_xlim(X_lim)
-    ax.legend()
+    if (label_list is not None):
+        ax.legend()
     ax.grid(is_showing_grid)
     ax.set_title(title)
     if (save_filepath is not None):

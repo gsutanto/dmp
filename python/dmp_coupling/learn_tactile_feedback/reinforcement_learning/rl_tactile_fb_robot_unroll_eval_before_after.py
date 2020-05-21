@@ -20,6 +20,8 @@ import utilities as py_util
 import pyplot_util as pypl_util
 import rl_tactile_fb_utils as rl_util
 
+plt.close('all')
+
 generic_task_type = 'scraping'
 specific_task_type = 'scraping_w_tool'
 date = '20190902exp2'
@@ -43,9 +45,9 @@ setting_to_roll_angle_mapping_dict['p8_75'] = 8.75
 setting_to_roll_angle_mapping_dict['p10'] = 10.0
 
 unroll_type_to_eval_description_mapping_dict = {}
-unroll_type_to_eval_description_mapping_dict['bsln'] = 'without feedback model'
-unroll_type_to_eval_description_mapping_dict['cpld_before_rl'] = 'with feedback model before RL'
-unroll_type_to_eval_description_mapping_dict['cpld_after_rl'] = 'with feedback model after RL'
+unroll_type_to_eval_description_mapping_dict['bsln'] = 'w/o fb'
+unroll_type_to_eval_description_mapping_dict['cpld_before_rl'] = 'w/ fb before RL'
+unroll_type_to_eval_description_mapping_dict['cpld_after_rl'] = 'w/ fb after RL'
 
 roll_angles = np.array([setting_to_roll_angle_mapping_dict[setting] for setting in settings])
 eval_descriptions = [unroll_type_to_eval_description_mapping_dict[unroll_type] for unroll_type in unroll_types]
@@ -77,15 +79,24 @@ for prim in prims_learned:
             E.append(rl_robot_unroll_eval_data[setting][unroll_type]['std_accum_cost'][prim])
         Y_list.append(Y)
         E_list.append(E)
+    pltitle = 'Prim. # %d' % (prim+1)
+    plxlabel = 'Env. Setting Roll-Angle (Degrees)'
+    plylabel = 'Cost'
+    if (prim == 1):
+        pllabellist = eval_descriptions
+    else:
+        pllabellist = None
     pypl_util.errorbar_2D(X_list=X_list, 
                           Y_list=Y_list, 
                           E_list=E_list, 
-                          title='Performance at Primitive # %d : Cost for each considered Settings' % (prim+1), 
-                          X_label='Environment Setting Roll-Angle (Degrees)', 
-                          Y_label='Cost', 
+#                          title='Performance at Primitive # %d : Cost for each considered Settings' % (prim+1), 
+                          title=pltitle, 
+                          X_label=plxlabel, 
+                          Y_label=plylabel, 
                           fig_num=prim, 
-                          label_list=eval_descriptions, 
+                          label_list=pllabellist, 
                           color_style_list=[['r',None],['g',None],['b',None]], 
                           X_lim=X_lim, 
-                          save_filepath='%s/plot_performance_before_vs_after_rl_of_primitive%d_%s' % (in_data_root_dir_path, prim+1, experiment_name)
+                          save_filepath='%s/plot_performance_before_vs_after_rl_of_primitive%d_%s' % (in_data_root_dir_path, prim+1, date), 
+                          options={'font_size':20}
                           )

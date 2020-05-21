@@ -23,6 +23,8 @@ from pi2 import Pi2
 import utilities as py_util
 import rl_tactile_fb_utils as rl_util
 
+plt.close('all')
+
 prims_tbi = [1, 2]
 end_plot_iter = 2
 

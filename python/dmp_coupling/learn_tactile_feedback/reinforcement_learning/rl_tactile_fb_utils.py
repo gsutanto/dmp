@@ -594,7 +594,7 @@ def checkUnrollPI2ParamSampleSupervisionRequirement(k, cart_types_to_be_improved
                 assert False, "Trajectory component named %s is un-defined!"%comp
     return False
 
-def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath=None):
+def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath=None, font_size=20):
     it = 0
     J_list = list()
     J_prime_list = list()
@@ -637,7 +637,7 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
         plt.close('all')
         pypl_util.plot_2D(X_list=X_list, 
                           Y_list=Y_list, 
-                          title='Total Cost per Iteration Prim. # %d' % (prim_to_be_improved+1), 
+                          title='Prim. # %d' % (prim_to_be_improved+1), 
                           X_label='RL Iteration #', 
                           Y_label='Total Cost', 
                           Y_ERR_list=Y_ERR_list,
@@ -646,7 +646,8 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
                           color_style_list=[['#9467bd','-']], 
                           err_color_style_list=['#e377c2'],
                           save_filepath=save_fpath, 
-                          xticks_step=1)
+                          xticks_step=1, 
+                          options={'font_size':font_size})
     Y_list.append(np.array(J_prime_list))
     Y_list.append(np.array(J_prime_new_list))
     Y_ERR_list.append(np.array(J_prime_err_list))
@@ -658,7 +659,7 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
         plt.close('all')
         pypl_util.plot_2D(X_list=X_list, 
                           Y_list=Y_list, 
-                          title='Total Cost per Iteration Prim. # %d' % (prim_to_be_improved+1), 
+                          title='Prim. # %d' % (prim_to_be_improved+1), 
                           X_label='RL Iteration #', 
                           Y_label='Total Cost', 
                           Y_ERR_list=Y_ERR_list,
@@ -667,7 +668,8 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
                           color_style_list=[['#9467bd','-'],['#2ca02c','-.'],['#1f77b4',':']], 
                           err_color_style_list=['#e377c2', '#bcbd22', '#17becf'],
                           save_filepath=save_fpath, 
-                          xticks_step=1)
+                          xticks_step=1, 
+                          options={'font_size':font_size})
     
     Y_list.append(np.array(J_new_list))
     Y_ERR_list.append(np.array(J_new_err_list))
@@ -677,7 +679,7 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
         plt.close('all')
         pypl_util.plot_2D(X_list=X_list, 
                           Y_list=Y_list, 
-                          title='Total Cost per Iteration Prim. # %d' % (prim_to_be_improved+1), 
+                          title='Prim. # %d' % (prim_to_be_improved+1), 
                           X_label='RL Iteration #', 
                           Y_label='Total Cost', 
                           Y_ERR_list=Y_ERR_list,
@@ -686,7 +688,8 @@ def plotLearningCurve(rl_data, prim_to_be_improved, end_plot_iter, save_filepath
                           color_style_list=[['#9467bd','-'],['#2ca02c','-.'],['#1f77b4',':'],['#8c564b','--']], 
                           err_color_style_list=['#e377c2', '#bcbd22', '#17becf', '#7f7f7f'],
                           save_filepath=save_fpath, 
-                          xticks_step=1)
+                          xticks_step=1, 
+                          options={'font_size':font_size})
     return None
 
 def extractParamsToBeImproved(params_dict, type_dim_tbi_dict, types_tbi_list, prim_tbi):
