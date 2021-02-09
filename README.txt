@@ -1,3 +1,10 @@
+-- Description --
+This codebase contains the implementation of the Dynamic Movement Primitive (DMP) in C++, Python, and MATLAB.
+The C++ implementation supports execution in a (hard) real-time control for robots.
+
+-- Acknowledgement --
+This codebase was developed with the generous support from the Max Planck Institute for Intelligent Systems and University of Southern California.
+
 To execute on Python:
 ------
 Open Spyder IDE ( https://docs.spyder-ide.org/installation.html )
