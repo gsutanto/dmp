@@ -4,8 +4,8 @@
   <version>1.0.0</version>
   <description>sl</description>
   <license>MIT</license>
-  <author email="gsutanto@usc.edu">Giovanni Sutanto</author>
-  <maintainer email="gsutanto@usc.edu">Giovanni Sutanto</maintainer>
+  <author email="gsutanto@alumni.usc.edu">Giovanni Sutanto</author>
+  <maintainer email="gsutanto@alumni.usc.edu">Giovanni Sutanto</maintainer>
 
   <buildtool_depend>catkin</buildtool_depend>
 
