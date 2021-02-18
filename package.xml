@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package>
-  <name>amd_clmc_dmp</name>
+  <name>dmp</name>
   <version>1.0.0</version>
   <description>sl</description>
-  <license>BSD</license>
+  <license>MIT</license>
   <author email="gsutanto@usc.edu">Giovanni Sutanto</author>
   <maintainer email="gsutanto@usc.edu">Giovanni Sutanto</maintainer>
 
