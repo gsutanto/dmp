@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/utility/DataIO.h"
+#include "dmp/utility/DataIO.h"
 
 namespace dmp
 {

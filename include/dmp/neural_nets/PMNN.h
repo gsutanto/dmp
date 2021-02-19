@@ -12,10 +12,10 @@
 #ifndef PMNN_H
 #define PMNN_H
 
-#include "amd_clmc_dmp/utility/DefinitionsDerived.h"
-#include "amd_clmc_dmp/utility/utility.h"
-#include "amd_clmc_dmp/utility/RealTimeAssertor.h"
-#include "amd_clmc_dmp/utility/DataIO.h"
+#include "dmp/utility/DefinitionsDerived.h"
+#include "dmp/utility/utility.h"
+#include "dmp/utility/RealTimeAssertor.h"
+#include "dmp/utility/DataIO.h"
 
 namespace dmp
 {

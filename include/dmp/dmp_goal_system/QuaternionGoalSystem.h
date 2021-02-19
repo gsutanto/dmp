@@ -11,9 +11,9 @@
 #ifndef QUATERNION_GOAL_SYSTEM_H
 #define QUATERNION_GOAL_SYSTEM_H
 
-#include "amd_clmc_dmp/dmp_goal_system/GoalSystem.h"
-#include "amd_clmc_dmp/dmp_state/QuaternionDMPState.h"
-#include "amd_clmc_dmp/utility/utility_quaternion.h"
+#include "dmp/dmp_goal_system/GoalSystem.h"
+#include "dmp/dmp_state/QuaternionDMPState.h"
+#include "dmp/utility/utility_quaternion.h"
 
 namespace dmp
 {

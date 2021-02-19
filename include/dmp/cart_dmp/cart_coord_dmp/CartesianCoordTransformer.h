@@ -15,9 +15,9 @@
 #include <stddef.h>
 #include <vector>
 #include <Eigen/Dense>
-#include "amd_clmc_dmp/utility/RealTimeAssertor.h"
-#include "amd_clmc_dmp/utility/DefinitionsDerived.h"
-#include "amd_clmc_dmp/dmp_state/DMPState.h"
+#include "dmp/utility/RealTimeAssertor.h"
+#include "dmp/utility/DefinitionsDerived.h"
+#include "dmp/dmp_state/DMPState.h"
 
 #define PARALLEL_VECTOR_PROJECTION_THRESHOLD        0.9 // two vectors will be considered parallel, if the projection of one vector on the other is greater than this value
 #define MIN_CTRAJ_LOCAL_COORD_OPTION_NO             0

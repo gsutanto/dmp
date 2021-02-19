@@ -21,12 +21,12 @@
 #include <unistd.h>
 #include <Eigen/Dense>
 
-#include "amd_clmc_dmp/utility/utility.h"
-#include "amd_clmc_dmp/dmp_state/DMPState.h"
-#include "amd_clmc_dmp/dmp_discrete/CanonicalSystemDiscrete.h"
-#include "amd_clmc_dmp/dmp_coupling/learn_obs_avoid/DefinitionsLearnObsAvoid.h"
-#include "amd_clmc_dmp/dmp_coupling/learn_obs_avoid/LearnObsAvoidDataIO.h"
-#include "amd_clmc_dmp/neural_nets/PMNN.h"
+#include "dmp/utility/utility.h"
+#include "dmp/dmp_state/DMPState.h"
+#include "dmp/dmp_discrete/CanonicalSystemDiscrete.h"
+#include "dmp/dmp_coupling/learn_obs_avoid/DefinitionsLearnObsAvoid.h"
+#include "dmp/dmp_coupling/learn_obs_avoid/LearnObsAvoidDataIO.h"
+#include "dmp/neural_nets/PMNN.h"
 
 namespace dmp
 {

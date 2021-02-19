@@ -7,14 +7,14 @@ Execution Order for Reproducing Experimental Results:
      Save the dataset/data files for example inside the folder ~/Desktop/dmp_demos/scraping_w_tool/human_baseline/ .
  [2] Making sure that 'specific_task_type' variable is set correctly,
      segment the baseline/nominal human demonstrations into primitives, 
-     by executing the script amd_clmc_dmp/data/dmp_coupling/learn_tactile_feedback/align_and_segment_nominal_sensorimotor_trajs_scraping.m .
+     by executing the script dmp/data/dmp_coupling/learn_tactile_feedback/align_and_segment_nominal_sensorimotor_trajs_scraping.m .
  [3] Making sure that 'specific_task_type' variable is set correctly,
      learn the baseline/nominal primitives from the segmented demonstrations,
-     by executing the script amd_clmc_dmp/matlab/dmp_coupling/learn_tactile_feedback/learn_nominal_action_primitives.m
+     by executing the script dmp/matlab/dmp_coupling/learn_tactile_feedback/learn_nominal_action_primitives.m
  [4] Making sure that 'specific_task_type' variable is set correctly,
      convert the learned baseline/nominal primitives' parameters from MATLAB *.m file into *.txt files for loading by C++ program, 
-     by executing the script amd_clmc_dmp/matlab/dmp_coupling/learn_tactile_feedback/convert_nominal_action_dmp_params_mat2cpp.m .
-     The parameters as *.txt files will be stored for example under directory amd_clmc_dmp/data/dmp_coupling/learn_tactile_feedback/scraping_w_tool/learned_prims_params/ .
+     by executing the script dmp/matlab/dmp_coupling/learn_tactile_feedback/convert_nominal_action_dmp_params_mat2cpp.m .
+     The parameters as *.txt files will be stored for example under directory dmp/data/dmp_coupling/learn_tactile_feedback/scraping_w_tool/learned_prims_params/ .
 **---------------- Learning Feedback/Coupling Term Model for Unrolling on Robot ----------------**
  [5] Making sure that 'prims_param_root_dir_path' string is set correctly,
      i.e. including the correct sub-string component (e.g. 'scraping_w_tool') as specific task type identifier,
@@ -42,9 +42,9 @@ Execution Order for Reproducing Experimental Results:
      Save the dataset/data files for example inside the folder ~/Desktop/dmp_demos/scraping_w_tool/<setting_number>/ .
  [7] Making sure that 'specific_task_type' variable is set correctly,
      segment the corrected sensorimotor demonstrations into primitives, 
-     by executing the script amd_clmc_dmp/data/dmp_coupling/learn_tactile_feedback/segment_sensorimotor_trajs_scraping_v2.m .
+     by executing the script dmp/data/dmp_coupling/learn_tactile_feedback/segment_sensorimotor_trajs_scraping_v2.m .
  [8] Making sure that 'specific_task_type' variable is set correctly,
-     prepare the Training and Generalization Testing Dataset, by running the following scripts in amd_clmc_dmp/matlab/dmp_coupling/learn_tactile_feedback/:
+     prepare the Training and Generalization Testing Dataset, by running the following scripts in dmp/matlab/dmp_coupling/learn_tactile_feedback/:
      >> on MATLAB: convert_demo_segment_to_supervised_tactile_fb_dataset_v2.m 
                    => augment_dataset.m (please remember to select which electrode(s) are being used, 
                                          by setting the appropriate values for 
@@ -52,23 +52,23 @@ Execution Order for Reproducing Experimental Results:
                    => augment_outlier_metric_and_visualize_2D_data_projection.m 
                    => tf_tactile_data_preparation_robot_unroll.m
  [9] Perform Feedback Model Training in TensorFlow in Python:
-     >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_tactile_feedback/learn_tactile_feedback_w_PMNN.py
+     >> on Spyder: dmp/python/dmp_coupling/learn_tactile_feedback/learn_tactile_feedback_w_PMNN.py
      (ensuring (is_performing_generalization_test == 0) on line 49 is selected...)
-[10] Using helper script amd_clmc_dmp/python/dmp_coupling/learn_tactile_feedback/models/compare_nmse_generalization_among_reinits.m ,
+[10] Using helper script dmp/python/dmp_coupling/learn_tactile_feedback/models/compare_nmse_generalization_among_reinits.m ,
      for EACH x in [1,2,3], inspect and compare among the prim_<x>_nmse_reinit_<y>_step_<TF_max_train_iters>.mat files for y in [0,1,2], 
      and manually select y which has the best (lowest) nmse_generalization_test.
      Suppose for x==1, y=2;
              for x==2, y=0;
              for x==3, y=1;
-     then write/update the file amd_clmc_dmp/python/dmp_coupling/learn_tactile_feedback/models/reinit_selection_idx.txt with content:
+     then write/update the file dmp/python/dmp_coupling/learn_tactile_feedback/models/reinit_selection_idx.txt with content:
      "2 0 1" (without the double quotes when writing in the file of course...).
-[11] Execute the script amd_clmc_dmp/data/dmp_coupling/learn_tactile_feedback/scraping/update_scraping_data_after_TF_training.m .
+[11] Execute the script dmp/data/dmp_coupling/learn_tactile_feedback/scraping/update_scraping_data_after_TF_training.m .
 [12] Test the trained Feedback Model performing prediction on unseen demonstration/trial in TensorFlow in Python:
-     >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_tactile_feedback/test_learned_tactile_feedback_w_PMNN.py
-[13] Execute TensorFlow Python versus MATLAB prediction based on trained parameters, by running the following scripts in amd_clmc_dmp/matlab/dmp_coupling/learn_tactile_feedback/:
+     >> on Spyder: dmp/python/dmp_coupling/learn_tactile_feedback/test_learned_tactile_feedback_w_PMNN.py
+[13] Execute TensorFlow Python versus MATLAB prediction based on trained parameters, by running the following scripts in dmp/matlab/dmp_coupling/learn_tactile_feedback/:
      >> on MATLAB: test_TensorFlow_trained_tactile_fb_NN_model.m
 [14] For safety during real robot unrolling with trained Feedback Model, we compute the safety bounds,
-     by executing the script amd_clmc_dmp/matlab/dmp_coupling/learn_tactile_feedback/analyze_trajectory_statistics.m .
+     by executing the script dmp/matlab/dmp_coupling/learn_tactile_feedback/analyze_trajectory_statistics.m .
 **------------------- Unrolling both Learned Primitive ------------------*
  *---------- and Learned Feedback/Coupling Term Model on Robot ----------*
  *------------------- and Evaluation by Visualization -------------------**
@@ -83,23 +83,23 @@ Execution Order for Reproducing Experimental Results:
      <p (positive tiltboard angle) or n (negative tiltboard angle)><tiltboard angle>/
      <c (unrolling with coupling term) or b (unrolling baseline/without coupling term)>/ .
 [16] Segment the robot unrolling results into primitives, 
-     by executing the script amd_clmc_dmp/data/dmp_coupling/learn_tactile_feedback/segment_robot_unroll_data_scraping.m .
+     by executing the script dmp/data/dmp_coupling/learn_tactile_feedback/segment_robot_unroll_data_scraping.m .
 [17] Visualize the robot unrolling results (divided into primitives),
-     by executing the script amd_clmc_dmp/matlab/dmp_coupling/learn_tactile_feedback/analyze_robot_unroll_data.m .
+     by executing the script dmp/matlab/dmp_coupling/learn_tactile_feedback/analyze_robot_unroll_data.m .
 **---------------- (Generalization) Evaluation on Learning Feedback/Coupling Term Model ----------------**
 (same steps as Section "Learning Feedback/Coupling Term Model for Unrolling on Robot" above until step [8])
  [9] Making sure that 'specific_task_type' variable is set correctly,
-     prepare the Training and Generalization Testing Datasets, by running the following scripts in amd_clmc_dmp/matlab/dmp_coupling/learn_tactile_feedback/:
+     prepare the Training and Generalization Testing Datasets, by running the following scripts in dmp/matlab/dmp_coupling/learn_tactile_feedback/:
      >> on MATLAB: tf_tactile_data_preparation_generalization_evaluation.m
 [10] Perform Feedback Model Training in TensorFlow in Python:
-     >> on Spyder: amd_clmc_dmp/python/dmp_coupling/learn_tactile_feedback/learn_tactile_feedback_w_PMNN.py
+     >> on Spyder: dmp/python/dmp_coupling/learn_tactile_feedback/learn_tactile_feedback_w_PMNN.py
      (ensuring (is_performing_generalization_test == 1) on line 49 is selected, and
       ensuring appropriate input_selector_list on line 61 is selected...)
 [11] Compute average best-generalization NMSE, 
-     by running the following scripts in amd_clmc_dmp/matlab/dmp_coupling/learn_tactile_feedback/:
+     by running the following scripts in dmp/matlab/dmp_coupling/learn_tactile_feedback/:
      >> on MATLAB: average_best_generalization_nmse.m
 **-------------------- Miscellaneous Visualizations --------------------**
-All are located under amd_clmc_dmp/matlab/dmp_coupling/learn_tactile_feedback/ :
+All are located under dmp/matlab/dmp_coupling/learn_tactile_feedback/ :
 [a] visualize_demo_vs_extracted_supervised_dataset_across_trials.m :
     Visualize the trajectories, as well as extracted supervised dataset
     (target X (sensor input) - Ct/coupling term (output) pairs) 
@@ -114,7 +114,7 @@ All are located under amd_clmc_dmp/matlab/dmp_coupling/learn_tactile_feedback/ :
     especially on trials it has never seen before,
     for evaluating the fitting/prediction quality,
     as well as generalization to unseen data.
-[d] amd_clmc_dmp/matlab/dmp_coupling/learn_tactile_feedback/neural_nets/plot_final_regular_hidden_layer_feature_priority_evolution.m :
+[d] dmp/matlab/dmp_coupling/learn_tactile_feedback/neural_nets/plot_final_regular_hidden_layer_feature_priority_evolution.m :
     Visualize the top 10 dominant regular hidden layer features 
     for each phase RBF in the specified primitive, roll-orientation coupling term,
     displayed in yellow. The less dominant ones are displayed in blue.

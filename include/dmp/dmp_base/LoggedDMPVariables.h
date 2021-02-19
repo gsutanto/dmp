@@ -12,10 +12,10 @@
 #ifndef LOGGED_DMP_VARIABLES_H
 #define LOGGED_DMP_VARIABLES_H
 
-#include "amd_clmc_dmp/utility/DefinitionsBase.h"
-#include "amd_clmc_dmp/utility/RealTimeAssertor.h"
-#include "amd_clmc_dmp/dmp_param/TauSystem.h"
-#include "amd_clmc_dmp/dmp_state/DMPState.h"
+#include "dmp/utility/DefinitionsBase.h"
+#include "dmp/utility/RealTimeAssertor.h"
+#include "dmp/dmp_param/TauSystem.h"
+#include "dmp/dmp_state/DMPState.h"
 
 namespace dmp
 {

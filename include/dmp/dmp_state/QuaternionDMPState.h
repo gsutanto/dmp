@@ -32,8 +32,8 @@
 #ifndef QUATERNION_DMP_STATE_H
 #define QUATERNION_DMP_STATE_H
 
-#include "amd_clmc_dmp/dmp_state/DMPState.h"
-#include "amd_clmc_dmp/utility/utility_quaternion.h"
+#include "dmp/dmp_state/DMPState.h"
+#include "dmp/utility/utility_quaternion.h"
 
 namespace dmp
 {

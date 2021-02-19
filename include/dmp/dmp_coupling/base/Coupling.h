@@ -10,7 +10,7 @@
 #ifndef COUPLING_H
 #define COUPLING_H
 
-#include "amd_clmc_dmp/utility/RealTimeAssertor.h"
+#include "dmp/utility/RealTimeAssertor.h"
 
 namespace dmp
 {

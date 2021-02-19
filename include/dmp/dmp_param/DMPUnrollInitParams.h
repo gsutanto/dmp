@@ -15,8 +15,8 @@
 #include <vector>
 #include <memory>
 
-#include "amd_clmc_dmp/utility/RealTimeAssertor.h"
-#include "amd_clmc_dmp/utility/DefinitionsDerived.h"
+#include "dmp/utility/RealTimeAssertor.h"
+#include "dmp/utility/DefinitionsDerived.h"
 
 namespace dmp
 {

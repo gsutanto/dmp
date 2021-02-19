@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/dmp_base/DMP.h"
+#include "dmp/dmp_base/DMP.h"
 
 namespace dmp
 {

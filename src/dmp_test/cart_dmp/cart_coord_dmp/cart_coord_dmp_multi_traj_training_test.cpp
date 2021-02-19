@@ -4,18 +4,18 @@
 #include <unistd.h>
 #include <getopt.h>
 
-#include "amd_clmc_dmp/dmp_state/DMPState.h"
-#include "amd_clmc_dmp/dmp_discrete/CanonicalSystemDiscrete.h"
-#include "amd_clmc_dmp/dmp_discrete/DMPDiscrete.h"
-#include "amd_clmc_dmp/cart_dmp/cart_coord_dmp/CartesianCoordDMP.h"
-#include "amd_clmc_dmp/cart_dmp/cart_coord_dmp/CartesianCoordTransformer.h"
-#include "amd_clmc_dmp/paths.h"
+#include "dmp/dmp_state/DMPState.h"
+#include "dmp/dmp_discrete/CanonicalSystemDiscrete.h"
+#include "dmp/dmp_discrete/DMPDiscrete.h"
+#include "dmp/cart_dmp/cart_coord_dmp/CartesianCoordDMP.h"
+#include "dmp/cart_dmp/cart_coord_dmp/CartesianCoordTransformer.h"
+#include "dmp/paths.h"
 
 using namespace dmp;
 
 void print_usage()
 {
-    printf("Usage: amd_clmc_dmp_cart_coord_dmp_multi_traj_training_demo [-f formula_type(0=_SCHAAL_ OR 1=_HOFFMANN_)] [-c canonical_order(1 OR 2)] [-m learning_method(0=_SCHAAL_LWR_METHOD_ OR 1=_JPETERS_GLOBAL_LEAST_SQUARES_METHOD_)] [-r time_reproduce_max(>=0)] [-t tau_reproduce(>=0)] [-e rt_err_file_path]\n");
+    printf("Usage: dmp_cart_coord_dmp_multi_traj_training_demo [-f formula_type(0=_SCHAAL_ OR 1=_HOFFMANN_)] [-c canonical_order(1 OR 2)] [-m learning_method(0=_SCHAAL_LWR_METHOD_ OR 1=_JPETERS_GLOBAL_LEAST_SQUARES_METHOD_)] [-r time_reproduce_max(>=0)] [-t tau_reproduce(>=0)] [-e rt_err_file_path]\n");
 }
 
 int main(int argc, char** argv)

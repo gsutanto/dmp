@@ -14,15 +14,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
-#include "amd_clmc_dmp/utility/DefinitionsDerived.h"
-#include "amd_clmc_dmp/dmp_state/DMPState.h"
-#include "amd_clmc_dmp/dmp_param/TauSystem.h"
-#include "amd_clmc_dmp/dmp_param/DMPUnrollInitParams.h"
-#include "amd_clmc_dmp/dmp_base/CanonicalSystem.h"
-#include "amd_clmc_dmp/dmp_base/FunctionApproximator.h"
-#include "amd_clmc_dmp/dmp_base/TransformationSystem.h"
-#include "amd_clmc_dmp/dmp_base/LearningSystem.h"
-#include "amd_clmc_dmp/dmp_base/DMPDataIO.h"
+#include "dmp/utility/DefinitionsDerived.h"
+#include "dmp/dmp_state/DMPState.h"
+#include "dmp/dmp_param/TauSystem.h"
+#include "dmp/dmp_param/DMPUnrollInitParams.h"
+#include "dmp/dmp_base/CanonicalSystem.h"
+#include "dmp/dmp_base/FunctionApproximator.h"
+#include "dmp/dmp_base/TransformationSystem.h"
+#include "dmp/dmp_base/LearningSystem.h"
+#include "dmp/dmp_base/DMPDataIO.h"
 
 namespace dmp
 {

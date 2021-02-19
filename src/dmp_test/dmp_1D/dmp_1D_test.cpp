@@ -5,18 +5,18 @@
 #include <getopt.h>
 #include <ctime>
 
-#include "amd_clmc_dmp/utility/DefinitionsDerived.h"
-#include "amd_clmc_dmp/dmp_state/DMPState.h"
-#include "amd_clmc_dmp/dmp_param/TauSystem.h"
-#include "amd_clmc_dmp/dmp_discrete/CanonicalSystemDiscrete.h"
-#include "amd_clmc_dmp/dmp_1D/DMPDiscrete1D.h"
-#include "amd_clmc_dmp/paths.h"
+#include "dmp/utility/DefinitionsDerived.h"
+#include "dmp/dmp_state/DMPState.h"
+#include "dmp/dmp_param/TauSystem.h"
+#include "dmp/dmp_discrete/CanonicalSystemDiscrete.h"
+#include "dmp/dmp_1D/DMPDiscrete1D.h"
+#include "dmp/paths.h"
 
 using namespace dmp;
 
 void print_usage()
 {
-    printf("Usage: amd_clmc_dmp_1D_demo [-f formula_type(0=_SCHAAL_ OR 1=_HOFFMANN_)] [-c canonical_order(1 OR 2)] [-m learning_method(0=_SCHAAL_LWR_METHOD_ OR 1=_JPETERS_GLOBAL_LEAST_SQUARES_METHOD_)] [-r time_reproduce_max(>=0)] [-h time_goal_change(>=0)] [-g new_goal] [-t tau_reproduce(>=0)] [-e rt_err_file_path]\n");
+    printf("Usage: dmp_1D_demo [-f formula_type(0=_SCHAAL_ OR 1=_HOFFMANN_)] [-c canonical_order(1 OR 2)] [-m learning_method(0=_SCHAAL_LWR_METHOD_ OR 1=_JPETERS_GLOBAL_LEAST_SQUARES_METHOD_)] [-r time_reproduce_max(>=0)] [-h time_goal_change(>=0)] [-g new_goal] [-t tau_reproduce(>=0)] [-e rt_err_file_path]\n");
 }
 
 int main(int argc, char** argv)

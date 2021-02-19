@@ -4,11 +4,11 @@ clc;
 
 task_type                   = 'scraping';
 
-amd_clmc_dmp_root_dir_path  = '../../../../';
+dmp_root_dir_path  = '../../../../';
 
-data_root_dir_path          = [amd_clmc_dmp_root_dir_path, 'data/'];
-matlab_root_dir_path        = [amd_clmc_dmp_root_dir_path, 'matlab/'];
-python_root_dir_path        = [amd_clmc_dmp_root_dir_path, 'python/'];
+data_root_dir_path          = [dmp_root_dir_path, 'data/'];
+matlab_root_dir_path        = [dmp_root_dir_path, 'matlab/'];
+python_root_dir_path        = [dmp_root_dir_path, 'python/'];
 
 data_learn_tactile_fb_task_type_dir_path             = [data_root_dir_path, 'dmp_coupling/learn_tactile_feedback/',task_type,'/'];
 data_LTacFB_task_type_PMNN_dir_path                  = [data_learn_tactile_fb_task_type_dir_path, 'neural_nets/pmnn/'];

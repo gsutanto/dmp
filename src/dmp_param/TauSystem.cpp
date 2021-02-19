@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/dmp_param/TauSystem.h"
+#include "dmp/dmp_param/TauSystem.h"
 
 namespace dmp
 {

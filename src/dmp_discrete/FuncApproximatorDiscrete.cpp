@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/dmp_discrete/FuncApproximatorDiscrete.h"
+#include "dmp/dmp_discrete/FuncApproximatorDiscrete.h"
 
 namespace dmp
 {

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-dirs_src_folder=$'../../../../../../amd_clmc_dmp_data/dmp_coupling/learn_obs_avoid/static_obs/data_multi_demo_vicon_static/'
+dirs_src_folder=$'../../../../../../dmp_data/dmp_coupling/learn_obs_avoid/static_obs/data_multi_demo_vicon_static/'
 
 dirs=$'baseline'
 max_numbered_dir=222

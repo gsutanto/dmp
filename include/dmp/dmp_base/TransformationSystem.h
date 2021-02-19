@@ -15,15 +15,15 @@
 #include <vector>
 #include <limits>
 
-#include "amd_clmc_dmp/utility/utility.h"
-#include "amd_clmc_dmp/utility/RealTimeAssertor.h"
-#include "amd_clmc_dmp/dmp_param/TauSystem.h"
-#include "amd_clmc_dmp/dmp_goal_system/GoalSystem.h"
-#include "amd_clmc_dmp/dmp_state/DMPState.h"
-#include "amd_clmc_dmp/dmp_base/CanonicalSystem.h"
-#include "amd_clmc_dmp/dmp_base/FunctionApproximator.h"
-#include "amd_clmc_dmp/dmp_base/LoggedDMPVariables.h"
-#include "amd_clmc_dmp/dmp_coupling/base/TransformCoupling.h"
+#include "dmp/utility/utility.h"
+#include "dmp/utility/RealTimeAssertor.h"
+#include "dmp/dmp_param/TauSystem.h"
+#include "dmp/dmp_goal_system/GoalSystem.h"
+#include "dmp/dmp_state/DMPState.h"
+#include "dmp/dmp_base/CanonicalSystem.h"
+#include "dmp/dmp_base/FunctionApproximator.h"
+#include "dmp/dmp_base/LoggedDMPVariables.h"
+#include "dmp/dmp_coupling/base/TransformCoupling.h"
 
 #define MIN_FABS_AMPLITUDE  1.e-3   // minimum of fabs(amplitude)
 #define MIN_K               0.01    // minimum of K (in Hoffman et al.'s formulation)

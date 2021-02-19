@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/dmp_discrete/TransformSystemDiscrete.h"
+#include "dmp/dmp_discrete/TransformSystemDiscrete.h"
 
 namespace dmp
 {

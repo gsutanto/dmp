@@ -1,6 +1,6 @@
 #!/bin/bash
 
-dirs_src_folder=$'../../../../../amd_clmc_dmp_data/dmp_coupling/learn_obs_avoid/static_obs/'
+dirs_src_folder=$'../../../../../dmp_data/dmp_coupling/learn_obs_avoid/static_obs/'
 
 dirs=$'data_multi_demo_static\ndata_reinforcement_learning\ndata_sph_new'
 

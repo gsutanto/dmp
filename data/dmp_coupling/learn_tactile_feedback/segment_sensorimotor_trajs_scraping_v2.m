@@ -14,7 +14,7 @@ specific_task_type 	= 'scraping_w_tool';
 % Change in_data_dir_path to the path of the input data directory, as
 % necessary:
 in_data_dir_path    = ['~/Desktop/dmp_demos/',specific_task_type,'/'];
-out_data_dir_path   = [pwd, '/../../../../amd_clmc_dmp_data/dmp_coupling/learn_tactile_feedback/',specific_task_type,'/'];
+out_data_dir_path   = [pwd, '/../../../../dmp_data/dmp_coupling/learn_tactile_feedback/',specific_task_type,'/'];
 
 is_baseline_first_to_be_processed   = 1;
 

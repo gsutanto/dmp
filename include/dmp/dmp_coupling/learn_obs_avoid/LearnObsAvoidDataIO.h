@@ -12,8 +12,8 @@
 
 #include <stdio.h>
 #include <vector>
-#include "amd_clmc_dmp/utility/DataIO.h"
-#include "amd_clmc_dmp/dmp_coupling/learn_obs_avoid/DefinitionsLearnObsAvoid.h"
+#include "dmp/utility/DataIO.h"
+#include "dmp/dmp_coupling/learn_obs_avoid/DefinitionsLearnObsAvoid.h"
 
 namespace dmp
 {

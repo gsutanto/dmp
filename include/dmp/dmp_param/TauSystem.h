@@ -15,8 +15,8 @@
 #include <vector>
 #include <memory>
 
-#include "amd_clmc_dmp/utility/RealTimeAssertor.h"
-#include "amd_clmc_dmp/dmp_coupling/base/TauCoupling.h"
+#include "dmp/utility/RealTimeAssertor.h"
+#include "dmp/dmp_coupling/base/TauCoupling.h"
 
 namespace dmp
 {

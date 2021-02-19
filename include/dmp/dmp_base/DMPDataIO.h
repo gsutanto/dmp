@@ -12,10 +12,10 @@
 
 #include <iomanip>
 
-#include "amd_clmc_dmp/utility/DataIO.h"
-#include "amd_clmc_dmp/dmp_base/TransformationSystem.h"
-#include "amd_clmc_dmp/dmp_base/FunctionApproximator.h"
-#include "amd_clmc_dmp/dmp_base/LoggedDMPVariables.h"
+#include "dmp/utility/DataIO.h"
+#include "dmp/dmp_base/TransformationSystem.h"
+#include "dmp/dmp_base/FunctionApproximator.h"
+#include "dmp/dmp_base/LoggedDMPVariables.h"
 
 namespace dmp
 {

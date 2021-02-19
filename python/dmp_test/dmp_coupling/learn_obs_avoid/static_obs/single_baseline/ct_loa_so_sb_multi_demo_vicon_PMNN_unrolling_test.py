@@ -35,7 +35,7 @@ from DataStacking import *
 from utilities import *
 from vicon_obs_avoid_utils import *
 
-def ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test(amd_clmc_dmp_home_dir_path="../../../../../../", 
+def ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test(dmp_home_dir_path="../../../../../../", 
                                                       canonical_order=2, unroll_ctraj_save_dir_path="", 
                                                       unroll_ctraj_save_filename=""):
     task_servo_rate = 300.0
@@ -43,11 +43,11 @@ def ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test(amd_clmc_dmp_home_dir_path
     dmp_basis_funcs_size = 25
     PMNN_input_size = 17
     PMNN_output_size = 3
-    loa_data_dir_path = amd_clmc_dmp_home_dir_path + "data/dmp_coupling/learn_obs_avoid/"
+    loa_data_dir_path = dmp_home_dir_path + "data/dmp_coupling/learn_obs_avoid/"
     loa_data_prim_dir_path = loa_data_dir_path + "static_obs/learned_prims_params/position/prim1/"
     pmnn_model_parent_dir_path = loa_data_dir_path + "static_obs/neural_nets/pmnn/cpp_models/"
     pmnn_model_path = loa_data_dir_path + "static_obs/neural_nets/pmnn/cpp_models/prim1/"
-    data_global_coord_filepath = amd_clmc_dmp_home_dir_path + "python/dmp_coupling/learn_obs_avoid/learn_obs_avoid_pmnn_vicon_data/data_multi_demo_vicon_static_global_coord.pkl"
+    data_global_coord_filepath = dmp_home_dir_path + "python/dmp_coupling/learn_obs_avoid/learn_obs_avoid_pmnn_vicon_data/data_multi_demo_vicon_static_global_coord.pkl"
     pmnn_name = 'my_PMNN_obs_avoid_fb'
     ctraj_local_coordinate_frame_selection = GSUTANTO_LOCAL_COORD_FRAME
     is_using_scaling = [False] * PMNN_output_size # NOT using scaling on CartCoordDMP for now...
@@ -89,7 +89,7 @@ def ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test(amd_clmc_dmp_home_dir_path
     if (os.path.isfile(data_global_coord_filepath)):
         data_global_coord = loadObj(data_global_coord_filepath)
     else:
-        data_global_coord = prepareDemoDatasetLOAVicon(task_servo_rate, amd_clmc_dmp_home_dir_path)
+        data_global_coord = prepareDemoDatasetLOAVicon(task_servo_rate, dmp_home_dir_path)
         
     N_unroll = 1 + (len(selected_obs_avoid_setting_numbers) * max_num_trajs_per_setting)
     list_global_traj_unroll = [None] * N_unroll

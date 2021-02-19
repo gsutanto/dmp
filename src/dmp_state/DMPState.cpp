@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/dmp_state/DMPState.h"
+#include "dmp/dmp_state/DMPState.h"
 
 namespace dmp
 {

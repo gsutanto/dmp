@@ -10,8 +10,8 @@
 #ifndef DEFINITIONS_LEARN_OBS_AVOID_H
 #define DEFINITIONS_LEARN_OBS_AVOID_H
 
-#include "amd_clmc_dmp/utility/DefinitionsBase.h"
-#include "amd_clmc_dmp/utility/DefinitionsDerived.h"
+#include "dmp/utility/DefinitionsBase.h"
+#include "dmp/utility/DefinitionsDerived.h"
 
 namespace dmp
 {

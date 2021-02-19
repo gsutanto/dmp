@@ -12,8 +12,8 @@
 #ifndef DMP_STATE_H
 #define DMP_STATE_H
 
-#include "amd_clmc_dmp/utility/DefinitionsBase.h"
-#include "amd_clmc_dmp/utility/RealTimeAssertor.h"
+#include "dmp/utility/DefinitionsBase.h"
+#include "dmp/utility/RealTimeAssertor.h"
 
 #include <stdlib.h>
 #include <stddef.h>

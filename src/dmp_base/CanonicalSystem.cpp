@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/dmp_base/CanonicalSystem.h"
+#include "dmp/dmp_base/CanonicalSystem.h"
 
 namespace dmp
 {

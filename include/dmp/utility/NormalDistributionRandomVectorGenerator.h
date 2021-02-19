@@ -22,8 +22,8 @@
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/normal_distribution.hpp>
 
-#include "amd_clmc_dmp/utility/utility.h"
-#include "amd_clmc_dmp/utility/RealTimeAssertor.h"
+#include "dmp/utility/utility.h"
+#include "dmp/utility/RealTimeAssertor.h"
 
 
 namespace dmp

@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/dmp_discrete/LearningSystemDiscrete.h"
+#include "dmp/dmp_discrete/LearningSystemDiscrete.h"
 
 namespace dmp
 {

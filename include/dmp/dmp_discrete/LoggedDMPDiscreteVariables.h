@@ -12,7 +12,7 @@
 #ifndef LOGGED_DMP_DISCRETE_VARIABLES_H
 #define LOGGED_DMP_DISCRETE_VARIABLES_H
 
-#include "amd_clmc_dmp/dmp_base/LoggedDMPVariables.h"
+#include "dmp/dmp_base/LoggedDMPVariables.h"
 
 namespace dmp
 {

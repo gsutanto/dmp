@@ -17,7 +17,7 @@ generic_task_type   	= 'scraping';
 specific_task_type 		= 'scraping_w_tool';
 
 if (is_standalone)
-	rel_dir_path  		= '~/AMD_CLMC/Repo/amd_clmc_arm/workspace/src/catkin/planning/amd_clmc_dmp/matlab/dmp_coupling/learn_tactile_feedback/';
+	rel_dir_path  		= '~/AMD_CLMC/Repo/amd_clmc_arm/workspace/src/catkin/planning/dmp/matlab/dmp_coupling/learn_tactile_feedback/';
 
 	date                    = '20170908_1';
     additional_description 	= '_after_pruning_inconsistent_demos_positive_side';

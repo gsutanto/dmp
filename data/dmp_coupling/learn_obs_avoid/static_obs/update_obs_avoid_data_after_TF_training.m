@@ -4,11 +4,11 @@ clc;
 
 task_type                   = 'obs_avoid';
 
-amd_clmc_dmp_root_dir_path  = '../../../../';
+dmp_root_dir_path  = '../../../../';
 
-data_root_dir_path          = [amd_clmc_dmp_root_dir_path, 'data/'];
-matlab_root_dir_path        = [amd_clmc_dmp_root_dir_path, 'matlab/'];
-python_root_dir_path        = [amd_clmc_dmp_root_dir_path, 'python/'];
+data_root_dir_path          = [dmp_root_dir_path, 'data/'];
+matlab_root_dir_path        = [dmp_root_dir_path, 'matlab/'];
+python_root_dir_path        = [dmp_root_dir_path, 'python/'];
 
 data_learn_obs_avoid_fb_task_type_dir_path              = [data_root_dir_path, 'dmp_coupling/learn_obs_avoid/static_obs/'];
 data_LObsAvoidFB_task_type_PMNN_dir_path                = [data_learn_obs_avoid_fb_task_type_dir_path, 'neural_nets/pmnn/'];

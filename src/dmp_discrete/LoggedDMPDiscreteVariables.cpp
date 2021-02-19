@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/dmp_discrete/LoggedDMPDiscreteVariables.h"
+#include "dmp/dmp_discrete/LoggedDMPDiscreteVariables.h"
 
 namespace dmp
 {

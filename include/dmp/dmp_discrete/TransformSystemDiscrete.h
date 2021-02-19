@@ -15,10 +15,10 @@
 #ifndef TRANSFORM_SYSTEM_DISCRETE_H
 #define TRANSFORM_SYSTEM_DISCRETE_H
 
-#include "amd_clmc_dmp/dmp_base/TransformationSystem.h"
-#include "amd_clmc_dmp/dmp_discrete/CanonicalSystemDiscrete.h"
-#include "amd_clmc_dmp/dmp_discrete/FuncApproximatorDiscrete.h"
-#include "amd_clmc_dmp/dmp_discrete/LoggedDMPDiscreteVariables.h"
+#include "dmp/dmp_base/TransformationSystem.h"
+#include "dmp/dmp_discrete/CanonicalSystemDiscrete.h"
+#include "dmp/dmp_discrete/FuncApproximatorDiscrete.h"
+#include "dmp/dmp_discrete/LoggedDMPDiscreteVariables.h"
 
 namespace dmp
 {

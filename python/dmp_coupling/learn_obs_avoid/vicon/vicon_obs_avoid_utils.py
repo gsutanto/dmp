@@ -15,9 +15,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../../utilities/'))
 from DataIO import *
 from utilities import *
 
-def prepareDemoDatasetLOAVicon(freq=300.0, amd_clmc_dmp_home_dir_path='../../../../'):
+def prepareDemoDatasetLOAVicon(freq=300.0, dmp_home_dir_path='../../../../'):
     trajs_extraction_version = 2
-    dir_path = amd_clmc_dmp_home_dir_path + 'data/dmp_coupling/learn_obs_avoid/static_obs/data_multi_demo_vicon_static/'
+    dir_path = dmp_home_dir_path + 'data/dmp_coupling/learn_obs_avoid/static_obs/data_multi_demo_vicon_static/'
     
     data_global_coord = {}
     data_global_coord["baseline"] = extractSetCartCoordTrajectories(dir_path + '/baseline/endeff_trajs/')

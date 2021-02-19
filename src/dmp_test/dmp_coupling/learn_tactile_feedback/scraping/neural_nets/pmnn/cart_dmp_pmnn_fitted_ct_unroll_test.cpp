@@ -4,22 +4,22 @@
 #include <unistd.h>
 #include <getopt.h>
 
-#include "amd_clmc_dmp/utility/DefinitionsDerived.h"
-#include "amd_clmc_dmp/dmp_state/DMPState.h"
-#include "amd_clmc_dmp/dmp_param/TauSystem.h"
-#include "amd_clmc_dmp/dmp_discrete/CanonicalSystemDiscrete.h"
-#include "amd_clmc_dmp/dmp_multi_dim/DMPDiscreteMultiDim.h"
-#include "amd_clmc_dmp/neural_nets/PMNN.h"
-#include "amd_clmc_dmp/cart_dmp/cart_coord_dmp/CartesianCoordDMP.h"
-#include "amd_clmc_dmp/cart_dmp/quat_dmp/QuaternionDMP.h"
-#include "amd_clmc_dmp/dmp_coupling/learn_tactile_feedback/TransformCouplingLearnTactileFeedback.h"
-#include "amd_clmc_dmp/paths.h"
+#include "dmp/utility/DefinitionsDerived.h"
+#include "dmp/dmp_state/DMPState.h"
+#include "dmp/dmp_param/TauSystem.h"
+#include "dmp/dmp_discrete/CanonicalSystemDiscrete.h"
+#include "dmp/dmp_multi_dim/DMPDiscreteMultiDim.h"
+#include "dmp/neural_nets/PMNN.h"
+#include "dmp/cart_dmp/cart_coord_dmp/CartesianCoordDMP.h"
+#include "dmp/cart_dmp/quat_dmp/QuaternionDMP.h"
+#include "dmp/dmp_coupling/learn_tactile_feedback/TransformCouplingLearnTactileFeedback.h"
+#include "dmp/paths.h"
 
 using namespace dmp;
 
 void print_usage()
 {
-    printf("Usage: amd_clmc_dmp_cart_dmp_pmnn_fitted_ct_unroll_demo [-o output_plot_dir_path] [-e rt_err_file_path]\n");
+    printf("Usage: dmp_cart_dmp_pmnn_fitted_ct_unroll_demo [-o output_plot_dir_path] [-e rt_err_file_path]\n");
 }
 
 int main(int argc, char** argv)

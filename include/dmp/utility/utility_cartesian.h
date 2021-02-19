@@ -13,9 +13,9 @@
 
 #include <Eigen/Geometry>
 
-#include "amd_clmc_dmp/utility/utility_quaternion.h"
-#include "amd_clmc_dmp/dmp_state/DMPState.h"
-#include "amd_clmc_dmp/dmp_state/QuaternionDMPState.h"
+#include "dmp/utility/utility_quaternion.h"
+#include "dmp/dmp_state/DMPState.h"
+#include "dmp/dmp_state/QuaternionDMPState.h"
 
 namespace dmp
 {

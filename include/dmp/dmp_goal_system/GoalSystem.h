@@ -11,8 +11,8 @@
 #ifndef GOAL_SYSTEM_H
 #define GOAL_SYSTEM_H
 
-#include "amd_clmc_dmp/utility/DefinitionsDerived.h"
-#include "amd_clmc_dmp/dmp_param/TauSystem.h"
+#include "dmp/utility/DefinitionsDerived.h"
+#include "dmp/dmp_param/TauSystem.h"
 
 namespace dmp
 {

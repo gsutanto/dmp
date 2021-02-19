@@ -4,10 +4,10 @@ clc;
 
 specific_task_type    	= 'scraping_w_tool';
 
-amd_clmc_dmp_root_dir_path  = '../../../';
+dmp_root_dir_path  = '../../../';
 
-data_root_dir_path      = [amd_clmc_dmp_root_dir_path, 'data/'];
-matlab_root_dir_path  	= [amd_clmc_dmp_root_dir_path, 'matlab/'];
+data_root_dir_path      = [dmp_root_dir_path, 'data/'];
+matlab_root_dir_path  	= [dmp_root_dir_path, 'matlab/'];
 
 data_learn_tactile_fb_specific_task_type_dir_path = [data_root_dir_path, 'dmp_coupling/learn_tactile_feedback/',specific_task_type,'/'];
 

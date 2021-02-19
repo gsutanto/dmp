@@ -23,7 +23,7 @@ from CartesianCoordTransformer import *
 from CartesianCoordDMP import *
 from utilities import *
 
-def cart_coord_dmp_single_traj_training_test(amd_clmc_dmp_home_dir_path="../../../../", 
+def cart_coord_dmp_single_traj_training_test(dmp_home_dir_path="../../../../", 
                                              canonical_order=2, time_reproduce_max=0.0, time_goal_change=0.0, 
                                              tau_reproduce=0.0, unroll_ctraj_save_dir_path="", 
                                              unroll_ctraj_save_filename="", 
@@ -45,7 +45,7 @@ def cart_coord_dmp_single_traj_training_test(amd_clmc_dmp_home_dir_path="../../.
     canonical_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
     cart_dmp = CartesianCoordDMP(model_size, canonical_sys_discr, GSUTANTO_LOCAL_COORD_FRAME)
     
-    set_ctraj_input = cart_dmp.extractSetTrajectories(amd_clmc_dmp_home_dir_path + "/data/cart_dmp/cart_coord_dmp/single_traj_training/sample_traj_3D_1.txt", 
+    set_ctraj_input = cart_dmp.extractSetTrajectories(dmp_home_dir_path + "/data/cart_dmp/cart_coord_dmp/single_traj_training/sample_traj_3D_1.txt", 
                                                       start_column_idx=1, time_column_idx=0)
     
     [critical_states_learn, 

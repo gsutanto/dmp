@@ -12,10 +12,10 @@
 
 #include <stdio.h>
 
-#include "amd_clmc_dmp/dmp_base/DMPDataIO.h"
-#include "amd_clmc_dmp/dmp_discrete/TransformSystemDiscrete.h"
-#include "amd_clmc_dmp/dmp_discrete/FuncApproximatorDiscrete.h"
-#include "amd_clmc_dmp/dmp_discrete/LoggedDMPDiscreteVariables.h"
+#include "dmp/dmp_base/DMPDataIO.h"
+#include "dmp/dmp_discrete/TransformSystemDiscrete.h"
+#include "dmp/dmp_discrete/FuncApproximatorDiscrete.h"
+#include "dmp/dmp_discrete/LoggedDMPDiscreteVariables.h"
 
 namespace dmp
 {

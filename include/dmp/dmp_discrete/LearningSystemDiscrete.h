@@ -21,13 +21,13 @@
 
 #include <stddef.h>
 
-#include "amd_clmc_dmp/utility/DefinitionsDerived.h"
-#include "amd_clmc_dmp/dmp_goal_system/GoalSystem.h"
-#include "amd_clmc_dmp/dmp_state/DMPState.h"
-#include "amd_clmc_dmp/dmp_base/LearningSystem.h"
-#include "amd_clmc_dmp/dmp_discrete/TransformSystemDiscrete.h"
-#include "amd_clmc_dmp/dmp_discrete/FuncApproximatorDiscrete.h"
-#include "amd_clmc_dmp/dmp_discrete/DMPDataIODiscrete.h"
+#include "dmp/utility/DefinitionsDerived.h"
+#include "dmp/dmp_goal_system/GoalSystem.h"
+#include "dmp/dmp_state/DMPState.h"
+#include "dmp/dmp_base/LearningSystem.h"
+#include "dmp/dmp_discrete/TransformSystemDiscrete.h"
+#include "dmp/dmp_discrete/FuncApproximatorDiscrete.h"
+#include "dmp/dmp_discrete/DMPDataIODiscrete.h"
 
 namespace dmp
 {

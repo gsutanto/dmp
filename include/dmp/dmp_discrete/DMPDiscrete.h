@@ -11,12 +11,12 @@
 #ifndef DMP_DISCRETE_H
 #define DMP_DISCRETE_H
 
-#include "amd_clmc_dmp/dmp_base/DMP.h"
-#include "amd_clmc_dmp/dmp_discrete/CanonicalSystemDiscrete.h"
-#include "amd_clmc_dmp/dmp_discrete/FuncApproximatorDiscrete.h"
-#include "amd_clmc_dmp/dmp_discrete/TransformSystemDiscrete.h"
-#include "amd_clmc_dmp/dmp_discrete/LearningSystemDiscrete.h"
-#include "amd_clmc_dmp/dmp_discrete/DMPDataIODiscrete.h"
+#include "dmp/dmp_base/DMP.h"
+#include "dmp/dmp_discrete/CanonicalSystemDiscrete.h"
+#include "dmp/dmp_discrete/FuncApproximatorDiscrete.h"
+#include "dmp/dmp_discrete/TransformSystemDiscrete.h"
+#include "dmp/dmp_discrete/LearningSystemDiscrete.h"
+#include "dmp/dmp_discrete/DMPDataIODiscrete.h"
 
 namespace dmp
 {

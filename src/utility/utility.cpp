@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/utility/utility.h"
+#include "dmp/utility/utility.h"
 
 namespace dmp
 {

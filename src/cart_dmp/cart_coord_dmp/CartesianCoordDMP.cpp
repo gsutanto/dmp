@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/cart_dmp/cart_coord_dmp/CartesianCoordDMP.h"
+#include "dmp/cart_dmp/cart_coord_dmp/CartesianCoordDMP.h"
 
 namespace dmp
 {

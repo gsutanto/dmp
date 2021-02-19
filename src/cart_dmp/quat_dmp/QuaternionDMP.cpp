@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/cart_dmp/quat_dmp/QuaternionDMP.h"
+#include "dmp/cart_dmp/quat_dmp/QuaternionDMP.h"
 
 namespace dmp
 {

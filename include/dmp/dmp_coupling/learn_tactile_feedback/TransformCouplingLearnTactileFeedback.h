@@ -10,8 +10,8 @@
 #ifndef TRANSFORM_COUPLING_LEARN_TACTILE_FEEDBACK_H
 #define TRANSFORM_COUPLING_LEARN_TACTILE_FEEDBACK_H
 
-#include "amd_clmc_dmp/dmp_coupling/base/TransformCoupling.h"
-#include "amd_clmc_dmp/neural_nets/PMNN.h"
+#include "dmp/dmp_coupling/base/TransformCoupling.h"
+#include "dmp/neural_nets/PMNN.h"
 
 namespace dmp
 {

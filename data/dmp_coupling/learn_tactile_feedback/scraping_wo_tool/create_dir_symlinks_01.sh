@@ -1,6 +1,6 @@
 #!/bin/bash
 
-dirs_src_folder=$'../../../../../amd_clmc_dmp_data/dmp_coupling/learn_tactile_feedback/scraping_wo_tool/'
+dirs_src_folder=$'../../../../../dmp_data/dmp_coupling/learn_tactile_feedback/scraping_wo_tool/'
 
 dirs=$'baseline\nhuman_baseline'
 max_numbered_dir=8

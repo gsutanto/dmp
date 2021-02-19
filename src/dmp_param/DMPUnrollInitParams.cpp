@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/dmp_param/DMPUnrollInitParams.h"
+#include "dmp/dmp_param/DMPUnrollInitParams.h"
 
 namespace dmp
 {

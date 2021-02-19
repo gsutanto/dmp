@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/paths.h"
+#include "dmp/paths.h"
 #include <cstring>
 
 // DMP_DATA_DIR, DMP_PLOT_DIR and DMP_RT_ERRORS_DIR are set to correct absolute

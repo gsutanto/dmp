@@ -20,16 +20,16 @@
 #include <unistd.h>
 #include <Eigen/Dense>
 
-#include "amd_clmc_dmp/utility/utility.h"
-#include "amd_clmc_dmp/dmp_state/DMPState.h"
-#include "amd_clmc_dmp/dmp_discrete/CanonicalSystemDiscrete.h"
-#include "amd_clmc_dmp/dmp_discrete/FuncApproximatorDiscrete.h"
-#include "amd_clmc_dmp/cart_dmp/cart_coord_dmp/CartesianCoordDMP.h"
-#include "amd_clmc_dmp/cart_dmp/cart_coord_dmp/CartesianCoordTransformer.h"
-#include "amd_clmc_dmp/dmp_coupling/base/TransformCoupling.h"
-#include "amd_clmc_dmp/dmp_coupling/learn_obs_avoid/DefinitionsLearnObsAvoid.h"
-#include "amd_clmc_dmp/dmp_coupling/learn_obs_avoid/LearnObsAvoidDataIO.h"
-#include "amd_clmc_dmp/dmp_coupling/learn_obs_avoid/TCLearnObsAvoidFeatureParameter.h"
+#include "dmp/utility/utility.h"
+#include "dmp/dmp_state/DMPState.h"
+#include "dmp/dmp_discrete/CanonicalSystemDiscrete.h"
+#include "dmp/dmp_discrete/FuncApproximatorDiscrete.h"
+#include "dmp/cart_dmp/cart_coord_dmp/CartesianCoordDMP.h"
+#include "dmp/cart_dmp/cart_coord_dmp/CartesianCoordTransformer.h"
+#include "dmp/dmp_coupling/base/TransformCoupling.h"
+#include "dmp/dmp_coupling/learn_obs_avoid/DefinitionsLearnObsAvoid.h"
+#include "dmp/dmp_coupling/learn_obs_avoid/LearnObsAvoidDataIO.h"
+#include "dmp/dmp_coupling/learn_obs_avoid/TCLearnObsAvoidFeatureParameter.h"
 
 namespace dmp
 {

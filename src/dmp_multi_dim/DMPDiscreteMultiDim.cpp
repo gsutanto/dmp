@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/dmp_multi_dim/DMPDiscreteMultiDim.h"
+#include "dmp/dmp_multi_dim/DMPDiscreteMultiDim.h"
 
 namespace dmp
 {

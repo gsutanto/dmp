@@ -14,11 +14,11 @@
 #ifndef LEARNING_SYSTEM_H
 #define LEARNING_SYSTEM_H
 
-#include "amd_clmc_dmp/utility/DefinitionsDerived.h"
-#include "amd_clmc_dmp/utility/utility.h"
-#include "amd_clmc_dmp/utility/RealTimeAssertor.h"
-#include "amd_clmc_dmp/dmp_base/TransformationSystem.h"
-#include "amd_clmc_dmp/dmp_base/DMPDataIO.h"
+#include "dmp/utility/DefinitionsDerived.h"
+#include "dmp/utility/utility.h"
+#include "dmp/utility/RealTimeAssertor.h"
+#include "dmp/dmp_base/TransformationSystem.h"
+#include "dmp/dmp_base/DMPDataIO.h"
 
 namespace dmp
 {

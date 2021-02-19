@@ -23,7 +23,7 @@ from CanonicalSystemDiscrete import *
 from DMPDiscrete1D import *
 from utilities import *
 
-def dmp_1D_test(amd_clmc_dmp_home_dir_path="../../../", canonical_order=2, time_reproduce_max=0.0, time_goal_change=0.0, 
+def dmp_1D_test(dmp_home_dir_path="../../../", canonical_order=2, time_reproduce_max=0.0, time_goal_change=0.0, 
                 new_goal_scalar=0.0, tau_reproduce=0.0, unroll_traj_save_dir_path="", unroll_traj_save_filename="", 
                 is_smoothing_training_traj_before_learning=False, 
                 percentage_padding=None, percentage_smoothing_points=None, 
@@ -46,7 +46,7 @@ def dmp_1D_test(amd_clmc_dmp_home_dir_path="../../../", canonical_order=2, time_
     can_sys_discr = CanonicalSystemDiscrete(tau_sys, canonical_order)
     dmp_discrete_1D = DMPDiscrete1D(model_size, can_sys_discr)
     
-    set_1Dtraj_input = dmp_discrete_1D.extractSetTrajectories(amd_clmc_dmp_home_dir_path + "/data/dmp_1D/sample_traj_1.txt")
+    set_1Dtraj_input = dmp_discrete_1D.extractSetTrajectories(dmp_home_dir_path + "/data/dmp_1D/sample_traj_1.txt")
     
     [critical_states_learn, 
      W, mean_A_learn, mean_tau, 

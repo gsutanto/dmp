@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/utility/NormalDistributionRandomVectorGenerator.h"
+#include "dmp/utility/NormalDistributionRandomVectorGenerator.h"
 
 namespace dmp
 {

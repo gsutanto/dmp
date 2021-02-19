@@ -22,9 +22,9 @@
 
 #include "math.h"
 
-#include "amd_clmc_dmp/dmp_state/DMPState.h"
-#include "amd_clmc_dmp/dmp_base/FunctionApproximator.h"
-#include "amd_clmc_dmp/dmp_discrete/CanonicalSystemDiscrete.h"
+#include "dmp/dmp_state/DMPState.h"
+#include "dmp/dmp_base/FunctionApproximator.h"
+#include "dmp/dmp_discrete/CanonicalSystemDiscrete.h"
 
 namespace dmp
 {

@@ -5,9 +5,9 @@ clc;
 generic_task_type           = 'scraping';
 specific_task_type          = 'scraping_w_tool';
 
-amd_clmc_dmp_root_dir_path  = '../../../';
+dmp_root_dir_path  = '../../../';
 
-python_root_dir_path        = [amd_clmc_dmp_root_dir_path, 'python/'];
+python_root_dir_path        = [dmp_root_dir_path, 'python/'];
 
 python_learn_tactile_fb_dir_path            = [python_root_dir_path, 'dmp_coupling/learn_tactile_feedback/'];
 python_learn_tactile_fb_models_dir_path     = [python_learn_tactile_fb_dir_path, 'models/'];

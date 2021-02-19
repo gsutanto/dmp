@@ -15,7 +15,7 @@ addpath([pwd,'/../utilities/']);
 % necessary:
 % in_data_dir_path    = '/home/gsutanto/Desktop/CLMC/Data/DMP_LOA_Ct_Vicon_Data_Collection_201607/learn_obs_avoid_gsutanto_vicon_data/';
 in_data_dir_path    = '/media/GSUTANTO/My Documents/USC/Research/CLMC/Data/DMP_LOA_Ct_Vicon_Data_Collection_201607/learn_obs_avoid_gsutanto_vicon_data/';
-out_data_dir_path   = '../../../../../../amd_clmc_dmp_data/dmp_coupling/learn_obs_avoid/static_obs/';
+out_data_dir_path   = '../../../../../../dmp_data/dmp_coupling/learn_obs_avoid/static_obs/';
 
 origin_folder       = pwd;
 addpath(origin_folder);

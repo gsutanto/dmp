@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/dmp_1D/DMPDiscrete1D.h"
+#include "dmp/dmp_1D/DMPDiscrete1D.h"
 
 namespace dmp
 {

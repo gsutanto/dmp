@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/dmp_coupling/learn_obs_avoid/LearnObsAvoidDataIO.h"
+#include "dmp/dmp_coupling/learn_obs_avoid/LearnObsAvoidDataIO.h"
 
 namespace dmp
 {

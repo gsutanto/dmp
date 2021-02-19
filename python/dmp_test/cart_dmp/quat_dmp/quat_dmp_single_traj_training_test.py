@@ -24,7 +24,7 @@ from utilities import *
 
 plt.close('all')
 
-def quat_dmp_single_traj_training_test(amd_clmc_dmp_home_dir_path="../../../../", 
+def quat_dmp_single_traj_training_test(dmp_home_dir_path="../../../../", 
                                        canonical_order=2, time_reproduce_max=0.0, 
                                        tau_reproduce=0.0, unroll_qtraj_save_dir_path="", 
                                        unroll_qtraj_save_filename="", 
@@ -52,7 +52,7 @@ def quat_dmp_single_traj_training_test(amd_clmc_dmp_home_dir_path="../../../../"
     #  (especially the QuaternionDMP fitting) so much worse and WRONG):
     sub_quat_dmp_training_file_path = "/data/cart_dmp/quat_dmp_unscrewing/prim02/03.txt"
     
-    set_qtraj_input = quat_dmp.extractSetTrajectories(amd_clmc_dmp_home_dir_path + sub_quat_dmp_training_file_path, 
+    set_qtraj_input = quat_dmp.extractSetTrajectories(dmp_home_dir_path + sub_quat_dmp_training_file_path, 
                                                       start_column_idx=10, time_column_idx=0)
     
     [critical_states_learn, 

@@ -4,14 +4,14 @@
 #include <unistd.h>
 #include <getopt.h>
 
-#include "amd_clmc_dmp/neural_nets/PMNN.h"
-#include "amd_clmc_dmp/paths.h"
+#include "dmp/neural_nets/PMNN.h"
+#include "dmp/paths.h"
 
 using namespace dmp;
 
 void print_usage()
 {
-    printf("Usage: amd_clmc_dmp_pmnn_demo [-e rt_err_file_path]\n");
+    printf("Usage: dmp_pmnn_demo [-e rt_err_file_path]\n");
 }
 
 int main(int argc, char** argv)

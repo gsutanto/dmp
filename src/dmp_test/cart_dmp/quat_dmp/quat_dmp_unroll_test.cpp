@@ -4,17 +4,17 @@
 #include <unistd.h>
 #include <getopt.h>
 
-#include "amd_clmc_dmp/dmp_state/QuaternionDMPState.h"
-#include "amd_clmc_dmp/dmp_discrete/CanonicalSystemDiscrete.h"
-#include "amd_clmc_dmp/cart_dmp/quat_dmp/QuaternionDMP.h"
-#include "amd_clmc_dmp/utility/DataIO.h"
-#include "amd_clmc_dmp/paths.h"
+#include "dmp/dmp_state/QuaternionDMPState.h"
+#include "dmp/dmp_discrete/CanonicalSystemDiscrete.h"
+#include "dmp/cart_dmp/quat_dmp/QuaternionDMP.h"
+#include "dmp/utility/DataIO.h"
+#include "dmp/paths.h"
 
 using namespace dmp;
 
 void print_usage()
 {
-    printf("Usage: amd_clmc_dmp_quat_dmp_unroll_demo [-r time_reproduce_max(>=0)] [-t tau_reproduce(>=0)] [-e rt_err_file_path]\n");
+    printf("Usage: dmp_quat_dmp_unroll_demo [-r time_reproduce_max(>=0)] [-t tau_reproduce(>=0)] [-e rt_err_file_path]\n");
 }
 
 int main(int argc, char** argv)

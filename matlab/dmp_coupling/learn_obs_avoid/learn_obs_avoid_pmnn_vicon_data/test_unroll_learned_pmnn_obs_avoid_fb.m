@@ -44,15 +44,15 @@ load('unrolling_param_obs_avoid.mat');
 load('loa_feat_param_obs_avoid.mat');
 
 learn_fb_task                   = 'learn_obs_avoid';
-amd_clmc_dmp_root_dir_path      = '../../../../';
+dmp_root_dir_path      = '../../../../';
 data_learn_fb_task_subdir_path  = [learn_fb_task, '/static_obs/'];
 python_learn_fb_task_TF_models_prefix_subdir_path   = 'tf/';
 PMNN_name                       = 'my_PMNN_obs_avoid_fb';
 np                              = 1;
 
-data_root_dir_path          = [amd_clmc_dmp_root_dir_path, 'data/'];
-matlab_root_dir_path        = [amd_clmc_dmp_root_dir_path, 'matlab/'];
-python_root_dir_path        = [amd_clmc_dmp_root_dir_path, 'python/'];
+data_root_dir_path          = [dmp_root_dir_path, 'data/'];
+matlab_root_dir_path        = [dmp_root_dir_path, 'matlab/'];
+python_root_dir_path        = [dmp_root_dir_path, 'python/'];
 
 data_learn_fb_task_dir_path                     = [data_root_dir_path, 'dmp_coupling/', data_learn_fb_task_subdir_path];
 data_learn_fb_task_PMNN_dir_path                = [data_learn_fb_task_dir_path, 'neural_nets/pmnn/'];

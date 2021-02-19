@@ -14,10 +14,10 @@
 #include <stddef.h>
 #include <vector>
 #include <limits>
-#include "amd_clmc_dmp/utility/RealTimeAssertor.h"
-#include "amd_clmc_dmp/dmp_param/TauSystem.h"
-#include "amd_clmc_dmp/dmp_state/DMPState.h"
-#include "amd_clmc_dmp/dmp_coupling/base/CanonicalCoupling.h"
+#include "dmp/utility/RealTimeAssertor.h"
+#include "dmp/dmp_param/TauSystem.h"
+#include "dmp/dmp_state/DMPState.h"
+#include "dmp/dmp_coupling/base/CanonicalCoupling.h"
 
 namespace dmp
 {

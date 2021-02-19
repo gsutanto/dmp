@@ -11,7 +11,7 @@ specific_task_type 	= 'scraping_w_tool';
 [~, raw_hostname]   = system('hostname');
 hostname            = raw_hostname(1:end-1);
 
-root_dmp_suffix_path= 'workspace/src/catkin/planning/amd_clmc_dmp/';
+root_dmp_suffix_path= 'workspace/src/catkin/planning/dmp/';
 if (strcmp(hostname, 'amdgsutanto-XPS-15-9560') == 1)
     home_path       = '/home/amdgsutanto/';
     root_dmp_path   = [home_path, 'AMD_CLMC/Repo/amd_clmc_arm/', root_dmp_suffix_path];

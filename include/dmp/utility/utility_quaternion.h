@@ -19,7 +19,7 @@
 #ifndef UTILITY_QUATERNION_H
 #define UTILITY_QUATERNION_H
 
-#include "amd_clmc_dmp/utility/DefinitionsBase.h"
+#include "dmp/utility/DefinitionsBase.h"
 
 namespace dmp
 {

@@ -5,20 +5,20 @@
 #include <getopt.h>
 #include <math.h>
 
-#include "amd_clmc_dmp/utility/utility.h"
-#include "amd_clmc_dmp/utility/RealTimeAssertor.h"
-#include "amd_clmc_dmp/dmp_state/DMPState.h"
-#include "amd_clmc_dmp/dmp_discrete/CanonicalSystemDiscrete.h"
-#include "amd_clmc_dmp/cart_dmp/cart_coord_dmp/CartesianCoordDMP.h"
-#include "amd_clmc_dmp/cart_dmp/cart_coord_dmp/CartesianCoordTransformer.h"
-#include "amd_clmc_dmp/dmp_coupling/learn_obs_avoid/TransformCouplingLearnObsAvoid.h"
-#include "amd_clmc_dmp/paths.h"
+#include "dmp/utility/utility.h"
+#include "dmp/utility/RealTimeAssertor.h"
+#include "dmp/dmp_state/DMPState.h"
+#include "dmp/dmp_discrete/CanonicalSystemDiscrete.h"
+#include "dmp/cart_dmp/cart_coord_dmp/CartesianCoordDMP.h"
+#include "dmp/cart_dmp/cart_coord_dmp/CartesianCoordTransformer.h"
+#include "dmp/dmp_coupling/learn_obs_avoid/TransformCouplingLearnObsAvoid.h"
+#include "dmp/paths.h"
 
 using namespace dmp;
 
 void print_usage()
 {
-    printf("Usage: amd_clmc_dmp_ct_loa_so_sb_multi_demo_vicon_learning_demo [-f formula_type(0=_SCHAAL_ OR 1=_HOFFMANN_)] [-c canonical_order(1 OR 2)] [-m learning_method(0=_SCHAAL_LWR_METHOD_ OR 1=_JPETERS_GLOBAL_LEAST_SQUARES_METHOD_)] [-r regularization_const] [-o loa_plot_dir_path] [-e rt_err_file_path]\n");
+    printf("Usage: dmp_ct_loa_so_sb_multi_demo_vicon_learning_demo [-f formula_type(0=_SCHAAL_ OR 1=_HOFFMANN_)] [-c canonical_order(1 OR 2)] [-m learning_method(0=_SCHAAL_LWR_METHOD_ OR 1=_JPETERS_GLOBAL_LEAST_SQUARES_METHOD_)] [-r regularization_const] [-o loa_plot_dir_path] [-e rt_err_file_path]\n");
 }
 
 int main(int argc, char** argv)

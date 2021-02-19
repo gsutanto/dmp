@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/utility/utility_cartesian.h"
+#include "dmp/utility/utility_cartesian.h"
 
 namespace dmp
 {

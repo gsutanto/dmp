@@ -15,9 +15,9 @@
 #ifndef TRANSFORM_SYSTEM_QUATERNION_H
 #define TRANSFORM_SYSTEM_QUATERNION_H
 
-#include "amd_clmc_dmp/dmp_discrete/TransformSystemDiscrete.h"
-#include "amd_clmc_dmp/dmp_goal_system/QuaternionGoalSystem.h"
-#include "amd_clmc_dmp/utility/utility_quaternion.h"
+#include "dmp/dmp_discrete/TransformSystemDiscrete.h"
+#include "dmp/dmp_goal_system/QuaternionGoalSystem.h"
+#include "dmp/utility/utility_quaternion.h"
 
 namespace dmp
 {

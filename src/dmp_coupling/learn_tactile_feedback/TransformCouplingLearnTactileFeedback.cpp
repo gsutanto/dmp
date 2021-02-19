@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/dmp_coupling/learn_tactile_feedback/TransformCouplingLearnTactileFeedback.h"
+#include "dmp/dmp_coupling/learn_tactile_feedback/TransformCouplingLearnTactileFeedback.h"
 
 namespace dmp
 {

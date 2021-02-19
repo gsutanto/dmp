@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/neural_nets/PMNN.h"
+#include "dmp/neural_nets/PMNN.h"
 
 namespace dmp
 {

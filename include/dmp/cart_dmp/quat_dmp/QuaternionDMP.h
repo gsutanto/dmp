@@ -12,8 +12,8 @@
 
 #include <filesystem>
 
-#include "amd_clmc_dmp/dmp_discrete/DMPDiscrete.h"
-#include "amd_clmc_dmp/cart_dmp/quat_dmp/TransformSystemQuaternion.h"
+#include "dmp/dmp_discrete/DMPDiscrete.h"
+#include "dmp/cart_dmp/quat_dmp/TransformSystemQuaternion.h"
 
 namespace dmp
 {

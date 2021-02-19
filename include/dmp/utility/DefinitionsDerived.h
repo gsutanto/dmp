@@ -10,8 +10,8 @@
 #ifndef DEFINITIONS_DERIVED_H
 #define DEFINITIONS_DERIVED_H
 
-#include "amd_clmc_dmp/dmp_state/DMPState.h"
-#include "amd_clmc_dmp/dmp_state/QuaternionDMPState.h"
+#include "dmp/dmp_state/DMPState.h"
+#include "dmp/dmp_state/QuaternionDMPState.h"
 #include <vector>
 
 

@@ -20,10 +20,10 @@
 
 #include <vector>
 
-#include "amd_clmc_dmp/utility/utility.h"
-#include "amd_clmc_dmp/utility/RealTimeAssertor.h"
-#include "amd_clmc_dmp/dmp_state/DMPState.h"
-#include "amd_clmc_dmp/dmp_base/CanonicalSystem.h"
+#include "dmp/utility/utility.h"
+#include "dmp/utility/RealTimeAssertor.h"
+#include "dmp/dmp_state/DMPState.h"
+#include "dmp/dmp_base/CanonicalSystem.h"
 
 namespace dmp
 {

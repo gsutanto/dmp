@@ -14,7 +14,7 @@
 #ifndef CANONICAL_SYSTEM_DISCRETE_H
 #define CANONICAL_SYSTEM_DISCRETE_H
 
-#include "amd_clmc_dmp/dmp_base/CanonicalSystem.h"
+#include "dmp/dmp_base/CanonicalSystem.h"
 
 namespace dmp
 {

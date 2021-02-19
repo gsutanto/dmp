@@ -23,7 +23,7 @@ from CartesianCoordTransformer import *
 from CartesianCoordDMP import *
 from utilities import *
 
-def cart_coord_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_path="../../../../", 
+def cart_coord_dmp_multi_traj_training_test(dmp_home_dir_path="../../../../", 
                                             canonical_order=2, time_reproduce_max=0.5, 
                                             tau_reproduce=0.5, unroll_ctraj_save_dir_path="", 
                                             unroll_ctraj_save_filename="", 
@@ -57,7 +57,7 @@ def cart_coord_dmp_multi_traj_training_test(amd_clmc_dmp_home_dir_path="../../..
         elif (k == 1): # With Obstacle
             sub_cart_coord_dmp_training_path = "/data/dmp_coupling/learn_obs_avoid/static_obs/data_sph_new/SubjectNo1/1/endeff_trajs/"
         
-        set_ctraj_input = cart_dmp.extractSetTrajectories(amd_clmc_dmp_home_dir_path + sub_cart_coord_dmp_training_path, 
+        set_ctraj_input = cart_dmp.extractSetTrajectories(dmp_home_dir_path + sub_cart_coord_dmp_training_path, 
                                                           start_column_idx=1, time_column_idx=0)
         
         [critical_states_learn, 

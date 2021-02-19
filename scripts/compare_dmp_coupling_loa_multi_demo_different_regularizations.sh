@@ -13,6 +13,6 @@ do
 	echo "regularization_const = $regularization_const"
 	mkdir "$target_dir/$i/"
 	echo "$regularization_const" > "$target_dir/$i/regularization_const.txt"
-	`../demos/amd_clmc_dmp_dc_loa_so_sb_multi_demo_demo -f 0 -c 2 -r $regularization_const -o $target_dir/$i/ -e ../rt_errors/rt_err.txt`
+	`../demos/dmp_dc_loa_so_sb_multi_demo_demo -f 0 -c 2 -r $regularization_const -o $target_dir/$i/ -e ../rt_errors/rt_err.txt`
 	let "i=i+1"
 done

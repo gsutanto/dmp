@@ -10,8 +10,8 @@
 #ifndef DMP_DISCRETE_1D_H
 #define DMP_DISCRETE_1D_H
 
-#include "amd_clmc_dmp/dmp_discrete/DMPDiscrete.h"
-#include "amd_clmc_dmp/dmp_discrete/TransformSystemDiscrete.h"
+#include "dmp/dmp_discrete/DMPDiscrete.h"
+#include "dmp/dmp_discrete/TransformSystemDiscrete.h"
 
 namespace dmp
 {

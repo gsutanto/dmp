@@ -10,7 +10,7 @@
 #ifndef TRANSFORM_COUPLING_H
 #define TRANSFORM_COUPLING_H
 
-#include "amd_clmc_dmp/utility/DefinitionsBase.h"
+#include "dmp/utility/DefinitionsBase.h"
 #include "Coupling.h"
 
 namespace dmp

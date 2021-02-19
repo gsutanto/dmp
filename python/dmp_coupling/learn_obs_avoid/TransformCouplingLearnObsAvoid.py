@@ -161,7 +161,7 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         Ydd_obs_local = demo_obs_avoid_traj_local.getXdd()
         
         # based on previous test on learning on synthetic dataset
-        # (see for example in amd_clmc_dmp/matlab/dmp_coupling/learn_obs_avoid/learn_obs_avoid_fixed_learning_algo/main.m ), 
+        # (see for example in dmp/matlab/dmp_coupling/learn_obs_avoid/learn_obs_avoid_fixed_learning_algo/main.m ), 
         # the ground-truth feature matrix is attained if
         # the trajectory is delayed 1 time step:
         is_demo_traj_shifted = True

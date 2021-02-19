@@ -268,7 +268,7 @@ function extract_obs_avoid_single_demo_static_vicon_data(varargin)
                     hold off;
                 end
             end
-%             cd('/home/gsutanto/amd_clmc_arm/workspace/src/catkin/control/amd_clmc_dmp/matlab/dmp_coupling/learn_obs_avoid/SL_data_conversion_to_text_files_format/vicon_201607/');
+%             cd('/home/gsutanto/amd_clmc_arm/workspace/src/catkin/control/dmp/matlab/dmp_coupling/learn_obs_avoid/SL_data_conversion_to_text_files_format/vicon_201607/');
             keyboard;
 %         end
     end

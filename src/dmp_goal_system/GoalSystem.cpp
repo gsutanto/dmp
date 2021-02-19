@@ -1,4 +1,4 @@
-#include "amd_clmc_dmp/dmp_goal_system/GoalSystem.h"
+#include "dmp/dmp_goal_system/GoalSystem.h"
 
 namespace dmp
 {
