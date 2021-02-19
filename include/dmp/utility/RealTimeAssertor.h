@@ -20,8 +20,8 @@
 #include <unistd.h>
 #include <sched.h>
 #include <pthread.h>
-#include <boost/thread.hpp>
-#include <boost/thread/mutex.hpp>
+#include <thread>
+#include <mutex>
 
 #include "amd_clmc_dmp/utility/utility.h"
 
@@ -75,7 +75,7 @@ private:
     // in the stack, by allocating them in the heap:
     CharArr         rt_err_file_path;
 
-    boost::mutex    rt_err_file_mutex;
+    std::mutex      rt_err_file_mutex;
 
 public:
 

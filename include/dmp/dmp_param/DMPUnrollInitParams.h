@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "amd_clmc_dmp/utility/RealTimeAssertor.h"
 #include "amd_clmc_dmp/utility/DefinitionsDerived.h"
@@ -87,10 +87,10 @@ public:
 };
 
 typedef std::vector< DMPUnrollInitParams >              VecDMPUnrollInitParams;
-typedef boost::shared_ptr< VecDMPUnrollInitParams >     VecDMPUnrollInitParamsPtr;
+typedef std::shared_ptr< VecDMPUnrollInitParams >       VecDMPUnrollInitParamsPtr;
 
 typedef std::vector< VecDMPUnrollInitParams >           VecVecDMPUnrollInitParams;
-typedef boost::shared_ptr< VecVecDMPUnrollInitParams >  VecVecDMPUnrollInitParamsPtr;
+typedef std::shared_ptr< VecVecDMPUnrollInitParams >    VecVecDMPUnrollInitParamsPtr;
 
 }
 #endif

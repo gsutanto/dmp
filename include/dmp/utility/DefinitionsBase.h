@@ -14,10 +14,8 @@
 #define DEFINITIONS_BASE_H
 
 #include <Eigen/Core>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/filesystem.hpp>
+#include <memory>
+#include <filesystem>
 
 
 namespace dmp
@@ -45,9 +43,9 @@ enum DMPForcingTermLearningMethod
 };
 
 typedef std::vector< double >               DoubleVector;
-typedef boost::shared_ptr< DoubleVector >   DoubleVectorPtr;
+typedef std::shared_ptr< DoubleVector >     DoubleVectorPtr;
 
-typedef boost::shared_array< char >         CharArr;
+typedef std::shared_array< char >           CharArr;
 
 typedef Eigen::MatrixXd                                                                                                     MatrixXxX;
 typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::AutoAlign, MAX_DMP_NUM_DIMENSIONS, MAX_MODEL_SIZE>     MatrixNxM;
@@ -61,12 +59,12 @@ typedef Eigen::Matrix<double, Eigen::Dynamic, 1, Eigen::AutoAlign, MAX_MODEL_SIZ
 typedef Eigen::Vector3d                                                                                                     Vector3;
 typedef Eigen::Vector4d                                                                                                     Vector4;
 
-typedef boost::shared_ptr< MatrixXxX >  MatrixXxXPtr;
-typedef boost::shared_ptr< MatrixNxM >  MatrixNxMPtr;
-typedef boost::shared_ptr< Matrix3xM >  Matrix3xMPtr;
-typedef boost::shared_ptr< Matrix3xU >  Matrix3xUPtr;
-typedef boost::shared_ptr< VectorN >    VectorNPtr;
-typedef boost::shared_ptr< VectorM >    VectorMPtr;
+typedef std::shared_ptr< MatrixXxX >  MatrixXxXPtr;
+typedef std::shared_ptr< MatrixNxM >  MatrixNxMPtr;
+typedef std::shared_ptr< Matrix3xM >  Matrix3xMPtr;
+typedef std::shared_ptr< Matrix3xU >  Matrix3xUPtr;
+typedef std::shared_ptr< VectorN >    VectorNPtr;
+typedef std::shared_ptr< VectorM >    VectorMPtr;
 
 #define ZeroMatrixNxM(N,M)      Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::AutoAlign, MAX_DMP_NUM_DIMENSIONS, MAX_MODEL_SIZE>::Zero(N,M)
 #define ZeroMatrix3xM(M)        Eigen::Matrix<double, 3, Eigen::Dynamic, Eigen::AutoAlign, 3, MAX_MODEL_SIZE>::Zero(3,M)
@@ -93,12 +91,12 @@ struct DMPDiscreteParams
 };
 
 typedef std::vector< DMPDiscreteParams >            DMPDiscreteParamsSet;
-typedef boost::shared_ptr< DMPDiscreteParamsSet >   DMPDiscreteParamsSetPtr;
+typedef std::shared_ptr< DMPDiscreteParamsSet >     DMPDiscreteParamsSetPtr;
 
 /*static class {
 public:
     template<typename T>
-    operator boost::shared_ptr<T>() { return boost::shared_ptr<T>(); }
+    operator std::shared_ptr<T>() { return std::shared_ptr<T>(); }
 } nullPtr;*/
 
 }

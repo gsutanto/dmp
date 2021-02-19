@@ -441,7 +441,7 @@ public:
      * @return Success or failure
      */
     template <class T>
-    bool readMatrixFromFile(const char* file_path, boost::shared_ptr<T>& matrix_data_structure)
+    bool readMatrixFromFile(const char* file_path, std::shared_ptr<T>& matrix_data_structure)
     {
         bool is_real_time   = false;
 

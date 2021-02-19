@@ -149,7 +149,7 @@ namespace dmp
      * @return Success or failure
      */
     template <class T>
-    bool isMemoryAllocated(const boost::shared_ptr<T>& smart_pointer,
+    bool isMemoryAllocated(const std::shared_ptr<T>& smart_pointer,
                            uint row_size, uint col_size)
     {
         if (smart_pointer == NULL)
@@ -180,7 +180,7 @@ namespace dmp
      */
     template <class T>
     bool allocateMemoryIfNonRealTime(bool is_real_time,
-                                     boost::shared_ptr<T>& smart_pointer,
+                                     std::shared_ptr<T>& smart_pointer,
                                      uint row_size, uint col_size)
     {
         // input checking:
@@ -237,7 +237,7 @@ namespace dmp
      * @return Success or failure
      */
     template <class T>
-    bool resizeAndReset(boost::shared_ptr<T>& smart_pointer,
+    bool resizeAndReset(std::shared_ptr<T>& smart_pointer,
                         uint row_size, uint col_size)
     {
         // input checking:
@@ -287,7 +287,7 @@ namespace dmp
      * @return Success or failure
      */
     template <class T>
-    bool isMemoryAllocated(const boost::shared_ptr<T>& smart_pointer,
+    bool isMemoryAllocated(const std::shared_ptr<T>& smart_pointer,
                            uint size)
     {
         if (smart_pointer == NULL)
@@ -317,7 +317,7 @@ namespace dmp
      */
     template <class T>
     bool allocateMemoryIfNonRealTime(bool is_real_time,
-                                     boost::shared_ptr< std::vector<T> >& smart_pointer,
+                                     std::shared_ptr< std::vector<T> >& smart_pointer,
                                      uint size=0)
     {
         // input checking:

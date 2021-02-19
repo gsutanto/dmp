@@ -362,12 +362,12 @@ bool CartesianCoordDMP::learnMultiCartCoordDMPs(const char* in_data_dir_path,
         return false;
     }
 
-    boost::filesystem::path                 in_data_dir(in_data_dir_path);
-    boost::filesystem::directory_iterator   null_directory_iterator;
+    std::filesystem::path                   in_data_dir(in_data_dir_path);
+    std::filesystem::directory_iterator     null_directory_iterator;
     char                                    in_data_subdir_path[1000];
     char                                    out_data_subdir_path[1000];
 
-    for (boost::filesystem::directory_iterator dir_iter(in_data_dir); dir_iter != null_directory_iterator; ++dir_iter)
+    for (std::filesystem::directory_iterator dir_iter(in_data_dir); dir_iter != null_directory_iterator; ++dir_iter)
     {
         char                                subdir_name[1000];
         strcpy(subdir_name, dir_iter->path().filename().string().c_str());

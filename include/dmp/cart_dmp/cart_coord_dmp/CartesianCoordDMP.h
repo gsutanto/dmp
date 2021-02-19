@@ -10,7 +10,7 @@
 #ifndef CARTESIAN_COORD_DMP_H
 #define CARTESIAN_COORD_DMP_H
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "amd_clmc_dmp/dmp_discrete/DMPDiscrete.h"
 #include "amd_clmc_dmp/cart_dmp/cart_coord_dmp/CartesianCoordTransformer.h"

@@ -12,17 +12,17 @@ namespace dmp
     }
 
     /**
-     * @param rt_error_file_path The path to the real-time-assertion-error-logging file
+     * @param rt_error_file_path_cstr The path to the real-time-assertion-error-logging file
      */
-    RealTimeAssertor::RealTimeAssertor(const char* rt_error_file_path)
+    RealTimeAssertor::RealTimeAssertor(const char* rt_error_file_path_cstr)
     {
         rt_err_file_path.reset(new char[ERROR_STRING_LENGTH]);
-        boost::filesystem::path rt_error_boost_file_path(rt_error_file_path);
+        std::filesystem::path rt_error_file_path(rt_error_file_path_cstr);
 
-        // Create the parent directory of rt_error_file_path, if it doesn't exist yet:
-        createDirIfNotExistYet(rt_error_boost_file_path.parent_path().string().c_str());
+        // Create the parent directory of rt_error_file_path_cstr, if it doesn't exist yet:
+        createDirIfNotExistYet(rt_error_file_path.parent_path().string().c_str());
 
-        strcpy(rt_err_file_path.get(), rt_error_file_path);
+        strcpy(rt_err_file_path.get(), rt_error_file_path_cstr);
     }
 
     /**
@@ -124,7 +124,7 @@ namespace dmp
         struct sched_param 			non_rt_thread_param;
         non_rt_thread_param.sched_priority                      = sched_get_priority_min(non_rt_thread_policy); // minimum-priority of the thread policy specified by non_rt_thread_policy
 
-        boost::thread   non_rt_thread(callAppendStringTo_rt_err_file,
+        std::thread     non_rt_thread(callAppendStringTo_rt_err_file,
                                       real_time_assertor_ptr, assertion_err_str_container);
 
         pthread_setschedparam(non_rt_thread.native_handle(), non_rt_thread_policy, &non_rt_thread_param);

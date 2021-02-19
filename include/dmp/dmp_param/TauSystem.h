@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "amd_clmc_dmp/utility/RealTimeAssertor.h"
 #include "amd_clmc_dmp/dmp_coupling/base/TauCoupling.h"
