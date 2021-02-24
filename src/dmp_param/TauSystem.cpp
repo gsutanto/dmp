@@ -129,7 +129,7 @@ bool TauSystem::getCouplingTerm(double& accumulated_ctau)
             {
                 return false;
             }
-            if (rt_assert(isnan(ctau) == 0) == false)
+            if (rt_assert(std::isnan(ctau) == 0) == false)
             {
                 return false;
             }

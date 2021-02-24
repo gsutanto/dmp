@@ -63,7 +63,7 @@ namespace dmp
                 {
                     return false;
                 }
-                if (rt_assert(isnan(cc) == 0) == false)
+                if (rt_assert(std::isnan(cc) == 0) == false)
                 {
                     return false;
                 }

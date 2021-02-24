@@ -154,14 +154,14 @@ int main(int argc, char** argv)
     DataIO                  data_io(&rt_assertor);
 
     // Sensory Primitives
-    std::vector< boost::shared_ptr<DMPDiscreteMultiDim> >   dmp_discrete_sense(N_sense);
+    std::vector< std::shared_ptr<DMPDiscreteMultiDim> >   dmp_discrete_sense(N_sense);
     std::vector< std::vector<MatrixNxM> >       dmpd_sense_weights(N_sense);
     std::vector< std::vector<VectorN> >         dmpd_sense_A_learn(N_sense);
     std::vector< std::vector<VectorN> >         dmpd_sense_start(N_sense);
     std::vector< std::vector<VectorN> >         dmpd_sense_goal(N_sense);
     std::vector< std::vector<double> >          dmpd_sense_tau(N_sense);
     // Current sense states:
-    std::vector< boost::shared_ptr<DMPState> >  sense_state(N_sense);
+    std::vector< std::shared_ptr<DMPState> >  sense_state(N_sense);
     // The "actual" sensor traces buffers:
     std::vector< std::vector<MatrixXxXPtr> >    X_sensor_trace(N_sense);
     std::vector< std::vector<VectorN> >         X_sensor_offset(N_sense);
@@ -183,24 +183,24 @@ int main(int argc, char** argv)
 //    std::vector<MatrixTxSBC>                    Ct(N_prims);
     VectorNN_N                                  Ct_vector(N_total_act_dimensionality);
 
-    std::vector< boost::shared_ptr<PMNN> >      pmnn(N_prims);
+    std::vector< std::shared_ptr<PMNN> >      pmnn(N_prims);
 
-    std::vector< boost::shared_ptr<TransformCouplingLearnTactileFeedback> > tc_lft(N_act);
+    std::vector< std::shared_ptr<TransformCouplingLearnTactileFeedback> > tc_lft(N_act);
 
     // Coupling Terms
     std::vector< std::vector<TransformCoupling*> >  transform_couplers(N_act);
 
     // Action/Movement Primitives
-    std::vector< boost::shared_ptr<DMPDiscrete> >       dmp_discrete_act(N_act);
-    dmp_discrete_act[0] = boost::make_shared<CartesianCoordDMP>(&can_sys_discr, model_size,
+    std::vector< std::shared_ptr<DMPDiscrete> >       dmp_discrete_act(N_act);
+    dmp_discrete_act[0] = std::make_shared<CartesianCoordDMP>(&can_sys_discr, model_size,
                                                                 formula_type, learning_method,
                                                                 &rt_assertor,
                                                                 2, "",
                                                                 &(transform_couplers[0]));
-    dmp_discrete_act[1] = boost::make_shared<QuaternionDMP>(model_size, &can_sys_discr,
+    dmp_discrete_act[1] = std::make_shared<QuaternionDMP>(model_size, &can_sys_discr,
                                                             learning_method, &rt_assertor, "",
                                                             &(transform_couplers[1]));
-    boost::shared_ptr<QuaternionDMP>            dmp_discrete_quat   = boost::dynamic_pointer_cast<QuaternionDMP> (dmp_discrete_act[1]);
+    std::shared_ptr<QuaternionDMP>            dmp_discrete_quat   = std::dynamic_pointer_cast<QuaternionDMP> (dmp_discrete_act[1]);
     std::vector< std::vector<MatrixNxM> >       dmpd_act_weights(N_act);
     std::vector< std::vector<VectorN> >         dmpd_act_A_learn(N_act);
     std::vector< std::vector<VectorN> >         dmpd_act_start(N_act);
@@ -227,12 +227,12 @@ int main(int argc, char** argv)
     for (uint m=0; m<N_sense; ++m)
     {
         // Initialize Sensory Primitives
-        dmp_discrete_sense[m]   = boost::make_shared<DMPDiscreteMultiDim>(sense_dimensionality[m],
+        dmp_discrete_sense[m]   = std::make_shared<DMPDiscreteMultiDim>(sense_dimensionality[m],
                                                                           model_size, &can_sys_discr,
                                                                           formula_type,
                                                                           learning_method,
                                                                           &rt_assertor, "");
-        sense_state[m]          = boost::make_shared<DMPState>(sense_dimensionality[m], &rt_assertor);
+        sense_state[m]          = std::make_shared<DMPState>(sense_dimensionality[m], &rt_assertor);
         dmpd_sense_unroll_critical_states[m].resize(N_prims);
         dmpd_sense_weights[m].resize(N_prims);
         dmpd_sense_A_learn[m].resize(N_prims);
@@ -341,7 +341,7 @@ int main(int argc, char** argv)
     for (uint np=0; np<N_prims; ++np)
     {
         // Initialize Phase-Modulated Neural Network (PMNN):
-        pmnn[np]    = boost::make_shared<PMNN>(N_total_act_dimensionality, topology, activation_functions, &rt_assertor);
+        pmnn[np]    = std::make_shared<PMNN>(N_total_act_dimensionality, topology, activation_functions, &rt_assertor);
 
         sprintf(pmnn_model_path, "%sprim%u/",
                 get_data_path("/dmp_coupling/learn_tactile_feedback/scraping/neural_nets/pmnn/cpp_models/").c_str(),
@@ -406,7 +406,7 @@ int main(int argc, char** argv)
         }
 
         // Initialize Transform Coupling Learn Tactile Feedback:
-        tc_lft[a]   = boost::make_shared<TransformCouplingLearnTactileFeedback>(act_dimensionality[a],
+        tc_lft[a]   = std::make_shared<TransformCouplingLearnTactileFeedback>(act_dimensionality[a],
                                                                                 act_start_idx_in_aggreg_ct_vec[a],
                                                                                 topology[0],
                                                                                 model_size,

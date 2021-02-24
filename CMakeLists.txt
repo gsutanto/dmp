@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.16.3)
 project(dmp)
 
 add_definitions(-DEIGEN_RUNTIME_NO_MALLOC -DEIGEN_STACK_ALLOCATION_LIMIT=0)
 
 # required to update the rpath during installation. has to be *before* add_executable and add_library
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_SKIP_BUILD_RPATH  FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) # tried also with TRUE
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
@@ -12,21 +13,22 @@ set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 
 # set global compile type
 set(CMAKE_BUILD_TYPE RelWithDebInfo) # Optimization with debugging info
-#set(CMAKE_BUILD_TYPE Release)       # Optimization 
+#set(CMAKE_BUILD_TYPE Release)       # Optimization
 #set(CMAKE_BUILD_TYPE Debug)         # Debug
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Weffc++ -pedantic -std=c++0x")
 
-find_package(catkin REQUIRED COMPONENTS Eigen) # 14.04
-#find_package(Eigen REQUIRED)                   # 12.04
+#find_package(catkin REQUIRED COMPONENTS Eigen)
+find_package(Eigen3 REQUIRED)
 find_package(Threads)
 
 #add_definitions(${EIGEN_DEFINITIONS})
 #link_directories(${EIGEN_LIBRARY_DIRS})
+set(EIGEN_INCLUDE_DIRS Eigen3::Eigen)
 
 include_directories(
     include
-    ${Eigen_INCLUDE_DIRS}
+    ${EIGEN_INCLUDE_DIRS}
 )
 
 get_filename_component(DATA_DIR data ABSOLUTE)
@@ -48,7 +50,6 @@ add_library(${PROJECT_NAME} SHARED
     src/utility/utility_cartesian.cpp
     src/utility/utility_quaternion.cpp
     src/utility/DataIO.cpp
-    src/utility/NormalDistributionRandomVectorGenerator.cpp
     src/utility/RealTimeAssertor.cpp
     src/dmp_state/DMPState.cpp
     src/dmp_state/QuaternionDMPState.cpp
@@ -82,23 +83,21 @@ add_library(${PROJECT_NAME} SHARED
     src/dmp_coupling/learn_tactile_feedback/TransformCouplingLearnTactileFeedback.cpp
     src/neural_nets/PMNN.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${EIGEN_INCLUDE_DIRS})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
   COMPILE_DEFINITIONS "${COMPILE_DEFS}"
 )
 
-
-### catkin exports
-### this will allow other catkin packages in the same workspace to link against the libraries generated here
-### and get access to the include folder
-catkin_package(
-  LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS Eigen    # 14.04
-  DEPENDS Threading # 14.04
-#  DEPENDS Eigen Threading # 12.04
-  INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
-)
+#### catkin exports
+#### this will allow other catkin packages in the same workspace to link against the libraries generated here
+#### and get access to the include folder
+#catkin_package(
+#  LIBRARIES ${PROJECT_NAME}
+#  CATKIN_DEPENDS Eigen
+#  DEPENDS Threading
+#  INCLUDE_DIRS include ${EIGEN_INCLUDE_DIRS}
+#)
 
 ## Test executables
 #set_source_files_properties(src/dmp_test/dmp_1D/dmp_1D_test.cpp PROPERTIES COMPILE_FLAGS -Weffc++)

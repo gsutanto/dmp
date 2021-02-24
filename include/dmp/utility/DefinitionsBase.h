@@ -45,7 +45,7 @@ enum DMPForcingTermLearningMethod
 typedef std::vector< double >               DoubleVector;
 typedef std::shared_ptr< DoubleVector >     DoubleVectorPtr;
 
-typedef std::shared_array< char >           CharArr;
+typedef std::shared_ptr< char[] >           CharArr;
 
 typedef Eigen::MatrixXd                                                                                                     MatrixXxX;
 typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::AutoAlign, MAX_DMP_NUM_DIMENSIONS, MAX_MODEL_SIZE>     MatrixNxM;

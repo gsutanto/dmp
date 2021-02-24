@@ -23,7 +23,7 @@ class LearnObsAvoidDataIO : public DataIO
 
 protected:
 
-    // The following data structures are encapsulated in boost::shared_ptr
+    // The following data structures are encapsulated in std::shared_ptr
     // to make sure this data structure is allocated in the heap
     MatrixloaTxF3Ptr    feature_trajectory_buffer;
     MatrixTx3Ptr        endeff_cart_position_local_trajectory_buffer;

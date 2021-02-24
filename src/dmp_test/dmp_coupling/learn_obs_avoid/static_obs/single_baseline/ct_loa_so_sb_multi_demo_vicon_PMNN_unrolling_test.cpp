@@ -144,10 +144,10 @@ int main(int argc, char** argv)
     VectorM                         func_approx_basis_functions(model_size);
     VectorNN_N                      normalized_phase_PSI_mult_phase_V(model_size);
     VectorNN_N                      Ct_vector(PMNN_output_size);
-    boost::shared_ptr<PMNN>         pmnn;
+    std::shared_ptr<PMNN>         pmnn;
     char                            pmnn_model_path[1000]   = "";
     // Initialize Phase-Modulated Neural Network (PMNN):
-    pmnn    = boost::make_shared<PMNN>(PMNN_output_size,
+    pmnn      = std::make_shared<PMNN>(PMNN_output_size,
                                        topology,
                                        activation_functions,
                                        &rt_assertor);

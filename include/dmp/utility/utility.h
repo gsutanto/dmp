@@ -53,7 +53,7 @@ namespace dmp
         {
             for (uint i = 0; i < input_mat.rows(); ++i)
             {
-                if (isnan(input_mat(i, j)))
+                if (std::isnan(input_mat(i, j)))
                 {
                     return true;
                 }

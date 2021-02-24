@@ -9,8 +9,8 @@ std::string get_data_path(const char* relative_path){
 }
 
 void get_data_path(char * get, const char* relative_path){
-  const char*  abs_path = get_data_path(relative_path).c_str();
-  strcpy(get,abs_path);
+  std::string str_abs_path = get_data_path(relative_path);
+  strcpy(get, str_abs_path.c_str());
 }
 
 
@@ -19,8 +19,8 @@ std::string get_matlab_path(const char* relative_path){
 }
 
 void get_matlab_path(char * get, const char* relative_path){
-  const char*  abs_path = get_matlab_path(relative_path).c_str();
-  strcpy(get,abs_path);
+  std::string str_abs_path = get_matlab_path(relative_path);
+  strcpy(get, str_abs_path.c_str());
 }
 
 
@@ -29,8 +29,8 @@ std::string get_python_path(const char* relative_path){
 }
 
 void get_python_path(char * get, const char* relative_path){
-  const char*  abs_path = get_python_path(relative_path).c_str();
-  strcpy(get,abs_path);
+  std::string str_abs_path = get_python_path(relative_path);
+  strcpy(get, str_abs_path.c_str());
 }
 
 
@@ -39,8 +39,8 @@ std::string get_plot_path(const char* relative_path){
 }
 
 void get_plot_path(char * get, const char* relative_path){
-  const char*  abs_path = get_plot_path(relative_path).c_str();
-  strcpy(get,abs_path);
+  std::string str_abs_path = get_plot_path(relative_path);
+  strcpy(get, str_abs_path.c_str());
 }
 
 
@@ -49,6 +49,6 @@ std::string get_rt_errors_path(const char* relative_path){
 }
 
 void get_rt_errors_path(char * get, const char* relative_path){
-  const char*  abs_path = get_rt_errors_path(relative_path).c_str();
-  strcpy(get,abs_path);
+  std::string str_abs_path = get_rt_errors_path(relative_path);
+  strcpy(get, str_abs_path.c_str());
 }
