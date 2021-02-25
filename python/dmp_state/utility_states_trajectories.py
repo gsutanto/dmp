@@ -52,7 +52,7 @@ def smoothStartEnd1DPositionProfile(oneD_position_prof,
     
     if ((mode == 1) or (mode == 3)):
         smoothed_1D_position_prof[1:num_padding,:] = smoothed_1D_position_prof[0,:]
-        smoothed_1D_position_prof_idx = (range(0, num_padding) + range(num_smoothing_points, traj_length))
+        smoothed_1D_position_prof_idx = (list(range(0, num_padding)) + list(range(num_smoothing_points, traj_length)))
         interp_position_prof_idx = range(num_padding, num_smoothing_points+1)
         
         smoothed_1D_position_prof[interp_position_prof_idx,:] = interp1d(smoothed_1D_position_prof_idx, 
@@ -61,7 +61,7 @@ def smoothStartEnd1DPositionProfile(oneD_position_prof,
     
     if ((mode == 2) or (mode == 3)):
         smoothed_1D_position_prof[traj_length-num_padding:traj_length-1,:] = smoothed_1D_position_prof[traj_length-1,:]
-        smoothed_1D_position_prof_idx = (range(0, traj_length-num_smoothing_points) + range(traj_length-num_padding, traj_length))
+        smoothed_1D_position_prof_idx = (list(range(0, traj_length-num_smoothing_points)) + list(range(traj_length-num_padding, traj_length)))
         interp_position_prof_idx = range(traj_length-num_smoothing_points, traj_length-num_padding)
         
         smoothed_1D_position_prof[interp_position_prof_idx,:] = interp1d(smoothed_1D_position_prof_idx, 

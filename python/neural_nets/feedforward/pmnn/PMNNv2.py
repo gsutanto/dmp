@@ -32,7 +32,7 @@ class PMNNv2(PMNN, object):
                                      regular_hidden_layer_topology, regular_hidden_layer_activation_func_list, 
                                      N_phaseLWR_kernels, D_output, 
                                      path, is_using_phase_kernel_modulation, is_predicting_only)
-        print "This is PMNNv2."
+        print ("This is PMNNv2.")
     
     def defineNeuralNetworkModel(self):
         """

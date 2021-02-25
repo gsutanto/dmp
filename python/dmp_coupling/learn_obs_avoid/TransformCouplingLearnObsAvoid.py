@@ -185,7 +185,7 @@ class TransformCouplingLearnObsAvoid(TransformCoupling, object):
         
         self.tau_sys.setTauBase(tau)
         
-        for i in xrange(traj_length):
+        for i in range(traj_length):
             self.endeff_ccstate_local.X = Y_obs_local_shifted[:,i].reshape(3,1)
             self.endeff_ccstate_local.Xd = Yd_obs_local_shifted[:,i].reshape(3,1)
             self.endeff_ccstate_local.Xdd = Ydd_obs_local_shifted[:,i].reshape(3,1)

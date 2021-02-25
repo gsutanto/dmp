@@ -19,8 +19,8 @@ class FeedForwardNeuralNetwork(NeuralNetwork):
         self.name = name
         
         self.neural_net_topology = neural_net_topology
-        print self.name + " Neural Network Topology:"
-        print self.neural_net_topology
+        print (self.name + " Neural Network Topology:")
+        print (self.neural_net_topology)
         
         self.N_layers = len(self.neural_net_topology)
         
@@ -31,8 +31,8 @@ class FeedForwardNeuralNetwork(NeuralNetwork):
             self.neural_net_activation_func_list = ['identity'] + nn_hidden_layer_activation_func_list + ['identity']
         # First Layer (Input Layer) always uses 'identity' activation function (and it does NOT matter actually; this is mainly for the sake of layer-indexing consistency...).
         assert (len(self.neural_net_activation_func_list) == self.N_layers), "len(self.neural_net_activation_func_list) must be == self.N_layers"
-        print "Neural Network Activation Function List:"
-        print self.neural_net_activation_func_list
+        print ("Neural Network Activation Function List:")
+        print (self.neural_net_activation_func_list)
         
         if (filepath == ""):
             self.num_params = self.defineNeuralNetworkModel()

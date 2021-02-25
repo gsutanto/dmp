@@ -53,7 +53,7 @@ def quat_dmp_multi_traj_training_test(dmp_home_dir_path="../../../../",
     
     for k in range(2):
         if (k == 0):
-            sub_quat_dmp_training_path = "/data/dmp_coupling/learn_tactile_feedback/scraping_w_tool/human_baseline/prim03/"
+            sub_quat_dmp_training_path = "/data/cart_dmp/quat_dmp/multi_traj_training/"
         elif (k == 1):
 #            sub_quat_dmp_training_path = "/data/dmp_coupling/learn_tactile_feedback/scraping_wo_tool/human_baseline/prim02/"
             # this one is a more challenging case, because Quaternions -Q and Q both represent the same orientation

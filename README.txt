@@ -34,6 +34,11 @@ Open the file <workspace>/src/catkin/planning/dmp/python/dmp_test/cart_dmp/quat_
 Execute ("Run") the file inside the Spyder IDE.
 (it will generate some plots comparing the training/demonstration data (in dotted blue lines) versus the unrolled trajectory from the learned DMP primitive (in solid green line))
 
+Remark: 
+For code under dmp/python/dmp_coupling that depends on TensorFlow, 
+the latest version of TensorFlow that works is TensorFlow 1.15.0.
+However, currently the software tests for these parts have not been revived yet.
+
 
 
 To compile:

@@ -32,6 +32,8 @@ python/dmp_coupling/learn_tactile_feedback/**/*.png
 pictures/*
 plot/dmp_1D/*.txt
 plot/cart_dmp/cart_coord_dmp/single_traj_training/*.txt
+plot/cart_dmp/cart_coord_dmp/multi_traj_training/dataset1/
+plot/cart_dmp/cart_coord_dmp/multi_traj_training/dataset2/
 plot/cart_dmp/cart_coord_dmp/multi_traj_training/w_obs/*.txt
 plot/cart_dmp/cart_coord_dmp/multi_traj_training/wo_obs/*.txt
 plot/cart_dmp/cart_coord_dmp/multi_traj_training/*.txt

@@ -27,10 +27,10 @@ int main(int argc, char** argv)
     uint        model_size                  = 25;
     double      tau                         = 0.5;      // this value will be changed (possibly many times) during learning, because each trajectory have different tau value
 
-    double      tau_learn_wo_obs;
-    double      tau_learn_w_obs;
-    Trajectory  critical_states_learn_wo_obs(2);
-    Trajectory  critical_states_learn_w_obs(2);
+    double      tau_learn_dataset1;
+    double      tau_learn_dataset2;
+    Trajectory  critical_states_learn_dataset1(2);
+    Trajectory  critical_states_learn_dataset2(2);
     double      time;
 
     uint        formula_type                = _SCHAAL_DMP_;
@@ -112,21 +112,21 @@ int main(int argc, char** argv)
     // change tau here during movement reproduction
     tau                 = tau_reproduce;
 
-    ///////////////////////////////////// Without Obstacle (Start) /////////////////////////////////////
+    ///////////////////////////////////// Dataset 1 (Start) /////////////////////////////////////
     // Learn the Cartesian trajectory
-    if (rt_assert_main(cart_dmp.learn(get_data_path("/dmp_coupling/learn_obs_avoid/static_obs/data_sph_new/SubjectNo1/baseline/endeff_trajs/").c_str(),
-                                      task_servo_rate, &tau_learn_wo_obs,
-                                      &critical_states_learn_wo_obs)) == false)
+    if (rt_assert_main(cart_dmp.learn(get_data_path("/cart_dmp/cart_coord_dmp/multi_traj_training/dataset1/").c_str(),
+                                      task_servo_rate, &tau_learn_dataset1,
+                                      &critical_states_learn_dataset1)) == false)
     {
         return (-1);
     }
 
     // Reproduce Cartesian DMP
     // define unrolling parameters:
-    DMPUnrollInitParams dmp_unroll_init_params_wo_obs(tau, critical_states_learn_wo_obs,
+    DMPUnrollInitParams dmp_unroll_init_params_dataset1(tau, critical_states_learn_dataset1,
                                                       &rt_assertor);
     // Start DMP
-    if (rt_assert_main(cart_dmp.start(dmp_unroll_init_params_wo_obs)) == false)
+    if (rt_assert_main(cart_dmp.start(dmp_unroll_init_params_dataset1)) == false)
     {
         return (-1);
     }
@@ -150,11 +150,11 @@ int main(int argc, char** argv)
         printf("%.05f %.05f %.05f %.05f\n", time, current_state.getX()[0], current_state.getX()[1], current_state.getX()[2]);
     }
     cart_dmp.stopCollectingTrajectoryDataSet();
-    if (rt_assert_main(cart_dmp.saveTrajectoryDataSet(get_plot_path("/cart_dmp/cart_coord_dmp/multi_traj_training/wo_obs/").c_str())) == false)
+    if (rt_assert_main(cart_dmp.saveTrajectoryDataSet(get_plot_path("/cart_dmp/cart_coord_dmp/multi_traj_training/dataset1/").c_str())) == false)
     {
         return (-1);
     }
-    if (rt_assert_main(cart_dmp.saveParams(get_plot_path("/cart_dmp/cart_coord_dmp/multi_traj_training/wo_obs/").c_str())) == false)
+    if (rt_assert_main(cart_dmp.saveParams(get_plot_path("/cart_dmp/cart_coord_dmp/multi_traj_training/dataset1/").c_str())) == false)
     {
         return (-1);
     }
@@ -176,7 +176,7 @@ int main(int argc, char** argv)
     {
         printf("%.05f %.05f %.05f %.05f\n", w(0,im), w(1,im), w(2,im), 0.0);
     }
-    printf("%.05f %.05f %.05f %.05f\n", A_learn(0), A_learn(1), A_learn(2), tau_learn_wo_obs);
+    printf("%.05f %.05f %.05f %.05f\n", A_learn(0), A_learn(1), A_learn(2), tau_learn_dataset1);
     printf("%.05f %.05f %.05f %.05f\n", mean_start_global_position(0), mean_start_global_position(1), mean_start_global_position(2), 0.0);
     printf("%.05f %.05f %.05f %.05f\n", mean_goal_global_position(0),  mean_goal_global_position(1),  mean_goal_global_position(2), 0.0);
     printf("%.05f %.05f %.05f %.05f\n", mean_start_local_position(0),  mean_start_local_position(1),  mean_start_local_position(2), 0.0);
@@ -189,25 +189,25 @@ int main(int argc, char** argv)
     {
         printf("%.05f %.05f %.05f %.05f\n", T_global_to_local_H(ir,0), T_global_to_local_H(ir,1), T_global_to_local_H(ir,2), T_global_to_local_H(ir,3));
     }
-    ///////////////////////////////////// Without Obstacle (End) /////////////////////////////////////
+    ///////////////////////////////////// Dataset 1 (End) /////////////////////////////////////
 
 
 
-    ///////////////////////////////////// With Obstacle (Start) /////////////////////////////////////
+    ///////////////////////////////////// Dataset 2 (Start) /////////////////////////////////////
     // Learn the Cartesian trajectory
-    if (rt_assert_main(cart_dmp.learn(get_data_path("/dmp_coupling/learn_obs_avoid/static_obs/data_sph_new/SubjectNo1/1/endeff_trajs/").c_str(),
-                                      task_servo_rate, &tau_learn_w_obs,
-                                      &critical_states_learn_w_obs)) == false)
+    if (rt_assert_main(cart_dmp.learn(get_data_path("/cart_dmp/cart_coord_dmp/multi_traj_training/dataset2/").c_str(),
+                                      task_servo_rate, &tau_learn_dataset2,
+                                      &critical_states_learn_dataset2)) == false)
     {
         return (-1);
     }
 
     // Reproduce Cartesian DMP
     // define unrolling parameters:
-    DMPUnrollInitParams dmp_unroll_init_params_w_obs(tau, critical_states_learn_w_obs,
+    DMPUnrollInitParams dmp_unroll_init_params_dataset2(tau, critical_states_learn_dataset2,
                                                      &rt_assertor);
     // Start DMP
-    if (rt_assert_main(cart_dmp.start(dmp_unroll_init_params_w_obs)) == false)
+    if (rt_assert_main(cart_dmp.start(dmp_unroll_init_params_dataset2)) == false)
     {
         return (-1);
     }
@@ -231,11 +231,11 @@ int main(int argc, char** argv)
         printf("%.05f %.05f %.05f %.05f\n", time, current_state.getX()[0], current_state.getX()[1], current_state.getX()[2]);
     }
     cart_dmp.stopCollectingTrajectoryDataSet();
-    if (rt_assert_main(cart_dmp.saveTrajectoryDataSet(get_plot_path("/cart_dmp/cart_coord_dmp/multi_traj_training/w_obs/").c_str())) == false)
+    if (rt_assert_main(cart_dmp.saveTrajectoryDataSet(get_plot_path("/cart_dmp/cart_coord_dmp/multi_traj_training/dataset2/").c_str())) == false)
     {
         return (-1);
     }
-    if (rt_assert_main(cart_dmp.saveParams(get_plot_path("/cart_dmp/cart_coord_dmp/multi_traj_training/w_obs/").c_str())) == false)
+    if (rt_assert_main(cart_dmp.saveParams(get_plot_path("/cart_dmp/cart_coord_dmp/multi_traj_training/dataset2/").c_str())) == false)
     {
         return (-1);
     }
@@ -255,7 +255,7 @@ int main(int argc, char** argv)
     {
         printf("%.05f %.05f %.05f %.05f\n", w(0,im), w(1,im), w(2,im), 0.0);
     }
-    printf("%.05f %.05f %.05f %.05f\n", A_learn(0), A_learn(1), A_learn(2), tau_learn_w_obs);
+    printf("%.05f %.05f %.05f %.05f\n", A_learn(0), A_learn(1), A_learn(2), tau_learn_dataset2);
     printf("%.05f %.05f %.05f %.05f\n", mean_start_global_position(0), mean_start_global_position(1), mean_start_global_position(2), 0.0);
     printf("%.05f %.05f %.05f %.05f\n", mean_goal_global_position(0),  mean_goal_global_position(1),  mean_goal_global_position(2), 0.0);
     printf("%.05f %.05f %.05f %.05f\n", mean_start_local_position(0),  mean_start_local_position(1),  mean_start_local_position(2), 0.0);
@@ -268,7 +268,7 @@ int main(int argc, char** argv)
     {
         printf("%.05f %.05f %.05f %.05f\n", T_global_to_local_H(ir,0), T_global_to_local_H(ir,1), T_global_to_local_H(ir,2), T_global_to_local_H(ir,3));
     }
-    ///////////////////////////////////// With Obstacle (End) /////////////////////////////////////
+    ///////////////////////////////////// Dataset 2 (End) /////////////////////////////////////
 
 	return 0;
 }

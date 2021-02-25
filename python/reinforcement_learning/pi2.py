@@ -75,7 +75,7 @@ class Pi2():
         # Compute cost-to-go for each time step for each sample.
         cost_to_go_per_timestep = np.zeros((N_samples,T))
         cost_to_go_per_timestep[:,T-1] = costs[:,T-1]
-        for t in xrange(T-2,-1,-1):
+        for t in range(T-2,-1,-1):
             cost_to_go_per_timestep[:,t] = costs[:,t] + cost_to_go_per_timestep[:,t+1]
         
         if (not self._is_computing_eta_per_timestep): # NOT quite working well...
@@ -86,7 +86,7 @@ class Pi2():
                                                             (N_samples,T))
         
         # Iterate over time steps.
-        for t in xrange(T):
+        for t in range(T):
             if (self._is_computing_eta_per_timestep):
                 cost_to_go = cost_to_go_per_timestep[:,t]
                 [normalized_cost_to_go, eta
@@ -102,7 +102,7 @@ class Pi2():
             mean_new_per_timestep[t] = np.sum(prob[:, np.newaxis] * samples, axis=0)
 
             # Update policy covariance with weighted max-likelihood.
-            for i in xrange(N_samples):
+            for i in range(N_samples):
                 mean_diff = samples[i] - mean_new_per_timestep[t]
                 mean_diff = np.reshape(mean_diff, (D_params, 1))                
                 cov_new_per_timestep[t] += prob[i] * np.dot(mean_diff, mean_diff.T)

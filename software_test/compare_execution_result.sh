@@ -1,12 +1,4 @@
 #!/bin/bash
 
-if [[ $(diff <($1 -e ../software_test/test_rt_err.txt) ../software_test/$2) ]]; then
-	echo "ERROR: Unmatched execution result of command: $1"
-	exit 1
-fi
-
-if [[ -s ../software_test/test_rt_err.txt ]] ; then
-	echo "ERROR: Error occurs when executing command  : $1 ; the error is:"
-	cat ../software_test/test_rt_err.txt
-	exit 1
-fi
+../software_test/execute_cpp_test.sh "$1" $2
+python ../software_test/compare_two_numeric_files.py -f1 ../software_test/$2 -f2 ../software_test/$3

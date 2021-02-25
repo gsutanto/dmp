@@ -32,7 +32,7 @@ class PMNNv3(PMNNv2, object):
         
         self.neural_net_topology = [D_input] + regular_hidden_layer_topology + [N_phaseLWR_kernels, D_output]
         print ("PMNN %s Topology:" % self.name)
-        print self.neural_net_topology
+        print (self.neural_net_topology)
         
         self.D_output = D_output
         self.N_layers = len(self.neural_net_topology)
@@ -44,8 +44,8 @@ class PMNNv3(PMNNv2, object):
             self.neural_net_activation_func_list = ['identity'] + regular_hidden_layer_activation_func_list + ['identity', 'identity']
         # First Layer (Input Layer) always uses 'identity' activation function (and it does NOT matter actually; this is mainly for the sake of layer-indexing consistency...).
         assert (len(self.neural_net_activation_func_list) == self.N_layers), "len(self.neural_net_activation_func_list) must be == self.N_layers"
-        print "Neural Network Activation Function List:"
-        print self.neural_net_activation_func_list
+        print ("Neural Network Activation Function List:")
+        print (self.neural_net_activation_func_list)
         
         self.N_phases = N_phaseLWR_kernels
         
@@ -58,7 +58,7 @@ class PMNNv3(PMNNv2, object):
         
         self.regularization_const = regularization_const
         
-        print "This is PMNNv3."
+        print ("This is PMNNv3.")
     
     def countNeuralNetworkModelNumParams(self):
         """

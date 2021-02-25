@@ -348,12 +348,13 @@ def preprocessQuaternionSignal( QtT, omega_tT, dt ):
     if (sign_mismatch_summary.any() == False):
         return QtT
     else:
-        sign_mismatch_idx = list(np.where(sign_mismatch_summary == True))
+        sign_mismatch_idx = list(np.where(sign_mismatch_summary == True)[0])
         if ((len(sign_mismatch_idx) % 2) == 1):
             sign_mismatch_idx.append(QtT.shape[0])
         sign_mismatch_idx_pairs = list(chunks(sign_mismatch_idx, 2))
         sign_corrector = np.ones(QtT.shape)
         for sign_mismatch_idx_pair in sign_mismatch_idx_pairs:
-            sign_corrector[range(sign_mismatch_idx_pair[0], sign_mismatch_idx_pair[1]),:] *= -1
+            sign_corrector[range(sign_mismatch_idx_pair[0], 
+                                 sign_mismatch_idx_pair[1]),:] *= -1
         QtT_sign_corrected = sign_corrector * QtT
         return QtT_sign_corrected

@@ -52,10 +52,10 @@ def cart_coord_dmp_multi_traj_training_test(dmp_home_dir_path="../../../../",
     unroll_log = list()
     
     for k in range(2):
-        if (k == 0): # Without Obstacle
-            sub_cart_coord_dmp_training_path = "/data/dmp_coupling/learn_obs_avoid/static_obs/data_sph_new/SubjectNo1/baseline/endeff_trajs/"
-        elif (k == 1): # With Obstacle
-            sub_cart_coord_dmp_training_path = "/data/dmp_coupling/learn_obs_avoid/static_obs/data_sph_new/SubjectNo1/1/endeff_trajs/"
+        if (k == 0):
+            sub_cart_coord_dmp_training_path = "/data/cart_dmp/cart_coord_dmp/multi_traj_training/dataset1/"
+        elif (k == 1):
+            sub_cart_coord_dmp_training_path = "/data/cart_dmp/cart_coord_dmp/multi_traj_training/dataset2/"
         
         set_ctraj_input = cart_dmp.extractSetTrajectories(dmp_home_dir_path + sub_cart_coord_dmp_training_path, 
                                                           start_column_idx=1, time_column_idx=0)
