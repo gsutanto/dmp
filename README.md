@@ -73,7 +73,12 @@ or reconcile the differences.
 
 ## Python Examples Execution
 
-Open Spyder IDE ( https://docs.spyder-ide.org/installation.html )
+Open Spyder IDE ( https://docs.spyder-ide.org ):
+
+```
+conda activate dmp
+spyder &
+```
 
 1.  One-Dimensional DMP Test:
 
