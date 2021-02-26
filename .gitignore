@@ -1,4 +1,5 @@
 build/*
+dmp.egg-info/*
 doxygen/*
 lib/*
 data/dmp_coupling/learn_obs_avoid/static_obs/neural_nets/pmnn/python_models/prim_*_nmse_test_unroll.mat

@@ -20,7 +20,7 @@ from cart_coord_dmp_single_traj_training_test import *
 from cart_coord_dmp_multi_traj_training_test import *
 from quat_dmp_single_traj_training_test import *
 from quat_dmp_multi_traj_training_test import *
-from ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test import *
+# from ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test import *
 from utilities import *
 
 dmp_1D_test(dmp_home_dir_abs_path, 2, 0.0, 0.0, 0.0, 0.0, dmp_software_test_dir_abs_path, "test_python_dmp_1D_test_0_2_0.txt")
