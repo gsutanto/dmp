@@ -97,7 +97,7 @@ bool QuaternionGoalSystem::updateCurrentGoalState(const double& dt) {
   Vector4 QG = G;
   Vector4 Qg = current_quaternion_goal_state.getQ();
   Vector3 omegag = current_quaternion_goal_state.getOmega();
-  Vector3 omegagd = current_quaternion_goal_state.getOmegad();
+  // Vector3 omegagd = current_quaternion_goal_state.getOmegad();
   Vector3 twice_log_quat_diff_g = ZeroVector3;
   if (rt_assert(computeTwiceLogQuaternionDifference(
           QG, Qg, twice_log_quat_diff_g)) == false) {

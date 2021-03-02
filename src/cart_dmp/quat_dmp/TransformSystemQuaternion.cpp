@@ -313,7 +313,7 @@ bool TransformSystemQuaternion::getTargetQuaternionForcingTerm(
     return false;
   }
 
-  Vector4 Q0_demo = start_quat_state.getQ();
+  // Vector4 Q0_demo = start_quat_state.getQ();
   Vector4 Q_demo = current_state_demo_local.getQ();
   Vector3 omega_demo = current_state_demo_local.getOmega();
   Vector3 omegad_demo = current_state_demo_local.getOmegad();

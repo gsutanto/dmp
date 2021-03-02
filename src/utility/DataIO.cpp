@@ -17,7 +17,7 @@ bool DataIO::extract1DTrajectory(const char* file_path, Trajectory& trajectory,
     return false;
   }
 
-  if (trajectory.size() != 0) {
+  if (trajectory.empty() == false) {
     trajectory.clear();
   }
 
@@ -62,7 +62,7 @@ bool DataIO::extract1DTrajectory(const char* file_path, Trajectory& trajectory,
 bool DataIO::write1DTrajectoryToFile(const Trajectory& trajectory,
                                      const char* file_path,
                                      bool is_comma_separated) {
-  bool is_real_time = false;
+  // bool is_real_time = false;
 
   if (rt_assert(DataIO::isValid()) == false) {
     return false;
@@ -102,13 +102,13 @@ bool DataIO::write1DTrajectoryToFile(const Trajectory& trajectory,
 
 bool DataIO::extractNDTrajectory(const char* file_path,
                                  Trajectory& trajectory) {
-  bool is_real_time = false;
+  // bool is_real_time = false;
 
   if (rt_assert(DataIO::isValid()) == false) {
     return false;
   }
 
-  if (trajectory.size() != 0) {
+  if (trajectory.empty() == false) {
     trajectory.clear();
   }
 
@@ -147,7 +147,7 @@ bool DataIO::extractCartCoordTrajectory(const char* file_path,
     return false;
   }
 
-  if (cart_coord_trajectory.size() != 0) {
+  if (cart_coord_trajectory.empty() == false) {
     cart_coord_trajectory.clear();
   }
 
@@ -270,7 +270,7 @@ bool DataIO::extractQuaternionTrajectory(const char* file_path,
     return false;
   }
 
-  if (quat_trajectory.size() != 0) {
+  if (quat_trajectory.empty() == false) {
     quat_trajectory.clear();
   }
 
@@ -342,7 +342,7 @@ bool DataIO::extractSetNDTrajectories(const char* dir_or_file_path,
     return false;
   }
 
-  if (nd_trajectory_set.size() != 0) {
+  if (nd_trajectory_set.empty() == false) {
     nd_trajectory_set.clear();
   }
 
@@ -368,8 +368,7 @@ bool DataIO::extractSetNDTrajectories(const char* dir_or_file_path,
       i++;
       sprintf(var_file_path, "%s/%d.txt", dir_or_file_path, i);
     }
-  } else if (file_type(dir_or_file_path) == _REG_)  // if it is a (text) file
-  {
+  } else if (file_type(dir_or_file_path) == _REG_) {  // if it is a (text) file
     if (rt_assert(extractNDTrajectory(dir_or_file_path, (*nd_trajectory))) ==
         false) {
       return false;
@@ -391,7 +390,7 @@ bool DataIO::extractSetCartCoordTrajectories(
     return false;
   }
 
-  if (cart_coord_trajectory_set.size() != 0) {
+  if (cart_coord_trajectory_set.empty() == false) {
     cart_coord_trajectory_set.clear();
   }
 
@@ -418,8 +417,7 @@ bool DataIO::extractSetCartCoordTrajectories(
       i++;
       sprintf(var_file_path, "%s/%d.txt", dir_or_file_path, i);
     }
-  } else if (file_type(dir_or_file_path) == _REG_)  // if it is a (text) file
-  {
+  } else if (file_type(dir_or_file_path) == _REG_) {  // if it is a (text) file
     if (rt_assert(extractCartCoordTrajectory(
             dir_or_file_path, (*cartesian_trajectory), is_comma_separated)) ==
         false) {
@@ -436,7 +434,7 @@ bool DataIO::extractSetCartCoordTrajectories(
 bool DataIO::writeSetCartCoordTrajectoriesToDir(
     const TrajectorySet& cart_coord_trajectory_set, const char* dir_path,
     bool is_comma_separated) {
-  bool is_real_time = false;
+  // bool is_real_time = false;
 
   if (rt_assert(DataIO::isValid()) == false) {
     return false;
@@ -472,7 +470,7 @@ bool DataIO::extractSetQuaternionTrajectories(
     return false;
   }
 
-  if (quat_trajectory_set.size() != 0) {
+  if (quat_trajectory_set.empty() == false) {
     quat_trajectory_set.clear();
   }
 
@@ -499,8 +497,7 @@ bool DataIO::extractSetQuaternionTrajectories(
       i++;
       sprintf(var_file_path, "%s/%d.txt", dir_or_file_path, i);
     }
-  } else if (file_type(dir_or_file_path) == _REG_)  // if it is a (text) file
-  {
+  } else if (file_type(dir_or_file_path) == _REG_) {  // if it is a (text) file
     if (rt_assert(extractQuaternionTrajectory(
             dir_or_file_path, (*quat_trajectory), is_comma_separated)) ==
         false) {
@@ -612,13 +609,13 @@ bool DataIO::extractSetCartCoordDemonstrationGroups(
 
 bool DataIO::extract3DPoints(const char* file_path, Points& points,
                              bool is_comma_separated) {
-  bool is_real_time = false;
+  // bool is_real_time = false;
 
   if (rt_assert(DataIO::isValid()) == false) {
     return false;
   }
 
-  if (points.size() != 0) {
+  if (points.empty() == false) {
     points.clear();
   }
 
@@ -631,7 +628,6 @@ bool DataIO::extract3DPoints(const char* file_path, Points& points,
   Vector3 point;
 
   while (fgets(line, 1000, f) != NULL) {
-    double time;
     if (is_comma_separated) {
       sscanf(line, "%lf,%lf,%lf", &(point[0]), &(point[1]), &(point[2]));
     } else {
@@ -647,7 +643,7 @@ bool DataIO::extract3DPoints(const char* file_path, Points& points,
 
 bool DataIO::readMatrixFromFile(const char* file_path,
                                 int& matrix_data_structure) {
-  bool is_real_time = false;
+  // bool is_real_time = false;
 
   if (rt_assert(DataIO::isValid()) == false) {
     return false;
@@ -678,7 +674,7 @@ bool DataIO::readMatrixFromFile(const char* file_path,
 
 bool DataIO::readMatrixFromFile(const char* file_path,
                                 double& matrix_data_structure) {
-  bool is_real_time = false;
+  // bool is_real_time = false;
 
   if (rt_assert(DataIO::isValid()) == false) {
     return false;
