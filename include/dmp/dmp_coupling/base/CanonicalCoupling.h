@@ -12,22 +12,18 @@
 
 #include "Coupling.h"
 
-namespace dmp
-{
+namespace dmp {
 
-class CanonicalCoupling : public Coupling
-{
+class CanonicalCoupling : public Coupling {
+ public:
+  /**
+   * @param cc Coupling value (C_c) that will be used in the canonical system to
+   * adjust time development of a DMP
+   * @return Success or failure
+   */
+  virtual bool getValue(double& cc) = 0;
 
-public:
-
-    /**
-     * @param cc Coupling value (C_c) that will be used in the canonical system to adjust time development of a DMP
-     * @return Success or failure
-     */
-    virtual bool getValue(double& cc) = 0;
-
-    virtual ~CanonicalCoupling() {}
-
+  virtual ~CanonicalCoupling() {}
 };
-}
+}  // namespace dmp
 #endif

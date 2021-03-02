@@ -10,87 +10,80 @@
 #ifndef DMP_UNROLL_INIT_PARAMS_H
 #define DMP_UNROLL_INIT_PARAMS_H
 
-#include <stdlib.h>
 #include <stddef.h>
-#include <vector>
+#include <stdlib.h>
+
 #include <memory>
+#include <vector>
 
-#include "dmp/utility/RealTimeAssertor.h"
 #include "dmp/utility/DefinitionsDerived.h"
+#include "dmp/utility/RealTimeAssertor.h"
 
-namespace dmp
-{
+namespace dmp {
 
-class DMPUnrollInitParams
-{
+class DMPUnrollInitParams {
+  friend class DMP;
+  friend class DMPDiscrete;
+  friend class CartesianCoordDMP;
+  friend class TransformCouplingLearnObsAvoid;
 
-    friend class        DMP;
-    friend class        DMPDiscrete;
-    friend class        CartesianCoordDMP;
-    friend class        TransformCouplingLearnObsAvoid;
+ private:
+  RealTimeAssertor* rt_assertor;
 
-private:
+ public:
+  DMPStates critical_states;
+  double tau;
 
-    RealTimeAssertor*   rt_assertor;
+  /**
+   * NON-REAL-TIME!!!
+   */
+  DMPUnrollInitParams();
 
-public:
+  /**
+   * NON-REAL-TIME!!!
+   */
+  DMPUnrollInitParams(const double& tau_init, const DMPState& start_state,
+                      const DMPState& goal_state,
+                      RealTimeAssertor* real_time_assertor,
+                      bool is_zeroing_out_velocity_and_acceleration = true);
 
-    DMPStates           critical_states;
-    double              tau;
+  /**
+   * NON-REAL-TIME!!!
+   */
+  DMPUnrollInitParams(const double& tau_init, const Trajectory& trajectory,
+                      RealTimeAssertor* real_time_assertor,
+                      bool is_zeroing_out_velocity_and_acceleration = true);
 
-    /**
-     * NON-REAL-TIME!!!
-     */
-    DMPUnrollInitParams();
+  /**
+   * NON-REAL-TIME!!!
+   */
+  DMPUnrollInitParams(const Trajectory& trajectory,
+                      RealTimeAssertor* real_time_assertor,
+                      bool is_zeroing_out_velocity_and_acceleration = true);
 
-    /**
-     * NON-REAL-TIME!!!
-     */
-    DMPUnrollInitParams(const double& tau_init,
-                        const DMPState& start_state,
-                        const DMPState& goal_state,
-                        RealTimeAssertor* real_time_assertor,
-                        bool is_zeroing_out_velocity_and_acceleration=true);
+  /**
+   * NON-REAL-TIME!!!
+   */
+  DMPUnrollInitParams(const Trajectory& trajectory,
+                      const double& robot_task_servo_rate,
+                      RealTimeAssertor* real_time_assertor,
+                      bool is_zeroing_out_velocity_and_acceleration = true);
 
-    /**
-     * NON-REAL-TIME!!!
-     */
-    DMPUnrollInitParams(const double& tau_init,
-                        const Trajectory& trajectory,
-                        RealTimeAssertor* real_time_assertor,
-                        bool is_zeroing_out_velocity_and_acceleration=true);
+  /**
+   * Checks validity of this data structure.
+   *
+   * @return Valid (true) or Invalid (false)
+   */
+  bool isValid() const;
 
-    /**
-     * NON-REAL-TIME!!!
-     */
-    DMPUnrollInitParams(const Trajectory& trajectory,
-                        RealTimeAssertor* real_time_assertor,
-                        bool is_zeroing_out_velocity_and_acceleration=true);
-
-    /**
-     * NON-REAL-TIME!!!
-     */
-    DMPUnrollInitParams(const Trajectory& trajectory,
-                        const double& robot_task_servo_rate,
-                        RealTimeAssertor* real_time_assertor,
-                        bool is_zeroing_out_velocity_and_acceleration=true);
-
-    /**
-     * Checks validity of this data structure.
-     *
-     * @return Valid (true) or Invalid (false)
-     */
-    bool isValid() const;
-
-    ~DMPUnrollInitParams();
-
+  ~DMPUnrollInitParams();
 };
 
-typedef std::vector< DMPUnrollInitParams >              VecDMPUnrollInitParams;
-typedef std::shared_ptr< VecDMPUnrollInitParams >       VecDMPUnrollInitParamsPtr;
+typedef std::vector<DMPUnrollInitParams> VecDMPUnrollInitParams;
+typedef std::shared_ptr<VecDMPUnrollInitParams> VecDMPUnrollInitParamsPtr;
 
-typedef std::vector< VecDMPUnrollInitParams >           VecVecDMPUnrollInitParams;
-typedef std::shared_ptr< VecVecDMPUnrollInitParams >    VecVecDMPUnrollInitParamsPtr;
+typedef std::vector<VecDMPUnrollInitParams> VecVecDMPUnrollInitParams;
+typedef std::shared_ptr<VecVecDMPUnrollInitParams> VecVecDMPUnrollInitParamsPtr;
 
-}
+}  // namespace dmp
 #endif
