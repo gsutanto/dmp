@@ -28,12 +28,13 @@ namespace dmp {
 #define MAX_DMP_NUM_DIMENSIONS \
   20  // dmp_num_dimensions is 1 for DMPDiscrete1D, and 3 for CartesianCoordDMP
 #define MAX_MODEL_SIZE 50  // maximum DMP basis functions model size
-#define MIN_TAU 0.01       // minimum value of tau
 #define MAX_TAU_LEARNING_UNROLL \
   10  // maximum value of tau for unrolling DMP in a learning process; e.g. this
       // is used in TransformCouplingLearnObsAvoid.cpp (10.0 seconds)
 #define MAX_NUM_UNROLL_TRAJ_STATES \
   (MAX_TAU_LEARNING_UNROLL * MAX_TASK_SERVO_RATE)
+
+const double MIN_TAU = 0.01;  // minimum value of tau
 
 enum DMPFormulation { _SCHAAL_DMP_ = 0, _HOFFMANN_DMP_ = 1 };
 
