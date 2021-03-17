@@ -170,11 +170,11 @@ int main(int argc, char** argv) {
   tau = tau_reproduce;
 
   // define unrolling parameters:
-  DMPUnrollInitParams dmp_unroll_init_parameters(tau, critical_states_learn,
-                                                 &rt_assertor);
+  DMPUnrollInitParams dmp_unroll_init_params(tau, critical_states_learn,
+                                             &rt_assertor);
 
   // Start DMP
-  if (rt_assert_main(dmp_discrete_1D.start(dmp_unroll_init_parameters)) ==
+  if (rt_assert_main(dmp_discrete_1D.start(dmp_unroll_init_params)) ==
       false) {
     return (-1);
   }

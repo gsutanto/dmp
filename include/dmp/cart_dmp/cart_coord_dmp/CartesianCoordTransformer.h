@@ -29,6 +29,8 @@
 #define MAX_CTRAJ_LOCAL_COORD_OPTION_NO 3
 #define N_GSUTANTO_LOCAL_COORD_FRAME_BASIS_VECTORS 5
 
+namespace dmp {
+
 enum CartCoordDMPLocalCoordinateFrameMethod  // definitions are in
                                              // CartesianCoordDMP.h:
                                              // CartesianCoordDMP(...)
@@ -39,8 +41,6 @@ enum CartCoordDMPLocalCoordinateFrameMethod  // definitions are in
   _SCHAAL_LOCAL_COORD_FRAME_ = 2,
   _KROEMER_LOCAL_COORD_FRAME_ = 3
 };
-
-namespace dmp {
 
 class CartesianCoordTransformer {
  private:

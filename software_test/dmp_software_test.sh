@@ -21,7 +21,7 @@
 
 ../software_test/compare_execution_result.sh "./dmp_cart_coord_dmp_single_traj_training_demo -f 0 -c 1" test_cart_coord_dmp_single_traj_training_test_0_1.txt result_cart_coord_dmp_single_traj_training_test_0_1.txt
 ../software_test/compare_execution_result.sh "./dmp_cart_coord_dmp_single_traj_training_demo -f 0 -c 2" test_cart_coord_dmp_single_traj_training_test_0_2.txt result_cart_coord_dmp_single_traj_training_test_0_2.txt
-#../software_test/compare_execution_result.sh "./dmp_cart_coord_dmp_single_traj_training_demo -f 1 -c 1" test_cart_coord_dmp_single_traj_training_test_1_1.txt result_cart_coord_dmp_single_traj_training_test_1_1.txt
+../software_test/compare_execution_result.sh "./dmp_cart_coord_dmp_single_traj_training_demo -f 1 -c 1" test_cart_coord_dmp_single_traj_training_test_1_1.txt result_cart_coord_dmp_single_traj_training_test_1_1.txt
 ../software_test/compare_execution_result.sh "./dmp_cart_coord_dmp_single_traj_training_demo -f 1 -c 2" test_cart_coord_dmp_single_traj_training_test_1_2.txt result_cart_coord_dmp_single_traj_training_test_1_2.txt
 ../software_test/compare_execution_result.sh "./dmp_cart_coord_dmp_single_traj_training_demo -f 0 -c 2 -r 6.0 -h 1.0 -t 6.0" test_cart_coord_dmp_single_traj_training_test_0_2_6.0_1.0_6.0.txt result_cart_coord_dmp_single_traj_training_test_0_2_6.0_1.0_6.0.txt
 ../software_test/compare_execution_result.sh "./dmp_cart_coord_dmp_single_traj_training_demo -f 0 -c 2 -r 6.0 -h 2.0 -t 6.0" test_cart_coord_dmp_single_traj_training_test_0_2_6.0_2.0_6.0.txt result_cart_coord_dmp_single_traj_training_test_0_2_6.0_2.0_6.0.txt

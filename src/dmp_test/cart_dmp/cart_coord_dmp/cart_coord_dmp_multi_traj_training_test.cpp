@@ -33,10 +33,8 @@ int main(int argc, char** argv) {
       0.5;  // this value will be changed (possibly many times) during learning,
             // because each trajectory have different tau value
 
-  double tau_learn_dataset1;
-  double tau_learn_dataset2;
-  Trajectory critical_states_learn_dataset1(2);
-  Trajectory critical_states_learn_dataset2(2);
+  double tau_learn;
+  Trajectory critical_states_learn(2);
   double time;
 
   uint formula_type = _SCHAAL_DMP_;
@@ -118,188 +116,101 @@ int main(int argc, char** argv) {
                              learning_method, &rt_assertor,
                              _GSUTANTO_LOCAL_COORD_FRAME_, dmp_plot_dir_path);
 
-  DMPState current_state(3, &rt_assertor);
+  DMPState state(3, &rt_assertor);
 
   // change tau here during movement reproduction
   tau = tau_reproduce;
 
-  ///////////////////////////// Dataset 1 (Start) /////////////////////////////
-  // Learn the Cartesian trajectory
-  if (rt_assert_main(cart_dmp.learn(
-          get_data_path(
-              "/cart_dmp/cart_coord_dmp/multi_traj_training/dataset1/")
-              .c_str(),
-          task_servo_rate, &tau_learn_dataset1,
-          &critical_states_learn_dataset1)) == false) {
-    return (-1);
-  }
+  for (uint ds_id = 1; ds_id <= 2; ds_id++) {
+    // Trajectories Dataset directory path update
+    std::string dataset_rel_path =
+        "/cart_dmp/cart_coord_dmp/multi_traj_training/dataset" +
+        std::to_string(ds_id) + "/";
 
-  // Reproduce Cartesian DMP
-  // define unrolling parameters:
-  DMPUnrollInitParams dmp_unroll_init_params_dataset1(
-      tau, critical_states_learn_dataset1, &rt_assertor);
-  // Start DMP
-  if (rt_assert_main(cart_dmp.start(dmp_unroll_init_params_dataset1)) ==
-      false) {
-    return (-1);
-  }
+    // Learn the Cartesian trajectory
+    if (rt_assert_main(cart_dmp.learn(
+            get_data_path(dataset_rel_path.c_str()).c_str(),
+            task_servo_rate, &tau_learn,
+            &critical_states_learn)) == false) {
+      return (-1);
+    }
 
-  // Run Cartesian DMP and print state values
-  if (rt_assert_main(cart_dmp.startCollectingTrajectoryDataSet()) == false) {
-    return (-1);
-  }
-  for (uint i = 0; i < (round(time_reproduce_max * task_servo_rate) + 1); ++i) {
-    time = 1.0 * (i * dt);
-
-    // Get the next state of the Cartesian DMP
-    if (rt_assert_main(cart_dmp.getNextState(dt, true, current_state)) ==
+    // Reproduce Cartesian DMP
+    // define unrolling parameters:
+    DMPUnrollInitParams dmp_unroll_init_params(
+        tau, critical_states_learn, &rt_assertor);
+    // Start DMP
+    if (rt_assert_main(cart_dmp.start(dmp_unroll_init_params)) ==
         false) {
       return (-1);
     }
 
-    // Log state trajectory:
-    printf("%.05f %.05f %.05f %.05f\n", time, current_state.getX()[0],
-           current_state.getX()[1], current_state.getX()[2]);
-  }
-  cart_dmp.stopCollectingTrajectoryDataSet();
-  if (rt_assert_main(cart_dmp.saveTrajectoryDataSet(
-          get_plot_path(
-              "/cart_dmp/cart_coord_dmp/multi_traj_training/dataset1/")
-              .c_str())) == false) {
-    return (-1);
-  }
-  if (rt_assert_main(cart_dmp.saveParams(
-          get_plot_path(
-              "/cart_dmp/cart_coord_dmp/multi_traj_training/dataset1/")
-              .c_str())) == false) {
-    return (-1);
-  }
+    // Run Cartesian DMP and print state values
+    if (rt_assert_main(cart_dmp.startCollectingTrajectoryDataSet()) == false) {
+      return (-1);
+    }
+    uint unroll_length = round(time_reproduce_max * task_servo_rate) + 1;
+    for (uint i = 0; i < unroll_length; ++i) {
+      time = 1.0 * (i * dt);
 
-  // Also print out the parameters:
-  MatrixNxM w(3, model_size);
-  VectorN A_learn(3);
-  if (rt_assert_main(cart_dmp.getParams(w, A_learn)) == false) {
-    return (-1);
-  }
-  Vector3 mean_start_global_position = cart_dmp.getMeanStartGlobalPosition();
-  Vector3 mean_goal_global_position = cart_dmp.getMeanGoalGlobalPosition();
-  Vector3 mean_start_local_position = cart_dmp.getMeanStartLocalPosition();
-  Vector3 mean_goal_local_position = cart_dmp.getMeanGoalLocalPosition();
-  Matrix4x4 T_local_to_global_H =
-      cart_dmp.getHomogeneousTransformMatrixLocalToGlobal();
-  Matrix4x4 T_global_to_local_H =
-      cart_dmp.getHomogeneousTransformMatrixGlobalToLocal();
-  for (uint im = 0; im < model_size; im++) {
-    printf("%.05f %.05f %.05f %.05f\n", w(0, im), w(1, im), w(2, im), 0.0);
-  }
-  printf("%.05f %.05f %.05f %.05f\n", A_learn(0), A_learn(1), A_learn(2),
-         tau_learn_dataset1);
-  printf("%.05f %.05f %.05f %.05f\n", mean_start_global_position(0),
-         mean_start_global_position(1), mean_start_global_position(2), 0.0);
-  printf("%.05f %.05f %.05f %.05f\n", mean_goal_global_position(0),
-         mean_goal_global_position(1), mean_goal_global_position(2), 0.0);
-  printf("%.05f %.05f %.05f %.05f\n", mean_start_local_position(0),
-         mean_start_local_position(1), mean_start_local_position(2), 0.0);
-  printf("%.05f %.05f %.05f %.05f\n", mean_goal_local_position(0),
-         mean_goal_local_position(1), mean_goal_local_position(2), 0.0);
-  for (uint ir = 0; ir < 4; ir++) {
-    printf("%.05f %.05f %.05f %.05f\n", T_local_to_global_H(ir, 0),
-           T_local_to_global_H(ir, 1), T_local_to_global_H(ir, 2),
-           T_local_to_global_H(ir, 3));
-  }
-  for (uint ir = 0; ir < 4; ir++) {
-    printf("%.05f %.05f %.05f %.05f\n", T_global_to_local_H(ir, 0),
-           T_global_to_local_H(ir, 1), T_global_to_local_H(ir, 2),
-           T_global_to_local_H(ir, 3));
-  }
-  ///////////////////////////// Dataset 1 (End) /////////////////////////////
+      // Get the next state of the Cartesian DMP
+      if (rt_assert_main(cart_dmp.getNextState(dt, true, state)) ==
+          false) {
+        return (-1);
+      }
 
-  ///////////////////////////// Dataset 2 (Start) /////////////////////////////
-  // Learn the Cartesian trajectory
-  if (rt_assert_main(cart_dmp.learn(
-          get_data_path(
-              "/cart_dmp/cart_coord_dmp/multi_traj_training/dataset2/")
-              .c_str(),
-          task_servo_rate, &tau_learn_dataset2,
-          &critical_states_learn_dataset2)) == false) {
-    return (-1);
-  }
-
-  // Reproduce Cartesian DMP
-  // define unrolling parameters:
-  DMPUnrollInitParams dmp_unroll_init_params_dataset2(
-      tau, critical_states_learn_dataset2, &rt_assertor);
-  // Start DMP
-  if (rt_assert_main(cart_dmp.start(dmp_unroll_init_params_dataset2)) ==
-      false) {
-    return (-1);
-  }
-
-  // Run Cartesian DMP and print state values
-  if (rt_assert_main(cart_dmp.startCollectingTrajectoryDataSet()) == false) {
-    return (-1);
-  }
-  for (uint i = 0; i < (round(time_reproduce_max * task_servo_rate) + 1); ++i) {
-    time = 1.0 * (i * dt);
-
-    // Get the next state of the Cartesian DMP
-    if (rt_assert_main(cart_dmp.getNextState(dt, true, current_state)) ==
-        false) {
+      // Log state trajectory:
+      printf("%.05f %.05f %.05f %.05f\n", time, state.getX()[0],
+             state.getX()[1], state.getX()[2]);
+    }
+    cart_dmp.stopCollectingTrajectoryDataSet();
+    if (rt_assert_main(cart_dmp.saveTrajectoryDataSet(
+            get_plot_path(dataset_rel_path.c_str()).c_str())) == false) {
+      return (-1);
+    }
+    if (rt_assert_main(cart_dmp.saveParams(
+            get_plot_path(dataset_rel_path.c_str()).c_str())) == false) {
       return (-1);
     }
 
-    // Log state trajectory:
-    printf("%.05f %.05f %.05f %.05f\n", time, current_state.getX()[0],
-           current_state.getX()[1], current_state.getX()[2]);
+    // Also print out the parameters:
+    MatrixNxM w(3, model_size);
+    VectorN A_learn(3);
+    if (rt_assert_main(cart_dmp.getParams(w, A_learn)) == false) {
+      return (-1);
+    }
+    Vector3 mean_start_global_position = cart_dmp.getMeanStartGlobalPosition();
+    Vector3 mean_goal_global_position = cart_dmp.getMeanGoalGlobalPosition();
+    Vector3 mean_start_local_position = cart_dmp.getMeanStartLocalPosition();
+    Vector3 mean_goal_local_position = cart_dmp.getMeanGoalLocalPosition();
+    Matrix4x4 T_local_to_global_H =
+        cart_dmp.getHomogeneousTransformMatrixLocalToGlobal();
+    Matrix4x4 T_global_to_local_H =
+        cart_dmp.getHomogeneousTransformMatrixGlobalToLocal();
+    for (uint im = 0; im < model_size; im++) {
+      printf("%.05f %.05f %.05f %.05f\n", w(0, im), w(1, im), w(2, im), 0.0);
+    }
+    printf("%.05f %.05f %.05f %.05f\n", A_learn(0), A_learn(1), A_learn(2),
+           tau_learn);
+    printf("%.05f %.05f %.05f %.05f\n", mean_start_global_position(0),
+           mean_start_global_position(1), mean_start_global_position(2), 0.0);
+    printf("%.05f %.05f %.05f %.05f\n", mean_goal_global_position(0),
+           mean_goal_global_position(1), mean_goal_global_position(2), 0.0);
+    printf("%.05f %.05f %.05f %.05f\n", mean_start_local_position(0),
+           mean_start_local_position(1), mean_start_local_position(2), 0.0);
+    printf("%.05f %.05f %.05f %.05f\n", mean_goal_local_position(0),
+           mean_goal_local_position(1), mean_goal_local_position(2), 0.0);
+    for (uint ir = 0; ir < 4; ir++) {
+      printf("%.05f %.05f %.05f %.05f\n", T_local_to_global_H(ir, 0),
+             T_local_to_global_H(ir, 1), T_local_to_global_H(ir, 2),
+             T_local_to_global_H(ir, 3));
+    }
+    for (uint ir = 0; ir < 4; ir++) {
+      printf("%.05f %.05f %.05f %.05f\n", T_global_to_local_H(ir, 0),
+             T_global_to_local_H(ir, 1), T_global_to_local_H(ir, 2),
+             T_global_to_local_H(ir, 3));
+    }
   }
-  cart_dmp.stopCollectingTrajectoryDataSet();
-  if (rt_assert_main(cart_dmp.saveTrajectoryDataSet(
-          get_plot_path(
-              "/cart_dmp/cart_coord_dmp/multi_traj_training/dataset2/")
-              .c_str())) == false) {
-    return (-1);
-  }
-  if (rt_assert_main(cart_dmp.saveParams(
-          get_plot_path(
-              "/cart_dmp/cart_coord_dmp/multi_traj_training/dataset2/")
-              .c_str())) == false) {
-    return (-1);
-  }
-
-  // Also print out the parameters:
-  if (rt_assert_main(cart_dmp.getParams(w, A_learn)) == false) {
-    return (-1);
-  }
-  mean_start_global_position = cart_dmp.getMeanStartGlobalPosition();
-  mean_goal_global_position = cart_dmp.getMeanGoalGlobalPosition();
-  mean_start_local_position = cart_dmp.getMeanStartLocalPosition();
-  mean_goal_local_position = cart_dmp.getMeanGoalLocalPosition();
-  T_local_to_global_H = cart_dmp.getHomogeneousTransformMatrixLocalToGlobal();
-  T_global_to_local_H = cart_dmp.getHomogeneousTransformMatrixGlobalToLocal();
-  for (uint im = 0; im < model_size; im++) {
-    printf("%.05f %.05f %.05f %.05f\n", w(0, im), w(1, im), w(2, im), 0.0);
-  }
-  printf("%.05f %.05f %.05f %.05f\n", A_learn(0), A_learn(1), A_learn(2),
-         tau_learn_dataset2);
-  printf("%.05f %.05f %.05f %.05f\n", mean_start_global_position(0),
-         mean_start_global_position(1), mean_start_global_position(2), 0.0);
-  printf("%.05f %.05f %.05f %.05f\n", mean_goal_global_position(0),
-         mean_goal_global_position(1), mean_goal_global_position(2), 0.0);
-  printf("%.05f %.05f %.05f %.05f\n", mean_start_local_position(0),
-         mean_start_local_position(1), mean_start_local_position(2), 0.0);
-  printf("%.05f %.05f %.05f %.05f\n", mean_goal_local_position(0),
-         mean_goal_local_position(1), mean_goal_local_position(2), 0.0);
-  for (uint ir = 0; ir < 4; ir++) {
-    printf("%.05f %.05f %.05f %.05f\n", T_local_to_global_H(ir, 0),
-           T_local_to_global_H(ir, 1), T_local_to_global_H(ir, 2),
-           T_local_to_global_H(ir, 3));
-  }
-  for (uint ir = 0; ir < 4; ir++) {
-    printf("%.05f %.05f %.05f %.05f\n", T_global_to_local_H(ir, 0),
-           T_global_to_local_H(ir, 1), T_global_to_local_H(ir, 2),
-           T_global_to_local_H(ir, 3));
-  }
-  ///////////////////////////// Dataset 2 (End) /////////////////////////////
 
   return 0;
 }

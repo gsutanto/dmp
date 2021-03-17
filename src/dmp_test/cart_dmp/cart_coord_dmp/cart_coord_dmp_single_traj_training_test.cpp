@@ -141,14 +141,11 @@ int main(int argc, char** argv) {
   tau = tau_reproduce;
 
   // define unrolling parameters:
-  DMPUnrollInitParams dmp_unroll_init_parameters(tau, critical_states_learn,
-                                                 &rt_assertor);
-
-  VectorN steady_state_goal_position(3);
-  steady_state_goal_position.block(0, 0, 3, 1) << 0.5, 1.0, 0.0;
+  DMPUnrollInitParams dmp_unroll_init_params(tau, critical_states_learn,
+                                             &rt_assertor);
 
   // Start DMP
-  if (rt_assert_main(cart_dmp.start(dmp_unroll_init_parameters)) == false) {
+  if (rt_assert_main(cart_dmp.start(dmp_unroll_init_params)) == false) {
     return (-1);
   }
 
@@ -160,10 +157,9 @@ int main(int argc, char** argv) {
     double time = 1.0 * (i * dt);
 
     // Get the next state of the Cartesian DMP
-    DMPState current_state(3, &rt_assertor);
+    DMPState state(3, &rt_assertor);
 
-    if (rt_assert_main(cart_dmp.getNextState(dt, true, current_state)) ==
-        false) {
+    if (rt_assert_main(cart_dmp.getNextState(dt, true, state)) == false) {
       return (-1);
     }
 
@@ -180,8 +176,8 @@ int main(int argc, char** argv) {
     }
 
     // Log state trajectory:
-    printf("%.05f %.05f %.05f %.05f\n", time, current_state.getX()[0],
-           current_state.getX()[1], current_state.getX()[2]);
+    printf("%.05f %.05f %.05f %.05f\n", time,
+           state.getX()[0], state.getX()[1], state.getX()[2]);
   }
   cart_dmp.stopCollectingTrajectoryDataSet();
   if (rt_assert_main(cart_dmp.saveTrajectoryDataSet()) == false) {
