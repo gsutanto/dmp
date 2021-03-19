@@ -356,7 +356,8 @@ bool DataIO::extractSetNDTrajectories(const char* dir_or_file_path,
   if (file_type(dir_or_file_path) == _DIR_)  // if it is a directory
   {
     uint i = 1;
-    sprintf(var_file_path, "%s/%d.txt", dir_or_file_path, i);
+    snprintf(var_file_path, sizeof(var_file_path),
+             "%s/%d.txt", dir_or_file_path, i);
 
     while ((file_type(var_file_path) == _REG_) &&  // while file exists
            (i <= max_num_trajs)) {
@@ -366,7 +367,8 @@ bool DataIO::extractSetNDTrajectories(const char* dir_or_file_path,
       }
       nd_trajectory_set.push_back(*nd_trajectory);
       i++;
-      sprintf(var_file_path, "%s/%d.txt", dir_or_file_path, i);
+      snprintf(var_file_path, sizeof(var_file_path),
+               "%s/%d.txt", dir_or_file_path, i);
     }
   } else if (file_type(dir_or_file_path) == _REG_) {  // if it is a (text) file
     if (rt_assert(extractNDTrajectory(dir_or_file_path, (*nd_trajectory))) ==
@@ -404,7 +406,8 @@ bool DataIO::extractSetCartCoordTrajectories(
   if (file_type(dir_or_file_path) == _DIR_)  // if it is a directory
   {
     uint i = 1;
-    sprintf(var_file_path, "%s/%d.txt", dir_or_file_path, i);
+    snprintf(var_file_path, sizeof(var_file_path),
+             "%s/%d.txt", dir_or_file_path, i);
 
     while ((file_type(var_file_path) == _REG_) &&  // while file exists
            (i <= max_num_trajs)) {
@@ -415,7 +418,8 @@ bool DataIO::extractSetCartCoordTrajectories(
       }
       cart_coord_trajectory_set.push_back(*cartesian_trajectory);
       i++;
-      sprintf(var_file_path, "%s/%d.txt", dir_or_file_path, i);
+      snprintf(var_file_path, sizeof(var_file_path),
+               "%s/%d.txt", dir_or_file_path, i);
     }
   } else if (file_type(dir_or_file_path) == _REG_) {  // if it is a (text) file
     if (rt_assert(extractCartCoordTrajectory(
@@ -449,7 +453,8 @@ bool DataIO::writeSetCartCoordTrajectoriesToDir(
 
   char var_file_path[1000];
   for (uint i = 0; i < N_traj; ++i) {
-    sprintf(var_file_path, "%s/%d.txt", dir_path, (i + 1));
+    snprintf(var_file_path, sizeof(var_file_path),
+             "%s/%d.txt", dir_path, (i + 1));
 
     if (rt_assert(writeCartCoordTrajectoryToFile(
             cart_coord_trajectory_set[i], var_file_path, is_comma_separated)) ==
@@ -484,7 +489,8 @@ bool DataIO::extractSetQuaternionTrajectories(
   if (file_type(dir_or_file_path) == _DIR_)  // if it is a directory
   {
     uint i = 1;
-    sprintf(var_file_path, "%s/%d.txt", dir_or_file_path, i);
+    snprintf(var_file_path, sizeof(var_file_path),
+             "%s/%d.txt", dir_or_file_path, i);
 
     while ((file_type(var_file_path) == _REG_) &&  // while file exists
            (i <= max_num_trajs)) {
@@ -495,7 +501,8 @@ bool DataIO::extractSetQuaternionTrajectories(
       }
       quat_trajectory_set.push_back(*quat_trajectory);
       i++;
-      sprintf(var_file_path, "%s/%d.txt", dir_or_file_path, i);
+      snprintf(var_file_path, sizeof(var_file_path),
+               "%s/%d.txt", dir_or_file_path, i);
     }
   } else if (file_type(dir_or_file_path) == _REG_) {  // if it is a (text) file
     if (rt_assert(extractQuaternionTrajectory(
@@ -546,16 +553,17 @@ bool DataIO::extractSetCartCoordDemonstrationGroups(
   for (uint n = 1; n <= N_demo_settings; n++) {
     if (selected_obs_avoid_setting_numbers == NULL)  // use all settings
     {
-      sprintf(in_demo_group_dir_path, "%s/%u/endeff_trajs/", in_data_dir_path,
-              n);
+      snprintf(in_demo_group_dir_path, sizeof(in_demo_group_dir_path),
+               "%s/%u/endeff_trajs/", in_data_dir_path, n);
     } else {
       if (rt_assert(((*selected_obs_avoid_setting_numbers)[n - 1] > 0) &&
                     ((*selected_obs_avoid_setting_numbers)[n - 1] <=
                      N_total_existing_demo_settings)) == false) {
         return false;
       }
-      sprintf(in_demo_group_dir_path, "%s/%u/endeff_trajs/", in_data_dir_path,
-              (*selected_obs_avoid_setting_numbers)[n - 1]);
+      snprintf(in_demo_group_dir_path, sizeof(in_demo_group_dir_path),
+               "%s/%u/endeff_trajs/", in_data_dir_path,
+               (*selected_obs_avoid_setting_numbers)[n - 1]);
     }
 
     // Load the demonstrations for each particular obstacle setting:

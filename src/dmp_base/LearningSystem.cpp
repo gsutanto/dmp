@@ -9,7 +9,7 @@ LearningSystem::LearningSystem()
       dmp_num_dimensions(0),
       model_size(0),
       learned_weights(new MatrixNxM(dmp_num_dimensions, model_size)) {
-  strcpy(data_directory_path, "");
+  snprintf(data_directory_path, sizeof(data_directory_path), "");
 }
 
 LearningSystem::LearningSystem(uint dmp_num_dimensions_init,
@@ -27,7 +27,8 @@ LearningSystem::LearningSystem(uint dmp_num_dimensions_init,
 
 {
   learned_weights->resize(dmp_num_dimensions, model_size);
-  strcpy(data_directory_path, opt_data_directory_path);
+  snprintf(data_directory_path, sizeof(data_directory_path),
+           "%s", opt_data_directory_path);
 }
 
 bool LearningSystem::isValid() {

@@ -20,12 +20,14 @@ int file_type(const char* object_path) {
 uint countNumberedDirectoriesUnderDirectory(const char* dir_path) {
   char var_dir_path[1000];
   uint count_numbered_directories = 1;
-  sprintf(var_dir_path, "%s/%d/", dir_path, count_numbered_directories);
+  snprintf(var_dir_path, sizeof(var_dir_path),
+           "%s/%d/", dir_path, count_numbered_directories);
 
   while (file_type(var_dir_path) == _DIR_)  // while directory exists
   {
     count_numbered_directories++;
-    sprintf(var_dir_path, "%s/%d/", dir_path, count_numbered_directories);
+    snprintf(var_dir_path, sizeof(var_dir_path),
+             "%s/%d/", dir_path, count_numbered_directories);
   }
   count_numbered_directories--;
   return (count_numbered_directories);
@@ -34,12 +36,14 @@ uint countNumberedDirectoriesUnderDirectory(const char* dir_path) {
 uint countNumberedFilesUnderDirectory(const char* dir_path) {
   char var_file_path[1000];
   uint count_numbered_files = 1;
-  sprintf(var_file_path, "%s/%d.txt", dir_path, count_numbered_files);
+  snprintf(var_file_path, sizeof(var_file_path),
+           "%s/%d.txt", dir_path, count_numbered_files);
 
   while (file_type(var_file_path) == _REG_)  // while file exists
   {
     count_numbered_files++;
-    sprintf(var_file_path, "%s/%d.txt", dir_path, count_numbered_files);
+    snprintf(var_file_path, sizeof(var_file_path),
+             "%s/%d.txt", dir_path, count_numbered_files);
   }
   count_numbered_files--;
   return (count_numbered_files);

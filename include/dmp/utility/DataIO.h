@@ -306,7 +306,7 @@ class DataIO {
     }
 
     char file_path[1000];
-    sprintf(file_path, "%s/%s", dir_path, file_name);
+    snprintf(file_path, sizeof(file_path), "%s/%s", dir_path, file_name);
 
     return (
         rt_assert(DataIO::writeMatrixToFile(file_path, matrix_data_structure)));
@@ -335,7 +335,7 @@ class DataIO {
     }
 
     char file_path[1000];
-    sprintf(file_path, "%s/%s", dir_path, file_name);
+    snprintf(file_path, sizeof(file_path), "%s/%s", dir_path, file_name);
 
     return (rt_assert(
         DataIO::readMatrixFromFile(file_path, matrix_data_structure)));

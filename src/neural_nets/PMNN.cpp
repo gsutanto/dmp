@@ -101,12 +101,12 @@ bool PMNN::loadParams(const char* dir_path, uint start_idx) {
     // Count how many weight files are available:
     uint weight_file_counter = 1;
     char var_weight_file_path[1000] = "";
-    sprintf(var_weight_file_path, "%s/%u/w%u", dir_path, dim_idx,
-            weight_file_counter - 1);
+    snprintf(var_weight_file_path, sizeof(var_weight_file_path),
+             "%s/%u/w%u", dir_path, dim_idx, weight_file_counter - 1);
     while (file_type(var_weight_file_path) == _REG_) {
       weight_file_counter++;
-      sprintf(var_weight_file_path, "%s/%u/w%u", dir_path, dim_idx,
-              weight_file_counter - 1);
+      snprintf(var_weight_file_path, sizeof(var_weight_file_path),
+               "%s/%u/w%u", dir_path, dim_idx, weight_file_counter - 1);
     }
     weight_file_counter--;
     if (rt_assert(weight_file_counter == (topology.size() - 1)) == false) {
@@ -116,8 +116,8 @@ bool PMNN::loadParams(const char* dir_path, uint start_idx) {
     // Now load the weights:
     for (uint weight_file_count = 0; weight_file_count < weight_file_counter;
          ++weight_file_count) {
-      sprintf(var_weight_file_path, "%s/%u/w%u", dir_path, dim_idx,
-              weight_file_count);
+      snprintf(var_weight_file_path, sizeof(var_weight_file_path),
+               "%s/%u/w%u", dir_path, dim_idx, weight_file_count);
       if (rt_assert(data_io.readMatrixFromFile(
               var_weight_file_path, *(weights[dim_idx][weight_file_count]))) ==
           false) {
@@ -128,12 +128,12 @@ bool PMNN::loadParams(const char* dir_path, uint start_idx) {
     // Count how many bias files are available:
     uint bias_file_counter = 1;
     char var_bias_file_path[1000] = "";
-    sprintf(var_bias_file_path, "%s/%u/b%u", dir_path, dim_idx,
-            bias_file_counter - 1);
+    snprintf(var_bias_file_path, sizeof(var_bias_file_path),
+             "%s/%u/b%u", dir_path, dim_idx, bias_file_counter - 1);
     while (file_type(var_bias_file_path) == _REG_) {
       bias_file_counter++;
-      sprintf(var_bias_file_path, "%s/%u/b%u", dir_path, dim_idx,
-              bias_file_counter - 1);
+      snprintf(var_bias_file_path, sizeof(var_bias_file_path),
+               "%s/%u/b%u", dir_path, dim_idx, bias_file_counter - 1);
     }
     bias_file_counter--;
     if (rt_assert(bias_file_counter == (topology.size() - 2)) == false) {
@@ -143,8 +143,8 @@ bool PMNN::loadParams(const char* dir_path, uint start_idx) {
     // Now load the biases:
     for (uint bias_file_count = 0; bias_file_count < bias_file_counter;
          ++bias_file_count) {
-      sprintf(var_bias_file_path, "%s/%u/b%u", dir_path, dim_idx,
-              bias_file_count);
+      snprintf(var_bias_file_path, sizeof(var_bias_file_path),
+               "%s/%u/b%u", dir_path, dim_idx, bias_file_count);
       if (rt_assert(data_io.readMatrixFromFile(
               var_bias_file_path, *(biases[dim_idx][bias_file_count]))) ==
           false) {

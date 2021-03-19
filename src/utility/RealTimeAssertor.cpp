@@ -6,7 +6,7 @@ namespace dmp {
 
 RealTimeAssertor::RealTimeAssertor() {
   rt_err_file_path.reset(new char[ERROR_STRING_LENGTH]);
-  sprintf(rt_err_file_path.get(), "");
+  snprintf(rt_err_file_path.get(), ERROR_STRING_LENGTH, "");
 }
 
 RealTimeAssertor::RealTimeAssertor(const char* rt_error_file_path_cstr) {
@@ -17,7 +17,8 @@ RealTimeAssertor::RealTimeAssertor(const char* rt_error_file_path_cstr) {
   // yet:
   createDirIfNotExistYet(rt_error_file_path.parent_path().string().c_str());
 
-  strcpy(rt_err_file_path.get(), rt_error_file_path_cstr);
+  snprintf(rt_err_file_path.get(), ERROR_STRING_LENGTH,
+           "%s", rt_error_file_path_cstr);
 }
 
 bool RealTimeAssertor::isValid() {
@@ -69,9 +70,10 @@ bool realTimeAssertFailed(RealTimeAssertor* real_time_assertor_ptr,
 
   struct ErrorStringContainer assertion_err_str_container;
 
-  sprintf(assertion_err_str_container.error_string,
-          "Assertion %s is failed at file %s, line %u.\n", expression_string,
-          file_name, line_number);
+  snprintf(assertion_err_str_container.error_string,
+           sizeof(assertion_err_str_container.error_string),
+           "Assertion %s is failed at file %s, line %u.\n", expression_string,
+           file_name, line_number);
 
   // Spawn a non-real-time-thread with minimum priority (such that it can be
   // preempted/yanked by any real-time thread or any thread with higher

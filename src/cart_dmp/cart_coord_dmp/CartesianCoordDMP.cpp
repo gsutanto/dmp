@@ -211,10 +211,12 @@ bool CartesianCoordDMP::learnMultiCartCoordDMPs(
   for (std::filesystem::directory_iterator dir_iter(in_data_dir);
        dir_iter != null_directory_iterator; ++dir_iter) {
     char subdir_name[1000];
-    strcpy(subdir_name, dir_iter->path().filename().string().c_str());
-    sprintf(in_data_subdir_path, "%s/%s/", dir_iter->path().string().c_str(),
-            in_data_subdir_subpath);
-    sprintf(out_data_subdir_path, "%s/%s/", out_data_dir_path, subdir_name);
+    snprintf(subdir_name, sizeof(subdir_name),
+             "%s", dir_iter->path().filename().string().c_str());
+    snprintf(in_data_subdir_path, sizeof(in_data_subdir_path), "%s/%s/",
+             dir_iter->path().string().c_str(), in_data_subdir_subpath);
+    snprintf(out_data_subdir_path, sizeof(out_data_subdir_path), "%s/%s/",
+             out_data_dir_path, subdir_name);
 
     // Create out_data_subdir_path directory if it doesn't exist yet:
     if (rt_assert(createDirIfNotExistYet(out_data_subdir_path)) == false) {

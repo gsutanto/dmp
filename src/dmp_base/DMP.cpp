@@ -20,7 +20,7 @@ DMP::DMP()
       rt_assertor(NULL) {
   mean_start_position.resize(dmp_num_dimensions);
   mean_goal_position.resize(dmp_num_dimensions);
-  strcpy(data_directory_path, "");
+  snprintf(data_directory_path, sizeof(data_directory_path), "");
 }
 
 DMP::DMP(uint dmp_num_dimensions_init, uint model_size_init,
@@ -48,7 +48,8 @@ DMP::DMP(uint dmp_num_dimensions_init, uint model_size_init,
       rt_assertor(real_time_assertor) {
   mean_start_position.resize(dmp_num_dimensions);
   mean_goal_position.resize(dmp_num_dimensions);
-  strcpy(data_directory_path, opt_data_directory_path);
+  snprintf(data_directory_path, sizeof(data_directory_path),
+           "%s", opt_data_directory_path);
 }
 
 bool DMP::isValid() {
@@ -239,7 +240,8 @@ bool DMP::setDataDirectory(const char* new_data_dir_path) {
     return false;
   }
 
-  strcpy(data_directory_path, new_data_dir_path);
+  snprintf(data_directory_path, sizeof(data_directory_path),
+           "%s", new_data_dir_path);
 
   return true;
 }

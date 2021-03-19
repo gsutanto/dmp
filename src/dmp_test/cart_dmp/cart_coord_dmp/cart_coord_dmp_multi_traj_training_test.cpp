@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
         tau_reproduce = atof(optarg);
         break;
       case 'e':
-        strcpy(rt_err_file_path, optarg);
+        snprintf(rt_err_file_path, sizeof(rt_err_file_path), "%s", optarg);
         break;
       default:
         print_usage();
