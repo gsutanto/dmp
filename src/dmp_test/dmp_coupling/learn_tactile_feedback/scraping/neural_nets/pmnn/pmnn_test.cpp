@@ -30,7 +30,10 @@ int main(int argc, char** argv) {
   activation_functions[3] = _IDENTITY_;
 
   char rt_err_file_path[1000];
-  get_rt_errors_path(rt_err_file_path, "/rt_err.txt");
+  std::string rt_err_file_path_str = 
+    get_rt_errors_path("/rt_err.txt");
+  snprintf(rt_err_file_path, sizeof(rt_err_file_path),
+           "%s", rt_err_file_path_str.c_str());
 
   static struct option long_options[] = {
       {"rt_err_file_path", required_argument, 0, 'e'}, {0, 0, 0, 0}};

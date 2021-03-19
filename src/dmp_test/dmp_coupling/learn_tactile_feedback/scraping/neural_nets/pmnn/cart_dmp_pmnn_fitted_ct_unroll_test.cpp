@@ -59,10 +59,15 @@ int main(int argc, char** argv) {
   activation_functions[3] = _IDENTITY_;
 
   char output_plot_dir_path[1000];
-  get_plot_path(output_plot_dir_path,
-                "/dmp_coupling/learn_tactile_feedback/scraping/");
+  std::string output_plot_dir_path_str = 
+    get_plot_path("/dmp_coupling/learn_tactile_feedback/scraping/");
+  snprintf(output_plot_dir_path, sizeof(output_plot_dir_path),
+           "%s", output_plot_dir_path_str.c_str());
   char rt_err_file_path[1000];
-  get_rt_errors_path(rt_err_file_path, "/rt_err.txt");
+  std::string rt_err_file_path_str = 
+    get_rt_errors_path("/rt_err.txt");
+  snprintf(rt_err_file_path, sizeof(rt_err_file_path),
+           "%s", rt_err_file_path_str.c_str());
 
   static struct option long_options[] = {
       {"output_plot_dir_path", required_argument, 0, 'o'},

@@ -41,10 +41,15 @@ int main(int argc, char** argv) {
   double time_goal_change = 0.0;
   double tau_reproduce = 0.0;
   char dmp_plot_dir_path[1000];
-  get_plot_path(dmp_plot_dir_path,
-                "/cart_dmp/cart_coord_dmp/single_traj_training/");
+  std::string dmp_plot_dir_path_str = 
+    get_plot_path("/cart_dmp/cart_coord_dmp/single_traj_training/");
+  snprintf(dmp_plot_dir_path, sizeof(dmp_plot_dir_path),
+           "%s", dmp_plot_dir_path_str.c_str());
   char rt_err_file_path[1000];
-  get_rt_errors_path(rt_err_file_path, "/rt_err.txt");
+  std::string rt_err_file_path_str = 
+    get_rt_errors_path("/rt_err.txt");
+  snprintf(rt_err_file_path, sizeof(rt_err_file_path),
+           "%s", rt_err_file_path_str.c_str());
 
   static struct option long_options[] = {
       {"formula_type", required_argument, 0, 'f'},

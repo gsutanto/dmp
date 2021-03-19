@@ -36,9 +36,15 @@ int main(int argc, char** argv) {
   double time_reproduce_max = 0.0;
   double tau_reproduce = 0.0;
   char dmp_plot_dir_path[1000];
-  get_plot_path(dmp_plot_dir_path, "/cart_dmp/quat_dmp/");
+  std::string dmp_plot_dir_path_str = 
+    get_plot_path("/cart_dmp/quat_dmp/");
+  snprintf(dmp_plot_dir_path, sizeof(dmp_plot_dir_path),
+           "%s", dmp_plot_dir_path_str.c_str());
   char rt_err_file_path[1000];
-  get_rt_errors_path(rt_err_file_path, "/rt_err.txt");
+  std::string rt_err_file_path_str = 
+    get_rt_errors_path("/rt_err.txt");
+  snprintf(rt_err_file_path, sizeof(rt_err_file_path),
+           "%s", rt_err_file_path_str.c_str());
 
   static struct option long_options[] = {
       {"time_reproduce_max", required_argument, 0, 'r'},

@@ -41,20 +41,27 @@ int main(int argc, char** argv) {
   uint canonical_order = 2;  // default is using 2nd order canonical system
   uint learning_method = _SCHAAL_LWR_METHOD_;
   char loa_data_dir_path[1000];
-  get_data_path(loa_data_dir_path,
-                "/dmp_coupling/learn_obs_avoid/learning_algo_verification/");
-  char dmp_plot_dir_path[1000];
-  get_plot_path(
-      dmp_plot_dir_path,
-      "/dmp_coupling/learn_obs_avoid/learning_algo_verification/dmp/");
+  std::string loa_data_dir_path_str = 
+    get_data_path("/dmp_coupling/learn_obs_avoid/learning_algo_verification/");
+  snprintf(loa_data_dir_path, sizeof(loa_data_dir_path),
+           "%s", loa_data_dir_path_str.c_str());
   char loa_plot_dir_path[1000];
-  get_plot_path(
-      loa_plot_dir_path,
-      "/dmp_coupling/learn_obs_avoid/learning_algo_verification/loa/");
+  std::string loa_plot_dir_path_str = 
+    get_plot_path("/dmp_coupling/learn_obs_avoid/learning_algo_verification/loa/");
+  snprintf(loa_plot_dir_path, sizeof(loa_plot_dir_path),
+           "%s", loa_plot_dir_path_str.c_str());
+  char dmp_plot_dir_path[1000];
+  std::string dmp_plot_dir_path_str = 
+    get_plot_path("/dmp_coupling/learn_obs_avoid/learning_algo_verification/dmp/");
+  snprintf(dmp_plot_dir_path, sizeof(dmp_plot_dir_path),
+           "%s", dmp_plot_dir_path_str.c_str());
   char var_input_file_path[1000] = "";
   char var_output_file_path[1000] = "";
   char rt_err_file_path[1000];
-  get_rt_errors_path(rt_err_file_path, "/rt_err.txt");
+  std::string rt_err_file_path_str = 
+    get_rt_errors_path("/rt_err.txt");
+  snprintf(rt_err_file_path, sizeof(rt_err_file_path),
+           "%s", rt_err_file_path_str.c_str());
 
   uint AF_H14_feature_method = _AF_H14_;
 

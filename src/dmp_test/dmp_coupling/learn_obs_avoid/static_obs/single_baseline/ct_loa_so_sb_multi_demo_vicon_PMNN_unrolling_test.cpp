@@ -54,7 +54,10 @@ int main(int argc, char** argv) {
   activation_functions[4] = _IDENTITY_;
 
   char loa_data_dir_path[1000];
-  get_data_path(loa_data_dir_path, "/dmp_coupling/learn_obs_avoid/");
+  std::string loa_data_dir_path_str = 
+    get_data_path("/dmp_coupling/learn_obs_avoid/");
+  snprintf(loa_data_dir_path, sizeof(loa_data_dir_path),
+           "%s", loa_data_dir_path_str.c_str());
   char loa_data_prim_dir_path[1000];
   snprintf(loa_data_prim_dir_path, sizeof(loa_data_prim_dir_path),
            "%s/static_obs/learned_prims_params/position/prim1/",
@@ -63,20 +66,27 @@ int main(int argc, char** argv) {
   snprintf(loa_data_vicon_dir_path, sizeof(loa_data_vicon_dir_path),
            "%s/static_obs/data_multi_demo_vicon_static/", loa_data_dir_path);
   char loa_plot_dir_path[1000];
-  get_plot_path(loa_plot_dir_path,
-                "/dmp_coupling/learn_obs_avoid/feature_trajectory/static_obs/"
-                "single_baseline/multi_demo_vicon/");
+  std::string loa_plot_dir_path_str = 
+    get_plot_path("/dmp_coupling/learn_obs_avoid/feature_trajectory/static_obs/"
+                  "single_baseline/multi_demo_vicon/");
+  snprintf(loa_plot_dir_path, sizeof(loa_plot_dir_path),
+           "%s", loa_plot_dir_path_str.c_str());
   char dmp_plot_dir_path[1000];
-  get_plot_path(dmp_plot_dir_path,
-                "/dmp_coupling/learn_obs_avoid/feature_trajectory/static_obs/"
-                "single_baseline/multi_demo_vicon/unroll_tests/");
+  std::string dmp_plot_dir_path_str = 
+    get_plot_path("/dmp_coupling/learn_obs_avoid/feature_trajectory/static_obs/"
+                  "single_baseline/multi_demo_vicon/unroll_tests/");
+  snprintf(dmp_plot_dir_path, sizeof(dmp_plot_dir_path),
+           "%s", dmp_plot_dir_path_str.c_str());
   char ct_loa_weights_subpath[1000];
   snprintf(ct_loa_weights_subpath, sizeof(ct_loa_weights_subpath),
            "learned_weights/1/learn_obs_avoid_weights_matrix_ARD.txt");
   char var_input_file_path[1000] = "";
   char var_output_file_path[1000] = "";
   char rt_err_file_path[1000];
-  get_rt_errors_path(rt_err_file_path, "/rt_err.txt");
+  std::string rt_err_file_path_str = 
+    get_rt_errors_path("/rt_err.txt");
+  snprintf(rt_err_file_path, sizeof(rt_err_file_path),
+           "%s", rt_err_file_path_str.c_str());
 
   double tau_reproduce = 2.0;
   double regularization_const = 1e-5;
