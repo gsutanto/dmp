@@ -120,7 +120,7 @@ class FunctionApproximator {
    */
   virtual CanonicalSystem* getCanonicalSystemPointer();
 
-  ~FunctionApproximator();
+  virtual ~FunctionApproximator();
 
  private:
 };

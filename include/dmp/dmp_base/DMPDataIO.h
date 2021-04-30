@@ -96,7 +96,7 @@ class DMPDataIO : public DataIO {
    */
   virtual bool saveTrajectoryDataSet(const char* data_directory);
 
-  ~DMPDataIO();
+  virtual ~DMPDataIO();
 };
 
 }  // namespace dmp

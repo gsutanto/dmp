@@ -115,7 +115,7 @@ class DMPState {
    * @param other_dmpstate Another DMPState whose value will be copied into this
    * DMPState
    */
-  virtual DMPState& operator=(const DMPState& other_dmpstate);
+  DMPState& operator=(const DMPState& other_dmpstate);
 
   virtual uint getDMPNumDimensions() const;
   virtual VectorN getX() const;
@@ -128,7 +128,7 @@ class DMPState {
   virtual bool setXdd(const VectorN& new_xdd);
   virtual bool setTime(double new_time);
 
-  ~DMPState();
+  virtual ~DMPState();
 };
 
 }  // namespace dmp

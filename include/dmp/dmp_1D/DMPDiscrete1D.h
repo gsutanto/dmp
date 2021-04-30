@@ -19,6 +19,8 @@ class DMPDiscrete1D : public DMPDiscrete {
  protected:
   TransformSystemDiscrete transform_sys_discrete_1D;
 
+  using DMPDiscrete::learn;
+
  public:
   DMPDiscrete1D();
 

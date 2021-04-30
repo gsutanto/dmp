@@ -345,7 +345,7 @@ class DMP {
 
   virtual FunctionApproximator* getFunctionApproximatorPointer();
 
-  ~DMP();
+  virtual ~DMP();
 };
 
 }  // namespace dmp

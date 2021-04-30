@@ -55,7 +55,7 @@ class LoggedDMPVariables {
 
   virtual uint getModelSize() const;
 
-  ~LoggedDMPVariables();
+  virtual ~LoggedDMPVariables();
 };
 
 }  // namespace dmp

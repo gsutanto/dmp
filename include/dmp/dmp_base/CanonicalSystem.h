@@ -108,7 +108,7 @@ class CanonicalSystem {
    */
   virtual TauSystem* getTauSystemPointer();
 
-  ~CanonicalSystem();
+  virtual ~CanonicalSystem();
 
  private:
 };

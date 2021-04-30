@@ -148,7 +148,7 @@ class GoalSystem {
    */
   virtual TauSystem* getTauSystemPointer();
 
-  ~GoalSystem();
+  virtual ~GoalSystem();
 };
 }  // namespace dmp
 #endif

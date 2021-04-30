@@ -110,7 +110,7 @@ class LearningSystem {
    */
   virtual TransformationSystem* getTransformationSystemPointer();
 
-  ~LearningSystem();
+  virtual ~LearningSystem();
 };
 }  // namespace dmp
 #endif

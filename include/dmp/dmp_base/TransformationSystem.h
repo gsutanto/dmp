@@ -303,7 +303,7 @@ class TransformationSystem {
   virtual bool setCouplingTermUsagePerDimensions(
       const std::vector<bool>& is_using_coupling_term_at_dimension_init);
 
-  ~TransformationSystem();
+  virtual ~TransformationSystem();
 };
 }  // namespace dmp
 #endif
