@@ -121,10 +121,10 @@ for np=1:N_prims
                             Qtraj   = data_demo.baseline{np,1}{nd,modality_mapping{1,nm}}(:,1:4).';
                         end
                         QGtraj  = repmat(QG, 1, size(Qtraj, 2));
-                        twice_log_quat_diff_from_goal   = computeTwiceLogQuatDifference(QGtraj, Qtraj);
-                        stretched_twice_log_quat_diff_from_goal = stretchTrajectory(twice_log_quat_diff_from_goal(nmd,:),unroll_traj_length(np, 1)).';
+                        log_quat_diff_from_goal   = computeLogQuatDifference(QGtraj, Qtraj);
+                        stretched_log_quat_diff_from_goal = stretchTrajectory(log_quat_diff_from_goal(nmd,:),unroll_traj_length(np, 1)).';
 
-                        data_dist_from_prim_goal_per_dims{np,ns}{1,nm}{nmd,1}(:,nd)	= stretched_twice_log_quat_diff_from_goal;
+                        data_dist_from_prim_goal_per_dims{np,ns}{1,nm}{nmd,1}(:,nd)	= stretched_log_quat_diff_from_goal;
                     end
                 else
                     error('Should NEVER reach here!!!');

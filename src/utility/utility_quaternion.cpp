@@ -87,23 +87,24 @@ bool computeQdd(Vector4 input_Q, const Vector4& input_Qd,
 }
 
 bool computeExpMap_so3_to_SO3(const Vector3& input_r, Vector4& output_exp_r) {
-  double norm_r = input_r.norm();
+  Vector3 half_input_r = input_r / 2.0;
+  double half_norm_r = half_input_r.norm();
   output_exp_r = ZeroVector4;
 
-  if (norm_r != 0) {
-    output_exp_r(0, 0) = cos(norm_r);
-    double sin_norm_r = sin(norm_r);
-    if (sin_norm_r > 0) {
+  if (half_norm_r != 0) {
+    output_exp_r(0, 0) = cos(half_norm_r);
+    double sin_half_norm_r = sin(half_norm_r);
+    if (sin_half_norm_r > 0) {
       output_exp_r.block(1, 0, 3, 1) =
-          exp(log(sin_norm_r) - log(norm_r)) * (input_r);
-    } else if (sin_norm_r < 0) {
+          exp(log(sin_half_norm_r) - log(half_norm_r)) * (half_input_r);
+    } else if (sin_half_norm_r < 0) {
       output_exp_r.block(1, 0, 3, 1) =
-          exp(log(-sin_norm_r) - log(norm_r)) * (-input_r);
-    } else {  // if (sin_norm_r == 0)
+          exp(log(-sin_half_norm_r) - log(half_norm_r)) * (-half_input_r);
+    } else {  // if (sin_half_norm_r == 0)
       output_exp_r(0, 0) = 1.0;
       output_exp_r.block(1, 0, 3, 1) = ZeroVector3;
     }
-  } else {  // if (norm_r == 0)
+  } else {  // if (half_norm_r == 0)
     output_exp_r(0, 0) = 1.0;
     output_exp_r.block(1, 0, 3, 1) = ZeroVector3;
   }
@@ -153,11 +154,13 @@ bool computeLogMap_SO3_to_so3(const Vector4& input_Q, Vector3& output_log_Q) {
     output_log_Q = q;
   }
 
+  output_log_Q *= 2.0;
+
   return true;
 }
 
-bool computeTwiceLogQuaternionDifference(Vector4 in_Q1, Vector4 in_Q2,
-                                         Vector3& out_result) {
+bool computeLogQuaternionDifference(Vector4 in_Q1, Vector4 in_Q2,
+                                    Vector3& out_result) {
   if (normalizeQuaternion(in_Q1) == false) {
     return false;
   }
@@ -177,14 +180,14 @@ bool computeTwiceLogQuaternionDifference(Vector4 in_Q1, Vector4 in_Q2,
     return false;
   }
 
-  out_result = (2.0 * so3_variable);
+  out_result = so3_variable;
 
   return true;
 }
 
 bool integrateQuaternion(Vector4 in_Q_t, Vector3 in_omega_t, double in_dt,
                          Vector4& out_Q_t_plus_1) {
-  Vector3 theta_v = 0.5 * in_omega_t * in_dt;
+  Vector3 theta_v = in_omega_t * in_dt;
   Vector4 Q_increment = ZeroVector4;
   if (normalizeQuaternion(in_Q_t) == false) {
     return false;

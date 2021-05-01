@@ -103,7 +103,7 @@ bool TransformSystemQuaternion::startTransformSystemQuaternion(
     }
 
     Vector3 log_quat_diff_Qg_and_Q =
-        ((((tau * tau * omegad0) / alpha) + (tau * omega0)) / (2.0 * beta));
+        ((((tau * tau * omegad0) / alpha) + (tau * omega0)) / beta);
     Vector4 quat_diff_Qg_and_Q = ZeroVector4;
     if (rt_assert(computeExpMap_so3_to_SO3(log_quat_diff_Qg_and_Q,
                                            quat_diff_Qg_and_Q)) == false) {
@@ -218,7 +218,7 @@ bool TransformSystemQuaternion::getNextQuaternionState(
 
   // compute scaling factor for the forcing term:
   Vector3 A = ZeroVector3;
-  if (rt_assert(computeTwiceLogQuaternionDifference(QG, Q0, A)) == false) {
+  if (rt_assert(computeLogQuaternionDifference(QG, Q0, A)) == false) {
     return false;
   }
 
@@ -239,12 +239,12 @@ bool TransformSystemQuaternion::getNextQuaternionState(
   }
 
   // original formulation by Schaal, AMAM 2003
-  Vector3 twice_log_quat_diff_Qg_and_Q = ZeroVector3;
-  if (rt_assert(computeTwiceLogQuaternionDifference(
-          Qg, Q, twice_log_quat_diff_Qg_and_Q)) == false) {
+  Vector3 log_quat_diff_Qg_and_Q = ZeroVector3;
+  if (rt_assert(computeLogQuaternionDifference(
+          Qg, Q, log_quat_diff_Qg_and_Q)) == false) {
     return false;
   }
-  ethad = ((alpha * ((beta * twice_log_quat_diff_Qg_and_Q) - etha)) +
+  ethad = ((alpha * ((beta * log_quat_diff_Qg_and_Q) - etha)) +
            ((f).asDiagonal() * A) + ct_acc) /
           tau;
 
@@ -321,21 +321,21 @@ bool TransformSystemQuaternion::getTargetQuaternionForcingTerm(
   Vector4 Qg_demo = quat_goal_sys.getCurrentQuaternionGoalState().getQ();
 
   // during learning, QG = QG_learn and Q0 = Q0_learn,
-  // thus amplitude   = (computeTwiceLogQuaternionDifference(QG,
-  // Q0)/computeTwiceLogQuaternionDifference(QG_learn, Q0_learn))
-  //                  = (computeTwiceLogQuaternionDifference(QG, Q0)/A_learn) =
+  // thus amplitude   = (computeLogQuaternionDifference(QG,
+  // Q0)/computeLogQuaternionDifference(QG_learn, Q0_learn))
+  //                  = (computeLogQuaternionDifference(QG, Q0)/A_learn) =
   //                  OnesVectorN(3),
   // as follows (commented out for computational effiency):
   // A_demo      = OnesVectorN(3);
 
   // original formulation by Schaal, AMAM 2003
-  Vector3 twice_log_quat_diff_Qg_demo_and_Q_demo = ZeroVector3;
-  if (rt_assert(computeTwiceLogQuaternionDifference(
-          Qg_demo, Q_demo, twice_log_quat_diff_Qg_demo_and_Q_demo)) == false) {
+  Vector3 log_quat_diff_Qg_demo_and_Q_demo = ZeroVector3;
+  if (rt_assert(computeLogQuaternionDifference(
+          Qg_demo, Q_demo, log_quat_diff_Qg_demo_and_Q_demo)) == false) {
     return false;
   }
   f_target = ((tau_demo * tau_demo * omegad_demo) -
-              (alpha * ((beta * twice_log_quat_diff_Qg_demo_and_Q_demo) -
+              (alpha * ((beta * log_quat_diff_Qg_demo_and_Q_demo) -
                         (tau_demo * omega_demo))));
   /*for (uint n = 0; n < dmp_num_dimensions; ++n)
   {
@@ -387,7 +387,7 @@ bool TransformSystemQuaternion::getTargetQuaternionCouplingTerm(
 
   // compute scaling factor for the forcing term:
   Vector3 A_demo = ZeroVector3;
-  if (rt_assert(computeTwiceLogQuaternionDifference(QG_demo, Q0_demo,
+  if (rt_assert(computeLogQuaternionDifference(QG_demo, Q0_demo,
                                                     A_demo)) == false) {
     return false;
   }
@@ -409,13 +409,13 @@ bool TransformSystemQuaternion::getTargetQuaternionCouplingTerm(
   }
 
   // original formulation by Schaal, AMAM 2003
-  Vector3 twice_log_quat_diff_Qg_demo_and_Q_demo = ZeroVector3;
-  if (rt_assert(computeTwiceLogQuaternionDifference(
-          Qg_demo, Q_demo, twice_log_quat_diff_Qg_demo_and_Q_demo)) == false) {
+  Vector3 log_quat_diff_Qg_demo_and_Q_demo = ZeroVector3;
+  if (rt_assert(computeLogQuaternionDifference(
+          Qg_demo, Q_demo, log_quat_diff_Qg_demo_and_Q_demo)) == false) {
     return false;
   }
   ct_acc_target = ((tau_demo * tau_demo * omegad_demo) -
-                   (alpha * ((beta * twice_log_quat_diff_Qg_demo_and_Q_demo) -
+                   (alpha * ((beta * log_quat_diff_Qg_demo_and_Q_demo) -
                              (tau_demo * omega_demo))) -
                    ((f).asDiagonal() * A_demo));
 

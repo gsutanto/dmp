@@ -292,8 +292,8 @@ switch lower(action)
         dcps(ID).Q0         = Q;
         % the goal state
         dcps(ID).QG         = Q;
-        dcps(ID).Qg         = computeQuatProduct(computeExpMapQuat(((((dcps(ID).ethad/tau)-f0-ct0)/dcps(ID).alpha_etha) + dcps(ID).etha)/(2.0 * dcps(ID).beta_etha)), dcps(ID).Q);
-        dcps(ID).ethag      = dcps(ID).alpha_g*computeTwiceLogQuatDifference(dcps(ID).QG, dcps(ID).Qg);
+        dcps(ID).Qg         = computeQuatProduct(computeExpMapQuat(((((dcps(ID).ethad/tau)-f0-ct0)/dcps(ID).alpha_etha) + dcps(ID).etha)/dcps(ID).beta_etha), dcps(ID).Q);
+        dcps(ID).ethag      = dcps(ID).alpha_g*computeLogQuatDifference(dcps(ID).QG, dcps(ID).Qg);
         dcps(ID).omegag     = dcps(ID).ethag*tau;
         dcps(ID).Qgd        = 0.5 * computeQuatProduct([0; dcps(ID).omegag], dcps(ID).Qg);
         
@@ -310,7 +310,7 @@ switch lower(action)
             dcps(ID).Q0     = dcps(ID).Q;
         end
         dcps(ID).s          = ones(3, 1);
-        scale_numerator     = computeTwiceLogQuatDifference(dcps(ID).QG, dcps(ID).Q0);
+        scale_numerator     = computeLogQuatDifference(dcps(ID).QG, dcps(ID).Q0);
         for i=1:3
             if (abs(dcps(ID).dG(i, 1)) > 0)  % check whether dcp has been fit
                 if (abs(dcps(ID).dG(i, 1)) < 1.e-3)
@@ -393,7 +393,7 @@ switch lower(action)
         dcps(ID).omega  = dcps(ID).omegad*dt+dcps(ID).omega;
         dcps(ID).etha   = dcps(ID).omega/(tau*ct_tau);
         
-        dcps(ID).ethad  = (dcps(ID).alpha_etha*((dcps(ID).beta_etha*computeTwiceLogQuatDifference(dcps(ID).Qg, dcps(ID).Q))-dcps(ID).etha)+f+ct)*tau*ct_tau;
+        dcps(ID).ethad  = (dcps(ID).alpha_etha*((dcps(ID).beta_etha*computeLogQuatDifference(dcps(ID).Qg, dcps(ID).Q))-dcps(ID).etha)+f+ct)*tau*ct_tau;
         dcps(ID).omegad = dcps(ID).ethad*tau*ct_tau;
         dcps(ID).Qdd = 0.5*(computeQuatProduct([0;dcps(ID).omegad], dcps(ID).Q) + computeQuatProduct([0;dcps(ID).omega], dcps(ID).Qd));
         dcps(ID).Qd  = 0.5*(computeQuatProduct([0;dcps(ID).omega], dcps(ID).Q));
@@ -413,7 +413,7 @@ switch lower(action)
         dcps(ID).v  = dcps(ID).vd*dt+dcps(ID).v;
         
         % update goal state
-        dcps(ID).ethag  = dcps(ID).alpha_g*computeTwiceLogQuatDifference(dcps(ID).QG, dcps(ID).Qg);
+        dcps(ID).ethag  = dcps(ID).alpha_g*computeLogQuatDifference(dcps(ID).QG, dcps(ID).Qg);
         dcps(ID).omegag = dcps(ID).ethag*tau*cc_tau;
         dcps(ID).Qgd = 0.5*(computeQuatProduct([0;dcps(ID).omegag], dcps(ID).Qg));
         dcps(ID).Qg  = integrateQuat( dcps(ID).Qg, dcps(ID).omegag, dt, 1.0 );
@@ -481,7 +481,7 @@ switch lower(action)
             % if using 2nd-order canonical system
             % the evolving goal is initialized at:
             % (it is equal to Q0, if ((omega0 == 0) and (omegad0 == 0)))
-            Qg  = computeQuatProduct(computeExpMapQuat((((omegad0/(tau^2))/dcps(ID).alpha_etha) + (omega0/tau))/(2.0 * dcps(ID).beta_etha)), Q0);
+            Qg  = computeQuatProduct(computeExpMapQuat((((omegad0/(tau^2))/dcps(ID).alpha_etha) + (omega0/tau))/dcps(ID).beta_etha), Q0);
         end
         
         traj_length = size(QT,2);
@@ -510,13 +510,13 @@ switch lower(action)
             x       = xd*dt+x;
             v       = vd*dt+v;
             
-            ethag   = dcps(ID).alpha_g*computeTwiceLogQuatDifference(QG, Qg);
+            ethag   = dcps(ID).alpha_g*computeLogQuatDifference(QG, Qg);
             omegag  = ethag*tau;
             Qg      = integrateQuat( Qg, omegag, dt, 1.0 );
             
         end
         dcps(ID).X  = X;
-        dcps(ID).dG = computeTwiceLogQuatDifference(QG, Q0);
+        dcps(ID).dG = computeLogQuatDifference(QG, Q0);
         dcps(ID).s  = ones(3, 1);   % for fitting a new primitive, the scale factor is always equal to one
         amp         = dcps(ID).s;
         
@@ -524,7 +524,7 @@ switch lower(action)
         ethadT  = omegadT/tau;
         
         % the regression target
-        Ft  = (ethadT/tau + (dcps(ID).alpha_etha*((-dcps(ID).beta_etha*computeTwiceLogQuatDifference( QgT, QT )) + ethaT)))' ./ repmat(amp.', traj_length, 1);
+        Ft  = (ethadT/tau + (dcps(ID).alpha_etha*((-dcps(ID).beta_etha*computeLogQuatDifference( QgT, QT )) + ethaT)))' ./ repmat(amp.', traj_length, 1);
         dcps(ID).Ft = Ft;
         
         % compute the weights for each local model along the trajectory
@@ -620,7 +620,7 @@ switch lower(action)
             QG      = QT(:,end);
             
             % accumulate dcps(ID).dG (for averaging later)
-            dcps(ID).dG = dcps(ID).dG + computeTwiceLogQuatDifference(QG, Q0);
+            dcps(ID).dG = dcps(ID).dG + computeLogQuatDifference(QG, Q0);
 
             % set up trajectory length and tau 
             % (here is approx. 0.5/movement_duration)
@@ -635,7 +635,7 @@ switch lower(action)
                 % if using 2nd-order canonical system
                 % the evolving goal is initialized at:
                 % (it is equal to Q0, if ((omega0 == 0) and (omegad0 == 0)))
-                Qg  = computeQuatProduct(computeExpMapQuat((((omegad0/(tau^2))/dcps(ID).alpha_etha) + (omega0/tau))/(2.0 * dcps(ID).beta_etha)), Q0);
+                Qg  = computeQuatProduct(computeExpMapQuat((((omegad0/(tau^2))/dcps(ID).alpha_etha) + (omega0/tau))/dcps(ID).beta_etha), Q0);
             end
 
             % compute the hidden states
@@ -662,7 +662,7 @@ switch lower(action)
                 x       = xd*dt+x;
                 v       = vd*dt+v;
 
-                ethag   = dcps(ID).alpha_g*computeTwiceLogQuatDifference(QG, Qg);
+                ethag   = dcps(ID).alpha_g*computeLogQuatDifference(QG, Qg);
                 omegag  = ethag*tau;
                 Qg      = integrateQuat( Qg, omegag, dt, 1.0 );
 
@@ -671,7 +671,7 @@ switch lower(action)
             ethaT   = omegaT/tau;
             ethadT  = omegadT/tau;
 
-            Ft_set{demo_idx, 1} = (ethadT/tau + (dcps(ID).alpha_etha*((-dcps(ID).beta_etha*computeTwiceLogQuatDifference( QgT, QT )) + ethaT)))';
+            Ft_set{demo_idx, 1} = (ethadT/tau + (dcps(ID).alpha_etha*((-dcps(ID).beta_etha*computeLogQuatDifference( QgT, QT )) + ethaT)))';
 
             % compute the weights for each local model along the trajectory
             PSI_set{demo_idx, 1}= exp(-0.5*((X_set{demo_idx, 1}*ones(1,size(dcps(ID).c,1))-ones(traj_length,1)*dcps(ID).c').^2).*(ones(traj_length,1)*dcps(ID).D'));
@@ -794,7 +794,7 @@ switch lower(action)
                 % if using 2nd-order canonical system
                 % the evolving goal is initialized at:
                 % (it is equal to Q0, if ((omega0 == 0) and (omegad0 == 0)))
-                Qg  = computeQuatProduct(computeExpMapQuat((((omegad0/(tau^2))/dcps(ID).alpha_etha) + (omega0/tau))/(2.0 * dcps(ID).beta_etha)), Q0);
+                Qg  = computeQuatProduct(computeExpMapQuat((((omegad0/(tau^2))/dcps(ID).alpha_etha) + (omega0/tau))/dcps(ID).beta_etha), Q0);
             end
 
             % compute the hidden states
@@ -821,7 +821,7 @@ switch lower(action)
                 x       = xd*dt+x;
                 v       = vd*dt+v;
 
-                ethag   = dcps(ID).alpha_g*computeTwiceLogQuatDifference(QG, Qg);
+                ethag   = dcps(ID).alpha_g*computeLogQuatDifference(QG, Qg);
                 omegag  = ethag*tau;
                 Qg      = integrateQuat( Qg, omegag, dt, 1.0 );
 
@@ -848,7 +848,7 @@ switch lower(action)
             end
             Ft_set{demo_idx, 1} = Ft_set{demo_idx, 1} .* repmat(amp.', traj_length, 1);
 
-            Ct_set{demo_idx, 1} = (ethadT/tau + (dcps(ID).alpha_etha*((-dcps(ID).beta_etha*computeTwiceLogQuatDifference( QgT, QT )) + ethaT)))' - Ft_set{demo_idx, 1};
+            Ct_set{demo_idx, 1} = (ethadT/tau + (dcps(ID).alpha_etha*((-dcps(ID).beta_etha*computeLogQuatDifference( QgT, QT )) + ethaT)))' - Ft_set{demo_idx, 1};
         end
         X           = cell2mat(X_set);
         V           = cell2mat(V_set);

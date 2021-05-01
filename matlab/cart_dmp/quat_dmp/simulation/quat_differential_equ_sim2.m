@@ -85,7 +85,7 @@ omegad_hist2                = zeros(traj_length, 3);
 
 % using (two times) Log Mapping of Quaternion Difference as the error signal:
 for i=1:traj_length
-    quat_err_from_goal  = computeTwiceLogQuatDifference(G_quat, quat);
+    quat_err_from_goal  = computeLogQuatDifference(G_quat, quat);
     tau_omegad          = alpha_z * eye(3) * ((beta_z * eye(3) * quat_err_from_goal) - omega);
     omegad              = tau_omegad/tau;
     

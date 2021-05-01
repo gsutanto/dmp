@@ -32,5 +32,5 @@ function [ log_mapped_quat ] = computeLogMapQuat( quat_input )
     end
     
     % take the real components only:
-    log_mapped_quat     = real(log_mapped_quat);
+    log_mapped_quat     = 2.0 * real(log_mapped_quat);
 end

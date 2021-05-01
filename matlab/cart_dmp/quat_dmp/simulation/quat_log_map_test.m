@@ -42,14 +42,14 @@ quat_diff_Q_orig_and_Q_rot_240deg_wrt_z         = computeQuatProduct(...
                                                     computeQuatConjugate(Q_rot_240deg_wrt_z));
 
 % 2Xlog(Q1 o Q2*): (NO standardization)
-twice_log_no_std_quat_diff_Q_orig_and_Q_rot_120deg_wrt_z        = computeTwiceLogQuatDifference(Q_orig, Q_rot_120deg_wrt_z, 0);
-twice_log_no_std_quat_diff_Q_orig_and_minus_Q_rot_120deg_wrt_z  = computeTwiceLogQuatDifference(Q_orig, minus_Q_rot_120deg_wrt_z, 0);
-twice_log_no_std_quat_diff_Q_orig_and_Q_rot_240deg_wrt_z        = computeTwiceLogQuatDifference(Q_orig, Q_rot_240deg_wrt_z, 0);
+log_no_std_quat_diff_Q_orig_and_Q_rot_120deg_wrt_z        = computeLogQuatDifference(Q_orig, Q_rot_120deg_wrt_z, 0);
+log_no_std_quat_diff_Q_orig_and_minus_Q_rot_120deg_wrt_z  = computeLogQuatDifference(Q_orig, minus_Q_rot_120deg_wrt_z, 0);
+log_no_std_quat_diff_Q_orig_and_Q_rot_240deg_wrt_z        = computeLogQuatDifference(Q_orig, Q_rot_240deg_wrt_z, 0);
 
 % 2Xlog(standardize(Q1 o Q2*)): (with standardization)
-twice_log_std_quat_diff_Q_orig_and_Q_rot_120deg_wrt_z       = computeTwiceLogQuatDifference(Q_orig, Q_rot_120deg_wrt_z, 1);
-twice_log_std_quat_diff_Q_orig_and_minus_Q_rot_120deg_wrt_z = computeTwiceLogQuatDifference(Q_orig, minus_Q_rot_120deg_wrt_z, 1);
-twice_log_std_quat_diff_Q_orig_and_Q_rot_240deg_wrt_z       = computeTwiceLogQuatDifference(Q_orig, Q_rot_240deg_wrt_z, 1);
+log_std_quat_diff_Q_orig_and_Q_rot_120deg_wrt_z       = computeLogQuatDifference(Q_orig, Q_rot_120deg_wrt_z, 1);
+log_std_quat_diff_Q_orig_and_minus_Q_rot_120deg_wrt_z = computeLogQuatDifference(Q_orig, minus_Q_rot_120deg_wrt_z, 1);
+log_std_quat_diff_Q_orig_and_Q_rot_240deg_wrt_z       = computeLogQuatDifference(Q_orig, Q_rot_240deg_wrt_z, 1);
 
 % log(R1 * R2^T):
 rot_mat_diff_R_orig_and_R_rot_120deg_wrt_z          = computeLogMapRotMat(R_orig * R_rot_120deg_wrt_z.');

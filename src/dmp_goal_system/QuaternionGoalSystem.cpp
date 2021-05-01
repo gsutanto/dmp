@@ -98,12 +98,12 @@ bool QuaternionGoalSystem::updateCurrentGoalState(const double& dt) {
   Vector4 Qg = current_quaternion_goal_state.getQ();
   Vector3 omegag = current_quaternion_goal_state.getOmega();
   // Vector3 omegagd = current_quaternion_goal_state.getOmegad();
-  Vector3 twice_log_quat_diff_g = ZeroVector3;
-  if (rt_assert(computeTwiceLogQuaternionDifference(
-          QG, Qg, twice_log_quat_diff_g)) == false) {
+  Vector3 log_quat_diff_g = ZeroVector3;
+  if (rt_assert(computeLogQuaternionDifference(
+          QG, Qg, log_quat_diff_g)) == false) {
     return false;
   }
-  Vector3 next_omegag = (alpha / tau) * twice_log_quat_diff_g;
+  Vector3 next_omegag = (alpha / tau) * log_quat_diff_g;
   Vector4 next_Qg = ZeroVector4;
   if (rt_assert(integrateQuaternion(Qg, next_omegag, dt, next_Qg)) == false) {
     return false;

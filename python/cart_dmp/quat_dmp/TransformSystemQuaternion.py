@@ -88,7 +88,7 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
 
       tau = self.tau_sys.getTauRelative()
       log_quat_diff_Qg_and_Q = ((((tau * tau * omegad0) * 1.0 / self.alpha) +
-                                 (tau * omega0)) / (2.0 * self.beta))
+                                 (tau * omega0)) / self.beta)
       quat_diff_Qg_and_Q = util_quat.computeQuaternionExpMap(
           log_quat_diff_Qg_and_Q.T).reshape(1, 4).T
       Qg0 = util_quat.computeQuatProduct(quat_diff_Qg_and_Q.T,
@@ -140,7 +140,7 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
     omega = omega + (omegad * dt)
     etha = tau * omega
 
-    A = util_quat.computeTwiceLogQuatDifference(QG.T, Q0.T).reshape(
+    A = util_quat.computeLogQuatDifference(QG.T, Q0.T).reshape(
         1, self.dmp_num_dimensions).T
 
     for d in range(self.dmp_num_dimensions):
@@ -152,10 +152,10 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
       else:
         A[d, 0] = 1.0
 
-    twice_log_quat_diff_Qg_and_Q = util_quat.computeTwiceLogQuatDifference(
+    log_quat_diff_Qg_and_Q = util_quat.computeLogQuatDifference(
         Qg.T, Q.T).reshape(1, self.dmp_num_dimensions).T
     ethad = ((self.alpha *
-              ((self.beta * twice_log_quat_diff_Qg_and_Q) - etha)) +
+              ((self.beta * log_quat_diff_Qg_and_Q) - etha)) +
              (forcing_term * A) + ct_acc) * 1.0 / tau
     assert (np.isnan(ethad).any() == False), "ethad contains NaN!"
 
@@ -204,7 +204,7 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
           steady_state_quat_goal_position_local)
     QG_learn = goal_steady_quatdmpstate_demo_local.X
     Q0_learn = start_quatdmpstate_demo_local.X
-    A_learn = util_quat.computeTwiceLogQuatDifference(
+    A_learn = util_quat.computeLogQuatDifference(
         QG_learn.T, Q0_learn.T).reshape(1, self.dmp_num_dimensions).T
     dt = (goal_steady_quatdmpstate_demo_local.time[0, 0] -
           start_quatdmpstate_demo_local.time[0, 0]) / (
@@ -267,11 +267,11 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
       ] = util_quat.computeOmegaAndOmegaDotTrajectory(QT.T, QdT.T, QddT.T)
       omegaT = omegaT_T.reshape(traj_length, self.dmp_num_dimensions).T
       omegadT = omegadT_T.reshape(traj_length, self.dmp_num_dimensions).T
-    twice_log_quat_diff_Qg_demo_and_Q_demo = util_quat.computeTwiceLogQuatDifference(
+    log_quat_diff_Qg_demo_and_Q_demo = util_quat.computeLogQuatDifference(
         QgT.T, QT.T).reshape(traj_length, self.dmp_num_dimensions).T
     F_target = ((np.square(tau_relative) * omegadT) -
                 (self.alpha *
-                 ((self.beta * twice_log_quat_diff_Qg_demo_and_Q_demo) -
+                 ((self.beta * log_quat_diff_Qg_demo_and_Q_demo) -
                   (tau_relative * omegaT))))
 
     return F_target, cX, cV, tau, tau_relative, A_learn, QgT
@@ -298,11 +298,11 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
       omegaT = omegaT_T.reshape(traj_length, self.dmp_num_dimensions).T
       omegadT = omegadT_T.reshape(traj_length, self.dmp_num_dimensions).T
     F, PSI = self.func_approx.getForcingTermTraj(cX, cV)
-    twice_log_quat_diff_Qg_demo_and_Q_demo = util_quat.computeTwiceLogQuatDifference(
+    log_quat_diff_Qg_demo_and_Q_demo = util_quat.computeLogQuatDifference(
         QgT.T, QT.T).reshape(traj_length, self.dmp_num_dimensions).T
     C_target = ((np.square(tau_relative) * omegadT) - F -
                 (self.alpha *
-                 ((self.beta * twice_log_quat_diff_Qg_demo_and_Q_demo) -
+                 ((self.beta * log_quat_diff_Qg_demo_and_Q_demo) -
                   (tau_relative * omegaT))))
 
     return C_target, F, PSI, cX, cV, tau, tau_relative, QgT

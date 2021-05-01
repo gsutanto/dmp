@@ -45,9 +45,9 @@ class QuaternionGoalSystem(GoalSystem, object):
     Qg = self.current_goal_state.getQ()
     omegag = self.current_goal_state.getOmega()
 
-    twice_log_quat_diff_g = util_quat.computeTwiceLogQuatDifference(
+    log_quat_diff_g = util_quat.computeLogQuatDifference(
         QG.T, Qg.T).reshape(1, self.dmp_num_dimensions).T
-    next_omegag = (self.alpha * 1.0 / tau) * twice_log_quat_diff_g
+    next_omegag = (self.alpha * 1.0 / tau) * log_quat_diff_g
     next_Qg = util_quat.integrateQuat(Qg.T, next_omegag.T, dt).reshape(1, 4).T
     next_omegagd = (next_omegag - omegag) / dt
     self.current_goal_state.setQ(next_Qg)

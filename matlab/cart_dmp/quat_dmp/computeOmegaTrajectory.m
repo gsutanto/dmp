@@ -9,6 +9,6 @@ function [ omegaT ] = computeOmegaTrajectory( QT, dt )
     QtT(:,end)              = QtT(:,end-1);
     Qt_plus_1T              = QT;
     Qt_plus_1T(:,1:end-1)   = QT(:,2:end);
-    omegaT                  = (1.0/dt) * computeTwiceLogQuatDifference(Qt_plus_1T, QtT);
+    omegaT                  = (1.0/dt) * computeLogQuatDifference(Qt_plus_1T, QtT);
 end
 

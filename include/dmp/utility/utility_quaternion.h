@@ -121,8 +121,8 @@ bool computeLogMap_SO3_to_so3(const Vector4& input_Q, Vector3& output_log_Q);
  * in_Q2*)
  * @return Success (true) or failure (false)
  */
-bool computeTwiceLogQuaternionDifference(Vector4 in_Q1, Vector4 in_Q2,
-                                         Vector3& out_result);
+bool computeLogQuaternionDifference(Vector4 in_Q1, Vector4 in_Q2,
+                                    Vector3& out_result);
 
 /**
  * Perform 1 time-step forward quaternion-preserving numerical integration.

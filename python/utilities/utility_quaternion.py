@@ -148,7 +148,7 @@ def computeQuaternionLogMap(Q_input, div_epsilon=division_epsilon):
   if (tensor_length == 1):
     log_Q_output = log_Q_output[0, :]
   assert (np.iscomplex(log_Q_output).any() == False)
-  return np.real(log_Q_output)
+  return (2.0 * np.real(log_Q_output))
 
 
 def computeQuaternionExpMap(log_Q_input, div_epsilon=division_epsilon):
@@ -162,7 +162,7 @@ def computeQuaternionExpMap(log_Q_input, div_epsilon=division_epsilon):
 
   tensor_length = log_Q_input.shape[0]
 
-  r = np.real(log_Q_input)
+  r = np.real(log_Q_input) / 2.0
   norm_r = npla.norm(r, ord=2, axis=1).reshape(tensor_length, 1)
   cos_norm_r = np.cos(norm_r)
   sin_norm_r = np.sin(norm_r)
@@ -304,13 +304,13 @@ def computeQuatProduct(Qp, Qq):
   return np.real(Qr)
 
 
-def computeTwiceLogQuatDifference(Qp, Qq, is_standardizing_quat_diff=True):
+def computeLogQuatDifference(Qp, Qq, is_standardizing_quat_diff=True):
   if (not is_standardizing_quat_diff
      ):  # if NOT standardizing before applying Log Mapping
-    omegar = 2.0 * computeQuaternionLogMap(
+    omegar = computeQuaternionLogMap(
         computeQuatProduct(normalizeQuaternion(Qp), computeQuatConjugate(Qq)))
   else:  # if (is_standardizing_quat_diff): # if standardizing before applying Log Mapping
-    omegar = 2.0 * computeQuaternionLogMap(
+    omegar = computeQuaternionLogMap(
         standardizeNormalizeQuaternion(
             computeQuatProduct(
                 normalizeQuaternion(Qp), computeQuatConjugate(Qq))))
@@ -334,8 +334,9 @@ def computeOmegaAndOmegaDotTrajectory(QT, QdT, QddT):
     QdT = QdT.reshape(1, 4)
   if (len(QddT.shape) == 1):
     QddT = QddT.reshape(1, 4)
-  assert ((QT.shape[0] == QdT.shape[0]) and (QdT.shape[0] == QddT.shape[0])
-         ), "QT, QdT, and QddT length are NOT equal!!!"
+  assert ((QT.shape[0] == QdT.shape[0]) and
+          (QdT.shape[0]
+           == QddT.shape[0])), "QT, QdT, and QddT length are NOT equal!!!"
   tensor_length = QT.shape[0]
 
   QT_conj = computeQuatConjugate(QT).reshape(tensor_length, 4)
@@ -378,7 +379,7 @@ def computeOmegaTrajectory(QT, dt):
   QtT[-1, :] = copy.deepcopy(QT[-2, :])
   Qt_plus_1T = copy.deepcopy(QT)
   Qt_plus_1T[:-1, :] = copy.deepcopy(QT[1:, :])
-  omegaT = (1.0 / dt) * computeTwiceLogQuatDifference(Qt_plus_1T, QtT)
+  omegaT = (1.0 / dt) * computeLogQuatDifference(Qt_plus_1T, QtT)
 
   return omegaT
 
@@ -413,7 +414,7 @@ def integrateQuat(Qt, omega_t, dt, tau=1.0):
   assert (dt > 0.0), "dt (sampling time) is invalid!"
   assert (tau > 0.0), "tau (time constant) is invalid!"
 
-  theta_v = 0.5 * omega_t * (dt / tau)
+  theta_v = omega_t * (dt / tau)
   Q_incr = computeQuaternionExpMap(theta_v)
   Qt_plus_1 = normalizeQuaternion(
       computeQuatProduct(Q_incr, normalizeQuaternion(Qt)))
@@ -423,7 +424,7 @@ def integrateQuat(Qt, omega_t, dt, tau=1.0):
 def inverseIntegrateQuat(Qt_plus_1, omega_t, dt, tau=1.0):
   assert (dt > 0.0), "dt (sampling time) is invalid!"
 
-  theta_v = 0.5 * omega_t * (dt / tau)
+  theta_v = omega_t * (dt / tau)
   Q_incr = computeQuaternionExpMap(theta_v)
   Q_decr = computeQuatConjugate(Q_incr)
   Qt = normalizeQuaternion(

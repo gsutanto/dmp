@@ -2,10 +2,12 @@ function [ exp_mapped_quat ] = computeExpMapQuat( log_mapped_quat_input )
     % Author        : Giovanni Sutanto
     % Date          : December 2016
     assert(size(log_mapped_quat_input, 1) == 3, 'Each column of log_mapped_quat_input must be 3-dimensional!');
+
+    r               = 0.5 * log_mapped_quat_input;
+
+    len_quat        = size(r, 2);
     
-    len_quat        = size(log_mapped_quat_input, 2);
-    
-    norm_r          = sqrt(sum((log_mapped_quat_input .^ 2), 1));
+    norm_r          = sqrt(sum((r .^ 2), 1));
     
     zero_norm_r_idx = find(norm_r == 0);
 %     if (~isempty(zero_norm_r_idx))
@@ -21,7 +23,7 @@ function [ exp_mapped_quat ] = computeExpMapQuat( log_mapped_quat_input )
     exp_mapped_quat(1, non_zero_norm_r_idx)     = cos(norm_r(1, non_zero_norm_r_idx));
     exp_mapped_quat(2:4, non_zero_norm_r_idx)   = repmat(exp(log(sin(norm_r(1, non_zero_norm_r_idx))) - ...
                                                              log(norm_r(1, non_zero_norm_r_idx))), 3, 1)...
-                                                  .* log_mapped_quat_input(:, non_zero_norm_r_idx);
+                                                  .* r(:, non_zero_norm_r_idx);
     
     % there is possibility that the computed exp_mapped_quat is an
     % imaginary number, therefore we check this:
