@@ -31,7 +31,7 @@
 
 ###../software_test/execute_cpp_test.sh "./dmp_ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_demo" test_cpp_ct_loa_so_sb_multi_demo_vicon_PMNN_unrolling_test.txt
 
-###../software_test/execute_cpp_test.sh "./dmp_quat_dmp_unroll_demo" test_cpp_quat_dmp_unroll_test.txt
+../software_test/execute_cpp_test.sh "./dmp_quat_dmp_unroll_demo" test_cpp_quat_dmp_unroll_test.txt
 
 ###../software_test/execute_cpp_test.sh "./dmp_pmnn_demo" test_cpp_pmnn_test.txt
 
