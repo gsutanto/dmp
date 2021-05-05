@@ -30,6 +30,7 @@ class TransformSystemDiscrete : public TransformationSystem {
   std::vector<bool> is_using_scaling;  // only relevant for Schaal's DMP Model
   VectorN A_learn;  // amplitude = (G - y_0) value during learning
 
+  FuncApproximatorDiscrete* func_approx_discrete;
   LoggedDMPDiscreteVariables* logged_dmp_discrete_variables;
 
  public:

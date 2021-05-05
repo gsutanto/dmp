@@ -18,14 +18,14 @@ FuncApproximatorDiscrete::FuncApproximatorDiscrete(
       centers(new VectorM(model_size)),
       bandwidths(new VectorM(model_size)),
       psi(new VectorM(model_size)),
-      sum_psi(0.0) {
+      sum_psi(0.0),
+      canonical_sys_discrete(canonical_system_discrete) {
   initBasisFunctions();
 }
 
 void FuncApproximatorDiscrete::initBasisFunctions() {
-  uint canonical_order = ((CanonicalSystemDiscrete*)canonical_sys)->getOrder();
-  double alpha_canonical =
-      ((CanonicalSystemDiscrete*)canonical_sys)->getAlpha();
+  uint canonical_order = getCanonicalSystemDiscreteOrder();
+  double alpha_canonical = canonical_sys_discrete->getAlpha();
   double tau_reference =
       canonical_sys->getTauSystemPointer()->getTauReference();
 
@@ -73,7 +73,7 @@ bool FuncApproximatorDiscrete::isValid() {
   if (rt_assert(FunctionApproximator::isValid()) == false) {
     return false;
   }
-  if (rt_assert(((CanonicalSystemDiscrete*)canonical_sys)->isValid()) ==
+  if (rt_assert(canonical_sys_discrete->isValid()) ==
       false) {
     return false;
   }
@@ -240,6 +240,22 @@ bool FuncApproximatorDiscrete::setWeights(const MatrixNxM& new_weights) {
 
   *weights = new_weights;
   return true;
+}
+
+uint FuncApproximatorDiscrete::getCanonicalSystemDiscreteOrder() {
+  return canonical_sys_discrete->getOrder();
+}
+
+double FuncApproximatorDiscrete::getCanonicalSystemDiscretePosition() {
+  return canonical_sys_discrete->getX();
+}
+
+double FuncApproximatorDiscrete::getCanonicalSystemDiscreteVelocity() {
+  return canonical_sys_discrete->getXd();
+}
+
+double FuncApproximatorDiscrete::getCanonicalSystemDiscreteAcceleration() {
+  return canonical_sys_discrete->getXdd();
 }
 
 FuncApproximatorDiscrete::~FuncApproximatorDiscrete() {}

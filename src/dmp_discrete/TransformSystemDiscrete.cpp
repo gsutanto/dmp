@@ -24,7 +24,9 @@ TransformSystemDiscrete::TransformSystemDiscrete(
     DMPState* current_velocity_dmpstate_discrete,
     GoalSystem* goal_system_discrete,
     std::vector<TransformCoupling*>* transform_couplers)
-    : TransformationSystem(dmp_num_dimensions_init, canonical_system_discrete,
+    : TransformationSystem(dmp_num_dimensions_init,
+                           canonical_system_discrete->getTauSystemPointer(),
+                           canonical_system_discrete,
                            func_approximator_discrete, logged_dmp_discrete_vars,
                            real_time_assertor, start_dmpstate_discrete,
                            current_dmpstate_discrete,
@@ -35,6 +37,7 @@ TransformSystemDiscrete::TransformSystemDiscrete(
       beta(25.0 / 4.0),
       is_using_scaling(is_using_scaling_init),
       A_learn(OnesVectorN(MAX_DMP_NUM_DIMENSIONS)),
+      func_approx_discrete(func_approximator_discrete),
       logged_dmp_discrete_variables(logged_dmp_discrete_vars) {
   A_learn.resize(dmp_num_dimensions);
 }
@@ -50,7 +53,9 @@ TransformSystemDiscrete::TransformSystemDiscrete(
     DMPState* current_velocity_dmpstate_discrete,
     GoalSystem* goal_system_discrete,
     std::vector<TransformCoupling*>* transform_couplers)
-    : TransformationSystem(dmp_num_dimensions_init, canonical_system_discrete,
+    : TransformationSystem(dmp_num_dimensions_init,
+                           canonical_system_discrete->getTauSystemPointer(),
+                           canonical_system_discrete,
                            func_approximator_discrete, logged_dmp_discrete_vars,
                            real_time_assertor, start_dmpstate_discrete,
                            current_dmpstate_discrete,
@@ -61,6 +66,7 @@ TransformSystemDiscrete::TransformSystemDiscrete(
       beta(ts_beta),
       is_using_scaling(is_using_scaling_init),
       A_learn(OnesVectorN(MAX_DMP_NUM_DIMENSIONS)),
+      func_approx_discrete(func_approximator_discrete),
       logged_dmp_discrete_variables(logged_dmp_discrete_vars) {
   A_learn.resize(dmp_num_dimensions);
 }
@@ -76,7 +82,9 @@ TransformSystemDiscrete::TransformSystemDiscrete(
     DMPState* current_velocity_dmpstate_discrete,
     GoalSystem* goal_system_discrete,
     std::vector<TransformCoupling*>* transform_couplers)
-    : TransformationSystem(dmp_num_dimensions_init, canonical_system_discrete,
+    : TransformationSystem(dmp_num_dimensions_init,
+                           canonical_system_discrete->getTauSystemPointer(),
+                           canonical_system_discrete,
                            func_approximator_discrete, logged_dmp_discrete_vars,
                            real_time_assertor, start_dmpstate_discrete,
                            current_dmpstate_discrete,
@@ -87,6 +95,7 @@ TransformSystemDiscrete::TransformSystemDiscrete(
       beta(25.0 / 4.0),
       is_using_scaling(is_using_scaling_init),
       A_learn(OnesVectorN(MAX_DMP_NUM_DIMENSIONS)),
+      func_approx_discrete(func_approximator_discrete),
       logged_dmp_discrete_variables(logged_dmp_discrete_vars) {
   A_learn.resize(dmp_num_dimensions);
 }
@@ -103,7 +112,9 @@ TransformSystemDiscrete::TransformSystemDiscrete(
     DMPState* current_velocity_dmpstate_discrete,
     GoalSystem* goal_system_discrete,
     std::vector<TransformCoupling*>* transform_couplers)
-    : TransformationSystem(dmp_num_dimensions_init, canonical_system_discrete,
+    : TransformationSystem(dmp_num_dimensions_init,
+                           canonical_system_discrete->getTauSystemPointer(),
+                           canonical_system_discrete,
                            func_approximator_discrete, logged_dmp_discrete_vars,
                            real_time_assertor, start_dmpstate_discrete,
                            current_dmpstate_discrete,
@@ -114,6 +125,7 @@ TransformSystemDiscrete::TransformSystemDiscrete(
       beta(ts_beta),
       is_using_scaling(is_using_scaling_init),
       A_learn(OnesVectorN(MAX_DMP_NUM_DIMENSIONS)),
+      func_approx_discrete(func_approximator_discrete),
       logged_dmp_discrete_variables(logged_dmp_discrete_vars) {
   A_learn.resize(dmp_num_dimensions);
 }
@@ -122,9 +134,13 @@ bool TransformSystemDiscrete::isValid() {
   if (rt_assert(TransformationSystem::isValid()) == false) {
     return false;
   }
+  if (rt_assert((rt_assert(func_approx_discrete == func_approx)) &&
+                (rt_assert(logged_dmp_discrete_variables ==
+                           logged_dmp_variables))) == false) {
+    return false;
+  }
   if (rt_assert(
-          (rt_assert(((CanonicalSystemDiscrete*)canonical_sys)->isValid())) &&
-          (rt_assert(((FuncApproximatorDiscrete*)func_approx)->isValid()))) ==
+          rt_assert(func_approx_discrete->isValid())) ==
       false) {
     return false;
   }
@@ -171,7 +187,7 @@ bool TransformSystemDiscrete::start(const DMPState& start_state_init,
   VectorN G_init = goal_state_init.getX();
   DMPState current_goal_state_init(dmp_num_dimensions, rt_assertor);
   if ((formulation_type == _SCHAAL_DMP_) &&
-      (((CanonicalSystemDiscrete*)canonical_sys)->getOrder() == 2)) {
+      (func_approx_discrete->getCanonicalSystemDiscreteOrder() == 2)) {
     // Best option for Schaal's DMP Model using 2nd order canonical system:
     // Using goal evolution system initialized with the start position (state)
     // as goal position (state), which over time evolves toward a steady-state
@@ -239,8 +255,8 @@ bool TransformSystemDiscrete::getNextState(
   }
 
   VectorN f(dmp_num_dimensions);
-  VectorM basis_functions(func_approx->getModelSize());
-  if (rt_assert(func_approx->getForcingTerm(
+  VectorM basis_functions(func_approx_discrete->getModelSize());
+  if (rt_assert(func_approx_discrete->getForcingTerm(
           f, &basis_functions,
           normalized_basis_func_vector_mult_phase_multiplier)) == false) {
     return false;
@@ -282,8 +298,6 @@ bool TransformSystemDiscrete::getNextState(
   VectorN v = current_velocity_state->getX();
   VectorN vd = current_velocity_state->getXd();
 
-  double p = canonical_sys->getCanonicalPosition();
-
   VectorN G = goal_sys->getSteadyStateGoalPosition();
   VectorN g = goal_sys->getCurrentGoalState().getX();
 
@@ -293,6 +307,8 @@ bool TransformSystemDiscrete::getNextState(
     // formulation by Hoffmann et al., ICRA 2009
     double K = alpha * beta;
     double D = alpha;
+
+    double p = func_approx_discrete->getCanonicalSystemDiscretePosition();
 
     if (rt_assert(K >= MIN_K) ==
         false)  // K is too small/does NOT make sense (will have problem when
@@ -344,16 +360,15 @@ bool TransformSystemDiscrete::getNextState(
       DMPState(v, vd, ZeroVectorN(dmp_num_dimensions), time, rt_assertor);
   next_state = *current_state;
 
-  /**************** For Trajectory Data Logging Purposes (Start)
-   * ****************/
+  /*************** For Trajectory Data Logging Purposes (Start) ***************/
   logged_dmp_discrete_variables->tau = tau;
   logged_dmp_discrete_variables->transform_sys_state_local = *current_state;
   logged_dmp_discrete_variables->canonical_sys_state[0] =
-      ((CanonicalSystemDiscrete*)canonical_sys)->getX();
+      func_approx_discrete->getCanonicalSystemDiscretePosition();
   logged_dmp_discrete_variables->canonical_sys_state[1] =
-      ((CanonicalSystemDiscrete*)canonical_sys)->getXd();
+      func_approx_discrete->getCanonicalSystemDiscreteVelocity();
   logged_dmp_discrete_variables->canonical_sys_state[2] =
-      ((CanonicalSystemDiscrete*)canonical_sys)->getXdd();
+      func_approx_discrete->getCanonicalSystemDiscreteAcceleration();
   logged_dmp_discrete_variables->goal_state_local =
       goal_sys->getCurrentGoalState();
   logged_dmp_discrete_variables->steady_state_goal_position_local = G;
@@ -396,14 +411,14 @@ bool TransformSystemDiscrete::getTargetForcingTerm(
   VectorN xd_demo = current_state_demo_local.getXd();
   VectorN xdd_demo = current_state_demo_local.getXdd();
 
-  double p_demo = canonical_sys->getCanonicalPosition();
-
   VectorN g_demo = goal_sys->getCurrentGoalState().getX();
 
   if (formulation_type == _HOFFMANN_DMP_) {
     // formulation by Hoffmann et al., ICRA 2009
     double K = alpha * beta;
     double D = alpha;
+
+    double p_demo = func_approx_discrete->getCanonicalSystemDiscretePosition();
 
     if (rt_assert(K >= MIN_K) == false)  // K is too small/does NOT make sense
     {
@@ -458,7 +473,7 @@ bool TransformSystemDiscrete::getTargetCouplingTerm(
   }
 
   VectorN f(dmp_num_dimensions);
-  if (rt_assert(func_approx->getForcingTerm(f)) == false) {
+  if (rt_assert(func_approx_discrete->getForcingTerm(f)) == false) {
     return false;
   }
 
@@ -467,8 +482,6 @@ bool TransformSystemDiscrete::getTargetCouplingTerm(
   VectorN xd_demo = current_state_demo_local.getXd();
   VectorN xdd_demo = current_state_demo_local.getXdd();
 
-  double p_demo = canonical_sys->getCanonicalPosition();
-
   VectorN G_demo = goal_sys->getSteadyStateGoalPosition();
   VectorN g_demo = goal_sys->getCurrentGoalState().getX();
 
@@ -476,6 +489,8 @@ bool TransformSystemDiscrete::getTargetCouplingTerm(
     // formulation by Hoffmann et al., ICRA 2009
     double K = alpha * beta;
     double D = alpha;
+
+    double p_demo = func_approx_discrete->getCanonicalSystemDiscretePosition();
 
     if (rt_assert(K >= MIN_K) == false)  // K is too small/does NOT make sense
     {

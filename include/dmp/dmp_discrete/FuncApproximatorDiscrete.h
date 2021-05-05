@@ -39,6 +39,8 @@ class FuncApproximatorDiscrete : public FunctionApproximator {
 
   double sum_psi;  // the sum of all components of the psi vector
 
+  CanonicalSystemDiscrete* canonical_sys_discrete;
+
   /**
    * NEVER RUN IN REAL-TIME, ONLY RUN IN INIT ROUTINE
    * Initializes centers and bandwidths of the Gaussian basis functions.
@@ -149,6 +151,29 @@ class FuncApproximatorDiscrete : public FunctionApproximator {
    * @return Success or failure
    */
   bool setWeights(const MatrixNxM& new_weights);
+
+  /**
+   * Get the order of the governing Discrete Canonical System
+   *
+   * @return The order of the governing Discrete Canonical System.
+   */
+  uint getCanonicalSystemDiscreteOrder();
+
+  /**
+   * Returns the Discrete Canonical System state's position (or x).
+   */
+  double getCanonicalSystemDiscretePosition();
+
+  /**
+   * Returns the Discrete Canonical System state's velocity (or xd or xdot).
+   */
+  double getCanonicalSystemDiscreteVelocity();
+
+  /**
+   * Returns the Discrete Canonical System state's acceleration (or xdd or
+   * xdoubledot).
+   */
+  double getCanonicalSystemDiscreteAcceleration();
 
   ~FuncApproximatorDiscrete();
 };

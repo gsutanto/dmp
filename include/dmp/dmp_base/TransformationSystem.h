@@ -46,16 +46,14 @@ class TransformationSystem {
   std::vector<bool> is_using_coupling_term_at_dimension;
 
   TauSystem* tau_sys;
-  CanonicalSystem* canonical_sys;
   FunctionApproximator* func_approx;
+  LoggedDMPVariables* logged_dmp_variables;
   std::vector<TransformCoupling*>* transform_coupling;
 
   DMPState* start_state;
   DMPState* current_state;
   DMPState* current_velocity_state;
   GoalSystem* goal_sys;  // including the goal state
-
-  LoggedDMPVariables* logged_dmp_variables;
 
   RealTimeAssertor* rt_assertor;
 
@@ -87,7 +85,8 @@ class TransformationSystem {
    * re-usability)
    */
   TransformationSystem(
-      uint dmp_num_dimensions_init, CanonicalSystem* canonical_system,
+      uint dmp_num_dimensions_init, TauSystem* tau_system,
+      CanonicalSystem* canonical_system,
       FunctionApproximator* function_approximator,
       LoggedDMPVariables* logged_dmp_vars, RealTimeAssertor* real_time_assertor,
       DMPState* start_dmpstate = NULL, DMPState* current_dmpstate = NULL,

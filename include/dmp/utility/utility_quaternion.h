@@ -111,14 +111,13 @@ bool computeExpMap_so3_to_SO3(const Vector3& input_r, Vector4& output_exp_r);
 bool computeLogMap_SO3_to_so3(const Vector4& input_Q, Vector3& output_log_Q);
 
 /**
- * Compute the orientation control error signal: 2 * log(in_Q1 o in_Q2*)
+ * Compute the orientation control error signal: log(in_Q1 o in_Q2*)
  * (please see the notation definitions in functions
  * computeQuaternionConjugate(), computeQuaternionComposition(), and
  * computeLogMap_SO3_to_so3()).
  * @param in_Q1 Input quaternion 1
  * @param in_Q2 Input quaternion 2
- * @param out_result Output orientation control error signal 2 * log(in_Q1 o
- * in_Q2*)
+ * @param out_result Output orientation control error signal log(in_Q1 o in_Q2*)
  * @return Success (true) or failure (false)
  */
 bool computeLogQuaternionDifference(Vector4 in_Q1, Vector4 in_Q2,

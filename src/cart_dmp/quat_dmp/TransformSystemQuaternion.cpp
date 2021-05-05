@@ -84,7 +84,7 @@ bool TransformSystemQuaternion::startTransformSystemQuaternion(
 
   Vector4 QG_init = goal_state_init.getQ();
   QuaternionDMPState current_goal_state_init(rt_assertor);
-  if (((CanonicalSystemDiscrete*)canonical_sys)->getOrder() == 2) {
+  if (func_approx_discrete->getCanonicalSystemDiscreteOrder() == 2) {
     // Best option for Schaal's DMP Model using 2nd order canonical system:
     // Using goal evolution system initialized with the start position (state)
     // as goal position (state), which over time evolves toward a steady-state
@@ -164,8 +164,8 @@ bool TransformSystemQuaternion::getNextQuaternionState(
   }
 
   VectorN f(dmp_num_dimensions);
-  VectorM basis_functions(func_approx->getModelSize());
-  if (rt_assert(func_approx->getForcingTerm(
+  VectorM basis_functions(func_approx_discrete->getModelSize());
+  if (rt_assert(func_approx_discrete->getForcingTerm(
           f, &basis_functions,
           normalized_basis_func_vector_mult_phase_multiplier)) == false) {
     return false;
@@ -373,7 +373,7 @@ bool TransformSystemQuaternion::getTargetQuaternionCouplingTerm(
   }
 
   VectorN f(dmp_num_dimensions);
-  if (rt_assert(func_approx->getForcingTerm(f)) == false) {
+  if (rt_assert(func_approx_discrete->getForcingTerm(f)) == false) {
     return false;
   }
 
