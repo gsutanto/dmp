@@ -17,101 +17,15 @@ TransformSystemDiscrete::TransformSystemDiscrete(
     uint dmp_num_dimensions_init,
     CanonicalSystemDiscrete* canonical_system_discrete,
     FuncApproximatorDiscrete* func_approximator_discrete,
+    LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
+    RealTimeAssertor* real_time_assertor,
     std::vector<bool> is_using_scaling_init,
-    LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
-    RealTimeAssertor* real_time_assertor, DMPState* start_dmpstate_discrete,
+    DMPState* start_dmpstate_discrete,
     DMPState* current_dmpstate_discrete,
     DMPState* current_velocity_dmpstate_discrete,
     GoalSystem* goal_system_discrete,
-    std::vector<TransformCoupling*>* transform_couplers)
-    : TransformationSystem(dmp_num_dimensions_init,
-                           canonical_system_discrete->getTauSystemPointer(),
-                           canonical_system_discrete,
-                           func_approximator_discrete, logged_dmp_discrete_vars,
-                           real_time_assertor, start_dmpstate_discrete,
-                           current_dmpstate_discrete,
-                           current_velocity_dmpstate_discrete,
-                           goal_system_discrete, transform_couplers),
-      formulation_type(_SCHAAL_DMP_),
-      alpha(25.0),
-      beta(25.0 / 4.0),
-      is_using_scaling(is_using_scaling_init),
-      A_learn(OnesVectorN(MAX_DMP_NUM_DIMENSIONS)),
-      func_approx_discrete(func_approximator_discrete),
-      logged_dmp_discrete_variables(logged_dmp_discrete_vars) {
-  A_learn.resize(dmp_num_dimensions);
-}
-
-TransformSystemDiscrete::TransformSystemDiscrete(
-    uint dmp_num_dimensions_init,
-    CanonicalSystemDiscrete* canonical_system_discrete,
-    FuncApproximatorDiscrete* func_approximator_discrete,
-    std::vector<bool> is_using_scaling_init, double ts_alpha, double ts_beta,
-    LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
-    RealTimeAssertor* real_time_assertor, DMPState* start_dmpstate_discrete,
-    DMPState* current_dmpstate_discrete,
-    DMPState* current_velocity_dmpstate_discrete,
-    GoalSystem* goal_system_discrete,
-    std::vector<TransformCoupling*>* transform_couplers)
-    : TransformationSystem(dmp_num_dimensions_init,
-                           canonical_system_discrete->getTauSystemPointer(),
-                           canonical_system_discrete,
-                           func_approximator_discrete, logged_dmp_discrete_vars,
-                           real_time_assertor, start_dmpstate_discrete,
-                           current_dmpstate_discrete,
-                           current_velocity_dmpstate_discrete,
-                           goal_system_discrete, transform_couplers),
-      formulation_type(_SCHAAL_DMP_),
-      alpha(ts_alpha),
-      beta(ts_beta),
-      is_using_scaling(is_using_scaling_init),
-      A_learn(OnesVectorN(MAX_DMP_NUM_DIMENSIONS)),
-      func_approx_discrete(func_approximator_discrete),
-      logged_dmp_discrete_variables(logged_dmp_discrete_vars) {
-  A_learn.resize(dmp_num_dimensions);
-}
-
-TransformSystemDiscrete::TransformSystemDiscrete(
-    uint dmp_num_dimensions_init,
-    CanonicalSystemDiscrete* canonical_system_discrete,
-    FuncApproximatorDiscrete* func_approximator_discrete,
-    std::vector<bool> is_using_scaling_init, uint ts_formulation_type,
-    LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
-    RealTimeAssertor* real_time_assertor, DMPState* start_dmpstate_discrete,
-    DMPState* current_dmpstate_discrete,
-    DMPState* current_velocity_dmpstate_discrete,
-    GoalSystem* goal_system_discrete,
-    std::vector<TransformCoupling*>* transform_couplers)
-    : TransformationSystem(dmp_num_dimensions_init,
-                           canonical_system_discrete->getTauSystemPointer(),
-                           canonical_system_discrete,
-                           func_approximator_discrete, logged_dmp_discrete_vars,
-                           real_time_assertor, start_dmpstate_discrete,
-                           current_dmpstate_discrete,
-                           current_velocity_dmpstate_discrete,
-                           goal_system_discrete, transform_couplers),
-      formulation_type(ts_formulation_type),
-      alpha(25.0),
-      beta(25.0 / 4.0),
-      is_using_scaling(is_using_scaling_init),
-      A_learn(OnesVectorN(MAX_DMP_NUM_DIMENSIONS)),
-      func_approx_discrete(func_approximator_discrete),
-      logged_dmp_discrete_variables(logged_dmp_discrete_vars) {
-  A_learn.resize(dmp_num_dimensions);
-}
-
-TransformSystemDiscrete::TransformSystemDiscrete(
-    uint dmp_num_dimensions_init,
-    CanonicalSystemDiscrete* canonical_system_discrete,
-    FuncApproximatorDiscrete* func_approximator_discrete,
-    std::vector<bool> is_using_scaling_init, double ts_alpha, double ts_beta,
-    uint ts_formulation_type,
-    LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
-    RealTimeAssertor* real_time_assertor, DMPState* start_dmpstate_discrete,
-    DMPState* current_dmpstate_discrete,
-    DMPState* current_velocity_dmpstate_discrete,
-    GoalSystem* goal_system_discrete,
-    std::vector<TransformCoupling*>* transform_couplers)
+    std::vector<TransformCoupling*>* transform_couplers,
+    double ts_alpha, double ts_beta, uint ts_formulation_type)
     : TransformationSystem(dmp_num_dimensions_init,
                            canonical_system_discrete->getTauSystemPointer(),
                            canonical_system_discrete,

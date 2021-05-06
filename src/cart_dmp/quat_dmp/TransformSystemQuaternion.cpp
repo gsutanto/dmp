@@ -12,17 +12,17 @@ TransformSystemQuaternion::TransformSystemQuaternion()
 TransformSystemQuaternion::TransformSystemQuaternion(
     CanonicalSystemDiscrete* canonical_system_discrete,
     FuncApproximatorDiscrete* func_approximator_discrete,
-    std::vector<bool> is_using_scaling_init,
     LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
     RealTimeAssertor* real_time_assertor,
+    std::vector<bool> is_using_scaling_init,
     std::vector<TransformCoupling*>* transform_couplers, double ts_alpha,
     double ts_beta)
     : TransformSystemDiscrete(
           3, canonical_system_discrete, func_approximator_discrete,
-          is_using_scaling_init, ts_alpha, ts_beta, _SCHAAL_DMP_,
-          logged_dmp_discrete_vars, real_time_assertor, &start_quat_state,
-          &current_quat_state, &current_angular_velocity_state, &quat_goal_sys,
-          transform_couplers),
+          logged_dmp_discrete_vars, real_time_assertor,
+          is_using_scaling_init, &start_quat_state, &current_quat_state,
+          &current_angular_velocity_state, &quat_goal_sys, transform_couplers,
+          ts_alpha, ts_beta, _SCHAAL_DMP_),
       start_quat_state(QuaternionDMPState(real_time_assertor)),
       current_quat_state(QuaternionDMPState(real_time_assertor)),
       current_angular_velocity_state(DMPState(3, real_time_assertor)),

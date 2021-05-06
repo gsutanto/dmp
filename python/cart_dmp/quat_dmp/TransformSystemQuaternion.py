@@ -45,14 +45,13 @@ class TransformSystemQuaternion(TransformSystemDiscrete, object):
         canonical_system_discrete=canonical_system_discrete,
         func_approximator_discrete=func_approximator_discrete,
         is_using_scaling_init=is_using_scaling_init,
-        ts_alpha=ts_alpha,
-        ts_beta=ts_beta,
         start_dmpstate_discrete=QuaternionDMPState(),
         current_dmpstate_discrete=QuaternionDMPState(),
         current_velocity_dmpstate_discrete=DMPState(X_init=np.zeros((3, 1))),
         goal_system_discrete=QuaternionGoalSystem(
             canonical_system_discrete.tau_sys),
         transform_couplers_list=[],
+        ts_alpha=ts_alpha, ts_beta=ts_beta,
         name=name)
 
   def isValid(self):

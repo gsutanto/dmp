@@ -4,9 +4,8 @@ namespace dmp {
 
 CartesianCoordDMP::CartesianCoordDMP()
     : transform_sys_discrete_cart_coord(TransformSystemDiscrete(
-          3, NULL, &func_approx_discrete, std::vector<bool>(3, true),
-          _SCHAAL_DMP_, &logged_dmp_discrete_variables, NULL, NULL, NULL, NULL,
-          NULL, NULL)),
+          3, NULL, &func_approx_discrete, &logged_dmp_discrete_variables, NULL,
+          std::vector<bool>(3, true))),
       DMPDiscrete(3, 0, NULL, &transform_sys_discrete_cart_coord,
                   _SCHAAL_LWR_METHOD_, NULL, ""),
       cart_coord_transformer(CartesianCoordTransformer()),
@@ -27,9 +26,9 @@ CartesianCoordDMP::CartesianCoordDMP(
     std::vector<TransformCoupling*>* transform_couplers)
     : transform_sys_discrete_cart_coord(TransformSystemDiscrete(
           3, canonical_system_discrete, &func_approx_discrete,
-          std::vector<bool>(3, true), ts_formulation_type,
-          &logged_dmp_discrete_variables, real_time_assertor, NULL, NULL, NULL,
-          NULL, transform_couplers)),
+          &logged_dmp_discrete_variables, real_time_assertor,
+          std::vector<bool>(3, true), NULL, NULL, NULL, NULL,
+          transform_couplers, 25.0, 25.0/4.0, ts_formulation_type)),
       DMPDiscrete(3, model_size_init, canonical_system_discrete,
                   &transform_sys_discrete_cart_coord, learning_method,
                   real_time_assertor, opt_data_directory_path),

@@ -40,12 +40,12 @@ class TransformSystemQuaternion : public TransformSystemDiscrete {
    * discrete transformation system
    * @param func_approximator_discrete Discrete function approximator that
    * produces forcing term for this discrete transformation system
-   * @param is_using_scaling_init Is transformation system using scaling
-   * (true/false)?
    * @param logged_dmp_discrete_vars (Pointer to the) buffer for logged discrete
    * DMP variables
    * @param real_time_assertor Real-Time Assertor for troubleshooting and
    * debugging
+   * @param is_using_scaling_init Is transformation system using scaling
+   * (true/false)?
    * @param transform_couplers All spatial couplings associated with the
    * transformation system \n (please note that this is a pointer to vector of
    * pointer to TransformCoupling data structure, for flexibility and
@@ -58,9 +58,9 @@ class TransformSystemQuaternion : public TransformSystemDiscrete {
   TransformSystemQuaternion(
       CanonicalSystemDiscrete* canonical_system_discrete,
       FuncApproximatorDiscrete* func_approximator_discrete,
-      std::vector<bool> is_using_scaling_init,
       LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
       RealTimeAssertor* real_time_assertor,
+      std::vector<bool> is_using_scaling_init,
       std::vector<TransformCoupling*>* transform_couplers = NULL,
       double ts_alpha = 25.0, double ts_beta = (25.0 / 4.0));
 

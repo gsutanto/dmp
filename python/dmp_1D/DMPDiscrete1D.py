@@ -27,8 +27,8 @@ class DMPDiscrete1D(DMPDiscrete, object):
                transform_couplers_list=[],
                name=''):
     self.transform_sys_discrete_1D = TransformSystemDiscrete(
-        1, canonical_system_discrete, None, [True], 25.0, 25.0 / 4.0, None,
-        None, None, None, transform_couplers_list)
+        1, canonical_system_discrete, None, [True], None,
+        None, None, None, transform_couplers_list, 25.0, 25.0 / 4.0)
     super(DMPDiscrete1D,
           self).__init__(1, model_size_init, canonical_system_discrete,
                          self.transform_sys_discrete_1D, name)

@@ -37,21 +37,17 @@ class TransformSystemDiscrete : public TransformationSystem {
   TransformSystemDiscrete();
 
   /**
-   * Original formulation by Schaal, AMAM 2003 (default formulation_type) is
-   * selected.\n alpha    = 25	(default)\n beta		= 25/4
-   * (default)
-   *
    * @param dmp_num_dimensions_init Number of DMP dimensions (N) to use
    * @param canonical_system_discrete Discrete canonical system that drives this
    * discrete transformation system
    * @param func_approximator_discrete Discrete function approximator that
    * produces forcing term for this discrete transformation system
-   * @param is_using_scaling_init Is transformation system using scaling
-   * (true/false)?
    * @param logged_dmp_discrete_vars (Pointer to the) buffer for logged discrete
    * DMP variables
    * @param real_time_assertor Real-Time Assertor for troubleshooting and
    * debugging
+   * @param is_using_scaling_init Is transformation system using scaling
+   * (true/false)?
    * @param start_dmpstate_discrete (Pointer to the) start state of the discrete
    * DMP's transformation system
    * @param current_dmpstate_discrete (Pointer to the) current state of the
@@ -64,156 +60,30 @@ class TransformSystemDiscrete : public TransformationSystem {
    * transformation system (please note that this is a pointer to vector of
    * pointer to TransformCoupling data structure, for flexibility and
    * re-usability)
+   * @param ts_alpha Spring parameter\n
+   *        Best practice: set it to 25
+   * @param ts_beta Damping parameter\n
+   *        Best practice: set it to alpha / 4 for a critically damped system
+   * @param ts_formulation_type Chosen formulation\n
+   *        _SCHAAL_DMP_: original formulation by Schaal, AMAM 2003 (default
+   * formulation_type)\n _HOFFMANN_DMP_: formulation by Hoffmann et al., ICRA
+   * 2009
    */
   TransformSystemDiscrete(
       uint dmp_num_dimensions_init,
       CanonicalSystemDiscrete* canonical_system_discrete,
       FuncApproximatorDiscrete* func_approximator_discrete,
+      LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
+      RealTimeAssertor* real_time_assertor,
       std::vector<bool> is_using_scaling_init,
-      LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
-      RealTimeAssertor* real_time_assertor,
       DMPState* start_dmpstate_discrete = NULL,
       DMPState* current_dmpstate_discrete = NULL,
       DMPState* current_velocity_dmpstate_discrete = NULL,
       GoalSystem* goal_system_discrete = NULL,
-      std::vector<TransformCoupling*>* transform_couplers = NULL);
-
-  /**
-   * Original formulation by Schaal, AMAM 2003 (default formulation type) is
-   * selected.
-   *
-   * @param dmp_num_dimensions_init Number of DMP dimensions (N) to use
-   * @param canonical_system_discrete Discrete canonical system that drives this
-   * discrete transformation system
-   * @param func_approximator_discrete Discrete function approximator that
-   * produces forcing term for this discrete transformation system
-   * @param is_using_scaling_init Is transformation system using scaling
-   * (true/false)?
-   * @param ts_alpha Spring parameter\n
-   *        Best practice: set it to 25
-   * @param ts_beta Damping parameter\n
-   *        Best practice: set it to alpha / 4 for a critically damped system
-   * @param logged_dmp_discrete_vars (Pointer to the) buffer for logged discrete
-   * DMP variables
-   * @param real_time_assertor Real-Time Assertor for troubleshooting and
-   * debugging
-   * @param start_dmpstate_discrete (Pointer to the) start state of the discrete
-   * DMP's transformation system
-   * @param current_dmpstate_discrete (Pointer to the) current state of the
-   * discrete DMP's transformation system
-   * @param current_velocity_dmpstate_discrete (Pointer to the) current velocity
-   * state of the discrete DMP's transformation system
-   * @param goal_system_discrete (Pointer to the) goal system for discrete DMP's
-   * transformation system
-   * @param transform_couplers All spatial couplings associated with the
-   * transformation system (please note that this is a pointer to vector of
-   * pointer to TransformCoupling data structure, for flexibility and
-   * re-usability)
-   */
-  TransformSystemDiscrete(
-      uint dmp_num_dimensions_init,
-      CanonicalSystemDiscrete* canonical_system_discrete,
-      FuncApproximatorDiscrete* func_approximator_discrete,
-      std::vector<bool> is_using_scaling_init, double ts_alpha, double ts_beta,
-      LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
-      RealTimeAssertor* real_time_assertor,
-      DMPState* start_dmpstate_discrete = NULL,
-      DMPState* current_dmpstate_discrete = NULL,
-      DMPState* current_velocity_dmpstate_discrete = NULL,
-      GoalSystem* goal_system_discrete = NULL,
-      std::vector<TransformCoupling*>* transform_couplers = NULL);
-
-  /**
-   * alpha    = 25	(default)\n
-   * beta		= 25/4	(default)
-   *
-   * @param dmp_num_dimensions_init Number of DMP dimensions (N) to use
-   * @param canonical_system_discrete Discrete canonical system that drives this
-   * discrete transformation system
-   * @param func_approximator_discrete Discrete function approximator that
-   * produces forcing term for this discrete transformation system
-   * @param is_using_scaling_init Is transformation system using scaling
-   * (true/false)?
-   * @param ts_formulation_type Chosen formulation\n
-   *        _SCHAAL_DMP_: original formulation by Schaal, AMAM 2003 (default
-   * formulation_type)\n _HOFFMANN_DMP_: formulation by Hoffmann et al., ICRA
-   * 2009
-   * @param logged_dmp_discrete_vars (Pointer to the) buffer for logged discrete
-   * DMP variables
-   * @param real_time_assertor Real-Time Assertor for troubleshooting and
-   * debugging
-   * @param start_dmpstate_discrete (Pointer to the) start state of the discrete
-   * DMP's transformation system
-   * @param current_dmpstate_discrete (Pointer to the) current state of the
-   * discrete DMP's transformation system
-   * @param current_velocity_dmpstate_discrete (Pointer to the) current velocity
-   * state of the discrete DMP's transformation system
-   * @param goal_system_discrete (Pointer to the) goal system for discrete DMP's
-   * transformation system
-   * @param transform_couplers All spatial couplings associated with the
-   * transformation system (please note that this is a pointer to vector of
-   * pointer to TransformCoupling data structure, for flexibility and
-   * re-usability)
-   */
-  TransformSystemDiscrete(
-      uint dmp_num_dimensions_init,
-      CanonicalSystemDiscrete* canonical_system_discrete,
-      FuncApproximatorDiscrete* func_approximator_discrete,
-      std::vector<bool> is_using_scaling_init, uint ts_formulation_type,
-      LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
-      RealTimeAssertor* real_time_assertor,
-      DMPState* start_dmpstate_discrete = NULL,
-      DMPState* current_dmpstate_discrete = NULL,
-      DMPState* current_velocity_dmpstate_discrete = NULL,
-      GoalSystem* goal_system_discrete = NULL,
-      std::vector<TransformCoupling*>* transform_couplers = NULL);
-
-  /**
-   * @param dmp_num_dimensions_init Number of DMP dimensions (N) to use
-   * @param canonical_system_discrete Discrete canonical system that drives this
-   * discrete transformation system
-   * @param func_approximator_discrete Discrete function approximator that
-   * produces forcing term for this discrete transformation system
-   * @param is_using_scaling_init Is transformation system using scaling
-   * (true/false)?
-   * @param ts_alpha Spring parameter\n
-   *        Best practice: set it to 25
-   * @param ts_beta Damping parameter\n
-   *        Best practice: set it to alpha / 4 for a critically damped system
-   * @param ts_formulation_type Chosen formulation\n
-   *        _SCHAAL_DMP_: original formulation by Schaal, AMAM 2003 (default
-   * formulation_type)\n _HOFFMANN_DMP_: formulation by Hoffmann et al., ICRA
-   * 2009
-   * @param logged_dmp_discrete_vars (Pointer to the) buffer for logged discrete
-   * DMP variables
-   * @param real_time_assertor Real-Time Assertor for troubleshooting and
-   * debugging
-   * @param start_dmpstate_discrete (Pointer to the) start state of the discrete
-   * DMP's transformation system
-   * @param current_dmpstate_discrete (Pointer to the) current state of the
-   * discrete DMP's transformation system
-   * @param current_velocity_dmpstate_discrete (Pointer to the) current velocity
-   * state of the discrete DMP's transformation system
-   * @param goal_system_discrete (Pointer to the) goal system for discrete DMP's
-   * transformation system
-   * @param transform_couplers All spatial couplings associated with the
-   * transformation system (please note that this is a pointer to vector of
-   * pointer to TransformCoupling data structure, for flexibility and
-   * re-usability)
-   */
-  TransformSystemDiscrete(
-      uint dmp_num_dimensions_init,
-      CanonicalSystemDiscrete* canonical_system_discrete,
-      FuncApproximatorDiscrete* func_approximator_discrete,
-      std::vector<bool> is_using_scaling_init, double ts_alpha, double ts_beta,
-      uint ts_formulation_type,
-      LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
-      RealTimeAssertor* real_time_assertor,
-      DMPState* start_dmpstate_discrete = NULL,
-      DMPState* current_dmpstate_discrete = NULL,
-      DMPState* current_velocity_dmpstate_discrete = NULL,
-      GoalSystem* goal_system_discrete = NULL,
-      std::vector<TransformCoupling*>* transform_couplers = NULL);
+      std::vector<TransformCoupling*>* transform_couplers = NULL,
+      double ts_alpha = 25.0,
+      double ts_beta = 25.0 / 4.0,
+      uint ts_formulation_type = _SCHAAL_DMP_);
 
   /**
    * Checks whether this transformation system is valid or not.

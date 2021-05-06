@@ -4,9 +4,8 @@ namespace dmp {
 
 DMPDiscreteMultiDim::DMPDiscreteMultiDim()
     : transform_sys_discrete_multi_dim(TransformSystemDiscrete(
-          0, NULL, &func_approx_discrete, std::vector<bool>(0, true),
-          _SCHAAL_DMP_, &logged_dmp_discrete_variables, NULL, NULL, NULL, NULL,
-          NULL, NULL)),
+          0, NULL, &func_approx_discrete, &logged_dmp_discrete_variables, NULL,
+          std::vector<bool>(0, true))),
       DMPDiscrete(0, 0, NULL, &transform_sys_discrete_multi_dim,
                   _SCHAAL_LWR_METHOD_, NULL, "") {}
 
@@ -19,9 +18,9 @@ DMPDiscreteMultiDim::DMPDiscreteMultiDim(
     : transform_sys_discrete_multi_dim(TransformSystemDiscrete(
           dmp_num_dimensions_init, canonical_system_discrete,
           &func_approx_discrete,
-          std::vector<bool>(dmp_num_dimensions_init, true), ts_formulation_type,
-          &logged_dmp_discrete_variables, real_time_assertor, NULL, NULL, NULL,
-          NULL, transform_couplers)),
+          &logged_dmp_discrete_variables, real_time_assertor,
+          std::vector<bool>(dmp_num_dimensions_init, true), NULL, NULL, NULL,
+          NULL, transform_couplers, 25.0, 25.0/4.0, ts_formulation_type)),
       DMPDiscrete(dmp_num_dimensions_init, model_size_init,
                   canonical_system_discrete, &transform_sys_discrete_multi_dim,
                   learning_method, real_time_assertor,

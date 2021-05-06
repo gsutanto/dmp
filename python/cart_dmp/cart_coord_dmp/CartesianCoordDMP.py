@@ -35,13 +35,12 @@ class CartesianCoordDMP(DMPDiscrete, object):
         canonical_system_discrete=canonical_system_discrete,
         func_approximator_discrete=None,  # this will be initialized during the initialization of DMPDiscrete
         is_using_scaling_init=[True] * 3,
-        ts_alpha=25.0,
-        ts_beta=25.0 / 4.0,
         start_dmpstate_discrete=None,
         current_dmpstate_discrete=None,
         current_velocity_dmpstate_discrete=None,
         goal_system_discrete=None,
         transform_couplers_list=transform_couplers_list,
+        ts_alpha=25.0, ts_beta=25.0 / 4.0,
         name="")
     super(CartesianCoordDMP, self).__init__(
         dmp_num_dimensions_init=3,
