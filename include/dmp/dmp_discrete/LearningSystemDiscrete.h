@@ -35,6 +35,8 @@ class LearningSystemDiscrete : public LearningSystem {
  protected:
   uint learning_method;
 
+  TransformSystemDiscrete* transform_sys_discrete;
+
  private:
   VectorN min_coord;  // minimum coordinate in the trajectory, for each
                       // dimension (reserved for future use)

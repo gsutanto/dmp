@@ -30,7 +30,7 @@ class TransformSystemDiscrete : public TransformationSystem {
   std::vector<bool> is_using_scaling;  // only relevant for Schaal's DMP Model
   VectorN A_learn;  // amplitude = (G - y_0) value during learning
 
-  FuncApproximatorDiscrete* func_approx_discrete;
+  std::shared_ptr<FuncApproximatorDiscrete> func_approx_discrete;
   LoggedDMPDiscreteVariables* logged_dmp_discrete_variables;
 
  public:
@@ -72,7 +72,7 @@ class TransformSystemDiscrete : public TransformationSystem {
   TransformSystemDiscrete(
       uint dmp_num_dimensions_init,
       CanonicalSystemDiscrete* canonical_system_discrete,
-      FuncApproximatorDiscrete* func_approximator_discrete,
+      std::shared_ptr<FuncApproximatorDiscrete> func_approximator_discrete,
       LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
       RealTimeAssertor* real_time_assertor,
       std::vector<bool> is_using_scaling_init,
@@ -81,8 +81,7 @@ class TransformSystemDiscrete : public TransformationSystem {
       DMPState* current_velocity_dmpstate_discrete = NULL,
       GoalSystem* goal_system_discrete = NULL,
       std::vector<TransformCoupling*>* transform_couplers = NULL,
-      double ts_alpha = 25.0,
-      double ts_beta = 25.0 / 4.0,
+      double ts_alpha = 25.0, double ts_beta = 25.0 / 4.0,
       uint ts_formulation_type = _SCHAAL_DMP_);
 
   /**
@@ -208,6 +207,12 @@ class TransformSystemDiscrete : public TransformationSystem {
    * formulation_type)\n 1: formulation by Hoffman et al., ICRA 2009
    */
   uint getFormulationType();
+
+  /**
+   * Returns the discrete function approximator pointer.
+   */
+  virtual std::shared_ptr<FuncApproximatorDiscrete>
+  getFuncApproxDiscretePointer();
 
   ~TransformSystemDiscrete();
 };

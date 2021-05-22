@@ -4,8 +4,8 @@ namespace dmp {
 
 QuaternionDMP::QuaternionDMP()
     : transform_sys_discrete_quat(TransformSystemQuaternion(
-          NULL, &func_approx_discrete, &logged_dmp_discrete_variables, NULL,
-        std::vector<bool>(3, true), NULL)),
+          NULL, nullptr, &logged_dmp_discrete_variables, NULL,
+          std::vector<bool>(3, true), NULL)),
       DMPDiscrete(1, 0, NULL, &transform_sys_discrete_quat, _SCHAAL_LWR_METHOD_,
                   NULL, "") {
   mean_start_position.resize(4);
@@ -18,7 +18,10 @@ QuaternionDMP::QuaternionDMP(
     const char* opt_data_directory_path,
     std::vector<TransformCoupling*>* transform_couplers)
     : transform_sys_discrete_quat(TransformSystemQuaternion(
-          canonical_system_discrete, &func_approx_discrete,
+          canonical_system_discrete,
+          std::make_shared<FuncApproximatorDiscrete>(3, model_size_init,
+                                                     canonical_system_discrete,
+                                                     real_time_assertor),
           &logged_dmp_discrete_variables, real_time_assertor,
           std::vector<bool>(3, true), transform_couplers)),
       DMPDiscrete(3, model_size_init, canonical_system_discrete,

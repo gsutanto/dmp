@@ -1,10 +1,12 @@
 #include "dmp/dmp_1D/DMPDiscrete1D.h"
 
+#include <memory>
+
 namespace dmp {
 
 DMPDiscrete1D::DMPDiscrete1D()
     : transform_sys_discrete_1D(TransformSystemDiscrete(
-          1, NULL, &func_approx_discrete, &logged_dmp_discrete_variables, NULL,
+          1, NULL, nullptr, &logged_dmp_discrete_variables, NULL,
           std::vector<bool>(1, true))),
       DMPDiscrete(1, 0, NULL, &transform_sys_discrete_1D, _SCHAAL_LWR_METHOD_,
                   NULL, "") {}
@@ -15,10 +17,13 @@ DMPDiscrete1D::DMPDiscrete1D(
     RealTimeAssertor* real_time_assertor, const char* opt_data_directory_path,
     std::vector<TransformCoupling*>* transform_couplers)
     : transform_sys_discrete_1D(TransformSystemDiscrete(
-          1, canonical_system_discrete, &func_approx_discrete,
+          1, canonical_system_discrete,
+          std::make_shared<FuncApproximatorDiscrete>(1, model_size_init,
+                                                     canonical_system_discrete,
+                                                     real_time_assertor),
           &logged_dmp_discrete_variables, real_time_assertor,
           std::vector<bool>(1, true), NULL, NULL, NULL, NULL,
-          transform_couplers, 25.0, 25.0/4.0, ts_formulation_type)),
+          transform_couplers, 25.0, 25.0 / 4.0, ts_formulation_type)),
       DMPDiscrete(1, model_size_init, canonical_system_discrete,
                   &transform_sys_discrete_1D, learning_method,
                   real_time_assertor, opt_data_directory_path) {}

@@ -16,24 +16,22 @@ TransformSystemDiscrete::TransformSystemDiscrete()
 TransformSystemDiscrete::TransformSystemDiscrete(
     uint dmp_num_dimensions_init,
     CanonicalSystemDiscrete* canonical_system_discrete,
-    FuncApproximatorDiscrete* func_approximator_discrete,
+    std::shared_ptr<FuncApproximatorDiscrete> func_approximator_discrete,
     LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
     RealTimeAssertor* real_time_assertor,
-    std::vector<bool> is_using_scaling_init,
-    DMPState* start_dmpstate_discrete,
+    std::vector<bool> is_using_scaling_init, DMPState* start_dmpstate_discrete,
     DMPState* current_dmpstate_discrete,
     DMPState* current_velocity_dmpstate_discrete,
     GoalSystem* goal_system_discrete,
-    std::vector<TransformCoupling*>* transform_couplers,
-    double ts_alpha, double ts_beta, uint ts_formulation_type)
-    : TransformationSystem(dmp_num_dimensions_init,
-                           canonical_system_discrete->getTauSystemPointer(),
-                           canonical_system_discrete,
-                           func_approximator_discrete, logged_dmp_discrete_vars,
-                           real_time_assertor, start_dmpstate_discrete,
-                           current_dmpstate_discrete,
-                           current_velocity_dmpstate_discrete,
-                           goal_system_discrete, transform_couplers),
+    std::vector<TransformCoupling*>* transform_couplers, double ts_alpha,
+    double ts_beta, uint ts_formulation_type)
+    : TransformationSystem(
+          dmp_num_dimensions_init,
+          canonical_system_discrete->getTauSystemPointer(),
+          canonical_system_discrete, func_approximator_discrete,
+          logged_dmp_discrete_vars, real_time_assertor, start_dmpstate_discrete,
+          current_dmpstate_discrete, current_velocity_dmpstate_discrete,
+          goal_system_discrete, transform_couplers),
       formulation_type(ts_formulation_type),
       alpha(ts_alpha),
       beta(ts_beta),
@@ -53,9 +51,7 @@ bool TransformSystemDiscrete::isValid() {
                            logged_dmp_variables))) == false) {
     return false;
   }
-  if (rt_assert(
-          rt_assert(func_approx_discrete->isValid())) ==
-      false) {
+  if (rt_assert(rt_assert(func_approx_discrete->isValid())) == false) {
     return false;
   }
   if (rt_assert((rt_assert(formulation_type >= _SCHAAL_DMP_)) &&
@@ -486,6 +482,11 @@ bool TransformSystemDiscrete::setLearningAmplitude(const VectorN& new_A_learn) {
 
 uint TransformSystemDiscrete::getFormulationType() {
   return (formulation_type);
+}
+
+std::shared_ptr<FuncApproximatorDiscrete>
+TransformSystemDiscrete::getFuncApproxDiscretePointer() {
+  return func_approx_discrete;
 }
 
 TransformSystemDiscrete::~TransformSystemDiscrete() {}

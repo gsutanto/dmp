@@ -14,6 +14,7 @@
 #include <stdlib.h>
 
 #include <limits>
+#include <memory>
 #include <vector>
 
 #include "dmp/dmp_base/CanonicalSystem.h"
@@ -46,7 +47,7 @@ class TransformationSystem {
   std::vector<bool> is_using_coupling_term_at_dimension;
 
   TauSystem* tau_sys;
-  FunctionApproximator* func_approx;
+  std::shared_ptr<FunctionApproximator> func_approx;
   LoggedDMPVariables* logged_dmp_variables;
   std::vector<TransformCoupling*>* transform_coupling;
 
@@ -87,7 +88,7 @@ class TransformationSystem {
   TransformationSystem(
       uint dmp_num_dimensions_init, TauSystem* tau_system,
       CanonicalSystem* canonical_system,
-      FunctionApproximator* function_approximator,
+      std::shared_ptr<FunctionApproximator> function_approximator,
       LoggedDMPVariables* logged_dmp_vars, RealTimeAssertor* real_time_assertor,
       DMPState* start_dmpstate = NULL, DMPState* current_dmpstate = NULL,
       DMPState* current_velocity_dmpstate = NULL,
@@ -208,6 +209,13 @@ class TransformationSystem {
   virtual uint getDMPNumDimensions();
 
   /**
+   * Returns model size used to represent the forcing term function.
+   *
+   * @return Model size used to represent the forcing term function
+   */
+  virtual uint getModelSize();
+
+  /**
    * Returns transformation system's start state.
    *
    * @return Transformation system's start state (DMPState)
@@ -297,7 +305,7 @@ class TransformationSystem {
   /**
    * Returns the function approximator pointer.
    */
-  virtual FunctionApproximator* getFuncApproxPointer();
+  virtual std::shared_ptr<FunctionApproximator> getFuncApproxPointer();
 
   virtual bool setCouplingTermUsagePerDimensions(
       const std::vector<bool>& is_using_coupling_term_at_dimension_init);

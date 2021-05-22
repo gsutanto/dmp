@@ -5,7 +5,6 @@ namespace dmp {
 DMPDiscrete::DMPDiscrete()
     : DMP(),
       canonical_sys_discrete(NULL),
-      func_approx_discrete(FuncApproximatorDiscrete()),
       transform_sys_discrete(NULL),
       learning_sys_discrete(LearningSystemDiscrete()),
       data_logger_loader_discrete(DMPDataIODiscrete()),
@@ -18,22 +17,18 @@ DMPDiscrete::DMPDiscrete(uint dmp_num_dimensions_init, uint model_size_init,
                          RealTimeAssertor* real_time_assertor,
                          const char* opt_data_directory_path)
     : DMP(dmp_num_dimensions_init, model_size_init, canonical_system_discrete,
-          &func_approx_discrete, transform_system_discrete,
-          &learning_sys_discrete, &data_logger_loader_discrete,
-          &logged_dmp_discrete_variables, real_time_assertor,
-          opt_data_directory_path),
+          transform_system_discrete, &learning_sys_discrete,
+          &data_logger_loader_discrete, &logged_dmp_discrete_variables,
+          real_time_assertor, opt_data_directory_path),
       canonical_sys_discrete(canonical_system_discrete),
       transform_sys_discrete(transform_system_discrete),
-      func_approx_discrete(FuncApproximatorDiscrete(
-          dmp_num_dimensions_init, model_size_init, canonical_system_discrete,
-          real_time_assertor)),
       learning_sys_discrete(LearningSystemDiscrete(
           dmp_num_dimensions_init, model_size_init, transform_system_discrete,
           &data_logger_loader_discrete, learning_method, real_time_assertor,
           opt_data_directory_path)),
-      data_logger_loader_discrete(DMPDataIODiscrete(transform_system_discrete,
-                                                    &func_approx_discrete,
-                                                    real_time_assertor)),
+      data_logger_loader_discrete(
+          DMPDataIODiscrete(dmp_num_dimensions_init, model_size_init,
+                            transform_system_discrete, real_time_assertor)),
       logged_dmp_discrete_variables(LoggedDMPDiscreteVariables(
           dmp_num_dimensions_init, model_size_init, real_time_assertor)) {}
 
@@ -47,18 +42,13 @@ bool DMPDiscrete::isValid() {
   }
   if (rt_assert((rt_assert(canonical_sys_discrete->isValid())) &&
                 (rt_assert(transform_sys_discrete->isValid())) &&
-                (rt_assert(func_approx_discrete.isValid())) &&
                 (rt_assert(learning_sys_discrete.isValid())) &&
                 (rt_assert(data_logger_loader_discrete.isValid()))) == false) {
     return false;
   }
-  if (rt_assert(
-          (rt_assert(
-              transform_sys_discrete ==
-              data_logger_loader_discrete.getTransformSysDiscretePointer())) &&
-          (rt_assert(
-              &func_approx_discrete ==
-              data_logger_loader_discrete.getFuncApproxDiscretePointer()))) ==
+  if (rt_assert(rt_assert(
+          transform_sys_discrete ==
+          data_logger_loader_discrete.getTransformSysDiscretePointer())) ==
       false) {
     return false;
   }
@@ -215,8 +205,9 @@ DMPState DMPDiscrete::getCurrentState() {
 
 bool DMPDiscrete::getForcingTerm(VectorN& result_f,
                                  VectorM* basis_function_vector) {
-  return (rt_assert(
-      func_approx_discrete.getForcingTerm(result_f, basis_function_vector)));
+  return (
+      rt_assert(transform_sys_discrete->getFuncApproxPointer()->getForcingTerm(
+          result_f, basis_function_vector)));
 }
 
 bool DMPDiscrete::getCurrentGoalPosition(VectorN& current_goal) {
@@ -312,11 +303,13 @@ bool DMPDiscrete::saveBasisFunctions(const char* file_path) {
 }
 
 bool DMPDiscrete::getWeights(MatrixNxM& weights_buffer) {
-  return (rt_assert(func_approx_discrete.getWeights(weights_buffer)));
+  return (rt_assert(transform_sys_discrete->getFuncApproxPointer()->getWeights(
+      weights_buffer)));
 }
 
 bool DMPDiscrete::setWeights(const MatrixNxM& new_weights) {
-  return (rt_assert(func_approx_discrete.setWeights(new_weights)));
+  return (rt_assert(
+      transform_sys_discrete->getFuncApproxPointer()->setWeights(new_weights)));
 }
 
 bool DMPDiscrete::startCollectingTrajectoryDataSet() {
@@ -349,7 +342,7 @@ uint DMPDiscrete::getCanonicalSysOrder() {
 }
 
 uint DMPDiscrete::getFuncApproxModelSize() {
-  return (func_approx_discrete.getModelSize());
+  return (transform_sys_discrete->getModelSize());
 }
 
 uint DMPDiscrete::getTransformSysFormulationType() {

@@ -13,7 +13,6 @@
 
 #include <iomanip>
 
-#include "dmp/dmp_base/FunctionApproximator.h"
 #include "dmp/dmp_base/LoggedDMPVariables.h"
 #include "dmp/dmp_base/TransformationSystem.h"
 #include "dmp/utility/DataIO.h"
@@ -26,7 +25,6 @@ class DMPDataIO : public DataIO {
   // point to other data structure(s) that might outlive the instance of this
   // class:
   TransformationSystem* transform_sys;
-  FunctionApproximator* func_approx;
 
   uint dmp_num_dimensions;
   uint model_size;
@@ -51,15 +49,17 @@ class DMPDataIO : public DataIO {
   DMPDataIO();
 
   /**
+   * @param dmp_num_dimensions_init Number of trajectory dimensions employed in
+   * this DMP
+   * @param model_size_init Size of the model (M: number of basis functions or
+   * others) used to represent the function
    * @param transformation_system Transformation System, whose data will be
-   * recorded
-   * @param function_approximator Function Approximator, whose data will be
    * recorded
    * @param real_time_assertor Real-Time Assertor for troubleshooting and
    * debugging
    */
-  DMPDataIO(TransformationSystem* transformation_system,
-            FunctionApproximator* function_approximator,
+  DMPDataIO(uint dmp_num_dimensions_init, uint model_size_init,
+            TransformationSystem* transformation_system,
             RealTimeAssertor* real_time_assertor);
 
   /**

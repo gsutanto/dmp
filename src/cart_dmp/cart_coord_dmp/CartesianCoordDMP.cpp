@@ -4,7 +4,7 @@ namespace dmp {
 
 CartesianCoordDMP::CartesianCoordDMP()
     : transform_sys_discrete_cart_coord(TransformSystemDiscrete(
-          3, NULL, &func_approx_discrete, &logged_dmp_discrete_variables, NULL,
+          3, NULL, nullptr, &logged_dmp_discrete_variables, NULL,
           std::vector<bool>(3, true))),
       DMPDiscrete(3, 0, NULL, &transform_sys_discrete_cart_coord,
                   _SCHAAL_LWR_METHOD_, NULL, ""),
@@ -25,10 +25,13 @@ CartesianCoordDMP::CartesianCoordDMP(
     const char* opt_data_directory_path,
     std::vector<TransformCoupling*>* transform_couplers)
     : transform_sys_discrete_cart_coord(TransformSystemDiscrete(
-          3, canonical_system_discrete, &func_approx_discrete,
+          3, canonical_system_discrete,
+          std::make_shared<FuncApproximatorDiscrete>(3, model_size_init,
+                                                     canonical_system_discrete,
+                                                     real_time_assertor),
           &logged_dmp_discrete_variables, real_time_assertor,
           std::vector<bool>(3, true), NULL, NULL, NULL, NULL,
-          transform_couplers, 25.0, 25.0/4.0, ts_formulation_type)),
+          transform_couplers, 25.0, 25.0 / 4.0, ts_formulation_type)),
       DMPDiscrete(3, model_size_init, canonical_system_discrete,
                   &transform_sys_discrete_cart_coord, learning_method,
                   real_time_assertor, opt_data_directory_path),
@@ -210,8 +213,8 @@ bool CartesianCoordDMP::learnMultiCartCoordDMPs(
   for (std::filesystem::directory_iterator dir_iter(in_data_dir);
        dir_iter != null_directory_iterator; ++dir_iter) {
     char subdir_name[1000];
-    snprintf(subdir_name, sizeof(subdir_name),
-             "%s", dir_iter->path().filename().string().c_str());
+    snprintf(subdir_name, sizeof(subdir_name), "%s",
+             dir_iter->path().filename().string().c_str());
     snprintf(in_data_subdir_path, sizeof(in_data_subdir_path), "%s/%s/",
              dir_iter->path().string().c_str(), in_data_subdir_subpath);
     snprintf(out_data_subdir_path, sizeof(out_data_subdir_path), "%s/%s/",

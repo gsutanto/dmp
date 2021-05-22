@@ -12,8 +12,9 @@
 
 #include <stdio.h>
 
+#include <memory>
+
 #include "dmp/dmp_base/DMPDataIO.h"
-#include "dmp/dmp_discrete/FuncApproximatorDiscrete.h"
 #include "dmp/dmp_discrete/LoggedDMPDiscreteVariables.h"
 #include "dmp/dmp_discrete/TransformSystemDiscrete.h"
 
@@ -25,7 +26,6 @@ class DMPDataIODiscrete : public DMPDataIO {
   // point to other data structure(s) that might outlive the instance of this
   // class:
   TransformSystemDiscrete* transform_sys_discrete;
-  FuncApproximatorDiscrete* func_approx_discrete;
 
   // The following field(s) are written as SMART pointers to reduce size
   // overhead in the stack, by allocating them in the heap:
@@ -35,15 +35,17 @@ class DMPDataIODiscrete : public DMPDataIO {
   DMPDataIODiscrete();
 
   /**
+   * @param dmp_num_dimensions_init Number of trajectory dimensions employed in
+   * this DMP
+   * @param model_size_init Size of the model (M: number of basis functions or
+   * others) used to represent the function
    * @param transform_system_discrete Discrete Transformation System, whose data
    * will be recorded
-   * @param func_approximator_discrete Discrete Function Approximator, whose
-   * data will be recorded
    * @param real_time_assertor Real-Time Assertor for troubleshooting and
    * debugging
    */
-  DMPDataIODiscrete(TransformSystemDiscrete* transform_system_discrete,
-                    FuncApproximatorDiscrete* func_approximator_discrete,
+  DMPDataIODiscrete(uint dmp_num_dimensions_init, uint model_size_init,
+                    TransformSystemDiscrete* transform_system_discrete,
                     RealTimeAssertor* real_time_assertor);
 
   /**
@@ -140,7 +142,7 @@ class DMPDataIODiscrete : public DMPDataIO {
   /**
    * Returns the discrete function approximator pointer.
    */
-  FuncApproximatorDiscrete* getFuncApproxDiscretePointer();
+  std::shared_ptr<FuncApproximatorDiscrete> getFuncApproxDiscretePointer();
 
   ~DMPDataIODiscrete();
 };

@@ -5,19 +5,17 @@ namespace dmp {
 DMPDataIODiscrete::DMPDataIODiscrete()
     : DMPDataIO(),
       transform_sys_discrete(NULL),
-      func_approx_discrete(NULL),
       canonical_sys_state_trajectory_buffer(new MatrixTx4()) {
   DMPDataIODiscrete::reset();
 }
 
 DMPDataIODiscrete::DMPDataIODiscrete(
+    uint dmp_num_dimensions_init, uint model_size_init,
     TransformSystemDiscrete* transform_system_discrete,
-    FuncApproximatorDiscrete* func_approximator_discrete,
     RealTimeAssertor* real_time_assertor)
-    : DMPDataIO(transform_system_discrete, func_approximator_discrete,
-                real_time_assertor),
+    : DMPDataIO(dmp_num_dimensions_init, model_size_init,
+                transform_system_discrete, real_time_assertor),
       transform_sys_discrete(transform_system_discrete),
-      func_approx_discrete(func_approximator_discrete),
       canonical_sys_state_trajectory_buffer(new MatrixTx4()) {
   DMPDataIODiscrete::reset();
 }
@@ -35,12 +33,10 @@ bool DMPDataIODiscrete::isValid() {
   if (rt_assert(DMPDataIO::isValid()) == false) {
     return false;
   }
-  if (rt_assert((rt_assert(transform_sys_discrete != NULL)) &&
-                (rt_assert(func_approx_discrete != NULL))) == false) {
+  if (rt_assert(rt_assert(transform_sys_discrete != NULL)) == false) {
     return false;
   }
-  if (rt_assert((rt_assert(transform_sys_discrete->isValid())) &&
-                (rt_assert(func_approx_discrete->isValid()))) == false) {
+  if (rt_assert(rt_assert(transform_sys_discrete->isValid())) == false) {
     return false;
   }
   if (rt_assert(canonical_sys_state_trajectory_buffer != NULL) == false) {
@@ -94,7 +90,9 @@ bool DMPDataIODiscrete::saveWeights(const char* dir_path,
 
   MatrixNxM weights(dmp_num_dimensions, model_size);
 
-  if (rt_assert(func_approx_discrete->getWeights(weights)) == false) {
+  if (rt_assert(
+          transform_sys_discrete->getFuncApproxDiscretePointer()->getWeights(
+              weights)) == false) {
     return false;
   }
 
@@ -116,7 +114,9 @@ bool DMPDataIODiscrete::loadWeights(const char* dir_path,
     return false;
   }
 
-  return (rt_assert(func_approx_discrete->setWeights(weights)));
+  return (rt_assert(
+      transform_sys_discrete->getFuncApproxDiscretePointer()->setWeights(
+          weights)));
 }
 
 bool DMPDataIODiscrete::saveALearn(const char* dir_path,
@@ -168,8 +168,8 @@ bool DMPDataIODiscrete::saveBasisFunctions(const char* file_path) {
 
   while (x <= 1.0) {
     fprintf(f, "%.05f,", x);
-    if (rt_assert(func_approx_discrete->getBasisFunctionVector(x, result)) ==
-        false) {
+    if (rt_assert(transform_sys_discrete->getFuncApproxDiscretePointer()
+                      ->getBasisFunctionVector(x, result)) == false) {
       fclose(f);
       return false;
     }
@@ -192,8 +192,9 @@ TransformSystemDiscrete* DMPDataIODiscrete::getTransformSysDiscretePointer() {
   return (transform_sys_discrete);
 }
 
-FuncApproximatorDiscrete* DMPDataIODiscrete::getFuncApproxDiscretePointer() {
-  return (func_approx_discrete);
+std::shared_ptr<FuncApproximatorDiscrete>
+DMPDataIODiscrete::getFuncApproxDiscretePointer() {
+  return (transform_sys_discrete->getFuncApproxDiscretePointer());
 }
 
 DMPDataIODiscrete::~DMPDataIODiscrete() {}

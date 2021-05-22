@@ -5,7 +5,6 @@ namespace dmp {
 DMPDataIO::DMPDataIO()
     : DataIO(),
       transform_sys(NULL),
-      func_approx(NULL),
       tau_trajectory_buffer(new MatrixTx2()),
       transform_sys_state_local_trajectory_buffer(new MatrixTxS()),
       transform_sys_state_global_trajectory_buffer(new MatrixTxS()),
@@ -22,12 +21,11 @@ DMPDataIO::DMPDataIO()
   DMPDataIO::reset();
 }
 
-DMPDataIO::DMPDataIO(TransformationSystem* transformation_system,
-                     FunctionApproximator* function_approximator,
+DMPDataIO::DMPDataIO(uint dmp_num_dimensions_init, uint model_size_init,
+                     TransformationSystem* transformation_system,
                      RealTimeAssertor* real_time_assertor)
     : DataIO(real_time_assertor),
       transform_sys(transformation_system),
-      func_approx(function_approximator),
       tau_trajectory_buffer(new MatrixTx2()),
       transform_sys_state_local_trajectory_buffer(new MatrixTxS()),
       transform_sys_state_global_trajectory_buffer(new MatrixTxS()),
@@ -39,8 +37,8 @@ DMPDataIO::DMPDataIO(TransformationSystem* transformation_system,
       forcing_term_trajectory_buffer(new MatrixTxNp1()),
       transform_sys_ct_acc_trajectory_buffer(new MatrixTxNp1()),
       save_data_buffer(new MatrixTxSBC()),
-      dmp_num_dimensions(func_approx->getDMPNumDimensions()),
-      model_size(func_approx->getModelSize()) {
+      dmp_num_dimensions(dmp_num_dimensions_init),
+      model_size(model_size_init) {
   DMPDataIO::reset();
 }
 
@@ -88,12 +86,10 @@ bool DMPDataIO::isValid() {
   if (rt_assert(DataIO::isValid()) == false) {
     return false;
   }
-  if (rt_assert((rt_assert(transform_sys != NULL)) &&
-                (rt_assert(func_approx != NULL))) == false) {
+  if (rt_assert(rt_assert(transform_sys != NULL)) == false) {
     return false;
   }
-  if (rt_assert((rt_assert(transform_sys->isValid())) &&
-                (rt_assert(func_approx->isValid()))) == false) {
+  if (rt_assert(rt_assert(transform_sys->isValid())) == false) {
     return false;
   }
   if (rt_assert(
@@ -112,10 +108,8 @@ bool DMPDataIO::isValid() {
           (rt_assert(save_data_buffer != NULL))) == false) {
     return false;
   }
-  if (rt_assert((rt_assert(dmp_num_dimensions ==
-                           transform_sys->getDMPNumDimensions())) &&
-                (rt_assert(dmp_num_dimensions ==
-                           func_approx->getDMPNumDimensions()))) == false) {
+  if (rt_assert(rt_assert(dmp_num_dimensions ==
+                          transform_sys->getDMPNumDimensions())) == false) {
     return false;
   }
   if (rt_assert((rt_assert(dmp_num_dimensions > 0)) &&
@@ -123,7 +117,7 @@ bool DMPDataIO::isValid() {
       false) {
     return false;
   }
-  if (rt_assert(model_size == func_approx->getModelSize()) == false) {
+  if (rt_assert(model_size == transform_sys->getModelSize()) == false) {
     return false;
   }
   if (rt_assert((rt_assert(model_size > 0)) &&

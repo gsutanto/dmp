@@ -1,5 +1,7 @@
 #include "dmp/dmp_discrete/LearningSystemDiscrete.h"
 
+#include <memory>
+
 namespace dmp {
 
 LearningSystemDiscrete::LearningSystemDiscrete()
@@ -20,6 +22,7 @@ LearningSystemDiscrete::LearningSystemDiscrete(
                      transformation_system_discrete, data_logging_system,
                      real_time_assertor, opt_data_directory_path),
       learning_method(selected_learning_method),
+      transform_sys_discrete(transformation_system_discrete),
       min_coord(ZeroVectorN(MAX_DMP_NUM_DIMENSIONS)),
       max_coord(ZeroVectorN(MAX_DMP_NUM_DIMENSIONS)) {
   min_coord.resize(dmp_num_dimensions);
@@ -30,8 +33,7 @@ bool LearningSystemDiscrete::isValid() {
   if (rt_assert(LearningSystem::isValid()) == false) {
     return false;
   }
-  if (rt_assert(((TransformSystemDiscrete*)transform_sys)->isValid()) ==
-      false) {
+  if (rt_assert(transform_sys_discrete->isValid()) == false) {
     return false;
   }
   if (rt_assert((rt_assert(learning_method >= _SCHAAL_LWR_METHOD_)) &&
@@ -171,8 +173,8 @@ bool LearningSystemDiscrete::learnApproximator(
   VectorN A_learn_average(dmp_num_dimensions);
   A_learn_average = ZeroVectorN(dmp_num_dimensions);
 
-  FuncApproximatorDiscrete* func_approx_discr =
-      ((FuncApproximatorDiscrete*)(transform_sys->getFuncApproxPointer()));
+  std::shared_ptr<FuncApproximatorDiscrete> func_approx_discr =
+      transform_sys_discrete->getFuncApproxDiscretePointer();
 
   uint idx_traj_state = 0;
 

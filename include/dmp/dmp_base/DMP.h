@@ -37,7 +37,6 @@ class DMP {
 
   TauSystem* tau_sys;
   CanonicalSystem* canonical_sys;
-  FunctionApproximator* func_approx;
   TransformationSystem* transform_sys;
   LearningSystem* learning_sys;
   DMPDataIO* data_logger_loader;
@@ -64,8 +63,6 @@ class DMP {
    * @param model_size_init Size of the model (M: number of basis functions or
    * others) used to represent the function
    * @param canonical_system Canonical system that drives this DMP
-   * @param function_approximator Non-linear function approximator that
-   * approximates the forcing term of this DMP
    * @param transform_system Transformation system used in this DMP
    * @param learning_system Learning system for learning the function
    * approximator's parameters
@@ -78,11 +75,9 @@ class DMP {
    * save/log all the data
    */
   DMP(uint dmp_num_dimensions_init, uint model_size_init,
-      CanonicalSystem* canonical_system,
-      FunctionApproximator* function_approximator,
-      TransformationSystem* transform_system, LearningSystem* learning_system,
-      DMPDataIO* dmp_data_io, LoggedDMPVariables* logged_dmp_vars,
-      RealTimeAssertor* real_time_assertor,
+      CanonicalSystem* canonical_system, TransformationSystem* transform_system,
+      LearningSystem* learning_system, DMPDataIO* dmp_data_io,
+      LoggedDMPVariables* logged_dmp_vars, RealTimeAssertor* real_time_assertor,
       const char* opt_data_directory_path = "");
 
   /**
@@ -343,7 +338,8 @@ class DMP {
       const std::vector<bool>&
           is_using_transform_sys_coupling_term_at_dimension_init);
 
-  virtual FunctionApproximator* getFunctionApproximatorPointer();
+  virtual std::shared_ptr<FunctionApproximator>
+  getFunctionApproximatorPointer();
 
   virtual ~DMP();
 };

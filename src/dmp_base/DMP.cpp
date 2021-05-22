@@ -1,5 +1,7 @@
 #include "dmp/dmp_base/DMP.h"
 
+#include <memory>
+
 namespace dmp {
 
 DMP::DMP()
@@ -8,7 +10,6 @@ DMP::DMP()
       is_started(false),
       tau_sys(NULL),
       canonical_sys(NULL),
-      func_approx(NULL),
       transform_sys(NULL),
       learning_sys(NULL),
       data_logger_loader(NULL),
@@ -25,7 +26,6 @@ DMP::DMP()
 
 DMP::DMP(uint dmp_num_dimensions_init, uint model_size_init,
          CanonicalSystem* canonical_system,
-         FunctionApproximator* function_approximator,
          TransformationSystem* transform_system,
          LearningSystem* learning_system, DMPDataIO* dmp_data_io,
          LoggedDMPVariables* logged_dmp_vars,
@@ -36,7 +36,6 @@ DMP::DMP(uint dmp_num_dimensions_init, uint model_size_init,
       is_started(false),
       tau_sys(canonical_system->getTauSystemPointer()),
       canonical_sys(canonical_system),
-      func_approx(function_approximator),
       transform_sys(transform_system),
       learning_sys(learning_system),
       data_logger_loader(dmp_data_io),
@@ -48,8 +47,8 @@ DMP::DMP(uint dmp_num_dimensions_init, uint model_size_init,
       rt_assertor(real_time_assertor) {
   mean_start_position.resize(dmp_num_dimensions);
   mean_goal_position.resize(dmp_num_dimensions);
-  snprintf(data_directory_path, sizeof(data_directory_path),
-           "%s", opt_data_directory_path);
+  snprintf(data_directory_path, sizeof(data_directory_path), "%s",
+           opt_data_directory_path);
 }
 
 bool DMP::isValid() {
@@ -64,7 +63,6 @@ bool DMP::isValid() {
   }
   if (rt_assert((rt_assert(tau_sys != NULL)) &&
                 (rt_assert(canonical_sys != NULL)) &&
-                (rt_assert(func_approx != NULL)) &&
                 (rt_assert(transform_sys != NULL)) &&
                 (rt_assert(learning_sys != NULL)) &&
                 (rt_assert(data_logger_loader != NULL))) == false) {
@@ -72,21 +70,18 @@ bool DMP::isValid() {
   }
   if (rt_assert((rt_assert(tau_sys->isValid())) &&
                 (rt_assert(canonical_sys->isValid())) &&
-                (rt_assert(func_approx->isValid())) &&
                 (rt_assert(transform_sys->isValid())) &&
                 (rt_assert(learning_sys->isValid())) &&
                 (rt_assert(data_logger_loader->isValid()))) == false) {
     return false;
   }
-  if (rt_assert((rt_assert(func_approx->getDMPNumDimensions() ==
-                           dmp_num_dimensions)) &&
-                (rt_assert(transform_sys->getDMPNumDimensions() ==
+  if (rt_assert((rt_assert(transform_sys->getDMPNumDimensions() ==
                            dmp_num_dimensions)) &&
                 (rt_assert(learning_sys->getDMPNumDimensions() ==
                            dmp_num_dimensions))) == false) {
     return false;
   }
-  if (rt_assert((rt_assert(model_size == func_approx->getModelSize())) &&
+  if (rt_assert((rt_assert(model_size == transform_sys->getModelSize())) &&
                 (rt_assert(model_size == learning_sys->getModelSize()))) ==
       false) {
     return false;
@@ -96,14 +91,8 @@ bool DMP::isValid() {
       false) {
     return false;
   }
-  if (rt_assert((rt_assert(canonical_sys ==
-                           func_approx->getCanonicalSystemPointer())) &&
-                (rt_assert(canonical_sys ==
-                           transform_sys->getCanonicalSystemPointer()))) ==
-      false) {
-    return false;
-  }
-  if (rt_assert(func_approx == transform_sys->getFuncApproxPointer()) ==
+  if (rt_assert(rt_assert(canonical_sys ==
+                          transform_sys->getCanonicalSystemPointer())) ==
       false) {
     return false;
   }
@@ -240,8 +229,8 @@ bool DMP::setDataDirectory(const char* new_data_dir_path) {
     return false;
   }
 
-  snprintf(data_directory_path, sizeof(data_directory_path),
-           "%s", new_data_dir_path);
+  snprintf(data_directory_path, sizeof(data_directory_path), "%s",
+           new_data_dir_path);
 
   return true;
 }
@@ -282,8 +271,8 @@ bool DMP::setTransformSystemCouplingTermUsagePerDimensions(
       is_using_transform_sys_coupling_term_at_dimension_init)));
 }
 
-FunctionApproximator* DMP::getFunctionApproximatorPointer() {
-  return func_approx;
+std::shared_ptr<FunctionApproximator> DMP::getFunctionApproximatorPointer() {
+  return transform_sys->getFuncApproxPointer();
 }
 
 DMP::~DMP() {}

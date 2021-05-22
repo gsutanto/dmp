@@ -29,7 +29,6 @@ class DMPDiscrete : public DMP {
   // Object-Oriented Programming (OOP)
   TransformSystemDiscrete* transform_sys_discrete;
 
-  FuncApproximatorDiscrete func_approx_discrete;
   LearningSystemDiscrete learning_sys_discrete;
   DMPDataIODiscrete data_logger_loader_discrete;
 

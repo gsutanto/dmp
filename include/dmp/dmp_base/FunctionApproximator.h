@@ -74,9 +74,9 @@ class FunctionApproximator {
   virtual uint getDMPNumDimensions();
 
   /**
-   * Returns model size used to represent the function.
+   * Returns model size used to represent the forcing term function.
    *
-   * @return Model size used to represent the function
+   * @return Model size used to represent the forcing term function
    */
   virtual uint getModelSize();
 

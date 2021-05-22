@@ -7,7 +7,7 @@ TransformationSystem::TransformationSystem()
       is_started(false),
       is_using_coupling_term_at_dimension(std::vector<bool>()),
       tau_sys(NULL),
-      func_approx(NULL),
+      func_approx(nullptr),
       transform_coupling(NULL),
       start_state(NULL),
       current_state(NULL),
@@ -23,7 +23,7 @@ TransformationSystem::TransformationSystem()
 TransformationSystem::TransformationSystem(
     uint dmp_num_dimensions_init, TauSystem* tau_system,
     CanonicalSystem* canonical_system,
-    FunctionApproximator* function_approximator,
+    std::shared_ptr<FunctionApproximator> function_approximator,
     LoggedDMPVariables* logged_dmp_vars, RealTimeAssertor* real_time_assertor,
     DMPState* start_dmpstate, DMPState* current_dmpstate,
     DMPState* current_velocity_dmpstate, GoalSystem* goal_system,
@@ -63,9 +63,8 @@ TransformationSystem::TransformationSystem(
   }
 
   if (goal_system == NULL) {
-    goal_sys = new GoalSystem(dmp_num_dimensions_init,
-                              tau_system,
-                              real_time_assertor);
+    goal_sys =
+        new GoalSystem(dmp_num_dimensions_init, tau_system, real_time_assertor);
     is_goal_sys_obj_created_here = true;
   } else {
     goal_sys = goal_system;
@@ -92,8 +91,7 @@ bool TransformationSystem::isValid() {
   }
   if (rt_assert((rt_assert(tau_sys == goal_sys->getTauSystemPointer())) &&
                 (rt_assert(tau_sys == func_approx->getCanonicalSystemPointer()
-                           ->getTauSystemPointer()))) ==
-      false) {
+                                          ->getTauSystemPointer()))) == false) {
     return false;
   }
   if (rt_assert((rt_assert(start_state != NULL)) &&
@@ -162,6 +160,10 @@ bool TransformationSystem::getCouplingTerm(VectorN& accumulated_ct_acc,
 }
 
 uint TransformationSystem::getDMPNumDimensions() { return dmp_num_dimensions; }
+
+uint TransformationSystem::getModelSize() {
+  return func_approx->getModelSize();
+}
 
 DMPState TransformationSystem::getStartState() { return (*start_state); }
 
@@ -260,15 +262,14 @@ bool TransformationSystem::setSteadyStateGoalPosition(const VectorN& new_G) {
   return (rt_assert(goal_sys->setSteadyStateGoalPosition(new_G)));
 }
 
-TauSystem* TransformationSystem::getTauSystemPointer() {
-  return tau_sys;
-}
+TauSystem* TransformationSystem::getTauSystemPointer() { return tau_sys; }
 
 CanonicalSystem* TransformationSystem::getCanonicalSystemPointer() {
   return func_approx->getCanonicalSystemPointer();
 }
 
-FunctionApproximator* TransformationSystem::getFuncApproxPointer() {
+std::shared_ptr<FunctionApproximator>
+TransformationSystem::getFuncApproxPointer() {
   return func_approx;
 }
 

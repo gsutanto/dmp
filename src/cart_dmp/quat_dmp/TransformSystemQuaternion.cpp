@@ -11,7 +11,7 @@ TransformSystemQuaternion::TransformSystemQuaternion()
 
 TransformSystemQuaternion::TransformSystemQuaternion(
     CanonicalSystemDiscrete* canonical_system_discrete,
-    FuncApproximatorDiscrete* func_approximator_discrete,
+    std::shared_ptr<FuncApproximatorDiscrete> func_approximator_discrete,
     LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
     RealTimeAssertor* real_time_assertor,
     std::vector<bool> is_using_scaling_init,
@@ -19,8 +19,8 @@ TransformSystemQuaternion::TransformSystemQuaternion(
     double ts_beta)
     : TransformSystemDiscrete(
           3, canonical_system_discrete, func_approximator_discrete,
-          logged_dmp_discrete_vars, real_time_assertor,
-          is_using_scaling_init, &start_quat_state, &current_quat_state,
+          logged_dmp_discrete_vars, real_time_assertor, is_using_scaling_init,
+          &start_quat_state, &current_quat_state,
           &current_angular_velocity_state, &quat_goal_sys, transform_couplers,
           ts_alpha, ts_beta, _SCHAAL_DMP_),
       start_quat_state(QuaternionDMPState(real_time_assertor)),
@@ -387,8 +387,8 @@ bool TransformSystemQuaternion::getTargetQuaternionCouplingTerm(
 
   // compute scaling factor for the forcing term:
   Vector3 A_demo = ZeroVector3;
-  if (rt_assert(computeLogQuaternionDifference(QG_demo, Q0_demo,
-                                                    A_demo)) == false) {
+  if (rt_assert(computeLogQuaternionDifference(QG_demo, Q0_demo, A_demo)) ==
+      false) {
     return false;
   }
 
