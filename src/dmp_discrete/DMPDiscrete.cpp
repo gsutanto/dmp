@@ -353,6 +353,11 @@ uint DMPDiscrete::getLearningSysMethod() {
   return (learning_sys_discrete.getLearningMethod());
 }
 
+std::shared_ptr<FuncApproximatorDiscrete>
+DMPDiscrete::getFuncApproxDiscretePointer() {
+  return (transform_sys_discrete->getFuncApproxDiscretePointer());
+}
+
 DMPDiscrete::~DMPDiscrete() {}
 
 }  // namespace dmp

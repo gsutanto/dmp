@@ -18,7 +18,7 @@ TransformCouplingLearnObsAvoid::TransformCouplingLearnObsAvoid()
       ctraj_hmg_transform_global_to_local_matrix(NULL),
       goal_cartesian_position_global(NULL),
       goal_cartesian_position_local(ZeroVector3),
-      func_approx_discrete(NULL) {
+      func_approx_discrete(nullptr) {
   snprintf(data_directory_path, sizeof(data_directory_path), "");
 }
 
@@ -42,7 +42,7 @@ TransformCouplingLearnObsAvoid::TransformCouplingLearnObsAvoid(
     bool opt_is_constraining_Rp_yd_relationship,
     bool opt_is_logging_learning_data, const char* opt_data_directory_path,
     Vector3* goal_position_global,
-    FuncApproximatorDiscrete* function_approximator_discrete)
+    std::shared_ptr<FuncApproximatorDiscrete> function_approximator_discrete)
     : TransformCoupling(3, real_time_assertor),
       loa_feat_param(loa_feature_parameter),
       cart_coord_transformer(CartesianCoordTransformer(real_time_assertor)),

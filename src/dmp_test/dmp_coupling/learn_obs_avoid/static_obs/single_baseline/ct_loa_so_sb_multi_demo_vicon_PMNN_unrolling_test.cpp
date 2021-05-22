@@ -219,7 +219,7 @@ int main(int argc, char** argv) {
       &point_obstacles_cart_state_global,
       &ctraj_hmg_transform_global_to_local_matrix, &rt_assertor, true, true,
       loa_plot_dir_path, &goal_cart_position_global,
-      (FuncApproximatorDiscrete*)cart_dmp.getFunctionApproximatorPointer());
+      cart_dmp.getFuncApproxDiscretePointer());
 
   // Turn-off all scaling for now:
   std::vector<bool> is_using_scaling_init = std::vector<bool>(3, false);
