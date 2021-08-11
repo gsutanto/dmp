@@ -16,6 +16,7 @@
 #define TRANSFORM_SYSTEM_DISCRETE_H
 
 #include <memory>
+
 #include "dmp/dmp_base/TransformationSystem.h"
 #include "dmp/dmp_discrete/CanonicalSystemDiscrete.h"
 #include "dmp/dmp_discrete/FuncApproximatorDiscrete.h"
