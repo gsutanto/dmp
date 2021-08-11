@@ -142,7 +142,7 @@ class DMPDataIODiscrete : public DMPDataIO {
   /**
    * Returns the discrete function approximator pointer.
    */
-  std::shared_ptr<FuncApproximatorDiscrete> getFuncApproxDiscretePointer();
+  FuncApproximatorDiscrete* getFuncApproxDiscretePointer();
 
   ~DMPDataIODiscrete();
 };

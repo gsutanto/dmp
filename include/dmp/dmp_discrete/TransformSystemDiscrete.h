@@ -15,6 +15,7 @@
 #ifndef TRANSFORM_SYSTEM_DISCRETE_H
 #define TRANSFORM_SYSTEM_DISCRETE_H
 
+#include <memory>
 #include "dmp/dmp_base/TransformationSystem.h"
 #include "dmp/dmp_discrete/CanonicalSystemDiscrete.h"
 #include "dmp/dmp_discrete/FuncApproximatorDiscrete.h"
@@ -30,7 +31,7 @@ class TransformSystemDiscrete : public TransformationSystem {
   std::vector<bool> is_using_scaling;  // only relevant for Schaal's DMP Model
   VectorN A_learn;  // amplitude = (G - y_0) value during learning
 
-  std::shared_ptr<FuncApproximatorDiscrete> func_approx_discrete;
+  std::unique_ptr<FuncApproximatorDiscrete> func_approx_discrete;
   LoggedDMPDiscreteVariables* logged_dmp_discrete_variables;
 
  public:
@@ -72,7 +73,7 @@ class TransformSystemDiscrete : public TransformationSystem {
   TransformSystemDiscrete(
       uint dmp_num_dimensions_init,
       CanonicalSystemDiscrete* canonical_system_discrete,
-      std::shared_ptr<FuncApproximatorDiscrete> func_approximator_discrete,
+      std::unique_ptr<FuncApproximatorDiscrete> func_approximator_discrete,
       LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
       RealTimeAssertor* real_time_assertor,
       std::vector<bool> is_using_scaling_init,
@@ -211,8 +212,7 @@ class TransformSystemDiscrete : public TransformationSystem {
   /**
    * Returns the discrete function approximator pointer.
    */
-  virtual std::shared_ptr<FuncApproximatorDiscrete>
-  getFuncApproxDiscretePointer();
+  virtual FuncApproximatorDiscrete* getFuncApproxDiscretePointer();
 
   ~TransformSystemDiscrete();
 };

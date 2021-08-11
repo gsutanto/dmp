@@ -47,7 +47,7 @@ class TransformationSystem {
   std::vector<bool> is_using_coupling_term_at_dimension;
 
   TauSystem* tau_sys;
-  std::shared_ptr<FunctionApproximator> func_approx;
+  FunctionApproximator* func_approx;  // No ownership.
   LoggedDMPVariables* logged_dmp_variables;
   std::vector<TransformCoupling*>* transform_coupling;
 
@@ -88,7 +88,7 @@ class TransformationSystem {
   TransformationSystem(
       uint dmp_num_dimensions_init, TauSystem* tau_system,
       CanonicalSystem* canonical_system,
-      std::shared_ptr<FunctionApproximator> function_approximator,
+      FunctionApproximator* function_approximator,
       LoggedDMPVariables* logged_dmp_vars, RealTimeAssertor* real_time_assertor,
       DMPState* start_dmpstate = NULL, DMPState* current_dmpstate = NULL,
       DMPState* current_velocity_dmpstate = NULL,
@@ -305,7 +305,7 @@ class TransformationSystem {
   /**
    * Returns the function approximator pointer.
    */
-  virtual std::shared_ptr<FunctionApproximator> getFuncApproxPointer();
+  virtual FunctionApproximator* getFuncApproxPointer();
 
   virtual bool setCouplingTermUsagePerDimensions(
       const std::vector<bool>& is_using_coupling_term_at_dimension_init);

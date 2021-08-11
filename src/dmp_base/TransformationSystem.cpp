@@ -23,7 +23,7 @@ TransformationSystem::TransformationSystem()
 TransformationSystem::TransformationSystem(
     uint dmp_num_dimensions_init, TauSystem* tau_system,
     CanonicalSystem* canonical_system,
-    std::shared_ptr<FunctionApproximator> function_approximator,
+    FunctionApproximator* function_approximator,
     LoggedDMPVariables* logged_dmp_vars, RealTimeAssertor* real_time_assertor,
     DMPState* start_dmpstate, DMPState* current_dmpstate,
     DMPState* current_velocity_dmpstate, GoalSystem* goal_system,
@@ -268,8 +268,7 @@ CanonicalSystem* TransformationSystem::getCanonicalSystemPointer() {
   return func_approx->getCanonicalSystemPointer();
 }
 
-std::shared_ptr<FunctionApproximator>
-TransformationSystem::getFuncApproxPointer() {
+FunctionApproximator* TransformationSystem::getFuncApproxPointer() {
   return func_approx;
 }
 

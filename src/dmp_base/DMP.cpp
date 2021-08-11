@@ -271,7 +271,7 @@ bool DMP::setTransformSystemCouplingTermUsagePerDimensions(
       is_using_transform_sys_coupling_term_at_dimension_init)));
 }
 
-std::shared_ptr<FunctionApproximator> DMP::getFunctionApproximatorPointer() {
+FunctionApproximator* DMP::getFunctionApproximatorPointer() {
   return transform_sys->getFuncApproxPointer();
 }
 

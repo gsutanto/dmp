@@ -338,8 +338,7 @@ class DMPDiscrete : public DMP {
   /**
    * Returns the discrete function approximator pointer.
    */
-  virtual std::shared_ptr<FuncApproximatorDiscrete>
-  getFuncApproxDiscretePointer();
+  virtual FuncApproximatorDiscrete* getFuncApproxDiscretePointer();
 
   ~DMPDiscrete();
 };

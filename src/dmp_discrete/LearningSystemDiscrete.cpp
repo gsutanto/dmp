@@ -173,7 +173,7 @@ bool LearningSystemDiscrete::learnApproximator(
   VectorN A_learn_average(dmp_num_dimensions);
   A_learn_average = ZeroVectorN(dmp_num_dimensions);
 
-  std::shared_ptr<FuncApproximatorDiscrete> func_approx_discr =
+  FuncApproximatorDiscrete* func_approx_discr =
       transform_sys_discrete->getFuncApproxDiscretePointer();
 
   uint idx_traj_state = 0;

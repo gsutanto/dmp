@@ -18,7 +18,7 @@ DMPDiscrete1D::DMPDiscrete1D(
     std::vector<TransformCoupling*>* transform_couplers)
     : transform_sys_discrete_1D(TransformSystemDiscrete(
           1, canonical_system_discrete,
-          std::make_shared<FuncApproximatorDiscrete>(1, model_size_init,
+          std::make_unique<FuncApproximatorDiscrete>(1, model_size_init,
                                                      canonical_system_discrete,
                                                      real_time_assertor),
           &logged_dmp_discrete_variables, real_time_assertor,

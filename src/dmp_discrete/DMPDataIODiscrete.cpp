@@ -192,8 +192,7 @@ TransformSystemDiscrete* DMPDataIODiscrete::getTransformSysDiscretePointer() {
   return (transform_sys_discrete);
 }
 
-std::shared_ptr<FuncApproximatorDiscrete>
-DMPDataIODiscrete::getFuncApproxDiscretePointer() {
+FuncApproximatorDiscrete* DMPDataIODiscrete::getFuncApproxDiscretePointer() {
   return (transform_sys_discrete->getFuncApproxDiscretePointer());
 }
 

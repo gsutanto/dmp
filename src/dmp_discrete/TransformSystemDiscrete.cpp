@@ -16,7 +16,7 @@ TransformSystemDiscrete::TransformSystemDiscrete()
 TransformSystemDiscrete::TransformSystemDiscrete(
     uint dmp_num_dimensions_init,
     CanonicalSystemDiscrete* canonical_system_discrete,
-    std::shared_ptr<FuncApproximatorDiscrete> func_approximator_discrete,
+    std::unique_ptr<FuncApproximatorDiscrete> func_approximator_discrete,
     LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
     RealTimeAssertor* real_time_assertor,
     std::vector<bool> is_using_scaling_init, DMPState* start_dmpstate_discrete,
@@ -28,7 +28,7 @@ TransformSystemDiscrete::TransformSystemDiscrete(
     : TransformationSystem(
           dmp_num_dimensions_init,
           canonical_system_discrete->getTauSystemPointer(),
-          canonical_system_discrete, func_approximator_discrete,
+          canonical_system_discrete, func_approximator_discrete.get(),
           logged_dmp_discrete_vars, real_time_assertor, start_dmpstate_discrete,
           current_dmpstate_discrete, current_velocity_dmpstate_discrete,
           goal_system_discrete, transform_couplers),
@@ -37,7 +37,7 @@ TransformSystemDiscrete::TransformSystemDiscrete(
       beta(ts_beta),
       is_using_scaling(is_using_scaling_init),
       A_learn(OnesVectorN(MAX_DMP_NUM_DIMENSIONS)),
-      func_approx_discrete(func_approximator_discrete),
+      func_approx_discrete(std::move(func_approximator_discrete)),
       logged_dmp_discrete_variables(logged_dmp_discrete_vars) {
   A_learn.resize(dmp_num_dimensions);
 }
@@ -46,7 +46,7 @@ bool TransformSystemDiscrete::isValid() {
   if (rt_assert(TransformationSystem::isValid()) == false) {
     return false;
   }
-  if (rt_assert((rt_assert(func_approx_discrete == func_approx)) &&
+  if (rt_assert((rt_assert(func_approx_discrete.get() == func_approx)) &&
                 (rt_assert(logged_dmp_discrete_variables ==
                            logged_dmp_variables))) == false) {
     return false;
@@ -484,9 +484,9 @@ uint TransformSystemDiscrete::getFormulationType() {
   return (formulation_type);
 }
 
-std::shared_ptr<FuncApproximatorDiscrete>
+FuncApproximatorDiscrete*
 TransformSystemDiscrete::getFuncApproxDiscretePointer() {
-  return func_approx_discrete;
+  return func_approx_discrete.get();
 }
 
 TransformSystemDiscrete::~TransformSystemDiscrete() {}

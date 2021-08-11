@@ -57,7 +57,7 @@ class TransformSystemQuaternion : public TransformSystemDiscrete {
    */
   TransformSystemQuaternion(
       CanonicalSystemDiscrete* canonical_system_discrete,
-      std::shared_ptr<FuncApproximatorDiscrete> func_approximator_discrete,
+      std::unique_ptr<FuncApproximatorDiscrete> func_approximator_discrete,
       LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
       RealTimeAssertor* real_time_assertor,
       std::vector<bool> is_using_scaling_init,

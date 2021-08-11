@@ -11,14 +11,14 @@ TransformSystemQuaternion::TransformSystemQuaternion()
 
 TransformSystemQuaternion::TransformSystemQuaternion(
     CanonicalSystemDiscrete* canonical_system_discrete,
-    std::shared_ptr<FuncApproximatorDiscrete> func_approximator_discrete,
+    std::unique_ptr<FuncApproximatorDiscrete> func_approximator_discrete,
     LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
     RealTimeAssertor* real_time_assertor,
     std::vector<bool> is_using_scaling_init,
     std::vector<TransformCoupling*>* transform_couplers, double ts_alpha,
     double ts_beta)
     : TransformSystemDiscrete(
-          3, canonical_system_discrete, func_approximator_discrete,
+          3, canonical_system_discrete, std::move(func_approximator_discrete),
           logged_dmp_discrete_vars, real_time_assertor, is_using_scaling_init,
           &start_quat_state, &current_quat_state,
           &current_angular_velocity_state, &quat_goal_sys, transform_couplers,

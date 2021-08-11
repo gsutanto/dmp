@@ -19,7 +19,7 @@ QuaternionDMP::QuaternionDMP(
     std::vector<TransformCoupling*>* transform_couplers)
     : transform_sys_discrete_quat(TransformSystemQuaternion(
           canonical_system_discrete,
-          std::make_shared<FuncApproximatorDiscrete>(3, model_size_init,
+          std::make_unique<FuncApproximatorDiscrete>(3, model_size_init,
                                                      canonical_system_discrete,
                                                      real_time_assertor),
           &logged_dmp_discrete_variables, real_time_assertor,
