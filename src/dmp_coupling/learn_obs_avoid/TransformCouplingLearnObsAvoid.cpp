@@ -42,7 +42,7 @@ TransformCouplingLearnObsAvoid::TransformCouplingLearnObsAvoid(
     bool opt_is_constraining_Rp_yd_relationship,
     bool opt_is_logging_learning_data, const char* opt_data_directory_path,
     Vector3* goal_position_global,
-    std::shared_ptr<FuncApproximatorDiscrete> function_approximator_discrete)
+    FuncApproximatorDiscrete* function_approximator_discrete)
     : TransformCoupling(3, real_time_assertor),
       loa_feat_param(loa_feature_parameter),
       cart_coord_transformer(CartesianCoordTransformer(real_time_assertor)),
