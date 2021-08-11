@@ -33,9 +33,9 @@ typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::AutoAlign,
                       2, MAX_NN_NUM_NODES_PER_LAYER>
     MatrixNN_2xN;
 
-typedef std::shared_ptr<MatrixNN_NxN> MatrixNN_NxNPtr;
-typedef std::shared_ptr<VectorNN_N> VectorNN_NPtr;
-typedef std::shared_ptr<MatrixNN_2xN> MatrixNN_2xNPtr;
+typedef std::unique_ptr<MatrixNN_NxN> MatrixNN_NxNPtr;
+typedef std::unique_ptr<VectorNN_N> VectorNN_NPtr;
+typedef std::unique_ptr<MatrixNN_2xN> MatrixNN_2xNPtr;
 
 #define ZeroVectorNN_N(N)                                    \
   Eigen::Matrix<double, Eigen::Dynamic, 1, Eigen::AutoAlign, \

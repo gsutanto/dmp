@@ -251,8 +251,8 @@ class DataIO {
    */
   bool extractSetCartCoordDemonstrationGroups(
       const char* in_data_dir_path,
-      DemonstrationGroupSet& demo_group_set_global,
-      uint& N_demo_settings, uint max_num_trajs_per_setting = 500,
+      DemonstrationGroupSet& demo_group_set_global, uint& N_demo_settings,
+      uint max_num_trajs_per_setting = 500,
       std::vector<uint>* selected_obs_avoid_setting_numbers = NULL,
       VecVecDMPUnrollInitParams* demo_group_set_dmp_unroll_init_params = NULL);
 
@@ -470,7 +470,7 @@ class DataIO {
    */
   template <class T>
   bool readMatrixFromFile(const char* file_path,
-                          std::shared_ptr<T>& matrix_data_structure) {
+                          std::unique_ptr<T>& matrix_data_structure) {
     bool is_real_time = false;
 
     if (rt_assert(DataIO::isValid()) == false) {

@@ -78,10 +78,10 @@ enum DMPCouplingTermLearnObsAvoidDataFileFormat
 };
 
 typedef std::vector< dmp::DMPState >                ObstacleStates;
-typedef std::shared_ptr< ObstacleStates >         ObstacleStatesPtr;
+typedef std::unique_ptr< ObstacleStates >         ObstacleStatesPtr;
 
 typedef std::vector< ObstacleStates >               ObstacleStatesVector;
-typedef std::shared_ptr< ObstacleStatesVector >   ObstacleStatesVectorPtr;
+typedef std::unique_ptr< ObstacleStatesVector >   ObstacleStatesVectorPtr;
 
 typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::AutoAlign, MAX_TRAJ_SIZE, MAX_LOA_NUM_FEATURE_VECTOR_SIZE>                 MatrixloaTxF3;
 typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::AutoAlign, (3*MAX_TRAJ_SIZE), MAX_LOA_NUM_FEATURE_MATRIX_ROWS>             Matrixloa3TxF1;
@@ -108,30 +108,30 @@ typedef Eigen::Matrix<double, Eigen::Dynamic, 1, Eigen::AutoAlign, MAX_NN_NUM_FE
 typedef Eigen::Matrix<double, Eigen::Dynamic, 1, Eigen::AutoAlign, MAX_NN_NUM_HIDDEN_NODES>                                                     VectorloaNN_H;
 typedef Eigen::Matrix<double, Eigen::Dynamic, 1, Eigen::AutoAlign, MAX_NN_NUM_OUTPUT_NODES>                                                     VectorloaNN_O;
 
-typedef std::shared_ptr< MatrixloaTxF3 >      MatrixloaTxF3Ptr;
-typedef std::shared_ptr< Matrixloa3TxF1 >     Matrixloa3TxF1Ptr;
-typedef std::shared_ptr< MatrixloaF1x3 >      MatrixloaF1x3Ptr;
-typedef std::shared_ptr< MatrixloaGxG >       MatrixloaGxGPtr;
-typedef std::shared_ptr< MatrixloaG2xG >      MatrixloaG2xGPtr;
-typedef std::shared_ptr< MatrixloaF3x3 >      MatrixloaF3x3Ptr;
-typedef std::shared_ptr< MatrixloaUxF3 >      MatrixloaUxF3Ptr;
-typedef std::shared_ptr< MatrixloaNN_HxI >    MatrixloaNN_HxIPtr;
-typedef std::shared_ptr< MatrixloaNN_HxH >    MatrixloaNN_HxHPtr;
-typedef std::shared_ptr< MatrixloaNN_OxH >    MatrixloaNN_OxHPtr;
-typedef std::shared_ptr< Matrixloa3xF3 >      Matrixloa3xF3Ptr;
-typedef std::shared_ptr< Matrixloa3xO >       Matrixloa3xOPtr;
-typedef std::shared_ptr< Matrixloa3xG >       Matrixloa3xGPtr;
-typedef std::shared_ptr< Matrixloa3xG2 >      Matrixloa3xG2Ptr;
-typedef std::shared_ptr< Matrixloa3xG3 >      Matrixloa3xG3Ptr;
-typedef std::shared_ptr< Vectorloa3T >        Vectorloa3TPtr;
-typedef std::shared_ptr< VectorloaG >         VectorloaGPtr;
-typedef std::shared_ptr< VectorloaG2 >        VectorloaG2Ptr;
-typedef std::shared_ptr< VectorloaG3 >        VectorloaG3Ptr;
-typedef std::shared_ptr< VectorloaF1 >        VectorloaF1Ptr;
-typedef std::shared_ptr< VectorloaF3 >        VectorloaF3Ptr;
-typedef std::shared_ptr< VectorloaNN_I >      VectorloaNN_IPtr;
-typedef std::shared_ptr< VectorloaNN_H >      VectorloaNN_HPtr;
-typedef std::shared_ptr< VectorloaNN_O >      VectorloaNN_OPtr;
+typedef std::unique_ptr< MatrixloaTxF3 >      MatrixloaTxF3Ptr;
+typedef std::unique_ptr< Matrixloa3TxF1 >     Matrixloa3TxF1Ptr;
+typedef std::unique_ptr< MatrixloaF1x3 >      MatrixloaF1x3Ptr;
+typedef std::unique_ptr< MatrixloaGxG >       MatrixloaGxGPtr;
+typedef std::unique_ptr< MatrixloaG2xG >      MatrixloaG2xGPtr;
+typedef std::unique_ptr< MatrixloaF3x3 >      MatrixloaF3x3Ptr;
+typedef std::unique_ptr< MatrixloaUxF3 >      MatrixloaUxF3Ptr;
+typedef std::unique_ptr< MatrixloaNN_HxI >    MatrixloaNN_HxIPtr;
+typedef std::unique_ptr< MatrixloaNN_HxH >    MatrixloaNN_HxHPtr;
+typedef std::unique_ptr< MatrixloaNN_OxH >    MatrixloaNN_OxHPtr;
+typedef std::unique_ptr< Matrixloa3xF3 >      Matrixloa3xF3Ptr;
+typedef std::unique_ptr< Matrixloa3xO >       Matrixloa3xOPtr;
+typedef std::unique_ptr< Matrixloa3xG >       Matrixloa3xGPtr;
+typedef std::unique_ptr< Matrixloa3xG2 >      Matrixloa3xG2Ptr;
+typedef std::unique_ptr< Matrixloa3xG3 >      Matrixloa3xG3Ptr;
+typedef std::unique_ptr< Vectorloa3T >        Vectorloa3TPtr;
+typedef std::unique_ptr< VectorloaG >         VectorloaGPtr;
+typedef std::unique_ptr< VectorloaG2 >        VectorloaG2Ptr;
+typedef std::unique_ptr< VectorloaG3 >        VectorloaG3Ptr;
+typedef std::unique_ptr< VectorloaF1 >        VectorloaF1Ptr;
+typedef std::unique_ptr< VectorloaF3 >        VectorloaF3Ptr;
+typedef std::unique_ptr< VectorloaNN_I >      VectorloaNN_IPtr;
+typedef std::unique_ptr< VectorloaNN_H >      VectorloaNN_HPtr;
+typedef std::unique_ptr< VectorloaNN_O >      VectorloaNN_OPtr;
 
 #define ZeroMatrixloaTxF3(T,F3) Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::AutoAlign, MAX_TRAJ_SIZE, MAX_LOA_NUM_FEATURE_VECTOR_SIZE>::Zero(T,F3)
 #define ZeroMatrixloaF1x3(F1)   Eigen::Matrix<double, Eigen::Dynamic, 3, Eigen::AutoAlign, MAX_LOA_NUM_FEATURE_MATRIX_ROWS>::Zero(F1,3)

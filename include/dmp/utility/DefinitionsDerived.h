@@ -32,29 +32,29 @@ namespace dmp {
 #define MAX_NUM_POINTS 100
 
 typedef std::vector<Vector3> Points;
-typedef std::shared_ptr<Points> PointsPtr;
+typedef std::unique_ptr<Points> PointsPtr;
 
 typedef std::vector<Points> PointsVector;
-typedef std::shared_ptr<PointsVector> PointsVectorPtr;
+typedef std::unique_ptr<PointsVector> PointsVectorPtr;
 
 typedef std::vector<dmp::DMPState> DMPStates;
 
-typedef std::shared_ptr<dmp::DMPState> DMPStatePtr;
+typedef std::unique_ptr<dmp::DMPState> DMPStatePtr;
 
 typedef std::vector<dmp::DMPState> Trajectory;
-typedef std::shared_ptr<Trajectory> TrajectoryPtr;
+typedef std::unique_ptr<Trajectory> TrajectoryPtr;
 
 typedef std::vector<dmp::QuaternionDMPState> QuaternionTrajectory;
-typedef std::shared_ptr<QuaternionTrajectory> QuaternionTrajectoryPtr;
+typedef std::unique_ptr<QuaternionTrajectory> QuaternionTrajectoryPtr;
 
 typedef std::vector<Trajectory> TrajectorySet;
-typedef std::shared_ptr<TrajectorySet> TrajectorySetPtr;
+typedef std::unique_ptr<TrajectorySet> TrajectorySetPtr;
 
 typedef std::vector<QuaternionTrajectory> QuaternionTrajectorySet;
-typedef std::shared_ptr<QuaternionTrajectorySet> QuaternionTrajectorySetPtr;
+typedef std::unique_ptr<QuaternionTrajectorySet> QuaternionTrajectorySetPtr;
 
 typedef std::vector<TrajectorySet> DemonstrationGroupSet;
-typedef std::shared_ptr<DemonstrationGroupSet> DemonstrationGroupSetPtr;
+typedef std::unique_ptr<DemonstrationGroupSet> DemonstrationGroupSetPtr;
 
 typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::AutoAlign,
                       MAX_TRAJ_SIZE, MAX_SAVE_BUFFER_COL_SIZE>
@@ -93,16 +93,16 @@ typedef Eigen::Matrix<double, Eigen::Dynamic, 1, Eigen::AutoAlign,
                       MAX_TRAJ_SIZE>
     VectorT;
 
-typedef std::shared_ptr<MatrixTxSBC> MatrixTxSBCPtr;
-typedef std::shared_ptr<MatrixTxMp1> MatrixTxMp1Ptr;
-typedef std::shared_ptr<MatrixTxS> MatrixTxSPtr;
-typedef std::shared_ptr<MatrixTxNp1> MatrixTxNp1Ptr;
-typedef std::shared_ptr<MatrixTx4> MatrixTx4Ptr;
-typedef std::shared_ptr<MatrixTx3> MatrixTx3Ptr;
-typedef std::shared_ptr<MatrixTx2> MatrixTx2Ptr;
-typedef std::shared_ptr<Matrix4xT> Matrix4xTPtr;
-typedef std::shared_ptr<Matrix3xT> Matrix3xTPtr;
-typedef std::shared_ptr<VectorT> VectorTPtr;
+typedef std::unique_ptr<MatrixTxSBC> MatrixTxSBCPtr;
+typedef std::unique_ptr<MatrixTxMp1> MatrixTxMp1Ptr;
+typedef std::unique_ptr<MatrixTxS> MatrixTxSPtr;
+typedef std::unique_ptr<MatrixTxNp1> MatrixTxNp1Ptr;
+typedef std::unique_ptr<MatrixTx4> MatrixTx4Ptr;
+typedef std::unique_ptr<MatrixTx3> MatrixTx3Ptr;
+typedef std::unique_ptr<MatrixTx2> MatrixTx2Ptr;
+typedef std::unique_ptr<Matrix4xT> Matrix4xTPtr;
+typedef std::unique_ptr<Matrix3xT> Matrix3xTPtr;
+typedef std::unique_ptr<VectorT> VectorTPtr;
 
 #define ZeroMatrixTxSBC(T, SBC)                                           \
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::AutoAlign, \

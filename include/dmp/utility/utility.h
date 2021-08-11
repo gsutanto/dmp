@@ -156,7 +156,7 @@ Vector3 computeClosestPointOnSphereSurface(const Vector3& evaluation_point,
  * @return Success or failure
  */
 template <class T>
-bool isMemoryAllocated(const std::shared_ptr<T>& smart_pointer, uint row_size,
+bool isMemoryAllocated(const std::unique_ptr<T>& smart_pointer, uint row_size,
                        uint col_size) {
   if (smart_pointer == NULL) {
     return false;
@@ -190,7 +190,7 @@ bool isMemoryAllocated(const std::shared_ptr<T>& smart_pointer, uint row_size,
  */
 template <class T>
 bool allocateMemoryIfNonRealTime(bool is_real_time,
-                                 std::shared_ptr<T>& smart_pointer,
+                                 std::unique_ptr<T>& smart_pointer,
                                  uint row_size, uint col_size) {
   // input checking:
   // (we are only allowed to allocate memory on heap if we operate in
@@ -244,7 +244,7 @@ bool allocateMemoryIfNonRealTime(bool is_real_time,
  * @return Success or failure
  */
 template <class T>
-bool resizeAndReset(std::shared_ptr<T>& smart_pointer, uint row_size,
+bool resizeAndReset(std::unique_ptr<T>& smart_pointer, uint row_size,
                     uint col_size) {
   // input checking:
   if (smart_pointer == NULL) {
@@ -293,7 +293,7 @@ bool resizeAndReset(std::shared_ptr<T>& smart_pointer, uint row_size,
  * @return Success or failure
  */
 template <class T>
-bool isMemoryAllocated(const std::shared_ptr<T>& smart_pointer, uint size) {
+bool isMemoryAllocated(const std::unique_ptr<T>& smart_pointer, uint size) {
   if (smart_pointer == NULL) {
     return false;
   }
@@ -323,7 +323,7 @@ bool isMemoryAllocated(const std::shared_ptr<T>& smart_pointer, uint size) {
  */
 template <class T>
 bool allocateMemoryIfNonRealTime(
-    bool is_real_time, std::shared_ptr<std::vector<T> >& smart_pointer,
+    bool is_real_time, std::unique_ptr<std::vector<T> >& smart_pointer,
     uint size = 0) {
   // input checking:
   // (we are only allowed to allocate memory on heap if we operate in

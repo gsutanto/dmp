@@ -44,9 +44,9 @@ enum DMPForcingTermLearningMethod {
 };
 
 typedef std::vector<double> DoubleVector;
-typedef std::shared_ptr<DoubleVector> DoubleVectorPtr;
+typedef std::unique_ptr<DoubleVector> DoubleVectorPtr;
 
-typedef std::shared_ptr<char[]> CharArr;
+typedef std::unique_ptr<char[]> CharArr;
 
 typedef Eigen::MatrixXd MatrixXxX;
 typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::AutoAlign,
@@ -72,12 +72,12 @@ typedef Eigen::Matrix<double, Eigen::Dynamic, 1, Eigen::AutoAlign,
 typedef Eigen::Vector3d Vector3;
 typedef Eigen::Vector4d Vector4;
 
-typedef std::shared_ptr<MatrixXxX> MatrixXxXPtr;
-typedef std::shared_ptr<MatrixNxM> MatrixNxMPtr;
-typedef std::shared_ptr<Matrix3xM> Matrix3xMPtr;
-typedef std::shared_ptr<Matrix3xU> Matrix3xUPtr;
-typedef std::shared_ptr<VectorN> VectorNPtr;
-typedef std::shared_ptr<VectorM> VectorMPtr;
+typedef std::unique_ptr<MatrixXxX> MatrixXxXPtr;
+typedef std::unique_ptr<MatrixNxM> MatrixNxMPtr;
+typedef std::unique_ptr<Matrix3xM> Matrix3xMPtr;
+typedef std::unique_ptr<Matrix3xU> Matrix3xUPtr;
+typedef std::unique_ptr<VectorN> VectorNPtr;
+typedef std::unique_ptr<VectorM> VectorMPtr;
 
 #define ZeroMatrixNxM(N, M)                                               \
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::AutoAlign, \
@@ -121,12 +121,12 @@ struct DMPDiscreteParams {
 };
 
 typedef std::vector<DMPDiscreteParams> DMPDiscreteParamsSet;
-typedef std::shared_ptr<DMPDiscreteParamsSet> DMPDiscreteParamsSetPtr;
+typedef std::unique_ptr<DMPDiscreteParamsSet> DMPDiscreteParamsSetPtr;
 
 /*static class {
 public:
     template<typename T>
-    operator std::shared_ptr<T>() { return std::shared_ptr<T>(); }
+    operator std::unique_ptr<T>() { return std::unique_ptr<T>(); }
 } nullPtr;*/
 
 }  // namespace dmp

@@ -80,10 +80,10 @@ class DMPUnrollInitParams {
 };
 
 typedef std::vector<DMPUnrollInitParams> VecDMPUnrollInitParams;
-typedef std::shared_ptr<VecDMPUnrollInitParams> VecDMPUnrollInitParamsPtr;
+typedef std::unique_ptr<VecDMPUnrollInitParams> VecDMPUnrollInitParamsPtr;
 
 typedef std::vector<VecDMPUnrollInitParams> VecVecDMPUnrollInitParams;
-typedef std::shared_ptr<VecVecDMPUnrollInitParams> VecVecDMPUnrollInitParamsPtr;
+typedef std::unique_ptr<VecVecDMPUnrollInitParams> VecVecDMPUnrollInitParamsPtr;
 
 }  // namespace dmp
 #endif
