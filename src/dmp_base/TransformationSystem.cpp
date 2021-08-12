@@ -1,5 +1,7 @@
 #include "dmp/dmp_base/TransformationSystem.h"
 
+#include <memory>
+
 namespace dmp {
 
 TransformationSystem::TransformationSystem()
@@ -8,25 +10,23 @@ TransformationSystem::TransformationSystem()
       is_using_coupling_term_at_dimension(std::vector<bool>()),
       tau_sys(NULL),
       func_approx(nullptr),
-      transform_coupling(NULL),
-      start_state(NULL),
-      current_state(NULL),
-      current_velocity_state(NULL),
-      goal_sys(NULL),
-      logged_dmp_variables(NULL),
-      rt_assertor(NULL),
-      is_start_state_obj_created_here(false),
-      is_current_state_obj_created_here(false),
-      is_current_velocity_state_obj_created_here(false),
-      is_goal_sys_obj_created_here(false) {}
+      transform_coupling(nullptr),
+      start_state(nullptr),
+      current_state(nullptr),
+      current_velocity_state(nullptr),
+      goal_sys(nullptr),
+      logged_dmp_variables(nullptr),
+      rt_assertor(nullptr) {}
 
 TransformationSystem::TransformationSystem(
     uint dmp_num_dimensions_init, TauSystem* tau_system,
     CanonicalSystem* canonical_system,
     FunctionApproximator* function_approximator,
     LoggedDMPVariables* logged_dmp_vars, RealTimeAssertor* real_time_assertor,
-    DMPState* start_dmpstate, DMPState* current_dmpstate,
-    DMPState* current_velocity_dmpstate, GoalSystem* goal_system,
+    std::unique_ptr<DMPState> start_dmpstate,
+    std::unique_ptr<DMPState> current_dmpstate,
+    std::unique_ptr<DMPState> current_velocity_dmpstate,
+    std::unique_ptr<GoalSystem> goal_system,
     std::vector<TransformCoupling*>* transform_couplers)
     : dmp_num_dimensions(dmp_num_dimensions_init),
       is_started(false),
@@ -37,38 +37,32 @@ TransformationSystem::TransformationSystem(
       logged_dmp_variables(logged_dmp_vars),
       rt_assertor(real_time_assertor),
       transform_coupling(transform_couplers) {
-  if (start_dmpstate == NULL) {
-    start_state = new DMPState(dmp_num_dimensions_init, real_time_assertor);
-    is_start_state_obj_created_here = true;
+  if (start_dmpstate) {
+    start_state = std::move(start_dmpstate);
   } else {
-    start_state = start_dmpstate;
-    is_start_state_obj_created_here = false;
+    start_state =
+        std::make_unique<DMPState>(dmp_num_dimensions_init, real_time_assertor);
   }
 
-  if (current_dmpstate == NULL) {
-    current_state = new DMPState(dmp_num_dimensions_init, real_time_assertor);
-    is_current_state_obj_created_here = true;
+  if (current_dmpstate) {
+    current_state = std::move(current_dmpstate);
   } else {
-    current_state = current_dmpstate;
-    is_current_state_obj_created_here = false;
+    current_state =
+        std::make_unique<DMPState>(dmp_num_dimensions_init, real_time_assertor);
   }
 
-  if (current_velocity_dmpstate == NULL) {
+  if (current_velocity_dmpstate) {
+    current_velocity_state = std::move(current_velocity_dmpstate);
+  } else {
     current_velocity_state =
-        new DMPState(dmp_num_dimensions_init, real_time_assertor);
-    is_current_velocity_state_obj_created_here = true;
-  } else {
-    current_velocity_state = current_velocity_dmpstate;
-    is_current_velocity_state_obj_created_here = false;
+        std::make_unique<DMPState>(dmp_num_dimensions_init, real_time_assertor);
   }
 
-  if (goal_system == NULL) {
-    goal_sys =
-        new GoalSystem(dmp_num_dimensions_init, tau_system, real_time_assertor);
-    is_goal_sys_obj_created_here = true;
+  if (goal_system) {
+    goal_sys = std::move(goal_system);
   } else {
-    goal_sys = goal_system;
-    is_goal_sys_obj_created_here = false;
+    goal_sys = std::make_unique<GoalSystem>(dmp_num_dimensions_init, tau_system,
+                                            real_time_assertor);
   }
 }
 
@@ -285,22 +279,6 @@ bool TransformationSystem::setCouplingTermUsagePerDimensions(
   return true;
 }
 
-TransformationSystem::~TransformationSystem() {
-  if (is_start_state_obj_created_here == true) {
-    delete start_state;
-  }
-
-  if (is_current_state_obj_created_here == true) {
-    delete current_state;
-  }
-
-  if (is_current_velocity_state_obj_created_here == true) {
-    delete current_velocity_state;
-  }
-
-  if (is_goal_sys_obj_created_here == true) {
-    delete goal_sys;
-  }
-}
+TransformationSystem::~TransformationSystem() {}
 
 }  // namespace dmp

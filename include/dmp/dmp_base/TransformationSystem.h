@@ -33,12 +33,6 @@
 namespace dmp {
 
 class TransformationSystem {
- private:
-  bool is_start_state_obj_created_here;
-  bool is_current_state_obj_created_here;
-  bool is_current_velocity_state_obj_created_here;
-  bool is_goal_sys_obj_created_here;
-
  protected:
   uint dmp_num_dimensions;
 
@@ -51,10 +45,10 @@ class TransformationSystem {
   LoggedDMPVariables* logged_dmp_variables;
   std::vector<TransformCoupling*>* transform_coupling;
 
-  DMPState* start_state;
-  DMPState* current_state;
-  DMPState* current_velocity_state;
-  GoalSystem* goal_sys;  // including the goal state
+  std::unique_ptr<DMPState> start_state;
+  std::unique_ptr<DMPState> current_state;
+  std::unique_ptr<DMPState> current_velocity_state;
+  std::unique_ptr<GoalSystem> goal_sys;  // including the goal state
 
   RealTimeAssertor* rt_assertor;
 
@@ -90,9 +84,10 @@ class TransformationSystem {
       CanonicalSystem* canonical_system,
       FunctionApproximator* function_approximator,
       LoggedDMPVariables* logged_dmp_vars, RealTimeAssertor* real_time_assertor,
-      DMPState* start_dmpstate = NULL, DMPState* current_dmpstate = NULL,
-      DMPState* current_velocity_dmpstate = NULL,
-      GoalSystem* goal_system = NULL,
+      std::unique_ptr<DMPState> start_dmpstate = NULL,
+      std::unique_ptr<DMPState> current_dmpstate = NULL,
+      std::unique_ptr<DMPState> current_velocity_dmpstate = NULL,
+      std::unique_ptr<GoalSystem> goal_system = NULL,
       std::vector<TransformCoupling*>* transform_couplers = NULL);
 
   /**

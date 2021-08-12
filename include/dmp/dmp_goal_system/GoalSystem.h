@@ -12,25 +12,24 @@
 #ifndef GOAL_SYSTEM_H
 #define GOAL_SYSTEM_H
 
+#include <memory>
+
 #include "dmp/dmp_param/TauSystem.h"
 #include "dmp/utility/DefinitionsDerived.h"
 
 namespace dmp {
 
 class GoalSystem {
- private:
-  bool is_current_goal_state_obj_created_here;
-
  protected:
   uint dmp_num_dimensions;  // number of dimensions in the DMP, for example:
                             // Cartesian DMP has 3 dimensions, Quaternion DMP
                             // has 3 dimensions, etc.
   double alpha;
 
-  // The following field(s) are written as RAW pointers for extensibility in
-  // Object-Oriented Programming (OOP)
-  DMPState* current_goal_state;  // current DMP goal state (position, velocity,
-                                 // acceleration, and time (if used))
+  std::unique_ptr<DMPState> current_goal_state;  // current DMP goal state
+                                                 // (position, velocity,
+                                                 // acceleration, and time (if
+                                                 // used))
 
   VectorN G;  // final (steady-state) goal position
 
@@ -72,7 +71,8 @@ class GoalSystem {
    * @param real_time_assertor Real-Time Assertor for troubleshooting and
    * debugging
    */
-  GoalSystem(uint dmp_num_dimensions_init, DMPState* current_goal_state_ptr,
+  GoalSystem(uint dmp_num_dimensions_init,
+             std::unique_ptr<DMPState> current_goal_state_ptr,
              uint goal_num_dimensions_init, TauSystem* tau_system,
              RealTimeAssertor* real_time_assertor,
              double alpha_init = 25.0 / 2.0);

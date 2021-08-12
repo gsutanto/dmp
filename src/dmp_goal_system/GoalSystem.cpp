@@ -1,25 +1,25 @@
 #include "dmp/dmp_goal_system/GoalSystem.h"
 
+#include <memory>
+
 namespace dmp {
 
 GoalSystem::GoalSystem()
     : dmp_num_dimensions(0),
       alpha(25.0 / 2.0),
-      current_goal_state(NULL),
+      current_goal_state(nullptr),
       G(ZeroVectorN(MAX_DMP_NUM_DIMENSIONS)),
       is_started(false),
       tau_sys(NULL),
-      rt_assertor(NULL),
-      is_current_goal_state_obj_created_here(false) {
+      rt_assertor(NULL) {
   G.resize(0);
 }
 
 GoalSystem::GoalSystem(uint dmp_num_dimensions_init, TauSystem* tau_system,
                        RealTimeAssertor* real_time_assertor, double alpha_init)
     : dmp_num_dimensions(dmp_num_dimensions_init),
-      current_goal_state(
-          new DMPState(dmp_num_dimensions_init, real_time_assertor)),
-      is_current_goal_state_obj_created_here(true),
+      current_goal_state(std::make_unique<DMPState>(dmp_num_dimensions_init,
+                                                    real_time_assertor)),
       G(ZeroVectorN(dmp_num_dimensions_init)),
       is_started(false),
       tau_sys(tau_system),
@@ -27,12 +27,11 @@ GoalSystem::GoalSystem(uint dmp_num_dimensions_init, TauSystem* tau_system,
       rt_assertor(real_time_assertor) {}
 
 GoalSystem::GoalSystem(uint dmp_num_dimensions_init,
-                       DMPState* current_goal_state_ptr,
+                       std::unique_ptr<DMPState> current_goal_state_ptr,
                        uint goal_num_dimensions_init, TauSystem* tau_system,
                        RealTimeAssertor* real_time_assertor, double alpha_init)
     : dmp_num_dimensions(dmp_num_dimensions_init),
-      current_goal_state(current_goal_state_ptr),
-      is_current_goal_state_obj_created_here(false),
+      current_goal_state(std::move(current_goal_state_ptr)),
       G(ZeroVectorN(goal_num_dimensions_init)),
       is_started(false),
       tau_sys(tau_system),
@@ -174,10 +173,6 @@ bool GoalSystem::updateCurrentGoalState(const double& dt) {
 
 TauSystem* GoalSystem::getTauSystemPointer() { return tau_sys; }
 
-GoalSystem::~GoalSystem() {
-  if (is_current_goal_state_obj_created_here == true) {
-    delete current_goal_state;
-  }
-}
+GoalSystem::~GoalSystem() {}
 
 }  // namespace dmp

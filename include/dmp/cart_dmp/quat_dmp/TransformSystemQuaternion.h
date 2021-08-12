@@ -22,13 +22,6 @@
 namespace dmp {
 
 class TransformSystemQuaternion : public TransformSystemDiscrete {
- protected:
-  QuaternionDMPState start_quat_state;
-  QuaternionDMPState current_quat_state;
-  DMPState current_angular_velocity_state;
-
-  QuaternionGoalSystem quat_goal_sys;
-
  public:
   TransformSystemQuaternion();
 

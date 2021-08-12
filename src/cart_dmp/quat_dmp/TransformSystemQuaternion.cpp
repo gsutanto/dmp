@@ -1,13 +1,13 @@
 #include "dmp/cart_dmp/quat_dmp/TransformSystemQuaternion.h"
 
+#include <memory>
+
+#include "dmp/dmp_state/QuaternionDMPState.h"
+
 namespace dmp {
 
 TransformSystemQuaternion::TransformSystemQuaternion()
-    : TransformSystemDiscrete(),
-      start_quat_state(QuaternionDMPState()),
-      current_quat_state(QuaternionDMPState()),
-      current_angular_velocity_state(DMPState()),
-      quat_goal_sys(QuaternionGoalSystem()) {}
+    : TransformSystemDiscrete() {}
 
 TransformSystemQuaternion::TransformSystemQuaternion(
     CanonicalSystemDiscrete* canonical_system_discrete,
@@ -20,13 +20,13 @@ TransformSystemQuaternion::TransformSystemQuaternion(
     : TransformSystemDiscrete(
           3, canonical_system_discrete, std::move(func_approximator_discrete),
           logged_dmp_discrete_vars, real_time_assertor, is_using_scaling_init,
-          &start_quat_state, &current_quat_state,
-          &current_angular_velocity_state, &quat_goal_sys, transform_couplers,
-          ts_alpha, ts_beta, _SCHAAL_DMP_),
-      start_quat_state(QuaternionDMPState(real_time_assertor)),
-      current_quat_state(QuaternionDMPState(real_time_assertor)),
-      current_angular_velocity_state(DMPState(3, real_time_assertor)),
-      quat_goal_sys(QuaternionGoalSystem(tau_sys, real_time_assertor)) {}
+          std::make_unique<QuaternionDMPState>(real_time_assertor),
+          std::make_unique<QuaternionDMPState>(real_time_assertor),
+          std::make_unique<DMPState>(3, real_time_assertor), nullptr,
+          transform_couplers, ts_alpha, ts_beta, _SCHAAL_DMP_) {
+  goal_sys =
+      std::make_unique<QuaternionGoalSystem>(tau_sys, real_time_assertor);
+}
 
 bool TransformSystemQuaternion::isValid() {
   if (rt_assert(TransformSystemDiscrete::isValid()) == false) {
@@ -38,20 +38,17 @@ bool TransformSystemQuaternion::isValid() {
   if (rt_assert(formulation_type == _SCHAAL_DMP_) == false) {
     return false;
   }
-  if (rt_assert((rt_assert(start_quat_state.isValid())) &&
-                (rt_assert(current_quat_state.isValid())) &&
-                (rt_assert(current_angular_velocity_state.isValid()))) ==
+  if (rt_assert(
+          (rt_assert((static_cast<QuaternionDMPState*>(start_state.get()))
+                         ->isValid())) &&
+          (rt_assert((static_cast<QuaternionDMPState*>(current_state.get()))
+                         ->isValid())) &&
+          (rt_assert(current_velocity_state->isValid()))) == false) {
+    return false;
+  }
+  if (rt_assert(
+          (static_cast<QuaternionGoalSystem*>(goal_sys.get()))->isValid()) ==
       false) {
-    return false;
-  }
-  if (rt_assert(quat_goal_sys.isValid()) == false) {
-    return false;
-  }
-  if (rt_assert((rt_assert(start_state == &start_quat_state)) &&
-                (rt_assert(current_state == &current_quat_state)) &&
-                (rt_assert(current_velocity_state ==
-                           &current_angular_velocity_state)) &&
-                (rt_assert(goal_sys == &quat_goal_sys))) == false) {
     return false;
   }
   return true;
@@ -76,7 +73,7 @@ bool TransformSystemQuaternion::startTransformSystemQuaternion(
     return false;
   }
 
-  start_quat_state = start_state_init;
+  *(static_cast<QuaternionDMPState*>(start_state.get())) = start_state_init;
   if (rt_assert(TransformSystemQuaternion::setCurrentQuaternionState(
           start_state_init)) == false) {
     return false;
@@ -122,8 +119,9 @@ bool TransformSystemQuaternion::startTransformSystemQuaternion(
     current_goal_state_init = goal_state_init;
   }
 
-  if (rt_assert(quat_goal_sys.startQuaternionGoalSystem(current_goal_state_init,
-                                                        QG_init)) == false) {
+  if (rt_assert((static_cast<QuaternionGoalSystem*>(goal_sys.get()))
+                    ->startQuaternionGoalSystem(current_goal_state_init,
+                                                QG_init)) == false) {
     return false;
   }
 
@@ -198,6 +196,15 @@ bool TransformSystemQuaternion::getNextQuaternionState(
     (*coupling_term_vel) = ct_vel;
   }
 
+  // some aliases:
+  const QuaternionDMPState& start_quat_state =
+      *(static_cast<QuaternionDMPState*>(start_state.get()));
+  QuaternionDMPState& current_quat_state =
+      *(static_cast<QuaternionDMPState*>(current_state.get()));
+  DMPState& current_angular_velocity_state = *current_velocity_state;
+  QuaternionGoalSystem* quat_goal_sys =
+      (static_cast<QuaternionGoalSystem*>(goal_sys.get()));
+
   double time = current_quat_state.getTime();
   Vector4 Q0 = start_quat_state.getQ();
   Vector4 Q = current_quat_state.getQ();
@@ -207,8 +214,8 @@ bool TransformSystemQuaternion::getNextQuaternionState(
   Vector3 etha = current_angular_velocity_state.getX();
   Vector3 ethad = current_angular_velocity_state.getXd();
 
-  Vector4 QG = quat_goal_sys.getSteadyStateGoalPosition();
-  Vector4 Qg = quat_goal_sys.getCurrentQuaternionGoalState().getQ();
+  Vector4 QG = quat_goal_sys->getSteadyStateGoalPosition();
+  Vector4 Qg = quat_goal_sys->getCurrentQuaternionGoalState().getQ();
 
   if (rt_assert(integrateQuaternion(Q, omega, dt, Q)) == false) {
     return false;
@@ -313,12 +320,16 @@ bool TransformSystemQuaternion::getTargetQuaternionForcingTerm(
     return false;
   }
 
+  // some aliases:
+  QuaternionGoalSystem* quat_goal_sys =
+      (static_cast<QuaternionGoalSystem*>(goal_sys.get()));
+
   // Vector4 Q0_demo = start_quat_state.getQ();
   Vector4 Q_demo = current_state_demo_local.getQ();
   Vector3 omega_demo = current_state_demo_local.getOmega();
   Vector3 omegad_demo = current_state_demo_local.getOmegad();
 
-  Vector4 Qg_demo = quat_goal_sys.getCurrentQuaternionGoalState().getQ();
+  Vector4 Qg_demo = quat_goal_sys->getCurrentQuaternionGoalState().getQ();
 
   // during learning, QG = QG_learn and Q0 = Q0_learn,
   // thus amplitude   = (computeLogQuaternionDifference(QG,
@@ -377,13 +388,19 @@ bool TransformSystemQuaternion::getTargetQuaternionCouplingTerm(
     return false;
   }
 
+  // some aliases:
+  const QuaternionDMPState& start_quat_state =
+      *(static_cast<QuaternionDMPState*>(start_state.get()));
+  QuaternionGoalSystem* quat_goal_sys =
+      (static_cast<QuaternionGoalSystem*>(goal_sys.get()));
+
   Vector4 Q0_demo = start_quat_state.getQ();
   Vector4 Q_demo = current_state_demo_local.getQ();
   Vector3 omega_demo = current_state_demo_local.getOmega();
   Vector3 omegad_demo = current_state_demo_local.getOmegad();
 
-  Vector4 QG_demo = quat_goal_sys.getSteadyStateGoalPosition();
-  Vector4 Qg_demo = quat_goal_sys.getCurrentQuaternionGoalState().getQ();
+  Vector4 QG_demo = quat_goal_sys->getSteadyStateGoalPosition();
+  Vector4 Qg_demo = quat_goal_sys->getCurrentQuaternionGoalState().getQ();
 
   // compute scaling factor for the forcing term:
   Vector3 A_demo = ZeroVector3;
@@ -429,11 +446,17 @@ bool TransformSystemQuaternion::getTargetQuaternionCouplingTerm(
 }
 
 QuaternionDMPState TransformSystemQuaternion::getQuaternionStartState() {
+  QuaternionDMPState start_quat_state =
+      *(static_cast<QuaternionDMPState*>(start_state.get()));
   return start_quat_state;
 }
 
 bool TransformSystemQuaternion::setQuaternionStartState(
     const QuaternionDMPState& new_start_state) {
+  // some aliases:
+  QuaternionDMPState& start_quat_state =
+      *(static_cast<QuaternionDMPState*>(start_state.get()));
+
   // pre-conditions checking
   if (rt_assert(this->isValid()) == false) {
     return false;
@@ -454,11 +477,17 @@ bool TransformSystemQuaternion::setQuaternionStartState(
 }
 
 QuaternionDMPState TransformSystemQuaternion::getCurrentQuaternionState() {
+  QuaternionDMPState current_quat_state =
+      *(static_cast<QuaternionDMPState*>(current_state.get()));
   return current_quat_state;
 }
 
 bool TransformSystemQuaternion::setCurrentQuaternionState(
     const QuaternionDMPState& new_current_state) {
+  // some aliases:
+  QuaternionDMPState& current_quat_state =
+      *(static_cast<QuaternionDMPState*>(current_state.get()));
+
   // pre-conditions checking
   if (rt_assert(this->isValid()) == false) {
     return false;
@@ -483,6 +512,11 @@ bool TransformSystemQuaternion::setCurrentQuaternionState(
 }
 
 bool TransformSystemQuaternion::updateCurrentVelocityStateFromCurrentState() {
+  // some aliases:
+  const QuaternionDMPState& current_quat_state =
+      *(static_cast<QuaternionDMPState*>(current_state.get()));
+  DMPState& current_angular_velocity_state = *current_velocity_state;
+
   // pre-conditions checking
   if (rt_assert(this->isValid()) == false) {
     return false;
@@ -511,13 +545,19 @@ bool TransformSystemQuaternion::updateCurrentVelocityStateFromCurrentState() {
 }
 
 QuaternionDMPState TransformSystemQuaternion::getCurrentQuaternionGoalState() {
-  return (quat_goal_sys.getCurrentQuaternionGoalState());
+  // some aliases:
+  QuaternionGoalSystem* quat_goal_sys =
+      (static_cast<QuaternionGoalSystem*>(goal_sys.get()));
+  return (quat_goal_sys->getCurrentQuaternionGoalState());
 }
 
 bool TransformSystemQuaternion::setCurrentQuaternionGoalState(
     const QuaternionDMPState& new_current_goal_state) {
+  // some aliases:
+  QuaternionGoalSystem* quat_goal_sys =
+      (static_cast<QuaternionGoalSystem*>(goal_sys.get()));
   return (rt_assert(
-      quat_goal_sys.setCurrentQuaternionGoalState(new_current_goal_state)));
+      quat_goal_sys->setCurrentQuaternionGoalState(new_current_goal_state)));
 }
 
 TransformSystemQuaternion::~TransformSystemQuaternion() {}

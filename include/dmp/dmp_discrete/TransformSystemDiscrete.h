@@ -78,10 +78,10 @@ class TransformSystemDiscrete : public TransformationSystem {
       LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
       RealTimeAssertor* real_time_assertor,
       std::vector<bool> is_using_scaling_init,
-      DMPState* start_dmpstate_discrete = NULL,
-      DMPState* current_dmpstate_discrete = NULL,
-      DMPState* current_velocity_dmpstate_discrete = NULL,
-      GoalSystem* goal_system_discrete = NULL,
+      std::unique_ptr<DMPState> start_dmpstate_discrete = NULL,
+      std::unique_ptr<DMPState> current_dmpstate_discrete = NULL,
+      std::unique_ptr<DMPState> current_velocity_dmpstate_discrete = NULL,
+      std::unique_ptr<GoalSystem> goal_system_discrete = NULL,
       std::vector<TransformCoupling*>* transform_couplers = NULL,
       double ts_alpha = 25.0, double ts_beta = 25.0 / 4.0,
       uint ts_formulation_type = _SCHAAL_DMP_);
@@ -215,7 +215,7 @@ class TransformSystemDiscrete : public TransformationSystem {
    */
   virtual FuncApproximatorDiscrete* getFuncApproxDiscretePointer();
 
-  ~TransformSystemDiscrete();
+  virtual ~TransformSystemDiscrete();
 };
 
 }  // namespace dmp

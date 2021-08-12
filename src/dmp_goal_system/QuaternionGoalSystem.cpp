@@ -1,26 +1,23 @@
 #include "dmp/dmp_goal_system/QuaternionGoalSystem.h"
 
+#include <memory>
+
 namespace dmp {
 
-QuaternionGoalSystem::QuaternionGoalSystem()
-    : GoalSystem(), current_quaternion_goal_state(QuaternionDMPState()) {}
+QuaternionGoalSystem::QuaternionGoalSystem() : GoalSystem() {}
 
 QuaternionGoalSystem::QuaternionGoalSystem(TauSystem* tau_system,
                                            RealTimeAssertor* real_time_assertor,
                                            double alpha_init)
-    : GoalSystem(3, &current_quaternion_goal_state, 4, tau_system,
-                 real_time_assertor, alpha_init),
-      current_quaternion_goal_state(QuaternionDMPState(real_time_assertor)) {}
+    : GoalSystem(3, std::make_unique<QuaternionDMPState>(real_time_assertor), 4,
+                 tau_system, real_time_assertor, alpha_init) {}
 
 bool QuaternionGoalSystem::isValid() {
   if (rt_assert(GoalSystem::isValid()) == false) {
     return false;
   }
-  if (rt_assert(current_quaternion_goal_state.isValid()) == false) {
-    return false;
-  }
-  if (rt_assert(current_goal_state == &current_quaternion_goal_state) ==
-      false) {
+  if (rt_assert((static_cast<QuaternionDMPState*>(current_goal_state.get()))
+                    ->isValid()) == false) {
     return false;
   }
   return true;
@@ -48,6 +45,8 @@ bool QuaternionGoalSystem::startQuaternionGoalSystem(
 }
 
 QuaternionDMPState QuaternionGoalSystem::getCurrentQuaternionGoalState() {
+  QuaternionDMPState current_quaternion_goal_state =
+      *(static_cast<QuaternionDMPState*>(current_goal_state.get()));
   return current_quaternion_goal_state;
 }
 
@@ -66,7 +65,7 @@ bool QuaternionGoalSystem::setCurrentQuaternionGoalState(
                 dmp_num_dimensions) &&
       rt_assert(new_current_goal_state.getX().rows() ==
                 current_goal_state->getX().rows())) {
-    current_quaternion_goal_state = new_current_goal_state;
+    *current_goal_state = new_current_goal_state;
   } else {
     return false;
   }
@@ -94,13 +93,17 @@ bool QuaternionGoalSystem::updateCurrentGoalState(const double& dt) {
     return false;
   }
 
+  // some aliases:
+  QuaternionDMPState& current_quaternion_goal_state =
+      *(static_cast<QuaternionDMPState*>(current_goal_state.get()));
+
   Vector4 QG = G;
   Vector4 Qg = current_quaternion_goal_state.getQ();
   Vector3 omegag = current_quaternion_goal_state.getOmega();
-  // Vector3 omegagd = current_quaternion_goal_state.getOmegad();
+  // Vector3 omegagd = current_quaternion_goal_state->getOmegad();
   Vector3 log_quat_diff_g = ZeroVector3;
-  if (rt_assert(computeLogQuaternionDifference(
-          QG, Qg, log_quat_diff_g)) == false) {
+  if (rt_assert(computeLogQuaternionDifference(QG, Qg, log_quat_diff_g)) ==
+      false) {
     return false;
   }
   Vector3 next_omegag = (alpha / tau) * log_quat_diff_g;

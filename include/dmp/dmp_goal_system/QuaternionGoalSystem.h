@@ -19,12 +19,6 @@
 namespace dmp {
 
 class QuaternionGoalSystem : public GoalSystem {
- protected:
-  QuaternionDMPState
-      current_quaternion_goal_state;  // current Quaternion DMP goal state
-                                      // (orientation, angular velocity, angular
-                                      // acceleration, and time (if used))
-
  public:
   QuaternionGoalSystem();
 
