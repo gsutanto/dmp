@@ -14,7 +14,7 @@ QuaternionDMPState::QuaternionDMPState() {
   omega = ZeroVector3;
   omegad = ZeroVector3;
   time = 0.0;
-  rt_assertor = NULL;
+  rt_assertor = nullptr;
 }
 
 QuaternionDMPState::QuaternionDMPState(RealTimeAssertor* real_time_assertor) {

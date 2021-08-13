@@ -568,7 +568,7 @@ int main(int argc, char** argv) {
           VectorM normalized_phase_PSI_mult_phase_V_temp(model_size);
           // Get the next state of the sensory primitives
           if (rt_assert_main(dmp_discrete_sense[m]->getNextState(
-                  dt, false, *(sense_state[m]), NULL, NULL, NULL,
+                  dt, false, *(sense_state[m]), nullptr, nullptr, nullptr,
                   &func_approx_basis_functions,
                   &normalized_phase_PSI_mult_phase_V_temp)) == false) {
             printf(

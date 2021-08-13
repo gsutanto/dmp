@@ -158,7 +158,7 @@ Vector3 computeClosestPointOnSphereSurface(const Vector3& evaluation_point,
 template <class T>
 bool isMemoryAllocated(const std::unique_ptr<T>& smart_pointer, uint row_size,
                        uint col_size) {
-  if (smart_pointer == NULL) {
+  if (smart_pointer == nullptr) {
     return false;
   }
   if ((smart_pointer->rows() != row_size) ||
@@ -247,7 +247,7 @@ template <class T>
 bool resizeAndReset(std::unique_ptr<T>& smart_pointer, uint row_size,
                     uint col_size) {
   // input checking:
-  if (smart_pointer == NULL) {
+  if (smart_pointer == nullptr) {
     return false;
   }
   if ((row_size < 1) || (col_size < 1)) {
@@ -294,7 +294,7 @@ bool resizeAndReset(std::unique_ptr<T>& smart_pointer, uint row_size,
  */
 template <class T>
 bool isMemoryAllocated(const std::unique_ptr<T>& smart_pointer, uint size) {
-  if (smart_pointer == NULL) {
+  if (smart_pointer == nullptr) {
     return false;
   }
   if (smart_pointer->size() != size) {

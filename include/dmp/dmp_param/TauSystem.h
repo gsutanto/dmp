@@ -51,7 +51,7 @@ class TauSystem {
    */
   TauSystem(double tau_base_init, RealTimeAssertor* real_time_assertor,
             double tau_ref = 0.5,
-            std::vector<TauCoupling*>* tau_couplers = NULL);
+            std::vector<TauCoupling*>* tau_couplers = nullptr);
 
   /**
    * Checks whether this tau system is valid or not.

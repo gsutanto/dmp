@@ -4,10 +4,10 @@ namespace dmp {
 
 CartesianCoordDMP::CartesianCoordDMP()
     : transform_sys_discrete_cart_coord(TransformSystemDiscrete(
-          3, NULL, nullptr, &logged_dmp_discrete_variables, NULL,
+          3, nullptr, nullptr, &logged_dmp_discrete_variables, nullptr,
           std::vector<bool>(3, true))),
-      DMPDiscrete(3, 0, NULL, &transform_sys_discrete_cart_coord,
-                  _SCHAAL_LWR_METHOD_, NULL, ""),
+      DMPDiscrete(3, 0, nullptr, &transform_sys_discrete_cart_coord,
+                  _SCHAAL_LWR_METHOD_, nullptr, ""),
       cart_coord_transformer(CartesianCoordTransformer()),
       ctraj_local_coord_selection(2) {
   ctraj_hmg_transform_local_to_global_matrix = ZeroMatrix4x4;
@@ -30,7 +30,7 @@ CartesianCoordDMP::CartesianCoordDMP(
                                                      canonical_system_discrete,
                                                      real_time_assertor),
           &logged_dmp_discrete_variables, real_time_assertor,
-          std::vector<bool>(3, true), NULL, NULL, NULL, NULL,
+          std::vector<bool>(3, true), nullptr, nullptr, nullptr, nullptr,
           transform_couplers, 25.0, 25.0 / 4.0, ts_formulation_type)),
       DMPDiscrete(3, model_size_init, canonical_system_discrete,
                   &transform_sys_discrete_cart_coord, learning_method,
@@ -563,9 +563,9 @@ bool CartesianCoordDMP::getSteadyStateGoalPosition(
 
   // Compute steady-state goal position on the global coordinate system:
   if (rt_assert(cart_coord_transformer.computeCTrajAtNewCoordSys(
-          &steady_state_goal_local_H, NULL, NULL, NULL,
+          &steady_state_goal_local_H, nullptr, nullptr, nullptr,
           ctraj_hmg_transform_local_to_global_matrix,
-          &steady_state_goal_global_H, NULL, NULL, NULL)) == false) {
+          &steady_state_goal_global_H, nullptr, nullptr, nullptr)) == false) {
     return false;
   }
 

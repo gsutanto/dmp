@@ -8,7 +8,7 @@ TransformationSystem::TransformationSystem()
     : dmp_num_dimensions(0),
       is_started(false),
       is_using_coupling_term_at_dimension(std::vector<bool>()),
-      tau_sys(NULL),
+      tau_sys(nullptr),
       func_approx(nullptr),
       transform_coupling(nullptr),
       start_state(nullptr),
@@ -73,9 +73,9 @@ bool TransformationSystem::isValid() {
                            dmp_num_dimensions))) == false) {
     return false;
   }
-  if (rt_assert((rt_assert(tau_sys != NULL)) &&
-                (rt_assert(func_approx != NULL)) &&
-                (rt_assert(goal_sys != NULL))) == false) {
+  if (rt_assert((rt_assert(tau_sys != nullptr)) &&
+                (rt_assert(func_approx != nullptr)) &&
+                (rt_assert(goal_sys != nullptr))) == false) {
     return false;
   }
   if (rt_assert((rt_assert(tau_sys->isValid())) &&
@@ -88,9 +88,9 @@ bool TransformationSystem::isValid() {
                                           ->getTauSystemPointer()))) == false) {
     return false;
   }
-  if (rt_assert((rt_assert(start_state != NULL)) &&
-                (rt_assert(current_state != NULL)) &&
-                (rt_assert(current_velocity_state != NULL))) == false) {
+  if (rt_assert((rt_assert(start_state != nullptr)) &&
+                (rt_assert(current_state != nullptr)) &&
+                (rt_assert(current_velocity_state != nullptr))) == false) {
     return false;
   }
   if (rt_assert((rt_assert(start_state->isValid())) &&
@@ -128,7 +128,7 @@ bool TransformationSystem::getCouplingTerm(VectorN& accumulated_ct_acc,
 
   if (transform_coupling) {
     for (uint i = 0; i < (*transform_coupling).size(); ++i) {
-      if ((*transform_coupling)[i] == NULL) {
+      if ((*transform_coupling)[i] == nullptr) {
         continue;
       }
 

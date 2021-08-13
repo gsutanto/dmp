@@ -6,10 +6,10 @@ namespace dmp {
 
 DMPDiscrete1D::DMPDiscrete1D()
     : transform_sys_discrete_1D(TransformSystemDiscrete(
-          1, NULL, nullptr, &logged_dmp_discrete_variables, NULL,
+          1, nullptr, nullptr, &logged_dmp_discrete_variables, nullptr,
           std::vector<bool>(1, true))),
-      DMPDiscrete(1, 0, NULL, &transform_sys_discrete_1D, _SCHAAL_LWR_METHOD_,
-                  NULL, "") {}
+      DMPDiscrete(1, 0, nullptr, &transform_sys_discrete_1D,
+                  _SCHAAL_LWR_METHOD_, nullptr, "") {}
 
 DMPDiscrete1D::DMPDiscrete1D(
     uint model_size_init, CanonicalSystemDiscrete* canonical_system_discrete,
@@ -22,7 +22,7 @@ DMPDiscrete1D::DMPDiscrete1D(
                                                      canonical_system_discrete,
                                                      real_time_assertor),
           &logged_dmp_discrete_variables, real_time_assertor,
-          std::vector<bool>(1, true), NULL, NULL, NULL, NULL,
+          std::vector<bool>(1, true), nullptr, nullptr, nullptr, nullptr,
           transform_couplers, 25.0, 25.0 / 4.0, ts_formulation_type)),
       DMPDiscrete(1, model_size_init, canonical_system_discrete,
                   &transform_sys_discrete_1D, learning_method,

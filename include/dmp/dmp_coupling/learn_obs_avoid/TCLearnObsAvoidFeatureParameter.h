@@ -271,9 +271,9 @@ public:
                                     uint Num_NN_hidden_layer_2=0,
                                     uint Num_NN_output=0,
                                     const char* NN_params_directory_path="",
-                                    VectorNN_N* pmnn_input_vector_ptr=NULL,
-                                    VectorNN_N* pmnn_phase_kernel_modulation_ptr=NULL,
-                                    VectorNN_N* pmnn_output_vector_ptr=NULL);
+                                    VectorNN_N* pmnn_input_vector_ptr=nullptr,
+                                    VectorNN_N* pmnn_phase_kernel_modulation_ptr=nullptr,
+                                    VectorNN_N* pmnn_output_vector_ptr=nullptr);
 
     /**
      * Checks the validity of this data structure.

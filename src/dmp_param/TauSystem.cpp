@@ -5,8 +5,8 @@ namespace dmp {
 TauSystem::TauSystem()
     : tau_base(0.0),
       tau_reference(0.0),
-      tau_coupling(NULL),
-      rt_assertor(NULL) {}
+      tau_coupling(nullptr),
+      rt_assertor(nullptr) {}
 
 TauSystem::TauSystem(double tau_base_init, RealTimeAssertor* real_time_assertor,
                      double tau_ref, std::vector<TauCoupling*>* tau_couplers)
@@ -74,7 +74,7 @@ bool TauSystem::getCouplingTerm(double& accumulated_ctau) {
 
   if (tau_coupling) {
     for (int i = 0; i < tau_coupling->size(); ++i) {
-      if ((*tau_coupling)[i] == NULL) {
+      if ((*tau_coupling)[i] == nullptr) {
         continue;
       }
 

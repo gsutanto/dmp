@@ -4,7 +4,7 @@ namespace dmp {
 
 DMPDataIO::DMPDataIO()
     : DataIO(),
-      transform_sys(NULL),
+      transform_sys(nullptr),
       tau_trajectory_buffer(new MatrixTx2()),
       transform_sys_state_local_trajectory_buffer(new MatrixTxS()),
       transform_sys_state_global_trajectory_buffer(new MatrixTxS()),
@@ -86,26 +86,27 @@ bool DMPDataIO::isValid() {
   if (rt_assert(DataIO::isValid()) == false) {
     return false;
   }
-  if (rt_assert(rt_assert(transform_sys != NULL)) == false) {
+  if (rt_assert(rt_assert(transform_sys != nullptr)) == false) {
     return false;
   }
   if (rt_assert(rt_assert(transform_sys->isValid())) == false) {
     return false;
   }
   if (rt_assert(
-          (rt_assert(tau_trajectory_buffer != NULL)) &&
-          (rt_assert(transform_sys_state_local_trajectory_buffer != NULL)) &&
-          (rt_assert(transform_sys_state_global_trajectory_buffer != NULL)) &&
-          (rt_assert(goal_state_local_trajectory_buffer != NULL)) &&
-          (rt_assert(goal_state_global_trajectory_buffer != NULL)) &&
+          (rt_assert(tau_trajectory_buffer != nullptr)) &&
+          (rt_assert(transform_sys_state_local_trajectory_buffer != nullptr)) &&
+          (rt_assert(transform_sys_state_global_trajectory_buffer !=
+                     nullptr)) &&
+          (rt_assert(goal_state_local_trajectory_buffer != nullptr)) &&
+          (rt_assert(goal_state_global_trajectory_buffer != nullptr)) &&
           (rt_assert(steady_state_goal_position_local_trajectory_buffer !=
-                     NULL)) &&
+                     nullptr)) &&
           (rt_assert(steady_state_goal_position_global_trajectory_buffer !=
-                     NULL)) &&
-          (rt_assert(basis_functions_trajectory_buffer != NULL)) &&
-          (rt_assert(forcing_term_trajectory_buffer != NULL)) &&
-          (rt_assert(transform_sys_ct_acc_trajectory_buffer != NULL)) &&
-          (rt_assert(save_data_buffer != NULL))) == false) {
+                     nullptr)) &&
+          (rt_assert(basis_functions_trajectory_buffer != nullptr)) &&
+          (rt_assert(forcing_term_trajectory_buffer != nullptr)) &&
+          (rt_assert(transform_sys_ct_acc_trajectory_buffer != nullptr)) &&
+          (rt_assert(save_data_buffer != nullptr))) == false) {
     return false;
   }
   if (rt_assert(rt_assert(dmp_num_dimensions ==

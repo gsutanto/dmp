@@ -95,8 +95,9 @@ class FunctionApproximator {
    * @return Success or failure
    */
   virtual bool getForcingTerm(
-      VectorN& result_f, VectorM* basis_function_vector = NULL,
-      VectorM* normalized_basis_func_vector_mult_phase_multiplier = NULL) = 0;
+      VectorN& result_f, VectorM* basis_function_vector = nullptr,
+      VectorM* normalized_basis_func_vector_mult_phase_multiplier =
+          nullptr) = 0;
 
   /**
    * Get the current weights of the basis functions.

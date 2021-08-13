@@ -143,8 +143,8 @@ class DMP {
    * @return Success or failure
    */
   virtual bool learn(const char* training_data_dir_or_file_path,
-                     double robot_task_servo_rate, double* tau_learn = NULL,
-                     Trajectory* critical_states_learn = NULL);
+                     double robot_task_servo_rate, double* tau_learn = nullptr,
+                     Trajectory* critical_states_learn = nullptr);
 
   /**
    * NON-REAL-TIME!!!\n
@@ -211,12 +211,12 @@ class DMP {
    */
   virtual bool getNextState(
       double dt, bool update_canonical_state, DMPState& next_state,
-      VectorN* transform_sys_forcing_term = NULL,
-      VectorN* transform_sys_coupling_term_acc = NULL,
-      VectorN* transform_sys_coupling_term_vel = NULL,
-      VectorM* func_approx_basis_functions = NULL,
+      VectorN* transform_sys_forcing_term = nullptr,
+      VectorN* transform_sys_coupling_term_acc = nullptr,
+      VectorN* transform_sys_coupling_term_vel = nullptr,
+      VectorM* func_approx_basis_functions = nullptr,
       VectorM* func_approx_normalized_basis_func_vector_mult_phase_multiplier =
-          NULL) = 0;
+          nullptr) = 0;
 
   /**
    * Returns current DMP state.
@@ -232,7 +232,7 @@ class DMP {
    * @return Success or failure
    */
   virtual bool getForcingTerm(VectorN& result_f,
-                              VectorM* basis_function_vector = NULL) = 0;
+                              VectorM* basis_function_vector = nullptr) = 0;
 
   /**
    * Returns current goal position.

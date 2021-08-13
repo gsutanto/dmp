@@ -151,12 +151,13 @@ class CartesianCoordDMP : public DMPDiscrete {
    * vector of pointer to TransformCoupling data structure, for flexibility and
    * re-usability)
    */
-  CartesianCoordDMP(CanonicalSystemDiscrete* canonical_system_discrete,
-                    uint model_size_init, uint ts_formulation_type,
-                    uint learning_method, RealTimeAssertor* real_time_assertor,
-                    uint ctraj_local_coordinate_frame_selection = 1,
-                    const char* opt_data_directory_path = "",
-                    std::vector<TransformCoupling*>* transform_couplers = NULL);
+  CartesianCoordDMP(
+      CanonicalSystemDiscrete* canonical_system_discrete, uint model_size_init,
+      uint ts_formulation_type, uint learning_method,
+      RealTimeAssertor* real_time_assertor,
+      uint ctraj_local_coordinate_frame_selection = 1,
+      const char* opt_data_directory_path = "",
+      std::vector<TransformCoupling*>* transform_couplers = nullptr);
 
   /**
    * Checks whether this Cartesian Coordinate DMP is valid or not.
@@ -197,8 +198,8 @@ class CartesianCoordDMP : public DMPDiscrete {
    * @return Success or failure
    */
   bool learn(const char* training_data_dir_or_file_path,
-             double robot_task_servo_rate, double* tau_learn = NULL,
-             Trajectory* critical_states_learn = NULL);
+             double robot_task_servo_rate, double* tau_learn = nullptr,
+             Trajectory* critical_states_learn = nullptr);
 
   /**
    * NON-REAL-TIME!!!\n
@@ -285,12 +286,12 @@ class CartesianCoordDMP : public DMPDiscrete {
    */
   bool getNextState(
       double dt, bool update_canonical_state, DMPState& result_dmp_state_global,
-      VectorN* transform_sys_forcing_term = NULL,
-      VectorN* transform_sys_coupling_term_acc = NULL,
-      VectorN* transform_sys_coupling_term_vel = NULL,
-      VectorM* func_approx_basis_functions = NULL,
+      VectorN* transform_sys_forcing_term = nullptr,
+      VectorN* transform_sys_coupling_term_acc = nullptr,
+      VectorN* transform_sys_coupling_term_vel = nullptr,
+      VectorM* func_approx_basis_functions = nullptr,
       VectorM* func_approx_normalized_basis_func_vector_mult_phase_multiplier =
-          NULL);
+          nullptr);
 
   /**
    * Runs one step of the DMP based on the time step dt.
@@ -322,12 +323,12 @@ class CartesianCoordDMP : public DMPDiscrete {
   bool getNextState(
       double dt, bool update_canonical_state, DMPState& result_dmp_state_global,
       DMPState& result_dmp_state_local,
-      VectorN* transform_sys_forcing_term = NULL,
-      VectorN* transform_sys_coupling_term_acc = NULL,
-      VectorN* transform_sys_coupling_term_vel = NULL,
-      VectorM* func_approx_basis_functions = NULL,
+      VectorN* transform_sys_forcing_term = nullptr,
+      VectorN* transform_sys_coupling_term_acc = nullptr,
+      VectorN* transform_sys_coupling_term_vel = nullptr,
+      VectorM* func_approx_basis_functions = nullptr,
       VectorM* func_approx_normalized_basis_func_vector_mult_phase_multiplier =
-          NULL);
+          nullptr);
 
   /**
    * Returns current (global) DMP state.

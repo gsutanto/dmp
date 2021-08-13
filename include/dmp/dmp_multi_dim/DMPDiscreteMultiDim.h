@@ -52,7 +52,7 @@ class DMPDiscreteMultiDim : public DMPDiscrete {
       uint ts_formulation_type, uint learning_method,
       RealTimeAssertor* real_time_assertor,
       const char* opt_data_directory_path = "",
-      std::vector<TransformCoupling*>* transform_couplers = NULL);
+      std::vector<TransformCoupling*>* transform_couplers = nullptr);
 
   /**
    * Checks whether this 1D Discrete DMP is valid or not.
@@ -104,8 +104,8 @@ class DMPDiscreteMultiDim : public DMPDiscrete {
    * @return Success or failure
    */
   bool learn(const char* training_data_dir_or_file_path,
-             double robot_task_servo_rate, double* tau_learn = NULL,
-             Trajectory* critical_states_learn = NULL);
+             double robot_task_servo_rate, double* tau_learn = nullptr,
+             Trajectory* critical_states_learn = nullptr);
 
   ~DMPDiscreteMultiDim();
 };

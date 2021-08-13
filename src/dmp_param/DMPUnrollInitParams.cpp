@@ -2,7 +2,7 @@
 
 namespace dmp {
 
-DMPUnrollInitParams::DMPUnrollInitParams() : tau(0.0), rt_assertor(NULL) {}
+DMPUnrollInitParams::DMPUnrollInitParams() : tau(0.0), rt_assertor(nullptr) {}
 
 DMPUnrollInitParams::DMPUnrollInitParams(
     const double& tau_init, const DMPState& start_state,

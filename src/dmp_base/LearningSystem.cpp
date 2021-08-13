@@ -3,9 +3,9 @@
 namespace dmp {
 
 LearningSystem::LearningSystem()
-    : transform_sys(NULL),
-      data_logger(NULL),
-      rt_assertor(NULL),
+    : transform_sys(nullptr),
+      data_logger(nullptr),
+      rt_assertor(nullptr),
       dmp_num_dimensions(0),
       model_size(0),
       learned_weights(new MatrixNxM(dmp_num_dimensions, model_size)) {
@@ -27,14 +27,14 @@ LearningSystem::LearningSystem(uint dmp_num_dimensions_init,
 
 {
   learned_weights->resize(dmp_num_dimensions, model_size);
-  snprintf(data_directory_path, sizeof(data_directory_path),
-           "%s", opt_data_directory_path);
+  snprintf(data_directory_path, sizeof(data_directory_path), "%s",
+           opt_data_directory_path);
 }
 
 bool LearningSystem::isValid() {
-  if (rt_assert(rt_assert(transform_sys != NULL) &&
-                rt_assert(data_logger != NULL) &&
-                rt_assert(learned_weights != NULL)) == false) {
+  if (rt_assert(rt_assert(transform_sys != nullptr) &&
+                rt_assert(data_logger != nullptr) &&
+                rt_assert(learned_weights != nullptr)) == false) {
     return false;
   }
   if (rt_assert(rt_assert(transform_sys->isValid()) &&

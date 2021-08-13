@@ -2,7 +2,7 @@
 
 namespace dmp {
 
-DataIO::DataIO() : rt_assertor(NULL) {}
+DataIO::DataIO() : rt_assertor(nullptr) {}
 
 DataIO::DataIO(RealTimeAssertor* real_time_assertor)
     : rt_assertor(real_time_assertor) {}
@@ -22,7 +22,7 @@ bool DataIO::extract1DTrajectory(const char* file_path, Trajectory& trajectory,
   }
 
   FILE* f = fopen(file_path, "rt");
-  if (rt_assert(f != NULL) == false) {
+  if (rt_assert(f != nullptr) == false) {
     return false;
   }
 
@@ -41,7 +41,7 @@ bool DataIO::extract1DTrajectory(const char* file_path, Trajectory& trajectory,
     return false;
   }
 
-  while (fgets(line, 1000, f) != NULL) {
+  while (fgets(line, 1000, f) != nullptr) {
     double time;
     if (is_comma_separated) {
       sscanf(line, "%lf,%lf,%lf,%lf", &time, &((*x)[0]), &((*xd)[0]),
@@ -74,7 +74,7 @@ bool DataIO::write1DTrajectoryToFile(const Trajectory& trajectory,
   }
 
   FILE* f = fopen(file_path, "w");
-  if (rt_assert(f != NULL) == false) {
+  if (rt_assert(f != nullptr) == false) {
     return false;
   }
 
@@ -152,7 +152,7 @@ bool DataIO::extractCartCoordTrajectory(const char* file_path,
   }
 
   FILE* f = fopen(file_path, "rt");
-  if (rt_assert(f != NULL) == false) {
+  if (rt_assert(f != nullptr) == false) {
     return false;
   }
 
@@ -172,7 +172,7 @@ bool DataIO::extractCartCoordTrajectory(const char* file_path,
     return false;
   }
 
-  while (fgets(line, 1000, f) != NULL) {
+  while (fgets(line, 1000, f) != nullptr) {
     if (is_comma_separated) {
       sscanf(line, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf", &time, &((*X)[0]),
              &((*X)[1]), &((*X)[2]), &((*Xd)[0]), &((*Xd)[1]), &((*Xd)[2]),
@@ -206,7 +206,7 @@ bool DataIO::writeCartCoordTrajectoryToFile(
   }
 
   FILE* f = fopen(file_path, "w");
-  if (rt_assert(f != NULL) == false) {
+  if (rt_assert(f != nullptr) == false) {
     return false;
   }
 
@@ -275,7 +275,7 @@ bool DataIO::extractQuaternionTrajectory(const char* file_path,
   }
 
   FILE* f = fopen(file_path, "rt");
-  if (rt_assert(f != NULL) == false) {
+  if (rt_assert(f != nullptr) == false) {
     return false;
   }
 
@@ -305,7 +305,7 @@ bool DataIO::extractQuaternionTrajectory(const char* file_path,
     return false;
   }
 
-  while (fgets(line, 1000, f) != NULL) {
+  while (fgets(line, 1000, f) != nullptr) {
     if (is_comma_separated) {
       sscanf(line,
              "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%"
@@ -356,8 +356,8 @@ bool DataIO::extractSetNDTrajectories(const char* dir_or_file_path,
   if (file_type(dir_or_file_path) == _DIR_)  // if it is a directory
   {
     uint i = 1;
-    snprintf(var_file_path, sizeof(var_file_path),
-             "%s/%d.txt", dir_or_file_path, i);
+    snprintf(var_file_path, sizeof(var_file_path), "%s/%d.txt",
+             dir_or_file_path, i);
 
     while ((file_type(var_file_path) == _REG_) &&  // while file exists
            (i <= max_num_trajs)) {
@@ -367,8 +367,8 @@ bool DataIO::extractSetNDTrajectories(const char* dir_or_file_path,
       }
       nd_trajectory_set.push_back(*nd_trajectory);
       i++;
-      snprintf(var_file_path, sizeof(var_file_path),
-               "%s/%d.txt", dir_or_file_path, i);
+      snprintf(var_file_path, sizeof(var_file_path), "%s/%d.txt",
+               dir_or_file_path, i);
     }
   } else if (file_type(dir_or_file_path) == _REG_) {  // if it is a (text) file
     if (rt_assert(extractNDTrajectory(dir_or_file_path, (*nd_trajectory))) ==
@@ -406,8 +406,8 @@ bool DataIO::extractSetCartCoordTrajectories(
   if (file_type(dir_or_file_path) == _DIR_)  // if it is a directory
   {
     uint i = 1;
-    snprintf(var_file_path, sizeof(var_file_path),
-             "%s/%d.txt", dir_or_file_path, i);
+    snprintf(var_file_path, sizeof(var_file_path), "%s/%d.txt",
+             dir_or_file_path, i);
 
     while ((file_type(var_file_path) == _REG_) &&  // while file exists
            (i <= max_num_trajs)) {
@@ -418,8 +418,8 @@ bool DataIO::extractSetCartCoordTrajectories(
       }
       cart_coord_trajectory_set.push_back(*cartesian_trajectory);
       i++;
-      snprintf(var_file_path, sizeof(var_file_path),
-               "%s/%d.txt", dir_or_file_path, i);
+      snprintf(var_file_path, sizeof(var_file_path), "%s/%d.txt",
+               dir_or_file_path, i);
     }
   } else if (file_type(dir_or_file_path) == _REG_) {  // if it is a (text) file
     if (rt_assert(extractCartCoordTrajectory(
@@ -453,8 +453,8 @@ bool DataIO::writeSetCartCoordTrajectoriesToDir(
 
   char var_file_path[1000];
   for (uint i = 0; i < N_traj; ++i) {
-    snprintf(var_file_path, sizeof(var_file_path),
-             "%s/%d.txt", dir_path, (i + 1));
+    snprintf(var_file_path, sizeof(var_file_path), "%s/%d.txt", dir_path,
+             (i + 1));
 
     if (rt_assert(writeCartCoordTrajectoryToFile(
             cart_coord_trajectory_set[i], var_file_path, is_comma_separated)) ==
@@ -489,8 +489,8 @@ bool DataIO::extractSetQuaternionTrajectories(
   if (file_type(dir_or_file_path) == _DIR_)  // if it is a directory
   {
     uint i = 1;
-    snprintf(var_file_path, sizeof(var_file_path),
-             "%s/%d.txt", dir_or_file_path, i);
+    snprintf(var_file_path, sizeof(var_file_path), "%s/%d.txt",
+             dir_or_file_path, i);
 
     while ((file_type(var_file_path) == _REG_) &&  // while file exists
            (i <= max_num_trajs)) {
@@ -501,8 +501,8 @@ bool DataIO::extractSetQuaternionTrajectories(
       }
       quat_trajectory_set.push_back(*quat_trajectory);
       i++;
-      snprintf(var_file_path, sizeof(var_file_path),
-               "%s/%d.txt", dir_or_file_path, i);
+      snprintf(var_file_path, sizeof(var_file_path), "%s/%d.txt",
+               dir_or_file_path, i);
     }
   } else if (file_type(dir_or_file_path) == _REG_) {  // if it is a (text) file
     if (rt_assert(extractQuaternionTrajectory(
@@ -533,7 +533,7 @@ bool DataIO::extractSetCartCoordDemonstrationGroups(
     return false;
   }
 
-  if (selected_obs_avoid_setting_numbers == NULL)  // use all settings
+  if (selected_obs_avoid_setting_numbers == nullptr)  // use all settings
   {
     N_demo_settings = N_total_existing_demo_settings;
   } else {
@@ -551,7 +551,7 @@ bool DataIO::extractSetCartCoordDemonstrationGroups(
 
   char in_demo_group_dir_path[1000];
   for (uint n = 1; n <= N_demo_settings; n++) {
-    if (selected_obs_avoid_setting_numbers == NULL)  // use all settings
+    if (selected_obs_avoid_setting_numbers == nullptr)  // use all settings
     {
       snprintf(in_demo_group_dir_path, sizeof(in_demo_group_dir_path),
                "%s/%u/endeff_trajs/", in_data_dir_path, n);
@@ -580,7 +580,7 @@ bool DataIO::extractSetCartCoordDemonstrationGroups(
     return false;
   }
 
-  if (demo_group_set_dmp_unroll_init_params != NULL) {
+  if (demo_group_set_dmp_unroll_init_params != nullptr) {
     demo_group_set_dmp_unroll_init_params->clear();
 
     VecDMPUnrollInitParamsPtr demo_group_dmp_unroll_init_params;
@@ -628,14 +628,14 @@ bool DataIO::extract3DPoints(const char* file_path, Points& points,
   }
 
   FILE* f = fopen(file_path, "rt");
-  if (rt_assert(f != NULL) == false) {
+  if (rt_assert(f != nullptr) == false) {
     return false;
   }
 
   char line[1000];
   Vector3 point;
 
-  while (fgets(line, 1000, f) != NULL) {
+  while (fgets(line, 1000, f) != nullptr) {
     if (is_comma_separated) {
       sscanf(line, "%lf,%lf,%lf", &(point[0]), &(point[1]), &(point[2]));
     } else {
@@ -658,19 +658,19 @@ bool DataIO::readMatrixFromFile(const char* file_path,
   }
 
   FILE* f = fopen(file_path, "rt");
-  if (rt_assert(f != NULL) == false) {
+  if (rt_assert(f != nullptr) == false) {
     return false;
   }
 
   char line[1000];
-  if (rt_assert(fgets(line, 1000, f) != NULL)) {
+  if (rt_assert(fgets(line, 1000, f) != nullptr)) {
     sscanf(line, "%d", &matrix_data_structure);
   } else {
     fclose(f);
     return false;
   }
 
-  if (rt_assert(fgets(line, 1000, f) == NULL) == false) {
+  if (rt_assert(fgets(line, 1000, f) == nullptr) == false) {
     fclose(f);
     return false;
   }
@@ -689,19 +689,19 @@ bool DataIO::readMatrixFromFile(const char* file_path,
   }
 
   FILE* f = fopen(file_path, "rt");
-  if (rt_assert(f != NULL) == false) {
+  if (rt_assert(f != nullptr) == false) {
     return false;
   }
 
   char line[1000];
-  if (rt_assert(fgets(line, 1000, f) != NULL)) {
+  if (rt_assert(fgets(line, 1000, f) != nullptr)) {
     sscanf(line, "%lf", &matrix_data_structure);
   } else {
     fclose(f);
     return false;
   }
 
-  if (rt_assert(fgets(line, 1000, f) == NULL) == false) {
+  if (rt_assert(fgets(line, 1000, f) == nullptr) == false) {
     fclose(f);
     return false;
   }

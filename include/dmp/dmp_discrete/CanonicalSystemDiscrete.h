@@ -47,7 +47,7 @@ class CanonicalSystemDiscrete : public CanonicalSystem {
   CanonicalSystemDiscrete(
       TauSystem* tau_system, RealTimeAssertor* real_time_assertor,
       uint cs_order = 2,
-      std::vector<CanonicalCoupling*>* canonical_couplers = NULL);
+      std::vector<CanonicalCoupling*>* canonical_couplers = nullptr);
 
   /**
    * @param tau_system Tau system that computes the tau parameter for this
@@ -69,7 +69,7 @@ class CanonicalSystemDiscrete : public CanonicalSystem {
   CanonicalSystemDiscrete(
       TauSystem* tau_system, uint cs_order, double cs_alpha,
       RealTimeAssertor* real_time_assertor,
-      std::vector<CanonicalCoupling*>* canonical_couplers = NULL);
+      std::vector<CanonicalCoupling*>* canonical_couplers = nullptr);
 
   /**
    * @param tau_system Tau system that computes the tau parameter for this
@@ -94,7 +94,7 @@ class CanonicalSystemDiscrete : public CanonicalSystem {
   CanonicalSystemDiscrete(
       TauSystem* tau_system, uint cs_order, double cs_alpha, double cs_beta,
       RealTimeAssertor* real_time_assertor,
-      std::vector<CanonicalCoupling*>* canonical_couplers = NULL);
+      std::vector<CanonicalCoupling*>* canonical_couplers = nullptr);
 
   /**
    * Checks whether this discrete canonical system is valid or not.

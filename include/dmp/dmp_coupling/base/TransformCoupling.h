@@ -39,7 +39,7 @@ class TransformCoupling : public Coupling {
    * @return Valid (true) or invalid (false)
    */
   bool isValid() {
-    if (rt_assertor != NULL) {
+    if (rt_assertor != nullptr) {
       if (rt_assert((rt_assert(dmp_num_dimensions >= 0)) &&
                     (rt_assert(dmp_num_dimensions <=
                                MAX_DMP_NUM_DIMENSIONS))) == false) {

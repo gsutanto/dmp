@@ -152,12 +152,12 @@ class DMPDiscrete : public DMP {
    */
   bool getNextState(
       double dt, bool update_canonical_state, DMPState& next_state,
-      VectorN* transform_sys_forcing_term = NULL,
-      VectorN* transform_sys_coupling_term_acc = NULL,
-      VectorN* transform_sys_coupling_term_vel = NULL,
-      VectorM* func_approx_basis_functions = NULL,
+      VectorN* transform_sys_forcing_term = nullptr,
+      VectorN* transform_sys_coupling_term_acc = nullptr,
+      VectorN* transform_sys_coupling_term_vel = nullptr,
+      VectorM* func_approx_basis_functions = nullptr,
       VectorM* func_approx_normalized_basis_func_vector_mult_phase_multiplier =
-          NULL);
+          nullptr);
 
   /**
    * Returns current DMP state.
@@ -174,7 +174,8 @@ class DMPDiscrete : public DMP {
    * dimension (return variable)
    * @return Success or failure
    */
-  bool getForcingTerm(VectorN& result_f, VectorM* basis_function_vector = NULL);
+  bool getForcingTerm(VectorN& result_f,
+                      VectorM* basis_function_vector = nullptr);
 
   /**
    * Returns current goal position.

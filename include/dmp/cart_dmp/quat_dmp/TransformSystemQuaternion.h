@@ -54,7 +54,7 @@ class TransformSystemQuaternion : public TransformSystemDiscrete {
       LoggedDMPDiscreteVariables* logged_dmp_discrete_vars,
       RealTimeAssertor* real_time_assertor,
       std::vector<bool> is_using_scaling_init,
-      std::vector<TransformCoupling*>* transform_couplers = NULL,
+      std::vector<TransformCoupling*>* transform_couplers = nullptr,
       double ts_alpha = 25.0, double ts_beta = (25.0 / 4.0));
 
   /**
@@ -103,10 +103,11 @@ class TransformSystemQuaternion : public TransformSystemDiscrete {
    * @return Success or failure
    */
   bool getNextQuaternionState(
-      double dt, QuaternionDMPState& next_state, VectorN* forcing_term = NULL,
-      VectorN* coupling_term_acc = NULL, VectorN* coupling_term_vel = NULL,
-      VectorM* basis_functions_out = NULL,
-      VectorM* normalized_basis_func_vector_mult_phase_multiplier = NULL);
+      double dt, QuaternionDMPState& next_state,
+      VectorN* forcing_term = nullptr, VectorN* coupling_term_acc = nullptr,
+      VectorN* coupling_term_vel = nullptr,
+      VectorM* basis_functions_out = nullptr,
+      VectorM* normalized_basis_func_vector_mult_phase_multiplier = nullptr);
 
   /**
    * Based on the start state, current state, evolving goal state and

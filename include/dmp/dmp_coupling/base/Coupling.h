@@ -18,7 +18,7 @@ class Coupling {
   RealTimeAssertor* rt_assertor;
 
  public:
-  Coupling() : rt_assertor(NULL) {}
+  Coupling() : rt_assertor(nullptr) {}
 
   /**
    * @param real_time_assertor Real-Time Assertor for troubleshooting and

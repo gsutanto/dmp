@@ -4,10 +4,10 @@ namespace dmp {
 
 DMPDiscreteMultiDim::DMPDiscreteMultiDim()
     : transform_sys_discrete_multi_dim(TransformSystemDiscrete(
-          0, NULL, nullptr, &logged_dmp_discrete_variables, NULL,
+          0, nullptr, nullptr, &logged_dmp_discrete_variables, nullptr,
           std::vector<bool>(0, true))),
-      DMPDiscrete(0, 0, NULL, &transform_sys_discrete_multi_dim,
-                  _SCHAAL_LWR_METHOD_, NULL, "") {}
+      DMPDiscrete(0, 0, nullptr, &transform_sys_discrete_multi_dim,
+                  _SCHAAL_LWR_METHOD_, nullptr, "") {}
 
 DMPDiscreteMultiDim::DMPDiscreteMultiDim(
     uint dmp_num_dimensions_init, uint model_size_init,
@@ -21,8 +21,9 @@ DMPDiscreteMultiDim::DMPDiscreteMultiDim(
               dmp_num_dimensions_init, model_size_init,
               canonical_system_discrete, real_time_assertor),
           &logged_dmp_discrete_variables, real_time_assertor,
-          std::vector<bool>(dmp_num_dimensions_init, true), NULL, NULL, NULL,
-          NULL, transform_couplers, 25.0, 25.0 / 4.0, ts_formulation_type)),
+          std::vector<bool>(dmp_num_dimensions_init, true), nullptr, nullptr,
+          nullptr, nullptr, transform_couplers, 25.0, 25.0 / 4.0,
+          ts_formulation_type)),
       DMPDiscrete(dmp_num_dimensions_init, model_size_init,
                   canonical_system_discrete, &transform_sys_discrete_multi_dim,
                   learning_method, real_time_assertor,

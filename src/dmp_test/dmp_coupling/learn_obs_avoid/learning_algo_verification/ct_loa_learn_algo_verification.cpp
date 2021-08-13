@@ -199,7 +199,7 @@ int main(int argc, char** argv) {
 
   /****************** without obstacle avoidance (START) ******************/
   // NOT using obstacle avoidance coupling term:
-  transform_couplers[0] = NULL;
+  transform_couplers[0] = nullptr;
   if (rt_assert_main(cart_dmp.setParams(*f_weights_baseline,
                                         f_A_learn_baseline)) == false) {
     return (-1);

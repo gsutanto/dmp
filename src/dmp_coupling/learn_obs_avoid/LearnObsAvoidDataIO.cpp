@@ -68,12 +68,12 @@ bool LearnObsAvoidDataIO::isValid() {
     return false;
   }
   if (rt_assert(
-          (rt_assert(feature_trajectory_buffer != NULL)) &&
-          (rt_assert(endeff_cart_position_local_trajectory_buffer != NULL)) &&
-          (rt_assert(endeff_cart_velocity_local_trajectory_buffer != NULL)) &&
-          (rt_assert(obstacle_cart_position_local_trajectory_buffer != NULL)) &&
+          (rt_assert(feature_trajectory_buffer != nullptr)) &&
+          (rt_assert(endeff_cart_position_local_trajectory_buffer != nullptr)) &&
+          (rt_assert(endeff_cart_velocity_local_trajectory_buffer != nullptr)) &&
+          (rt_assert(obstacle_cart_position_local_trajectory_buffer != nullptr)) &&
           (rt_assert(obstacle_cart_velocity_local_trajectory_buffer !=
-                     NULL))) == false) {
+                     nullptr))) == false) {
     return false;
   }
   if (rt_assert((rt_assert(feature_vector_size > 0)) &&
@@ -145,7 +145,7 @@ bool LearnObsAvoidDataIO::extractObstacleAvoidanceTrainingDataSphObs(
   }
 
   for (uint n = 1; n <= N_demo_settings; n++) {
-    if (selected_obs_avoid_setting_numbers == NULL)  // use all settings
+    if (selected_obs_avoid_setting_numbers == nullptr)  // use all settings
     {
       snprintf(obs_setting_dir_path, sizeof(obs_setting_dir_path), "%s/%u/",
                in_data_dir_path, n);
@@ -218,7 +218,7 @@ bool LearnObsAvoidDataIO::extractObstacleAvoidanceTrainingDataVicon(
   }
 
   for (uint n = 1; n <= N_demo_settings; n++) {
-    if (selected_obs_avoid_setting_numbers == NULL)  // use all settings
+    if (selected_obs_avoid_setting_numbers == nullptr)  // use all settings
     {
       snprintf(obs_setting_dir_path, sizeof(obs_setting_dir_path), "%s/%u/",
                in_data_dir_path, n);

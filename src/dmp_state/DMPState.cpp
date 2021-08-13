@@ -11,7 +11,7 @@ DMPState::DMPState() {
   x.resize(dmp_num_dimensions);
   xd.resize(dmp_num_dimensions);
   xdd.resize(dmp_num_dimensions);
-  rt_assertor = NULL;
+  rt_assertor = nullptr;
 }
 
 DMPState::DMPState(RealTimeAssertor* real_time_assertor) {

@@ -84,7 +84,7 @@ public:
                                    bool opt_is_constraining_Rp_yd_relationship=false,
                                    bool opt_is_logging_learning_data=false,
                                    const char* opt_data_directory_path="",
-                                   Vector3* goal_position_global=NULL,
+                                   Vector3* goal_position_global=nullptr,
                                    FuncApproximatorDiscrete* function_approximator_discrete=nullptr);
 
     /**
@@ -126,7 +126,7 @@ public:
                            double regularization_const=5.0,
                            bool is_learning_baseline=true,
                            uint max_num_trajs_per_setting=500,
-                           std::vector<uint>* selected_obs_avoid_setting_numbers=NULL,
+                           std::vector<uint>* selected_obs_avoid_setting_numbers=nullptr,
                            double max_critical_point_distance_baseline_vs_obs_avoid_demo=0.075);
 
     /**
@@ -162,8 +162,8 @@ public:
                                                          VectorloaF3& feature_vector_buffer,
                                                          MatrixloaTxF3& sub_feature_matrix,
                                                          Matrix3xT& sub_target_coupling_term,
-                                                         Matrixloa3TxF1* sub_feature_matrix_Rp_yd_constrained=NULL,
-                                                         Vectorloa3T* sub_target_coupling_term_Rp_yd_constrained=NULL,
+                                                         Matrixloa3TxF1* sub_feature_matrix_Rp_yd_constrained=nullptr,
+                                                         Vectorloa3T* sub_target_coupling_term_Rp_yd_constrained=nullptr,
                                                          double max_critical_point_distance_baseline_vs_obs_avoid_demo=0.075);
 
     /**
@@ -182,7 +182,7 @@ public:
                          const ObstacleStates& point_obstacles_cart_state_global,
                          const Matrix4x4& cart_hmg_transform_global_to_local_matrix,
                          VectorloaF3& feature_vector,
-                         MatrixloaF1x3* feature_matrix=NULL);
+                         MatrixloaF1x3* feature_matrix=nullptr);
 
     /**
      * This is for computing the stacked feature vector Phi, such that: \n
@@ -198,7 +198,7 @@ public:
     bool computeFeatures(const DMPState& endeff_cart_state_local,
                          const ObstacleStates& point_obstacles_cart_state_local,
                          VectorloaF3& feature_vector,
-                         MatrixloaF1x3* feature_matrix=NULL);
+                         MatrixloaF1x3* feature_matrix=nullptr);
 
     /**
      * In Rai et al. (Humanoids 2014) paper, this is for computing \n
@@ -215,7 +215,7 @@ public:
     bool computeAF_H14ObsAvoidCtFeatureMatricesPerObsPoint(const DMPState& endeff_cart_state_local,
                                                            const DMPState& obs_evalpt_cart_state_local,
                                                            Matrixloa3xG2& feature_matrix_phi1_or_phi2_per_point,
-                                                           Matrixloa3xG* feature_matrix_phi3_per_point=NULL);
+                                                           Matrixloa3xG* feature_matrix_phi3_per_point=nullptr);
 
     /**
      * In Park et al. (Humanoids 2008) paper, this is for computing \n
@@ -415,8 +415,8 @@ public:
                                                    PointsVector& vector_point_obstacles_cart_position_global,
                                                    uint& N_demo_settings,
                                                    uint max_num_trajs_per_setting=500,
-                                                   std::vector<uint>* selected_obs_avoid_setting_numbers=NULL,
-                                                   VecVecDMPUnrollInitParams* demo_group_set_dmp_unroll_init_params=NULL);
+                                                   std::vector<uint>* selected_obs_avoid_setting_numbers=nullptr,
+                                                   VecVecDMPUnrollInitParams* demo_group_set_dmp_unroll_init_params=nullptr);
 
     ~TransformCouplingLearnObsAvoid();
 

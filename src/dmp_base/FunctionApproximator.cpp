@@ -5,9 +5,9 @@ namespace dmp {
 FunctionApproximator::FunctionApproximator()
     : dmp_num_dimensions(0),
       model_size(0),
-      canonical_sys(NULL),
+      canonical_sys(nullptr),
       weights(new MatrixNxM(MAX_DMP_NUM_DIMENSIONS, MAX_MODEL_SIZE)),
-      rt_assertor(NULL) {}
+      rt_assertor(nullptr) {}
 
 FunctionApproximator::FunctionApproximator(uint dmp_num_dimensions_init,
                                            uint model_size_init,
@@ -29,8 +29,8 @@ bool FunctionApproximator::isValid() {
                 (rt_assert(model_size <= MAX_MODEL_SIZE))) == false) {
     return false;
   }
-  if (rt_assert(rt_assert(canonical_sys != NULL) &&
-                rt_assert(weights != NULL)) == false) {
+  if (rt_assert(rt_assert(canonical_sys != nullptr) &&
+                rt_assert(weights != nullptr)) == false) {
     return false;
   }
   if (rt_assert(canonical_sys->isValid()) == false) {

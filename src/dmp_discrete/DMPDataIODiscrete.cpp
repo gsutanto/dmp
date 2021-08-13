@@ -4,7 +4,7 @@ namespace dmp {
 
 DMPDataIODiscrete::DMPDataIODiscrete()
     : DMPDataIO(),
-      transform_sys_discrete(NULL),
+      transform_sys_discrete(nullptr),
       canonical_sys_state_trajectory_buffer(new MatrixTx4()) {
   DMPDataIODiscrete::reset();
 }
@@ -33,13 +33,13 @@ bool DMPDataIODiscrete::isValid() {
   if (rt_assert(DMPDataIO::isValid()) == false) {
     return false;
   }
-  if (rt_assert(rt_assert(transform_sys_discrete != NULL)) == false) {
+  if (rt_assert(rt_assert(transform_sys_discrete != nullptr)) == false) {
     return false;
   }
   if (rt_assert(rt_assert(transform_sys_discrete->isValid())) == false) {
     return false;
   }
-  if (rt_assert(canonical_sys_state_trajectory_buffer != NULL) == false) {
+  if (rt_assert(canonical_sys_state_trajectory_buffer != nullptr) == false) {
     return false;
   }
   return true;
@@ -162,7 +162,7 @@ bool DMPDataIODiscrete::saveBasisFunctions(const char* file_path) {
   double dx = 0.0001;
 
   FILE* f = fopen(file_path, "w");
-  if (rt_assert(f != NULL) == false) {
+  if (rt_assert(f != nullptr) == false) {
     return false;
   }
 

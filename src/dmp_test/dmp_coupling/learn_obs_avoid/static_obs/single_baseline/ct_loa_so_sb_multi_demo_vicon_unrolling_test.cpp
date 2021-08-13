@@ -264,7 +264,7 @@ int main(int argc, char** argv) {
 
   /****************** without obstacle (START) ******************/
   // NOT using obstacle avoidance coupling term:
-  transform_couplers[0] = NULL;
+  transform_couplers[0] = nullptr;
 
   tau_reproduce = (*demo_group_set_dmp_unroll_init_params)[0][0].tau;
 

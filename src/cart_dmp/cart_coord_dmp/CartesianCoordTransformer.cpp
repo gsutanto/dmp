@@ -3,7 +3,7 @@
 namespace dmp {
 
 CartesianCoordTransformer::CartesianCoordTransformer()
-    : rt_assertor(NULL),
+    : rt_assertor(nullptr),
       theta_kernel_centers(new VectorM(MAX_MODEL_SIZE)),
       theta_kernel_Ds(new VectorM(MAX_MODEL_SIZE)),
       basis_vector_weights_unnormalized(new VectorM(MAX_MODEL_SIZE)),
@@ -113,10 +113,10 @@ bool CartesianCoordTransformer::isValid() {
                                   cart_trajectory_size)) == false) {
     return false;
   }
-  if (rt_assert((rt_assert(theta_kernel_centers != NULL)) &&
-                (rt_assert(theta_kernel_Ds != NULL)) &&
-                (rt_assert(basis_vector_weights_unnormalized != NULL)) &&
-                (rt_assert(basis_matrix != NULL))) == false) {
+  if (rt_assert((rt_assert(theta_kernel_centers != nullptr)) &&
+                (rt_assert(theta_kernel_Ds != nullptr)) &&
+                (rt_assert(basis_vector_weights_unnormalized != nullptr)) &&
+                (rt_assert(basis_matrix != nullptr))) == false) {
     return false;
   }
   if (rt_assert((rt_assert(theta_kernel_centers->rows() ==
@@ -337,371 +337,365 @@ bool CartesianCoordTransformer::computeCTrajCoordTransforms(
           local_y_axis / local_y_axis.norm();  // normalize local y-axis
     } else {  // if it is "parallel enough" (following the same method as
               // Schaal's trajectory local coordinate system formulation):
-        // check if local x-axis is "too parallel" with the global z-axis; if
-        // not:
-        if (fabs(local_x_axis.dot(global_z_axis)) <=
-            PARALLEL_VECTOR_PROJECTION_THRESHOLD) {
-          local_z_axis = global_z_axis;
-          local_y_axis = local_z_axis.cross(local_x_axis);
-          local_y_axis =
-              local_y_axis / local_y_axis.norm();  // normalize local y-axis
-          local_z_axis = local_x_axis.cross(local_y_axis);
-          local_z_axis =
-              local_z_axis / local_z_axis.norm();  // normalize local z-axis
-        } else {  // if it is "parallel enough":
-          local_y_axis = global_y_axis;
-          local_z_axis = local_x_axis.cross(local_y_axis);
-          local_z_axis =
-              local_z_axis / local_z_axis.norm();  // normalize local z-axis
-          local_y_axis = local_z_axis.cross(local_x_axis);
-          local_y_axis =
-              local_y_axis / local_y_axis.norm();  // normalize local y-axis
-        }
+      // check if local x-axis is "too parallel" with the global z-axis; if
+      // not:
+      if (fabs(local_x_axis.dot(global_z_axis)) <=
+          PARALLEL_VECTOR_PROJECTION_THRESHOLD) {
+        local_z_axis = global_z_axis;
+        local_y_axis = local_z_axis.cross(local_x_axis);
+        local_y_axis =
+            local_y_axis / local_y_axis.norm();  // normalize local y-axis
+        local_z_axis = local_x_axis.cross(local_y_axis);
+        local_z_axis =
+            local_z_axis / local_z_axis.norm();  // normalize local z-axis
+      } else {                                   // if it is "parallel enough":
+        local_y_axis = global_y_axis;
+        local_z_axis = local_x_axis.cross(local_y_axis);
+        local_z_axis =
+            local_z_axis / local_z_axis.norm();  // normalize local z-axis
+        local_y_axis = local_z_axis.cross(local_x_axis);
+        local_y_axis =
+            local_y_axis / local_y_axis.norm();  // normalize local y-axis
       }
     }
-
-    rotation_matrix << local_x_axis, local_y_axis, local_z_axis;
-
-    rel_homogen_transform_matrix_local_to_global.block(0, 0, 3, 3)
-        << rotation_matrix;
-    rel_homogen_transform_matrix_local_to_global.block(0, 3, 3, 1)
-        << translation_vector;
-    rel_homogen_transform_matrix_local_to_global.block(3, 0, 1, 4) << 0.0, 0.0,
-        0.0, 1.0;
-
-    rel_homogen_transform_matrix_global_to_local.block(0, 0, 3, 3)
-        << rotation_matrix.transpose();
-    rel_homogen_transform_matrix_global_to_local.block(0, 3, 3, 1)
-        << -(rotation_matrix.transpose()) * translation_vector;
-    rel_homogen_transform_matrix_global_to_local.block(3, 0, 1, 4) << 0.0, 0.0,
-        0.0, 1.0;
-
-    return true;
   }
 
-  bool CartesianCoordTransformer::convertCTrajDMPStatesToMatrices(
-      const Trajectory& cart_trajectory, Matrix4xT& ctraj_H_matrix,
-      Matrix3xT& ctrajd_matrix, Matrix3xT& ctrajdd_matrix,
-      VectorT& ctraj_time_vector) {
-    // pre-conditions checking
-    if (rt_assert(CartesianCoordTransformer::isValid()) == false) {
-      return false;
-    }
-    // input checking:
-    cart_trajectory_size = cart_trajectory.size();
-    if (rt_assert((rt_assert(cart_trajectory_size > 0)) &&
-                  (rt_assert(cart_trajectory_size <= MAX_TRAJ_SIZE))) ==
-        false) {
-      return false;
-    }
-    if (rt_assert((rt_assert(ctraj_H_matrix.cols() == cart_trajectory_size)) &&
-                  (rt_assert(ctrajd_matrix.cols() == cart_trajectory_size)) &&
-                  (rt_assert(ctrajdd_matrix.cols() == cart_trajectory_size)) &&
-                  (rt_assert(ctraj_time_vector.rows() ==
-                             cart_trajectory_size))) == false) {
-      return false;
-    }
+  rotation_matrix << local_x_axis, local_y_axis, local_z_axis;
 
-    for (int i = 0; i < cart_trajectory_size; i++) {
-      if (rt_assert(cart_trajectory[i].getDMPNumDimensions() == 3) == false) {
-        return false;
-      }
+  rel_homogen_transform_matrix_local_to_global.block(0, 0, 3, 3)
+      << rotation_matrix;
+  rel_homogen_transform_matrix_local_to_global.block(0, 3, 3, 1)
+      << translation_vector;
+  rel_homogen_transform_matrix_local_to_global.block(3, 0, 1, 4) << 0.0, 0.0,
+      0.0, 1.0;
 
-      ctraj_H_matrix.block(0, i, 3, 1) =
-          cart_trajectory[i].getX().block(0, 0, 3, 1);
-      ctrajd_matrix.block(0, i, 3, 1) =
-          cart_trajectory[i].getXd().block(0, 0, 3, 1);
-      ctrajdd_matrix.block(0, i, 3, 1) =
-          cart_trajectory[i].getXdd().block(0, 0, 3, 1);
-      ctraj_time_vector(i, 0) = cart_trajectory[i].getTime();
-    }
-    ctraj_H_matrix.row(3).setOnes();
+  rel_homogen_transform_matrix_global_to_local.block(0, 0, 3, 3)
+      << rotation_matrix.transpose();
+  rel_homogen_transform_matrix_global_to_local.block(0, 3, 3, 1)
+      << -(rotation_matrix.transpose()) * translation_vector;
+  rel_homogen_transform_matrix_global_to_local.block(3, 0, 1, 4) << 0.0, 0.0,
+      0.0, 1.0;
 
-    return true;
+  return true;
+}
+
+bool CartesianCoordTransformer::convertCTrajDMPStatesToMatrices(
+    const Trajectory& cart_trajectory, Matrix4xT& ctraj_H_matrix,
+    Matrix3xT& ctrajd_matrix, Matrix3xT& ctrajdd_matrix,
+    VectorT& ctraj_time_vector) {
+  // pre-conditions checking
+  if (rt_assert(CartesianCoordTransformer::isValid()) == false) {
+    return false;
+  }
+  // input checking:
+  cart_trajectory_size = cart_trajectory.size();
+  if (rt_assert((rt_assert(cart_trajectory_size > 0)) &&
+                (rt_assert(cart_trajectory_size <= MAX_TRAJ_SIZE))) == false) {
+    return false;
+  }
+  if (rt_assert((rt_assert(ctraj_H_matrix.cols() == cart_trajectory_size)) &&
+                (rt_assert(ctrajd_matrix.cols() == cart_trajectory_size)) &&
+                (rt_assert(ctrajdd_matrix.cols() == cart_trajectory_size)) &&
+                (rt_assert(ctraj_time_vector.rows() ==
+                           cart_trajectory_size))) == false) {
+    return false;
   }
 
-  bool CartesianCoordTransformer::computeCTrajAtNewCoordSys(
-      const Matrix4xT& ctraj_H_matrix_old, const Matrix3xT& ctrajd_matrix_old,
-      const Matrix3xT& ctrajdd_matrix_old,
-      const Matrix4x4& rel_homogen_transform_matrix_old_to_new,
-      Matrix4xT& ctraj_H_matrix_new, Matrix3xT& ctrajd_matrix_new,
-      Matrix3xT& ctrajdd_matrix_new) {
-    // pre-conditions checking
-    if (rt_assert(CartesianCoordTransformer::isValid()) == false) {
-      return false;
-    }
-    // input checking:
-    cart_trajectory_size = ctrajdd_matrix_new.cols();
-    if (rt_assert((rt_assert(cart_trajectory_size > 0)) &&
-                  (rt_assert(cart_trajectory_size <= MAX_TRAJ_SIZE))) ==
-        false) {
-      return false;
-    }
-    if (rt_assert(
-            (rt_assert(ctraj_H_matrix_old.cols() == cart_trajectory_size)) &&
-            (rt_assert(ctrajd_matrix_old.cols() == cart_trajectory_size)) &&
-            (rt_assert(ctrajdd_matrix_old.cols() == cart_trajectory_size)) &&
-            (rt_assert(ctraj_H_matrix_new.cols() == cart_trajectory_size)) &&
-            (rt_assert(ctrajd_matrix_new.cols() == cart_trajectory_size))) ==
-        false) {
-      return false;
-    }
-    if (rt_assert((rt_assert(ctraj_H_matrix_old.isZero() == false)) &&
-                  (rt_assert(rel_homogen_transform_matrix_old_to_new.isZero() ==
-                             false))) == false) {
+  for (int i = 0; i < cart_trajectory_size; i++) {
+    if (rt_assert(cart_trajectory[i].getDMPNumDimensions() == 3) == false) {
       return false;
     }
 
-    ctraj_H_matrix_new =
-        rel_homogen_transform_matrix_old_to_new * ctraj_H_matrix_old;
-    ctrajd_matrix_new =
-        rel_homogen_transform_matrix_old_to_new.block(0, 0, 3, 3) *
-        ctrajd_matrix_old;
-    ctrajdd_matrix_new =
-        rel_homogen_transform_matrix_old_to_new.block(0, 0, 3, 3) *
-        ctrajdd_matrix_old;
+    ctraj_H_matrix.block(0, i, 3, 1) =
+        cart_trajectory[i].getX().block(0, 0, 3, 1);
+    ctrajd_matrix.block(0, i, 3, 1) =
+        cart_trajectory[i].getXd().block(0, 0, 3, 1);
+    ctrajdd_matrix.block(0, i, 3, 1) =
+        cart_trajectory[i].getXdd().block(0, 0, 3, 1);
+    ctraj_time_vector(i, 0) = cart_trajectory[i].getTime();
+  }
+  ctraj_H_matrix.row(3).setOnes();
 
-    return true;
+  return true;
+}
+
+bool CartesianCoordTransformer::computeCTrajAtNewCoordSys(
+    const Matrix4xT& ctraj_H_matrix_old, const Matrix3xT& ctrajd_matrix_old,
+    const Matrix3xT& ctrajdd_matrix_old,
+    const Matrix4x4& rel_homogen_transform_matrix_old_to_new,
+    Matrix4xT& ctraj_H_matrix_new, Matrix3xT& ctrajd_matrix_new,
+    Matrix3xT& ctrajdd_matrix_new) {
+  // pre-conditions checking
+  if (rt_assert(CartesianCoordTransformer::isValid()) == false) {
+    return false;
+  }
+  // input checking:
+  cart_trajectory_size = ctrajdd_matrix_new.cols();
+  if (rt_assert((rt_assert(cart_trajectory_size > 0)) &&
+                (rt_assert(cart_trajectory_size <= MAX_TRAJ_SIZE))) == false) {
+    return false;
+  }
+  if (rt_assert(
+          (rt_assert(ctraj_H_matrix_old.cols() == cart_trajectory_size)) &&
+          (rt_assert(ctrajd_matrix_old.cols() == cart_trajectory_size)) &&
+          (rt_assert(ctrajdd_matrix_old.cols() == cart_trajectory_size)) &&
+          (rt_assert(ctraj_H_matrix_new.cols() == cart_trajectory_size)) &&
+          (rt_assert(ctrajd_matrix_new.cols() == cart_trajectory_size))) ==
+      false) {
+    return false;
+  }
+  if (rt_assert((rt_assert(ctraj_H_matrix_old.isZero() == false)) &&
+                (rt_assert(rel_homogen_transform_matrix_old_to_new.isZero() ==
+                           false))) == false) {
+    return false;
   }
 
-  bool CartesianCoordTransformer::computeCTrajAtNewCoordSys(
-      Vector4 * cart_H_old, Vector3 * cartd_old, Vector3 * cartdd_old,
-      Vector3 * cart_vector_old,
-      const Matrix4x4& rel_homogen_transform_matrix_old_to_new,
-      Vector4* cart_H_new, Vector3* cartd_new, Vector3* cartdd_new,
-      Vector3* cart_vector_new) {
-    // pre-conditions checking
-    if (rt_assert(CartesianCoordTransformer::isValid()) == false) {
-      return false;
-    }
-    // input checking:
-    if (rt_assert(rel_homogen_transform_matrix_old_to_new.isZero() == false) ==
-        false) {
-      return false;
-    }
+  ctraj_H_matrix_new =
+      rel_homogen_transform_matrix_old_to_new * ctraj_H_matrix_old;
+  ctrajd_matrix_new =
+      rel_homogen_transform_matrix_old_to_new.block(0, 0, 3, 3) *
+      ctrajd_matrix_old;
+  ctrajdd_matrix_new =
+      rel_homogen_transform_matrix_old_to_new.block(0, 0, 3, 3) *
+      ctrajdd_matrix_old;
 
-    if (cart_H_old) {
-      if (rt_assert((*cart_H_old)(3) == 1.0) == false) {
-        return false;
-      }
-      if (rt_assert(cart_H_new != NULL) == false) {
-        return false;
-      }
+  return true;
+}
 
-      (*cart_H_new) = rel_homogen_transform_matrix_old_to_new * (*cart_H_old);
-    }
-
-    if (cartd_old) {
-      if (rt_assert(cartd_new != NULL) == false) {
-        return false;
-      }
-
-      (*cartd_new) = rel_homogen_transform_matrix_old_to_new.block<3, 3>(0, 0) *
-                     (*cartd_old);
-    }
-
-    if (cartdd_old) {
-      if (rt_assert(cartdd_new != NULL) == false) {
-        return false;
-      }
-
-      (*cartdd_new) =
-          rel_homogen_transform_matrix_old_to_new.block<3, 3>(0, 0) *
-          (*cartdd_old);
-    }
-
-    if (cart_vector_old) {
-      if (rt_assert(cart_vector_new != NULL) == false) {
-        return false;
-      }
-
-      (*cart_vector_new) =
-          rel_homogen_transform_matrix_old_to_new.block<3, 3>(0, 0) *
-          (*cart_vector_old);
-    }
-
-    return true;
+bool CartesianCoordTransformer::computeCTrajAtNewCoordSys(
+    Vector4* cart_H_old, Vector3* cartd_old, Vector3* cartdd_old,
+    Vector3* cart_vector_old,
+    const Matrix4x4& rel_homogen_transform_matrix_old_to_new,
+    Vector4* cart_H_new, Vector3* cartd_new, Vector3* cartdd_new,
+    Vector3* cart_vector_new) {
+  // pre-conditions checking
+  if (rt_assert(CartesianCoordTransformer::isValid()) == false) {
+    return false;
+  }
+  // input checking:
+  if (rt_assert(rel_homogen_transform_matrix_old_to_new.isZero() == false) ==
+      false) {
+    return false;
   }
 
-  bool CartesianCoordTransformer::computeCPosAtNewCoordSys(
-      const Vector3& pos_3D_old,
-      const Matrix4x4& rel_homogen_transform_matrix_old_to_new,
-      Vector3& pos_3D_new) {
-    // pre-conditions checking
-    if (rt_assert(CartesianCoordTransformer::isValid()) == false) {
+  if (cart_H_old) {
+    if (rt_assert((*cart_H_old)(3) == 1.0) == false) {
       return false;
     }
-    // input checking:
-    if (rt_assert(rel_homogen_transform_matrix_old_to_new.isZero() == false) ==
-        false) {
+    if (rt_assert(cart_H_new != nullptr) == false) {
       return false;
     }
 
-    Vector4 pos_3D_H_old = ZeroVector4;
-    Vector4 pos_3D_H_new = ZeroVector4;
-
-    pos_3D_H_old.block(0, 0, 3, 1) = pos_3D_old;
-    pos_3D_H_old(3) = 1.0;
-    pos_3D_H_new = rel_homogen_transform_matrix_old_to_new * pos_3D_H_old;
-    if (rt_assert(pos_3D_H_new(3) == 1.0) == false) {
-      return false;
-    }
-    pos_3D_new = pos_3D_H_new.block(0, 0, 3, 1);
-
-    return true;
+    (*cart_H_new) = rel_homogen_transform_matrix_old_to_new * (*cart_H_old);
   }
 
-  bool CartesianCoordTransformer::convertCTrajMatricesToDMPStates(
-      const Matrix4xT& ctraj_H_matrix, const Matrix3xT& ctrajd_matrix,
-      const Matrix3xT& ctrajdd_matrix, const VectorT& ctraj_time_vector,
-      Trajectory& cart_trajectory) {
-    // pre-conditions checking
-    if (rt_assert(CartesianCoordTransformer::isValid()) == false) {
-      return false;
-    }
-    // input checking:
-    cart_trajectory_size = ctrajdd_matrix.cols();
-    if (rt_assert((rt_assert(cart_trajectory_size > 0)) &&
-                  (rt_assert(cart_trajectory_size <= MAX_TRAJ_SIZE))) ==
-        false) {
-      return false;
-    }
-    if (rt_assert((rt_assert(ctraj_H_matrix.cols() == cart_trajectory_size)) &&
-                  (rt_assert(ctrajd_matrix.cols() == cart_trajectory_size)) &&
-                  (rt_assert(ctraj_time_vector.rows() ==
-                             cart_trajectory_size))) == false) {
-      return false;
-    }
-    if (rt_assert(cart_trajectory.size() == cart_trajectory_size) == false) {
-      return false;
-    }
-    if (rt_assert((rt_assert(ctraj_H_matrix.isZero() == false)) &&
-                  (rt_assert(ctraj_H_matrix.row(3).isOnes()))) == false) {
+  if (cartd_old) {
+    if (rt_assert(cartd_new != nullptr) == false) {
       return false;
     }
 
-    for (int i = 0; i < cart_trajectory_size; i++) {
-      cart_trajectory[i] = DMPState(ctraj_H_matrix.block(0, i, 3, 1),
-                                    ctrajd_matrix.block(0, i, 3, 1),
-                                    ctrajdd_matrix.block(0, i, 3, 1),
-                                    ctraj_time_vector(i, 0), rt_assertor);
-    }
-
-    return true;
+    (*cartd_new) = rel_homogen_transform_matrix_old_to_new.block<3, 3>(0, 0) *
+                   (*cartd_old);
   }
 
-  bool CartesianCoordTransformer::convertCTrajAtOldToNewCoordSys(
-      const Trajectory& cart_trajectory_old_vector,
-      const Matrix4x4& rel_homogen_transform_matrix_old_to_new,
-      Trajectory& cart_trajectory_new_vector) {
-    // pre-conditions checking
-    if (rt_assert(CartesianCoordTransformer::isValid()) == false) {
-      return false;
-    }
-    // input checking:
-    cart_trajectory_size = cart_trajectory_new_vector.size();
-    if (rt_assert((rt_assert(cart_trajectory_size > 0)) &&
-                  (rt_assert(cart_trajectory_size <= MAX_TRAJ_SIZE))) ==
-        false) {
-      return false;
-    }
-    if (rt_assert(cart_trajectory_old_vector.size() == cart_trajectory_size) ==
-        false) {
-      return false;
-    }
-    if (rt_assert(rel_homogen_transform_matrix_old_to_new.isZero() == false) ==
-        false) {
+  if (cartdd_old) {
+    if (rt_assert(cartdd_new != nullptr) == false) {
       return false;
     }
 
-    cctraj_time_vector->resize(cart_trajectory_size);
-
-    cctraj_old_coord_H_matrix->resize(4, cart_trajectory_size);
-    cctrajd_old_coord_matrix->resize(3, cart_trajectory_size);
-    cctrajdd_old_coord_matrix->resize(3, cart_trajectory_size);
-
-    cctraj_new_coord_H_matrix->resize(4, cart_trajectory_size);
-    cctrajd_new_coord_matrix->resize(3, cart_trajectory_size);
-    cctrajdd_new_coord_matrix->resize(3, cart_trajectory_size);
-
-    if (rt_assert(convertCTrajDMPStatesToMatrices(
-            cart_trajectory_old_vector, *cctraj_old_coord_H_matrix,
-            *cctrajd_old_coord_matrix, *cctrajdd_old_coord_matrix,
-            *cctraj_time_vector)) == false) {
-      return false;
-    }
-    if (rt_assert(computeCTrajAtNewCoordSys(
-            *cctraj_old_coord_H_matrix, *cctrajd_old_coord_matrix,
-            *cctrajdd_old_coord_matrix, rel_homogen_transform_matrix_old_to_new,
-            *cctraj_new_coord_H_matrix, *cctrajd_new_coord_matrix,
-            *cctrajdd_new_coord_matrix)) == false) {
-      return false;
-    }
-    if (rt_assert(convertCTrajMatricesToDMPStates(
-            *cctraj_new_coord_H_matrix, *cctrajd_new_coord_matrix,
-            *cctrajdd_new_coord_matrix, *cctraj_time_vector,
-            cart_trajectory_new_vector)) == false) {
-      return false;
-    }
-
-    return true;
+    (*cartdd_new) = rel_homogen_transform_matrix_old_to_new.block<3, 3>(0, 0) *
+                    (*cartdd_old);
   }
 
-  bool CartesianCoordTransformer::convertCTrajAtOldToNewCoordSys(
-      const DMPState& dmpstate_old,
-      const Matrix4x4& rel_homogen_transform_matrix_old_to_new,
-      DMPState& dmpstate_new) {
-    // pre-conditions checking
-    if (rt_assert(CartesianCoordTransformer::isValid()) == false) {
-      return false;
-    }
-    // input checking:
-    if (rt_assert(rel_homogen_transform_matrix_old_to_new.isZero() == false) ==
-        false) {
-      return false;
-    }
-    if (rt_assert((rt_assert(dmpstate_old.getDMPNumDimensions() == 3)) &&
-                  (rt_assert(dmpstate_new.getDMPNumDimensions() == 3))) ==
-        false) {
+  if (cart_vector_old) {
+    if (rt_assert(cart_vector_new != nullptr) == false) {
       return false;
     }
 
-    Vector4 cart_H_old;
-    Vector3 cartd_old;
-    Vector3 cartdd_old;
-
-    Vector4 cart_H_new;
-    Vector3 cartd_new;
-    Vector3 cartdd_new;
-
-    cart_H_old.block(0, 0, 3, 1) = dmpstate_old.getX();
-    cart_H_old(3) = 1.0;
-    cartd_old.block(0, 0, 3, 1) = dmpstate_old.getXd();
-    cartdd_old.block(0, 0, 3, 1) = dmpstate_old.getXdd();
-
-    if (rt_assert(computeCTrajAtNewCoordSys(
-            &cart_H_old, &cartd_old, &cartdd_old, NULL,
-            rel_homogen_transform_matrix_old_to_new, &cart_H_new, &cartd_new,
-            &cartdd_new, NULL)) == false) {
-      return false;
-    }
-
-    if (rt_assert(dmpstate_new.setX(cart_H_new.block(0, 0, 3, 1))) == false) {
-      return false;
-    }
-    if (rt_assert(dmpstate_new.setXd(cartd_new.block(0, 0, 3, 1))) == false) {
-      return false;
-    }
-    if (rt_assert(dmpstate_new.setXdd(cartdd_new.block(0, 0, 3, 1))) == false) {
-      return false;
-    }
-    if (rt_assert(dmpstate_new.setTime(dmpstate_old.getTime())) == false) {
-      return false;
-    }
-
-    return true;
+    (*cart_vector_new) =
+        rel_homogen_transform_matrix_old_to_new.block<3, 3>(0, 0) *
+        (*cart_vector_old);
   }
 
-  CartesianCoordTransformer::~CartesianCoordTransformer() {}
+  return true;
+}
+
+bool CartesianCoordTransformer::computeCPosAtNewCoordSys(
+    const Vector3& pos_3D_old,
+    const Matrix4x4& rel_homogen_transform_matrix_old_to_new,
+    Vector3& pos_3D_new) {
+  // pre-conditions checking
+  if (rt_assert(CartesianCoordTransformer::isValid()) == false) {
+    return false;
+  }
+  // input checking:
+  if (rt_assert(rel_homogen_transform_matrix_old_to_new.isZero() == false) ==
+      false) {
+    return false;
+  }
+
+  Vector4 pos_3D_H_old = ZeroVector4;
+  Vector4 pos_3D_H_new = ZeroVector4;
+
+  pos_3D_H_old.block(0, 0, 3, 1) = pos_3D_old;
+  pos_3D_H_old(3) = 1.0;
+  pos_3D_H_new = rel_homogen_transform_matrix_old_to_new * pos_3D_H_old;
+  if (rt_assert(pos_3D_H_new(3) == 1.0) == false) {
+    return false;
+  }
+  pos_3D_new = pos_3D_H_new.block(0, 0, 3, 1);
+
+  return true;
+}
+
+bool CartesianCoordTransformer::convertCTrajMatricesToDMPStates(
+    const Matrix4xT& ctraj_H_matrix, const Matrix3xT& ctrajd_matrix,
+    const Matrix3xT& ctrajdd_matrix, const VectorT& ctraj_time_vector,
+    Trajectory& cart_trajectory) {
+  // pre-conditions checking
+  if (rt_assert(CartesianCoordTransformer::isValid()) == false) {
+    return false;
+  }
+  // input checking:
+  cart_trajectory_size = ctrajdd_matrix.cols();
+  if (rt_assert((rt_assert(cart_trajectory_size > 0)) &&
+                (rt_assert(cart_trajectory_size <= MAX_TRAJ_SIZE))) == false) {
+    return false;
+  }
+  if (rt_assert((rt_assert(ctraj_H_matrix.cols() == cart_trajectory_size)) &&
+                (rt_assert(ctrajd_matrix.cols() == cart_trajectory_size)) &&
+                (rt_assert(ctraj_time_vector.rows() ==
+                           cart_trajectory_size))) == false) {
+    return false;
+  }
+  if (rt_assert(cart_trajectory.size() == cart_trajectory_size) == false) {
+    return false;
+  }
+  if (rt_assert((rt_assert(ctraj_H_matrix.isZero() == false)) &&
+                (rt_assert(ctraj_H_matrix.row(3).isOnes()))) == false) {
+    return false;
+  }
+
+  for (int i = 0; i < cart_trajectory_size; i++) {
+    cart_trajectory[i] = DMPState(
+        ctraj_H_matrix.block(0, i, 3, 1), ctrajd_matrix.block(0, i, 3, 1),
+        ctrajdd_matrix.block(0, i, 3, 1), ctraj_time_vector(i, 0), rt_assertor);
+  }
+
+  return true;
+}
+
+bool CartesianCoordTransformer::convertCTrajAtOldToNewCoordSys(
+    const Trajectory& cart_trajectory_old_vector,
+    const Matrix4x4& rel_homogen_transform_matrix_old_to_new,
+    Trajectory& cart_trajectory_new_vector) {
+  // pre-conditions checking
+  if (rt_assert(CartesianCoordTransformer::isValid()) == false) {
+    return false;
+  }
+  // input checking:
+  cart_trajectory_size = cart_trajectory_new_vector.size();
+  if (rt_assert((rt_assert(cart_trajectory_size > 0)) &&
+                (rt_assert(cart_trajectory_size <= MAX_TRAJ_SIZE))) == false) {
+    return false;
+  }
+  if (rt_assert(cart_trajectory_old_vector.size() == cart_trajectory_size) ==
+      false) {
+    return false;
+  }
+  if (rt_assert(rel_homogen_transform_matrix_old_to_new.isZero() == false) ==
+      false) {
+    return false;
+  }
+
+  cctraj_time_vector->resize(cart_trajectory_size);
+
+  cctraj_old_coord_H_matrix->resize(4, cart_trajectory_size);
+  cctrajd_old_coord_matrix->resize(3, cart_trajectory_size);
+  cctrajdd_old_coord_matrix->resize(3, cart_trajectory_size);
+
+  cctraj_new_coord_H_matrix->resize(4, cart_trajectory_size);
+  cctrajd_new_coord_matrix->resize(3, cart_trajectory_size);
+  cctrajdd_new_coord_matrix->resize(3, cart_trajectory_size);
+
+  if (rt_assert(convertCTrajDMPStatesToMatrices(
+          cart_trajectory_old_vector, *cctraj_old_coord_H_matrix,
+          *cctrajd_old_coord_matrix, *cctrajdd_old_coord_matrix,
+          *cctraj_time_vector)) == false) {
+    return false;
+  }
+  if (rt_assert(computeCTrajAtNewCoordSys(
+          *cctraj_old_coord_H_matrix, *cctrajd_old_coord_matrix,
+          *cctrajdd_old_coord_matrix, rel_homogen_transform_matrix_old_to_new,
+          *cctraj_new_coord_H_matrix, *cctrajd_new_coord_matrix,
+          *cctrajdd_new_coord_matrix)) == false) {
+    return false;
+  }
+  if (rt_assert(convertCTrajMatricesToDMPStates(
+          *cctraj_new_coord_H_matrix, *cctrajd_new_coord_matrix,
+          *cctrajdd_new_coord_matrix, *cctraj_time_vector,
+          cart_trajectory_new_vector)) == false) {
+    return false;
+  }
+
+  return true;
+}
+
+bool CartesianCoordTransformer::convertCTrajAtOldToNewCoordSys(
+    const DMPState& dmpstate_old,
+    const Matrix4x4& rel_homogen_transform_matrix_old_to_new,
+    DMPState& dmpstate_new) {
+  // pre-conditions checking
+  if (rt_assert(CartesianCoordTransformer::isValid()) == false) {
+    return false;
+  }
+  // input checking:
+  if (rt_assert(rel_homogen_transform_matrix_old_to_new.isZero() == false) ==
+      false) {
+    return false;
+  }
+  if (rt_assert((rt_assert(dmpstate_old.getDMPNumDimensions() == 3)) &&
+                (rt_assert(dmpstate_new.getDMPNumDimensions() == 3))) ==
+      false) {
+    return false;
+  }
+
+  Vector4 cart_H_old;
+  Vector3 cartd_old;
+  Vector3 cartdd_old;
+
+  Vector4 cart_H_new;
+  Vector3 cartd_new;
+  Vector3 cartdd_new;
+
+  cart_H_old.block(0, 0, 3, 1) = dmpstate_old.getX();
+  cart_H_old(3) = 1.0;
+  cartd_old.block(0, 0, 3, 1) = dmpstate_old.getXd();
+  cartdd_old.block(0, 0, 3, 1) = dmpstate_old.getXdd();
+
+  if (rt_assert(computeCTrajAtNewCoordSys(
+          &cart_H_old, &cartd_old, &cartdd_old, nullptr,
+          rel_homogen_transform_matrix_old_to_new, &cart_H_new, &cartd_new,
+          &cartdd_new, nullptr)) == false) {
+    return false;
+  }
+
+  if (rt_assert(dmpstate_new.setX(cart_H_new.block(0, 0, 3, 1))) == false) {
+    return false;
+  }
+  if (rt_assert(dmpstate_new.setXd(cartd_new.block(0, 0, 3, 1))) == false) {
+    return false;
+  }
+  if (rt_assert(dmpstate_new.setXdd(cartdd_new.block(0, 0, 3, 1))) == false) {
+    return false;
+  }
+  if (rt_assert(dmpstate_new.setTime(dmpstate_old.getTime())) == false) {
+    return false;
+  }
+
+  return true;
+}
+
+CartesianCoordTransformer::~CartesianCoordTransformer() {}
 
 }  // namespace dmp

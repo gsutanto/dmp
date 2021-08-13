@@ -84,11 +84,11 @@ class TransformationSystem {
       CanonicalSystem* canonical_system,
       FunctionApproximator* function_approximator,
       LoggedDMPVariables* logged_dmp_vars, RealTimeAssertor* real_time_assertor,
-      std::unique_ptr<DMPState> start_dmpstate = NULL,
-      std::unique_ptr<DMPState> current_dmpstate = NULL,
-      std::unique_ptr<DMPState> current_velocity_dmpstate = NULL,
-      std::unique_ptr<GoalSystem> goal_system = NULL,
-      std::vector<TransformCoupling*>* transform_couplers = NULL);
+      std::unique_ptr<DMPState> start_dmpstate = nullptr,
+      std::unique_ptr<DMPState> current_dmpstate = nullptr,
+      std::unique_ptr<DMPState> current_velocity_dmpstate = nullptr,
+      std::unique_ptr<GoalSystem> goal_system = nullptr,
+      std::vector<TransformCoupling*>* transform_couplers = nullptr);
 
   /**
    * Checks whether this transformation system is valid or not.
@@ -135,10 +135,12 @@ class TransformationSystem {
    * @return Success or failure
    */
   virtual bool getNextState(
-      double dt, DMPState& next_state, VectorN* forcing_term = NULL,
-      VectorN* coupling_term_acc = NULL, VectorN* coupling_term_vel = NULL,
-      VectorM* basis_functions_out = NULL,
-      VectorM* normalized_basis_func_vector_mult_phase_multiplier = NULL) = 0;
+      double dt, DMPState& next_state, VectorN* forcing_term = nullptr,
+      VectorN* coupling_term_acc = nullptr,
+      VectorN* coupling_term_vel = nullptr,
+      VectorM* basis_functions_out = nullptr,
+      VectorM* normalized_basis_func_vector_mult_phase_multiplier =
+          nullptr) = 0;
 
   /**
    * Based on the start state, current state, evolving goal state and

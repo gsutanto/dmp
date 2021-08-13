@@ -6,8 +6,8 @@ namespace dmp {
  * NON-REAL-TIME!!!
  */
 TCLearnObsAvoidFeatureParameter::TCLearnObsAvoidFeatureParameter()
-    : rt_assertor(NULL),
-      canonical_sys_discrete(NULL),
+    : rt_assertor(nullptr),
+      canonical_sys_discrete(nullptr),
       feature_vector_size(0),
       data_file_format(0),
       is_using_AF_H14_feature(false),
@@ -41,10 +41,10 @@ TCLearnObsAvoidFeatureParameter::TCLearnObsAvoidFeatureParameter()
       NN_N_hidden_layer_1(0),
       NN_N_hidden_layer_2(0),
       NN_N_output(0),
-      pmnn(NULL),
-      pmnn_input_vector(NULL),
-      pmnn_phase_kernel_modulation(NULL),
-      pmnn_output_vector(NULL) {}
+      pmnn(nullptr),
+      pmnn_input_vector(nullptr),
+      pmnn_phase_kernel_modulation(nullptr),
+      pmnn_output_vector(nullptr) {}
 
 /**
  * NON-REAL-TIME!!!
@@ -107,7 +107,7 @@ TCLearnObsAvoidFeatureParameter::TCLearnObsAvoidFeatureParameter(
       NN_N_hidden_layer_1(Num_NN_hidden_layer_1),
       NN_N_hidden_layer_2(Num_NN_hidden_layer_2),
       NN_N_output(Num_NN_output),
-      pmnn(NULL),
+      pmnn(nullptr),
       pmnn_input_vector(pmnn_input_vector_ptr),
       pmnn_phase_kernel_modulation(pmnn_phase_kernel_modulation_ptr),
       pmnn_output_vector(pmnn_output_vector_ptr) {
@@ -1328,13 +1328,13 @@ bool TCLearnObsAvoidFeatureParameter::isValid() {
         false) {
       return false;
     }
-    if (pmnn != NULL) {
+    if (pmnn != nullptr) {
       if (rt_assert(pmnn->isValid()) == false) {
         return false;
       }
-      if (rt_assert((rt_assert(pmnn_input_vector != NULL)) &&
-                    (rt_assert(pmnn_phase_kernel_modulation != NULL)) &&
-                    (rt_assert(pmnn_output_vector != NULL))) == false) {
+      if (rt_assert((rt_assert(pmnn_input_vector != nullptr)) &&
+                    (rt_assert(pmnn_phase_kernel_modulation != nullptr)) &&
+                    (rt_assert(pmnn_output_vector != nullptr))) == false) {
         return false;
       }
       if (rt_assert((rt_assert(pmnn_input_vector->rows() >= 0)) &&

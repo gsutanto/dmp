@@ -10,8 +10,8 @@ GoalSystem::GoalSystem()
       current_goal_state(nullptr),
       G(ZeroVectorN(MAX_DMP_NUM_DIMENSIONS)),
       is_started(false),
-      tau_sys(NULL),
-      rt_assertor(NULL) {
+      tau_sys(nullptr),
+      rt_assertor(nullptr) {
   G.resize(0);
 }
 
@@ -44,7 +44,7 @@ bool GoalSystem::isValid() {
       false) {
     return false;
   }
-  if (rt_assert(current_goal_state != NULL) == false) {
+  if (rt_assert(current_goal_state != nullptr) == false) {
     return false;
   }
   if (rt_assert(current_goal_state->isValid()) == false) {
@@ -57,7 +57,7 @@ bool GoalSystem::isValid() {
   if (rt_assert(G.rows() == current_goal_state->getX().rows()) == false) {
     return false;
   }
-  if (rt_assert(tau_sys != NULL) == false) {
+  if (rt_assert(tau_sys != nullptr) == false) {
     return false;
   }
   if (rt_assert(tau_sys->isValid()) == false) {

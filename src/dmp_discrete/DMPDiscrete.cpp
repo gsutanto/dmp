@@ -4,8 +4,8 @@ namespace dmp {
 
 DMPDiscrete::DMPDiscrete()
     : DMP(),
-      canonical_sys_discrete(NULL),
-      transform_sys_discrete(NULL),
+      canonical_sys_discrete(nullptr),
+      transform_sys_discrete(nullptr),
       learning_sys_discrete(LearningSystemDiscrete()),
       data_logger_loader_discrete(DMPDataIODiscrete()),
       logged_dmp_discrete_variables(LoggedDMPDiscreteVariables()) {}
@@ -36,8 +36,8 @@ bool DMPDiscrete::isValid() {
   if (rt_assert(DMP::isValid()) == false) {
     return false;
   }
-  if (rt_assert((rt_assert(canonical_sys_discrete != NULL)) &&
-                (rt_assert(transform_sys_discrete != NULL))) == false) {
+  if (rt_assert((rt_assert(canonical_sys_discrete != nullptr)) &&
+                (rt_assert(transform_sys_discrete != nullptr))) == false) {
     return false;
   }
   if (rt_assert((rt_assert(canonical_sys_discrete->isValid())) &&

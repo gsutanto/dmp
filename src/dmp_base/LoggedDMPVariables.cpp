@@ -5,7 +5,7 @@ namespace dmp {
 LoggedDMPVariables::LoggedDMPVariables()
     : dmp_num_dimensions(0),
       model_size(0),
-      rt_assertor(NULL),
+      rt_assertor(nullptr),
       tau(0.0),
       transform_sys_state_local(DMPState()),
       transform_sys_state_global(DMPState()),

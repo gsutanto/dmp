@@ -5,7 +5,7 @@
 namespace dmp {
 
 LearningSystemDiscrete::LearningSystemDiscrete()
-    : LearningSystem(0, 0, NULL, NULL, NULL, ""),
+    : LearningSystem(0, 0, nullptr, nullptr, nullptr, ""),
       learning_method(_SCHAAL_LWR_METHOD_),
       min_coord(ZeroVectorN(MAX_DMP_NUM_DIMENSIONS)),
       max_coord(ZeroVectorN(MAX_DMP_NUM_DIMENSIONS)) {

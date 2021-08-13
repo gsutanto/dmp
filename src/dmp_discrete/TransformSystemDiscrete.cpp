@@ -9,7 +9,7 @@ TransformSystemDiscrete::TransformSystemDiscrete()
       beta(25.0 / 4.0),
       is_using_scaling(std::vector<bool>()),
       A_learn(OnesVectorN(MAX_DMP_NUM_DIMENSIONS)),
-      logged_dmp_discrete_variables(NULL) {
+      logged_dmp_discrete_variables(nullptr) {
   A_learn.resize(dmp_num_dimensions);
 }
 

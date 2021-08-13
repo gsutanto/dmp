@@ -53,7 +53,7 @@ class QuaternionDMP : public DMPDiscrete {
                 CanonicalSystemDiscrete* canonical_system_discrete,
                 uint learning_method, RealTimeAssertor* real_time_assertor,
                 const char* opt_data_directory_path = "",
-                std::vector<TransformCoupling*>* transform_couplers = NULL);
+                std::vector<TransformCoupling*>* transform_couplers = nullptr);
 
   /**
    * Checks whether this Quaternion DMP is valid or not.
@@ -104,12 +104,12 @@ class QuaternionDMP : public DMPDiscrete {
    */
   bool getNextQuaternionState(
       double dt, bool update_canonical_state, QuaternionDMPState& next_state,
-      VectorN* transform_sys_forcing_term = NULL,
-      VectorN* transform_sys_coupling_term_acc = NULL,
-      VectorN* transform_sys_coupling_term_vel = NULL,
-      VectorM* func_approx_basis_functions = NULL,
+      VectorN* transform_sys_forcing_term = nullptr,
+      VectorN* transform_sys_coupling_term_acc = nullptr,
+      VectorN* transform_sys_coupling_term_vel = nullptr,
+      VectorM* func_approx_basis_functions = nullptr,
       VectorM* func_approx_normalized_basis_func_vector_mult_phase_multiplier =
-          NULL);
+          nullptr);
 
   /**
    * Returns current Quaternion DMP state.

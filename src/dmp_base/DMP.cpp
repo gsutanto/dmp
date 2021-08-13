@@ -8,17 +8,17 @@ DMP::DMP()
     : dmp_num_dimensions(0),
       model_size(0),
       is_started(false),
-      tau_sys(NULL),
-      canonical_sys(NULL),
-      transform_sys(NULL),
-      learning_sys(NULL),
-      data_logger_loader(NULL),
-      logged_dmp_variables(NULL),
+      tau_sys(nullptr),
+      canonical_sys(nullptr),
+      transform_sys(nullptr),
+      learning_sys(nullptr),
+      data_logger_loader(nullptr),
+      logged_dmp_variables(nullptr),
       mean_start_position(ZeroVectorN(MAX_DMP_NUM_DIMENSIONS)),
       mean_goal_position(ZeroVectorN(MAX_DMP_NUM_DIMENSIONS)),
       mean_tau(0.0),
       is_collecting_trajectory_data(false),
-      rt_assertor(NULL) {
+      rt_assertor(nullptr) {
   mean_start_position.resize(dmp_num_dimensions);
   mean_goal_position.resize(dmp_num_dimensions);
   snprintf(data_directory_path, sizeof(data_directory_path), "");
@@ -61,11 +61,11 @@ bool DMP::isValid() {
                 (rt_assert(model_size <= MAX_MODEL_SIZE))) == false) {
     return false;
   }
-  if (rt_assert((rt_assert(tau_sys != NULL)) &&
-                (rt_assert(canonical_sys != NULL)) &&
-                (rt_assert(transform_sys != NULL)) &&
-                (rt_assert(learning_sys != NULL)) &&
-                (rt_assert(data_logger_loader != NULL))) == false) {
+  if (rt_assert((rt_assert(tau_sys != nullptr)) &&
+                (rt_assert(canonical_sys != nullptr)) &&
+                (rt_assert(transform_sys != nullptr)) &&
+                (rt_assert(learning_sys != nullptr)) &&
+                (rt_assert(data_logger_loader != nullptr))) == false) {
     return false;
   }
   if (rt_assert((rt_assert(tau_sys->isValid())) &&
@@ -171,11 +171,11 @@ bool DMP::learn(const char* training_data_dir_or_file_path,
     return false;
   }
 
-  if (tau_learn != NULL) {
+  if (tau_learn != nullptr) {
     *tau_learn = mean_tau;
   }
 
-  if (critical_states_learn != NULL) {
+  if (critical_states_learn != nullptr) {
     if (critical_states_learn->size() >= 2) {
       uint end_idx = critical_states_learn->size() - 1;
 

@@ -11,10 +11,10 @@ TransformCouplingLearnTactileFeedback::TransformCouplingLearnTactileFeedback()
       pmnn_input_num_dimensions(0),
       pmnn_phase_kernel_model_size(0),
       pmnn_output_num_dimensions(0),
-      pmnn(NULL),
-      pmnn_input_vector(NULL),
-      pmnn_phase_kernel_modulation(NULL),
-      pmnn_output_vector(NULL) {}
+      pmnn(nullptr),
+      pmnn_input_vector(nullptr),
+      pmnn_phase_kernel_modulation(nullptr),
+      pmnn_output_vector(nullptr) {}
 
 /**
  * NON-REAL-TIME!!!\n
@@ -35,7 +35,7 @@ TransformCouplingLearnTactileFeedback::TransformCouplingLearnTactileFeedback(
       pmnn_input_num_dimensions(pmnn_input_num_dimensions_init),
       pmnn_phase_kernel_model_size(pmnn_phase_kernel_model_size_init),
       pmnn_output_num_dimensions(pmnn_output_num_dimensions_init),
-      pmnn(NULL),  // this should be set manually later
+      pmnn(nullptr),  // this should be set manually later
       pmnn_input_vector(pmnn_input_vector_ptr),
       pmnn_phase_kernel_modulation(pmnn_phase_kernel_modulation_ptr),
       pmnn_output_vector(pmnn_output_vector_ptr) {}
@@ -47,7 +47,7 @@ TransformCouplingLearnTactileFeedback::TransformCouplingLearnTactileFeedback(
  * @return Valid (true) or invalid (false)
  */
 bool TransformCouplingLearnTactileFeedback::isValid() {
-  if (rt_assertor == NULL) {
+  if (rt_assertor == nullptr) {
     return false;
   }
   if (rt_assert(TransformCoupling::isValid()) == false) {
@@ -73,10 +73,10 @@ bool TransformCouplingLearnTactileFeedback::isValid() {
                            start_index + dmp_num_dimensions - 1))) == false) {
     return false;
   }
-  if (rt_assert((rt_assert(pmnn != NULL)) &&
-                (rt_assert(pmnn_input_vector != NULL)) &&
-                (rt_assert(pmnn_phase_kernel_modulation != NULL)) &&
-                (rt_assert(pmnn_output_vector != NULL))) == false) {
+  if (rt_assert((rt_assert(pmnn != nullptr)) &&
+                (rt_assert(pmnn_input_vector != nullptr)) &&
+                (rt_assert(pmnn_phase_kernel_modulation != nullptr)) &&
+                (rt_assert(pmnn_output_vector != nullptr))) == false) {
     return false;
   }
   if (rt_assert(pmnn->isValid()) == false) {

@@ -47,8 +47,9 @@ class CanonicalSystem {
    * of pointer to CanonicalCoupling data structure, for flexibility and
    * re-usability)
    */
-  CanonicalSystem(TauSystem* tau_system, RealTimeAssertor* real_time_assertor,
-                  std::vector<CanonicalCoupling*>* canonical_couplers = NULL);
+  CanonicalSystem(
+      TauSystem* tau_system, RealTimeAssertor* real_time_assertor,
+      std::vector<CanonicalCoupling*>* canonical_couplers = nullptr);
 
   /**
    * Checks whether this canonical system is valid or not.

@@ -3,10 +3,10 @@
 namespace dmp {
 
 CanonicalSystem::CanonicalSystem()
-    : tau_sys(NULL),
-      canonical_coupling(NULL),
+    : tau_sys(nullptr),
+      canonical_coupling(nullptr),
       is_started(false),
-      rt_assertor(NULL) {}
+      rt_assertor(nullptr) {}
 
 CanonicalSystem::CanonicalSystem(
     TauSystem* tau_system, RealTimeAssertor* real_time_assertor,
@@ -17,7 +17,7 @@ CanonicalSystem::CanonicalSystem(
       rt_assertor(real_time_assertor) {}
 
 bool CanonicalSystem::isValid() {
-  if (rt_assert(tau_sys != NULL) == false) {
+  if (rt_assert(tau_sys != nullptr) == false) {
     return false;
   }
   if (rt_assert(tau_sys->isValid()) == false) {
@@ -31,7 +31,7 @@ bool CanonicalSystem::getCouplingTerm(double& accumulated_cc) {
 
   if (canonical_coupling) {
     for (uint i = 0; i < canonical_coupling->size(); ++i) {
-      if ((*canonical_coupling)[i] == NULL) {
+      if ((*canonical_coupling)[i] == nullptr) {
         continue;
       }
 

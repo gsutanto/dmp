@@ -91,8 +91,8 @@ public:
                                                     DoubleVector& obs_sph_radius,
                                                     uint& N_demo_settings,
                                                     uint max_num_trajs_per_setting=500,
-                                                    std::vector<uint>* selected_obs_avoid_setting_numbers=NULL,
-                                                    VecVecDMPUnrollInitParams* demo_group_set_dmp_unroll_init_params=NULL);
+                                                    std::vector<uint>* selected_obs_avoid_setting_numbers=nullptr,
+                                                    VecVecDMPUnrollInitParams* demo_group_set_dmp_unroll_init_params=nullptr);
 
     /**
      * NON-REAL-TIME!!!\n
@@ -125,8 +125,8 @@ public:
                                                    PointsVector& vector_point_obstacles_cart_position_global,
                                                    uint& N_demo_settings,
                                                    uint max_num_trajs_per_setting=500,
-                                                   std::vector<uint>* selected_obs_avoid_setting_numbers=NULL,
-                                                   VecVecDMPUnrollInitParams* demo_group_set_dmp_unroll_init_params=NULL);
+                                                   std::vector<uint>* selected_obs_avoid_setting_numbers=nullptr,
+                                                   VecVecDMPUnrollInitParams* demo_group_set_dmp_unroll_init_params=nullptr);
 
     uint getFeatureVectorSize();
 

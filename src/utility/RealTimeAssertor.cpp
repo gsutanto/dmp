@@ -17,12 +17,12 @@ RealTimeAssertor::RealTimeAssertor(const char* rt_error_file_path_cstr) {
   // yet:
   createDirIfNotExistYet(rt_error_file_path.parent_path().string().c_str());
 
-  snprintf(rt_err_file_path.get(), ERROR_STRING_LENGTH,
-           "%s", rt_error_file_path_cstr);
+  snprintf(rt_err_file_path.get(), ERROR_STRING_LENGTH, "%s",
+           rt_error_file_path_cstr);
 }
 
 bool RealTimeAssertor::isValid() {
-  if (rt_err_file_path == NULL) {
+  if (rt_err_file_path == nullptr) {
     return false;
   }
 
@@ -33,7 +33,7 @@ void RealTimeAssertor::clear_rt_err_file() {
   FILE* fp;
 
   fp = fopen(rt_err_file_path.get(), "w");
-  if (fp != NULL) {
+  if (fp != nullptr) {
     fclose(fp);
   }
 }
@@ -43,7 +43,7 @@ void RealTimeAssertor::appendStringTo_rt_err_file(
   FILE* fp;
 
   fp = fopen(rt_err_file_path.get(), "a");
-  if (fp != NULL) {
+  if (fp != nullptr) {
     rt_err_file_mutex.lock();
     fprintf(fp, "%s", err_str_container.error_string);
     rt_err_file_mutex.unlock();
@@ -64,7 +64,7 @@ void callAppendStringTo_rt_err_file(
 bool realTimeAssertFailed(RealTimeAssertor* real_time_assertor_ptr,
                           const char* expression_string, const char* file_name,
                           uint line_number) {
-  if (real_time_assertor_ptr == NULL) {
+  if (real_time_assertor_ptr == nullptr) {
     return false;
   }
 

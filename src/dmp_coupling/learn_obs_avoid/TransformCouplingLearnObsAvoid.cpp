@@ -12,11 +12,11 @@ TransformCouplingLearnObsAvoid::TransformCouplingLearnObsAvoid()
       is_logging_learning_data(false),
       is_collecting_trajectory_data(false),
       is_constraining_Rp_yd_relationship(false),
-      tau_sys(NULL),
-      endeff_cartesian_state_global(NULL),
-      point_obstacles_cartesian_state_global(NULL),
-      ctraj_hmg_transform_global_to_local_matrix(NULL),
-      goal_cartesian_position_global(NULL),
+      tau_sys(nullptr),
+      endeff_cartesian_state_global(nullptr),
+      point_obstacles_cartesian_state_global(nullptr),
+      ctraj_hmg_transform_global_to_local_matrix(nullptr),
+      goal_cartesian_position_global(nullptr),
       goal_cartesian_position_local(ZeroVector3),
       func_approx_discrete(nullptr) {
   snprintf(data_directory_path, sizeof(data_directory_path), "");
@@ -140,20 +140,20 @@ TransformCouplingLearnObsAvoid::TransformCouplingLearnObsAvoid(
  * @return Valid (true) or invalid (false)
  */
 bool TransformCouplingLearnObsAvoid::isValid() {
-  if (rt_assertor == NULL) {
+  if (rt_assertor == nullptr) {
     return false;
   }
   if (rt_assert(TransformCoupling::isValid()) == false) {
     return false;
   }
   if (rt_assert(
-          (rt_assert(loa_feat_param != NULL)) && (rt_assert(tau_sys != NULL)) &&
-          (rt_assert(endeff_cartesian_state_global != NULL)) &&
-          (rt_assert(point_obstacles_cartesian_state_global != NULL)) &&
-          (rt_assert(point_obstacles_cartesian_state_local != NULL)) &&
-          (rt_assert(ctraj_hmg_transform_global_to_local_matrix != NULL)) &&
+          (rt_assert(loa_feat_param != nullptr)) && (rt_assert(tau_sys != nullptr)) &&
+          (rt_assert(endeff_cartesian_state_global != nullptr)) &&
+          (rt_assert(point_obstacles_cartesian_state_global != nullptr)) &&
+          (rt_assert(point_obstacles_cartesian_state_local != nullptr)) &&
+          (rt_assert(ctraj_hmg_transform_global_to_local_matrix != nullptr)) &&
           (rt_assert(point_obstacles_cartesian_distances_from_endeff !=
-                     NULL))) == false) {
+                     nullptr))) == false) {
     return false;
   }
   if (rt_assert((rt_assert(cart_coord_transformer.isValid())) &&
@@ -166,8 +166,8 @@ bool TransformCouplingLearnObsAvoid::isValid() {
                 loa_feat_param->feature_vector_size) == false) {
     return false;
   }
-  if (loa_feat_param->pmnn != NULL) {
-    if (rt_assert(func_approx_discrete != NULL) == false) {
+  if (loa_feat_param->pmnn != nullptr) {
+    if (rt_assert(func_approx_discrete != nullptr) == false) {
       return false;
     }
     if (rt_assert(func_approx_discrete->isValid()) == false) {
@@ -231,7 +231,7 @@ bool TransformCouplingLearnObsAvoid::learnCouplingTerm(
       false) {
     return false;
   }
-  if (rt_assert(cart_dmp_baseline_ptr != NULL) == false) {
+  if (rt_assert(cart_dmp_baseline_ptr != nullptr) == false) {
     return false;
   }
   if (rt_assert(cart_dmp_baseline_ptr->isValid()) == false) {
@@ -484,7 +484,7 @@ bool TransformCouplingLearnObsAvoid::learnCouplingTerm(
 
     for (uint i = 1;
          i <= (*input_demo_group_set_obs_avoid_global)[n - 1].size(); i++) {
-      if (selected_obs_avoid_setting_numbers == NULL)  // use all settings
+      if (selected_obs_avoid_setting_numbers == nullptr)  // use all settings
       {
         std::cout << "Building Feature Matrix from Demo Setting #" << n << "/"
                   << N_demo_settings << ", Demo Number #" << i << "/"
@@ -505,8 +505,8 @@ bool TransformCouplingLearnObsAvoid::learnCouplingTerm(
                                  loa_feat_param->feature_vector_size);
       sub_target_coupling_term->resize(3, traj_length);
 
-      Matrixloa3TxF1* sub_feature_matrix_Rp_yd_constrained_ptr = NULL;
-      Vectorloa3T* sub_target_coupling_term_Rp_yd_constrained_ptr = NULL;
+      Matrixloa3TxF1* sub_feature_matrix_Rp_yd_constrained_ptr = nullptr;
+      Vectorloa3T* sub_target_coupling_term_Rp_yd_constrained_ptr = nullptr;
 
       if (is_constraining_Rp_yd_relationship == true) {
         sub_feature_matrix_Rp_yd_constrained->resize(
@@ -719,8 +719,8 @@ bool TransformCouplingLearnObsAvoid::
     return false;
   }
   if (is_constraining_Rp_yd_relationship == true) {
-    if (rt_assert((sub_feature_matrix_Rp_yd_constrained != NULL) &&
-                  (sub_target_coupling_term_Rp_yd_constrained != NULL)) ==
+    if (rt_assert((sub_feature_matrix_Rp_yd_constrained != nullptr) &&
+                  (sub_target_coupling_term_Rp_yd_constrained != nullptr)) ==
         false) {
       return false;
     }
@@ -1176,7 +1176,7 @@ bool TransformCouplingLearnObsAvoid::computeFeatures(
     return false;
   }
 
-  if (feature_matrix != NULL) {
+  if (feature_matrix != nullptr) {
     *feature_matrix = *(loa_feat_param->cart_coord_loa_feature_matrix);
   }
 
@@ -1313,7 +1313,7 @@ bool TransformCouplingLearnObsAvoid::
     return false;
   }
 
-  if (feature_matrix_phi3_per_point != NULL) {
+  if (feature_matrix_phi3_per_point != nullptr) {
     if (loa_feat_param->AF_H14_N_k_phi3_grid > 0) {
       if (feature_matrix_phi3_per_point->cols() !=
           loa_feat_param->AF_H14_N_k_phi3_grid) {
@@ -1962,7 +1962,7 @@ bool TransformCouplingLearnObsAvoid::getValue(VectorN& ct_acc,
       return false;
     }
 
-    if (loa_feat_param->pmnn != NULL) {
+    if (loa_feat_param->pmnn != nullptr) {
       loa_feat_param->pmnn_input_vector->block(
           0, 0, loa_feat_param->cart_coord_loa_feature_vector->rows(), 1) =
           *(loa_feat_param->cart_coord_loa_feature_vector);
@@ -2003,9 +2003,9 @@ bool TransformCouplingLearnObsAvoid::getValue(VectorN& ct_acc,
       goal_cart_position_global_H(3, 0) = 1.0;
 
       if (rt_assert(cart_coord_transformer.computeCTrajAtNewCoordSys(
-              &goal_cart_position_global_H, NULL, NULL, NULL,
+              &goal_cart_position_global_H, nullptr, nullptr, nullptr,
               *ctraj_hmg_transform_global_to_local_matrix,
-              &goal_cart_position_local_H, NULL, NULL, NULL)) == false) {
+              &goal_cart_position_local_H, nullptr, nullptr, nullptr)) == false) {
         return false;
       }
       goal_cartesian_position_local.block(0, 0, 3, 1) =

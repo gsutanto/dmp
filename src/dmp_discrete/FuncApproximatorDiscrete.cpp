@@ -73,13 +73,12 @@ bool FuncApproximatorDiscrete::isValid() {
   if (rt_assert(FunctionApproximator::isValid()) == false) {
     return false;
   }
-  if (rt_assert(canonical_sys_discrete->isValid()) ==
-      false) {
+  if (rt_assert(canonical_sys_discrete->isValid()) == false) {
     return false;
   }
-  if (rt_assert((rt_assert(centers != NULL)) &&
-                (rt_assert(bandwidths != NULL)) && (rt_assert(psi != NULL))) ==
-      false) {
+  if (rt_assert((rt_assert(centers != nullptr)) &&
+                (rt_assert(bandwidths != nullptr)) &&
+                (rt_assert(psi != nullptr))) == false) {
     return false;
   }
   if (rt_assert((rt_assert(centers->rows() == model_size)) &&
@@ -109,14 +108,14 @@ bool FuncApproximatorDiscrete::getForcingTerm(
     return false;
   }
 
-  if (basis_function_vector != NULL) {
+  if (basis_function_vector != nullptr) {
     if (rt_assert(basis_function_vector->rows() == model_size) == false) {
       return false;
     }
     *basis_function_vector = *psi;
   }
 
-  if (normalized_basis_func_vector_mult_phase_multiplier != NULL) {
+  if (normalized_basis_func_vector_mult_phase_multiplier != nullptr) {
     (*normalized_basis_func_vector_mult_phase_multiplier) =
         normalized_basis_func_vector_multiplied_phase_multiplier;
   }

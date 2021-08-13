@@ -90,8 +90,8 @@ class FuncApproximatorDiscrete : public FunctionApproximator {
    * @return Success or failure
    */
   bool getForcingTerm(
-      VectorN& result_f, VectorM* basis_function_vector = NULL,
-      VectorM* normalized_basis_func_vector_mult_phase_multiplier = NULL);
+      VectorN& result_f, VectorM* basis_function_vector = nullptr,
+      VectorM* normalized_basis_func_vector_mult_phase_multiplier = nullptr);
 
   /**
    * Returns the vector variables required for learning the weights of the basis
@@ -118,7 +118,7 @@ class FuncApproximatorDiscrete : public FunctionApproximator {
    * @param x Position to be evaluated at (usually this is the canonical state
    * position)
    * @param result_vector Vector that will be filled with the result (return
-   * variable).\n If NULL then nothing gets returned (only updating basis
+   * variable).\n If nullptr then nothing gets returned (only updating basis
    * functions vector (psi) and its sum (sum_psi)).
    * @return Success or failure
    */

@@ -4,10 +4,10 @@ namespace dmp {
 
 QuaternionDMP::QuaternionDMP()
     : transform_sys_discrete_quat(TransformSystemQuaternion(
-          NULL, nullptr, &logged_dmp_discrete_variables, NULL,
-          std::vector<bool>(3, true), NULL)),
-      DMPDiscrete(1, 0, NULL, &transform_sys_discrete_quat, _SCHAAL_LWR_METHOD_,
-                  NULL, "") {
+          nullptr, nullptr, &logged_dmp_discrete_variables, nullptr,
+          std::vector<bool>(3, true), nullptr)),
+      DMPDiscrete(1, 0, nullptr, &transform_sys_discrete_quat,
+                  _SCHAAL_LWR_METHOD_, nullptr, "") {
   mean_start_position.resize(4);
   mean_goal_position.resize(4);
 }
