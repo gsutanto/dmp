@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
                         "sample_traj_3D_1.txt")
               .c_str(),
           task_servo_rate, &tau_learn, &critical_states_learn)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   /**** Reproduce ****/
@@ -151,12 +151,12 @@ int main(int argc, char** argv) {
 
   // Start DMP
   if (rt_assert_main(cart_dmp.start(dmp_unroll_init_params)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   // Run DMP and print state values:
   if (rt_assert_main(cart_dmp.startCollectingTrajectoryDataSet()) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   for (uint i = 0; i < (round(time_reproduce_max * task_servo_rate) + 1); ++i) {
     double time = 1.0 * (i * dt);
@@ -165,7 +165,7 @@ int main(int argc, char** argv) {
     DMPState state(3, &rt_assertor);
 
     if (rt_assert_main(cart_dmp.getNextState(dt, true, state)) == false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
 
     double epsilon = std::numeric_limits<double>::epsilon();
@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
       steady_state_goal_position << 0.5, 0.5, 0.0;
       if (rt_assert_main(cart_dmp.setNewSteadyStateGoalPosition(
               steady_state_goal_position)) == false) {
-        return (-1);
+        return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
       }
     }
 
@@ -186,7 +186,7 @@ int main(int argc, char** argv) {
   }
   cart_dmp.stopCollectingTrajectoryDataSet();
   if (rt_assert_main(cart_dmp.saveTrajectoryDataSet()) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   return 0;

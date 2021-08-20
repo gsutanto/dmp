@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
           "regular_NN_hidden_layer_topology.txt",
           regular_NN_hidden_layer_topology)) == false) {
     printf("Failed reading PMNN topology specification\n");
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   topology[1] = (uint)regular_NN_hidden_layer_topology;
 
@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
                         "neural_nets/pmnn/cpp_models/prim1/")
               .c_str(),
           0)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   MatrixXxXPtr X;
@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
               "unroll_test_dataset/test_unroll_prim_1_X_raw_scraping.txt")
               .c_str(),
           X)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   MatrixXxXPtr normalized_phase_PSI_mult_phase_V;
@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
                         "scraping.txt")
               .c_str(),
           normalized_phase_PSI_mult_phase_V)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   uint Nri = X->rows();
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
   uint Nrp = normalized_phase_PSI_mult_phase_V->rows();
   uint Ncp = normalized_phase_PSI_mult_phase_V->cols();
   if (rt_assert_main(Nri == Nrp) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   VectorNN_N input(Nci), phase_kernel_modulation(Ncp), output(6);
@@ -124,7 +124,7 @@ int main(int argc, char** argv) {
     if (rt_assert_main(pmnn.computePrediction(input, phase_kernel_modulation,
                                               output)) == false) {
       printf("Failed making prediction!");
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
 
     printf("%.05f %.05f %.05f %.05f %.05f %.05f\n", output(0, 0), output(1, 0),

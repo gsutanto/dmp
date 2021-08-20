@@ -131,7 +131,7 @@ int main(int argc, char** argv) {
   if (rt_assert_main(dmp_discrete_1D.learn(
           get_data_path("/dmp_1D/sample_traj_1.txt").c_str(), task_servo_rate,
           &tau_learn, &critical_states_learn)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   /** Store Basis Functions Magnitude over Varying Canonical State Position **/
@@ -139,7 +139,7 @@ int main(int argc, char** argv) {
   (rt_assert_main(dmp_discrete_1D.saveBasisFunctions("../plot/dmp_1D/sample_dmp_basis_functions.txt"))
   == false)
   {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }*/
   // test weight-saving:
   if (rt_assert_main(dmp_discrete_1D.saveParams(
@@ -147,7 +147,7 @@ int main(int argc, char** argv) {
           "sample_dmp_1D_A_learn.txt", "sample_dmp_1D_mean_start_position.txt",
           "sample_dmp_1D_mean_goal_position.txt",
           "sample_dmp_1D_mean_tau.txt")) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   // test weight-loading:
   if (rt_assert_main(dmp_discrete_1D.loadParams(
@@ -155,7 +155,7 @@ int main(int argc, char** argv) {
           "sample_dmp_1D_A_learn.txt", "sample_dmp_1D_mean_start_position.txt",
           "sample_dmp_1D_mean_goal_position.txt",
           "sample_dmp_1D_mean_tau.txt")) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   /**** Reproduce ****/
@@ -182,7 +182,7 @@ int main(int argc, char** argv) {
   // Start DMP
   if (rt_assert_main(dmp_discrete_1D.start(dmp_unroll_init_params)) ==
       false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   double dt = 1.0 / task_servo_rate;
@@ -190,7 +190,7 @@ int main(int argc, char** argv) {
   // Run DMP and print state values:
   if (rt_assert_main(dmp_discrete_1D.startCollectingTrajectoryDataSet()) ==
       false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   // std::clock_t begin = std::clock();
   for (uint i = 0; i < (round(time_reproduce_max * task_servo_rate) + 1); i++) {
@@ -200,7 +200,7 @@ int main(int argc, char** argv) {
     {
       if (rt_assert_main(dmp_discrete_1D.setNewSteadyStateGoalPosition(
               new_goal)) == false) {
-        return (-1);
+        return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
       }
     }
 
@@ -208,7 +208,7 @@ int main(int argc, char** argv) {
     DMPState state(&rt_assertor);
     if (rt_assert_main(dmp_discrete_1D.getNextState(dt, true, state)) ==
         false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
 
     printf("%.05f %.05f %.05f %.05f\n", state.getTime(), state.getX()[0],
@@ -219,7 +219,7 @@ int main(int argc, char** argv) {
   // std::cout << "elapsed_secs = " << elapsed_secs << std::endl;
   dmp_discrete_1D.stopCollectingTrajectoryDataSet();
   if (rt_assert_main(dmp_discrete_1D.saveTrajectoryDataSet()) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   return 0;

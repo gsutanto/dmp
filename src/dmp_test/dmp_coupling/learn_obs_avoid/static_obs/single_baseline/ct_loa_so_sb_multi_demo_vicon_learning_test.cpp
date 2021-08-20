@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
   DataIO data_io_main(&rt_assertor);
   if (rt_assert_main(data_io_main.writeMatrixToFile(
           loa_plot_dir_path, "tau_reproduce.txt", tau_reproduce)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   // Initialize tau system
@@ -188,7 +188,7 @@ int main(int argc, char** argv) {
   std::vector<bool> is_using_scaling_init = std::vector<bool>(3, false);
   if (rt_assert_main(cart_dmp.setScalingUsage(is_using_scaling_init)) ==
       false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   // Learn both the coupling term and the BASELINE DMP:
@@ -196,7 +196,7 @@ int main(int argc, char** argv) {
           loa_data_dir_path, task_servo_rate, &cart_dmp, regularization_const,
           true, max_num_trajs_per_setting,
           &selected_obs_avoid_setting_numbers)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   return 0;

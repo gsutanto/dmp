@@ -160,33 +160,33 @@ int main(int argc, char** argv) {
               "synthetic_data/baseline/endeff_trajs/")
               .c_str(),
           task_servo_rate, &tau_learn, &critical_states_learn)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   tau = tau_learn;
   if (rt_assert_main(data_io_main.writeMatrixToFile(loa_plot_dir_path,
                                                     "tau.txt", tau)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   // Load synthetic obstacle avoidance weights
   if (rt_assert_main(transform_coupling_learn_obs_avoid.loadWeights(
           loa_data_dir_path, "loa_synthetic_weights.txt")) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   // DMP parameters
   MatrixNxMPtr f_weights_baseline;
   if (rt_assert_main(allocateMemoryIfNonRealTime(
           is_real_time, f_weights_baseline, 3, model_size)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   f_weights_baseline->resize(3, model_size);
   VectorN f_A_learn_baseline(3);
 
   if (rt_assert_main(cart_dmp.getParams(*f_weights_baseline,
                                         f_A_learn_baseline)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   start_position = cart_dmp.getMeanStartPosition();
@@ -202,15 +202,15 @@ int main(int argc, char** argv) {
   transform_couplers[0] = nullptr;
   if (rt_assert_main(cart_dmp.setParams(*f_weights_baseline,
                                         f_A_learn_baseline)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   if (rt_assert_main(cart_dmp.start(dmp_unroll_init_parameters)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   // Run DMP and print state values:
   if (rt_assert_main(cart_dmp.startCollectingTrajectoryDataSet()) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   for (uint i = 0; i < (round(tau * task_servo_rate) + 1); ++i) {
     double time = 1.0 * (i * dt);
@@ -218,7 +218,7 @@ int main(int argc, char** argv) {
     // Get the next state of the Cartesian DMP
     if (rt_assert_main(cart_dmp.getNextState(dt, true, current_state)) ==
         false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
 
     // Log state trajectory:
@@ -230,7 +230,7 @@ int main(int argc, char** argv) {
            "%s/baseline/", dmp_plot_dir_path);
   if (rt_assert_main(cart_dmp.saveTrajectoryDataSet(var_output_file_path)) ==
       false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   /****************** without obstacle avoidance (END) ******************/
 
@@ -241,7 +241,7 @@ int main(int argc, char** argv) {
                          .readSphereObstacleParametersFromFile(
                              var_input_file_path, obsctr_cart_position_global,
                              obs_sphere_radius)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   obsctr_cart_state_global =
       DMPState(obsctr_cart_position_global, &rt_assertor);
@@ -253,10 +253,10 @@ int main(int argc, char** argv) {
 
   if (rt_assert_main(cart_dmp.setParams(*f_weights_baseline,
                                         f_A_learn_baseline)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   if (rt_assert_main(cart_dmp.start(dmp_unroll_init_parameters)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   current_state = cart_dmp.getCurrentState();
   ctraj_hmg_transform_global_to_local_matrix =
@@ -265,10 +265,10 @@ int main(int argc, char** argv) {
   // Run DMP and print state values:
   if (rt_assert_main(transform_coupling_learn_obs_avoid
                          .startCollectingTrajectoryDataSet()) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   if (rt_assert_main(cart_dmp.startCollectingTrajectoryDataSet()) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   for (uint i = 0; i < (round(tau * task_servo_rate) + 1); ++i) {
     double time = 1.0 * (i * dt);
@@ -284,13 +284,13 @@ int main(int argc, char** argv) {
                     ee_cart_state_global, obsctr_cart_state_global,
                     obs_sphere_radius, point_obstacles_cart_state_global)) ==
         false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
 
     // Get the next state of the Cartesian DMP
     if (rt_assert_main(cart_dmp.getNextState(dt, true, current_state)) ==
         false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
 
     // Log state trajectory:
@@ -302,12 +302,12 @@ int main(int argc, char** argv) {
            "%s/w_synthetic_obs_avoidance/", dmp_plot_dir_path);
   if (rt_assert_main(cart_dmp.saveTrajectoryDataSet(var_output_file_path)) ==
       false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   transform_coupling_learn_obs_avoid.stopCollectingTrajectoryDataSet();
   if (rt_assert_main(transform_coupling_learn_obs_avoid.saveTrajectoryDataSet(
           var_output_file_path)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   /****************** with synthetic obstacle avoidance (END)
    * ******************/
@@ -322,7 +322,7 @@ int main(int argc, char** argv) {
            "%s/synthetic_data/1/endeff_trajs/1.txt", loa_data_dir_path);
   if (rt_assert_main(rename(var_input_file_path, var_output_file_path) == 0) ==
       false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   // Learn from the synthetic obstacle avoidance trajectory:
@@ -331,14 +331,14 @@ int main(int argc, char** argv) {
   if (rt_assert_main(transform_coupling_learn_obs_avoid.learnCouplingTerm(
           var_input_file_path, task_servo_rate, &cart_dmp, regularization_const,
           false)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   // Load ARD-learned obstacle avoidance weights
   if (rt_assert_main(transform_coupling_learn_obs_avoid.loadWeights(
           loa_plot_dir_path, "learn_obs_avoid_weights_matrix_ARD.txt")) ==
       false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   /****************** with ARD-learned obstacle avoidance (START)
@@ -348,10 +348,10 @@ int main(int argc, char** argv) {
 
   if (rt_assert_main(cart_dmp.setParams(*f_weights_baseline,
                                         f_A_learn_baseline)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   if (rt_assert_main(cart_dmp.start(dmp_unroll_init_parameters)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   current_state = cart_dmp.getCurrentState();
   ctraj_hmg_transform_global_to_local_matrix =
@@ -360,10 +360,10 @@ int main(int argc, char** argv) {
   // Run DMP and print state values:
   if (rt_assert_main(transform_coupling_learn_obs_avoid
                          .startCollectingTrajectoryDataSet()) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   if (rt_assert_main(cart_dmp.startCollectingTrajectoryDataSet()) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   for (uint i = 0; i < (round(tau * task_servo_rate) + 1); ++i) {
     double time = 1.0 * (i * dt);
@@ -379,13 +379,13 @@ int main(int argc, char** argv) {
                     ee_cart_state_global, obsctr_cart_state_global,
                     obs_sphere_radius, point_obstacles_cart_state_global)) ==
         false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
 
     // Get the next state of the Cartesian DMP
     if (rt_assert_main(cart_dmp.getNextState(dt, true, current_state)) ==
         false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
 
     // Log state trajectory:
@@ -397,12 +397,12 @@ int main(int argc, char** argv) {
            "%s/w_ARD_learned_obs_avoidance/", dmp_plot_dir_path);
   if (rt_assert_main(cart_dmp.saveTrajectoryDataSet(var_output_file_path)) ==
       false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   transform_coupling_learn_obs_avoid.stopCollectingTrajectoryDataSet();
   if (rt_assert_main(transform_coupling_learn_obs_avoid.saveTrajectoryDataSet(
           var_output_file_path)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   /****************** with ARD-learned obstacle avoidance (END)
    * ******************/

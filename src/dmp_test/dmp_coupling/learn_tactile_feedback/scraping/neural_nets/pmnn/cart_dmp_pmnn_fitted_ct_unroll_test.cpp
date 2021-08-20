@@ -259,7 +259,7 @@ int main(int argc, char** argv) {
             std::vector<bool>(sense_dimensionality[m], false))) == false) {
       printf("Failed setting scaling usage for sensing modality %s\n",
              sense_name[m].c_str());
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
 
     X_sensor_trace[m].resize(N_prims);
@@ -277,7 +277,7 @@ int main(int argc, char** argv) {
             "Failed loading parameters for sensing modality %s, primitive "
             "#%u\n",
             sense_name[m].c_str(), np + 1);
-        return (-1);
+        return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
       }
 
       // Store the parameters on buffers:
@@ -287,7 +287,7 @@ int main(int argc, char** argv) {
             "Failed getting weights or A_learn parameters for sensing modality "
             "%s, primitive #%u\n",
             sense_name[m].c_str(), np + 1);
-        return (-1);
+        return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
       }
       dmpd_sense_start[m][np] = dmp_discrete_sense[m]->getMeanStartPosition();
       dmpd_sense_goal[m][np] = dmp_discrete_sense[m]->getMeanGoalPosition();
@@ -305,7 +305,7 @@ int main(int argc, char** argv) {
             "Failed reading actual sensor traces for sensing modality %s, "
             "primitive #%u\n",
             sense_name[m].c_str(), np + 1);
-        return (-1);
+        return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
       }
       if (rt_assert_main(X_sensor_trace[m][np]->cols() ==
                          sense_dimensionality[m]) == false) {
@@ -313,7 +313,7 @@ int main(int argc, char** argv) {
             "Failed reading actual sensor traces for sensing modality %s, "
             "primitive #%u\n",
             sense_name[m].c_str(), np + 1);
-        return (-1);
+        return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
       }
 
       // initial sensor offset averaging
@@ -348,7 +348,7 @@ int main(int argc, char** argv) {
               "Unroll trajectory length is INCONSISTENT on sensing modality "
               "%s!!!\n",
               sense_name[m].c_str());
-          return (-1);
+          return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
         }
       }
 
@@ -365,7 +365,7 @@ int main(int argc, char** argv) {
           "regular_NN_hidden_layer_topology.txt",
           regular_NN_hidden_layer_topology)) == false) {
     printf("Failed reading PMNN topology specification\n");
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   topology[1] = (uint)regular_NN_hidden_layer_topology;
 
@@ -382,7 +382,7 @@ int main(int argc, char** argv) {
              np + 1);
     if (rt_assert_main(pmnn[np]->loadParams(pmnn_model_path, 0)) == false) {
       printf("Failed loading PMNN params for primitive #%u\n", np + 1);
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
   }
 
@@ -398,7 +398,7 @@ int main(int argc, char** argv) {
             std::vector<bool>(3, false))) == false) {
       printf("Failed setting scaling usage for %s primitive.\n",
              act_name[a].c_str());
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
 
     // X_act_trace[a].resize(N_prims);
@@ -416,7 +416,7 @@ int main(int argc, char** argv) {
               "Failed loading parameters for action modality %s, primitive "
               "#%u\n",
               act_name[a].c_str(), np + 1);
-          return (-1);
+          return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
         }
       } else  // if (a == 1)
       {
@@ -427,7 +427,7 @@ int main(int argc, char** argv) {
               "Failed loading parameters for action modality %s, primitive "
               "#%u\n",
               act_name[a].c_str(), np + 1);
-          return (-1);
+          return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
         }
       }
 
@@ -438,7 +438,7 @@ int main(int argc, char** argv) {
             "Failed getting weights or A_learn parameters for action modality "
             "%s, primitive #%u\n",
             act_name[a].c_str(), np + 1);
-        return (-1);
+        return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
       }
       dmpd_act_start[a][np] = dmp_discrete_act[a]->getMeanStartPosition();
       dmpd_act_goal[a][np] = dmp_discrete_act[a]->getMeanGoalPosition();
@@ -476,7 +476,7 @@ int main(int argc, char** argv) {
             "Failed setting weights or A_learn parameters for sensing modality "
             "%s, primitive #%u\n",
             sense_name[m].c_str(), np + 1);
-        return (-1);
+        return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
       }
 
       dmpd_sense_unroll_critical_states[m][np][0] =
@@ -491,7 +491,7 @@ int main(int argc, char** argv) {
             "Failed starting sensory primitive for sensing modality %s, "
             "primitive #%u\n",
             sense_name[m].c_str(), np + 1);
-        return (-1);
+        return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
       }
     }
 
@@ -503,7 +503,7 @@ int main(int argc, char** argv) {
             "Failed setting weights or A_learn parameters for action modality "
             "%s, primitive #%u\n",
             act_name[a].c_str(), np + 1);
-        return (-1);
+        return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
       }
 
       if (np == 0) {
@@ -540,7 +540,7 @@ int main(int argc, char** argv) {
               "Failed starting sensory primitive for action modality %s, "
               "primitive #%u\n",
               act_name[a].c_str(), np + 1);
-          return (-1);
+          return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
         }
       } else  // if (a == 1)
       {
@@ -551,7 +551,7 @@ int main(int argc, char** argv) {
               "Failed starting sensory primitive for action modality %s, "
               "primitive #%u\n",
               act_name[a].c_str(), np + 1);
-          return (-1);
+          return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
         }
       }
 
@@ -575,7 +575,7 @@ int main(int argc, char** argv) {
                 "Failed sensory primitive unrolling at time t=%u for sensing "
                 "modality %s, primitive #%u\n",
                 t, sense_name[m].c_str(), np + 1);
-            return (-1);
+            return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
           }
           normalized_phase_PSI_mult_phase_V =
               normalized_phase_PSI_mult_phase_V_temp.block(0, 0, model_size, 1);
@@ -599,7 +599,7 @@ int main(int argc, char** argv) {
       if (t > 0) {
         if (rt_assert_main(can_sys_discr.updateCanonicalState(dt)) == false) {
           printf("Failed updating canonical state!!!\n");
-          return (-1);
+          return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
         }
       }
 
@@ -612,7 +612,7 @@ int main(int argc, char** argv) {
                 "Failed action primitive unrolling at time t=%u for action "
                 "modality %s, primitive #%u\n",
                 t, act_name[a].c_str(), np + 1);
-            return (-1);
+            return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
           }
         } else  // if (a == 1)
         {
@@ -622,7 +622,7 @@ int main(int argc, char** argv) {
                 "Failed action primitive unrolling at time t=%u for action "
                 "modality %s, primitive #%u\n",
                 t, act_name[a].c_str(), np + 1);
-            return (-1);
+            return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
           }
         }
       }
@@ -638,7 +638,7 @@ int main(int argc, char** argv) {
               X_vector, normalized_phase_PSI_mult_phase_V, Ct_vector)) ==
           false) {
         printf("Failed prediction at time t=%u for primitive #%u\n", t, np + 1);
-        return (-1);
+        return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
       }
 
       // data logging for verification:
@@ -652,7 +652,7 @@ int main(int argc, char** argv) {
     //        var_file_name, X[np])) == false)
     //        {
     //            printf("Failed to write feature matrix X of primitive #%u\n",
-    //            np+1); return (-1);
+    //            np+1); return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     //        }
 
     //        snprintf(var_file_name, sizeof(var_file_name), "Ct_prim%u", np+1);
@@ -660,7 +660,7 @@ int main(int argc, char** argv) {
     //        var_file_name, Ct[np])) == false)
     //        {
     //            printf("Failed to write predicted coupling term matrix Ct of
-    //            primitive #%u\n", np+1); return (-1);
+    //            primitive #%u\n", np+1); return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     //        }
 
     snprintf(var_file_name, sizeof(var_file_name),
@@ -670,7 +670,7 @@ int main(int argc, char** argv) {
         false) {
       printf("Failed to write coupled trajectory unrolling of primitive #%u\n",
              np + 1);
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
   }
 

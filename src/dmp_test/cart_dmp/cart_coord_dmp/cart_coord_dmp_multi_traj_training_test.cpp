@@ -137,7 +137,7 @@ int main(int argc, char** argv) {
             get_data_path(dataset_rel_path.c_str()).c_str(),
             task_servo_rate, &tau_learn,
             &critical_states_learn)) == false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
 
     // Reproduce Cartesian DMP
@@ -147,12 +147,12 @@ int main(int argc, char** argv) {
     // Start DMP
     if (rt_assert_main(cart_dmp.start(dmp_unroll_init_params)) ==
         false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
 
     // Run Cartesian DMP and print state values
     if (rt_assert_main(cart_dmp.startCollectingTrajectoryDataSet()) == false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
     uint unroll_length = round(time_reproduce_max * task_servo_rate) + 1;
     for (uint i = 0; i < unroll_length; ++i) {
@@ -161,7 +161,7 @@ int main(int argc, char** argv) {
       // Get the next state of the Cartesian DMP
       if (rt_assert_main(cart_dmp.getNextState(dt, true, state)) ==
           false) {
-        return (-1);
+        return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
       }
 
       // Log state trajectory:
@@ -171,18 +171,18 @@ int main(int argc, char** argv) {
     cart_dmp.stopCollectingTrajectoryDataSet();
     if (rt_assert_main(cart_dmp.saveTrajectoryDataSet(
             get_plot_path(dataset_rel_path.c_str()).c_str())) == false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
     if (rt_assert_main(cart_dmp.saveParams(
             get_plot_path(dataset_rel_path.c_str()).c_str())) == false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
 
     // Also print out the parameters:
     MatrixNxM w(3, model_size);
     VectorN A_learn(3);
     if (rt_assert_main(cart_dmp.getParams(w, A_learn)) == false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
     Vector3 mean_start_global_position = cart_dmp.getMeanStartGlobalPosition();
     Vector3 mean_goal_global_position = cart_dmp.getMeanGoalGlobalPosition();

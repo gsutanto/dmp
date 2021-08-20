@@ -101,18 +101,18 @@ int main(int argc, char** argv) {
   if (rt_assert_main(
           quat_dmp.loadParams(get_data_path("/cart_dmp/quat_dmp/").c_str(), "w",
                               "A_learn", "Q0", "QG", "tau")) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   tau_learn = quat_dmp.getMeanTau();
   critical_states_learn[0] =
       QuaternionDMPState(quat_dmp.getMeanStartPosition(), &rt_assertor);
   if (rt_assert_main(critical_states_learn[0].computeQdAndQdd()) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   critical_states_learn[1] =
       QuaternionDMPState(quat_dmp.getMeanGoalPosition(), &rt_assertor);
   if (rt_assert_main(critical_states_learn[1].computeQdAndQdd()) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   /**** Unrolling Time Parameters ****/
@@ -134,7 +134,7 @@ int main(int argc, char** argv) {
   // Start Quaternion DMP
   if (rt_assert_main(quat_dmp.startQuaternionDMP(critical_states_learn, tau)) ==
       false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   // Run DMP and print state values:
@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
 
     if (rt_assert_main(quat_dmp.getNextQuaternionState(
             dt, true, current_state)) == false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
 
     // Log state trajectory:
@@ -165,24 +165,24 @@ int main(int argc, char** argv) {
   if (rt_assert_main(data_io.readMatrixFromFile(
           get_data_path("/cart_dmp/quat_dmp/").c_str(), "nonzero_omega",
           nonzero_omega)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   if (rt_assert_main(data_io.readMatrixFromFile(
           get_data_path("/cart_dmp/quat_dmp/").c_str(), "nonzero_omegad",
           nonzero_omegad)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   if (rt_assert_main(critical_states_learn[0].setOmega(nonzero_omega)) ==
       false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   if (rt_assert_main(critical_states_learn[0].setOmegad(nonzero_omegad)) ==
       false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   if (rt_assert_main(critical_states_learn[0].computeQdAndQdd()) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   // unroll at a longer duration:
   tau = 1.5 * tau;
@@ -194,7 +194,7 @@ int main(int argc, char** argv) {
   // Start Quaternion DMP
   if (rt_assert_main(quat_dmp.startQuaternionDMP(critical_states_learn, tau)) ==
       false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   // Run DMP and print state values:
@@ -206,7 +206,7 @@ int main(int argc, char** argv) {
 
     if (rt_assert_main(quat_dmp.getNextQuaternionState(
             dt, true, current_state)) == false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
 
     // Log state trajectory:

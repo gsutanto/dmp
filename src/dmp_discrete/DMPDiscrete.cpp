@@ -73,7 +73,7 @@ bool DMPDiscrete::learn(const TrajectorySet& trajectory_set,
   TrajectorySetPtr trajectory_set_preprocessed;
   if (rt_assert(allocateMemoryIfNonRealTime(
           is_real_time, trajectory_set_preprocessed)) == false) {
-    return (-1);
+    return false;
   }
   (*trajectory_set_preprocessed) = trajectory_set;
 

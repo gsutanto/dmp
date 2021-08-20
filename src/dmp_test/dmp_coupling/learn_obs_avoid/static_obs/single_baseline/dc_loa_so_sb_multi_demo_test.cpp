@@ -136,7 +136,7 @@ int main(int argc, char** argv) {
   DataIO data_io_main(&rt_assertor);
   if (rt_assert_main(data_io_main.writeMatrixToFile(
           loa_plot_dir_path, "tau_reproduce.txt", tau_reproduce)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   // Initialize tau system
@@ -168,13 +168,13 @@ int main(int argc, char** argv) {
   if (rt_assert_main(transform_coupling_learn_obs_avoid.learnCouplingTerm(
           loa_data_dir_path, task_servo_rate, &cart_dmp,
           regularization_const)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   MatrixNxMPtr weights_baseline;
   if (rt_assert_main(allocateMemoryIfNonRealTime(is_real_time, weights_baseline,
                                                  3, model_size)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   VectorN A_learn_baseline(3);
@@ -182,7 +182,7 @@ int main(int argc, char** argv) {
   weights_baseline->resize(3, model_size);
   if (rt_assert_main(cart_dmp.getParams(*weights_baseline, A_learn_baseline)) ==
       false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   start_position = cart_dmp.getMeanStartPosition();
@@ -199,15 +199,15 @@ int main(int argc, char** argv) {
   transform_couplers[0] = nullptr;
   if (rt_assert_main(cart_dmp.setParams(*weights_baseline, A_learn_baseline)) ==
       false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   if (rt_assert_main(cart_dmp.start(dmp_unroll_init_parameters)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   // Run DMP and print state values:
   if (rt_assert_main(cart_dmp.startCollectingTrajectoryDataSet()) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   for (uint i = 0; i < (round(tau_reproduce * task_servo_rate) + 1); ++i) {
     double time = 1.0 * (i * dt);
@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
     // Get the next state of the Cartesian DMP
     if (rt_assert_main(cart_dmp.getNextState(dt, true, current_state)) ==
         false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
 
     // Log state trajectory:
@@ -227,7 +227,7 @@ int main(int argc, char** argv) {
            "%s/baseline/", dmp_plot_dir_path);
   if (rt_assert_main(cart_dmp.saveTrajectoryDataSet(var_output_file_path)) ==
       false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   /****************** without obstacle (END) ******************/
 
@@ -253,7 +253,7 @@ int main(int argc, char** argv) {
                            .readSphereObstacleParametersFromFile(
                                var_input_file_path, obsctr_cart_position_global,
                                obs_sphere_radius)) == false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
     obsctr_cart_state_global =
         DMPState(obsctr_cart_position_global, &rt_assertor);
@@ -269,10 +269,10 @@ int main(int argc, char** argv) {
 
     if (rt_assert_main(
             cart_dmp.setParams(*weights_baseline, A_learn_baseline)) == false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
     if (rt_assert_main(cart_dmp.start(dmp_unroll_init_parameters)) == false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
     current_state = cart_dmp.getCurrentState();
     ctraj_hmg_transform_global_to_local_matrix =
@@ -280,7 +280,7 @@ int main(int argc, char** argv) {
 
     // Run DMP and print state values:
     if (rt_assert_main(cart_dmp.startCollectingTrajectoryDataSet()) == false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
     for (uint i = 0; i < (round(tau_reproduce * task_servo_rate) + 1); ++i) {
       double time = 1.0 * (i * dt);
@@ -300,13 +300,13 @@ int main(int argc, char** argv) {
                       ee_cart_state_global, obsctr_cart_state_global,
                       obs_sphere_radius, point_obstacles_cart_state_global)) ==
           false) {
-        return (-1);
+        return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
       }
 
       // Get the next state of the Cartesian DMP
       if (rt_assert_main(cart_dmp.getNextState(dt, true, current_state)) ==
           false) {
-        return (-1);
+        return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
       }
 
       // Log state trajectory:
@@ -318,7 +318,7 @@ int main(int argc, char** argv) {
              "%s/%u/real/", dmp_plot_dir_path, n);
     if (rt_assert_main(cart_dmp.saveTrajectoryDataSet(var_output_file_path)) ==
         false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
     /****************** with obstacle (END) ******************/
   }

@@ -194,14 +194,14 @@ int main(int argc, char** argv) {
   std::vector<bool> is_using_scaling_init = std::vector<bool>(3, false);
   if (rt_assert_main(cart_dmp.setScalingUsage(is_using_scaling_init)) ==
       false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   // Load the obstacle avoidance coupling term weights:
   if (NN_feature_method == _NN_NO_USE_) {
     if (rt_assert_main(transform_coupling_learn_obs_avoid.loadWeights(
             loa_plot_dir_path, ct_loa_weights_subpath)) == false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
   }
 
@@ -245,7 +245,7 @@ int main(int argc, char** argv) {
                   max_num_trajs_per_setting,
                   &selected_obs_avoid_setting_numbers,
                   demo_group_set_dmp_unroll_init_params.get())) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   // Load baseline DMP (forcing term weights and other parameter):
@@ -257,7 +257,7 @@ int main(int argc, char** argv) {
           "f_baseline_A_learn_matrix.txt", "baseline_mean_start_position.txt",
           "baseline_mean_goal_position.txt", "baseline_mean_tau.txt")) ==
       false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   DMPState current_state(3, &rt_assertor);
@@ -274,12 +274,12 @@ int main(int argc, char** argv) {
       DMPState(cart_dmp.getMeanGoalPosition(), &rt_assertor), &rt_assertor);
   if (rt_assert_main(cart_dmp.start(dmp_unroll_init_parameters_wo_obs)) ==
       false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   // Run DMP and print state values:
   if (rt_assert_main(cart_dmp.startCollectingTrajectoryDataSet()) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   for (uint i = 0; i < (round(tau_reproduce * task_servo_rate) + 1); ++i) {
     double time = 1.0 * (i * dt);
@@ -287,7 +287,7 @@ int main(int argc, char** argv) {
     // Get the next state of the Cartesian DMP
     if (rt_assert_main(cart_dmp.getNextState(dt, true, current_state)) ==
         false) {
-      return (-1);
+      return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
     }
 
     // Log state trajectory:
@@ -299,7 +299,7 @@ int main(int argc, char** argv) {
            "%s/baseline/", dmp_plot_dir_path);
   if (rt_assert_main(cart_dmp.saveTrajectoryDataSet(var_output_file_path)) ==
       false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
   /****************** without obstacle (END) ******************/
 
@@ -307,7 +307,7 @@ int main(int argc, char** argv) {
           (demo_group_set_dmp_unroll_init_params->size() == N_demo_settings) &&
           (vector_point_obstacles_cart_position_global->size() ==
            N_demo_settings)) == false) {
-    return (-1);
+    return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
   }
 
   /****************** with obstacle (START) ******************/
@@ -330,7 +330,7 @@ int main(int argc, char** argv) {
           DMPState(cart_dmp.getMeanGoalPosition(), &rt_assertor), &rt_assertor);
       if (rt_assert_main(cart_dmp.start(dmp_unroll_init_parameters_w_obs)) ==
           false) {
-        return (-1);
+        return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
       }
       current_state = cart_dmp.getCurrentState();
       ctraj_hmg_transform_global_to_local_matrix =
@@ -348,7 +348,7 @@ int main(int argc, char** argv) {
       // Run DMP and print state values:
       if (rt_assert_main(cart_dmp.startCollectingTrajectoryDataSet()) ==
           false) {
-        return (-1);
+        return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
       }
       for (uint i = 0; i < (round(tau_reproduce * task_servo_rate) + 1); ++i) {
         double time = 1.0 * (i * dt);
@@ -368,7 +368,7 @@ int main(int argc, char** argv) {
         // Get the next state of the Cartesian DMP
         if (rt_assert_main(cart_dmp.getNextState(dt, true, current_state)) ==
             false) {
-          return (-1);
+          return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
         }
 
         // Log state trajectory:
@@ -380,7 +380,7 @@ int main(int argc, char** argv) {
                "%s/%u/%u/", dmp_plot_dir_path, (n + 1), (j + 1));
       if (rt_assert_main(
               cart_dmp.saveTrajectoryDataSet(var_output_file_path)) == false) {
-        return (-1);
+        return rt_assertor.writeErrorsAndReturnIntErrorCode(-1);
       }
     }
   }
